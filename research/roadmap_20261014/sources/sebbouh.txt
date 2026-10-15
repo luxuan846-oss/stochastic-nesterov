@@ -1,0 +1,2324 @@
+Proceedings of Machine Learning Research vol 134:1–37, 2021               34th Annual Conference on Learning Theory
+
+
+
+
+   Almost sure convergence rates for Stochastic Gradient Descent and
+                        Stochastic Heavy Ball
+Othmane Sebbouh                                                                OTHMANE . SEBBOUH @ ENS . FR
+CNRS, ENS, PSL University, CREST, ENSAE, Paris, France
+Robert M. Gower                                                       ROBERT. GOWER @ TELECOM - PARIS . FR
+LTCI, Télécom Paris, Institut Polytechnique de Paris, Paris, France
+Aaron Defazio                                                                             ADEFAZIO @ FB . COM
+Facebook AI Research, New York, USA
+
+
+Editors: Mikhail Belkin and Samory Kpotufe
+
+
+                                                        Abstract
+     We study stochastic gradient descent (SGD) and the stochastic heavy ball method (SHB, otherwise
+     known as the momentum method) for the general stochastic approximation problem. For SGD, in
+     the convex and smooth setting, we provide the first almost sure asymptotic convergence rates for a
+     weighted average of the iterates . More
+                                         √ precisely, we show that the convergence rate of the function
+     values is arbitrarily close to o(1/ k), and is exactly o(1/k) in the so-called overparametrized
+     case. We show that these results still hold when using a decreasing step size version of stochastic
+     line search and stochastic Polyak stepsizes, thereby giving the first proof of convergence of these
+     methods in the non-overparametrized regime. Using a substantially different analysis, we show
+     that these rates hold for SHB as well, but at the last iterate. This distinction is important because
+     it is the last iterate of SGD and SHB which is used in practice. We also show that the last iterate
+     of SHB converges to a minimizer almost surely. Additionally, we prove that the function values of
+     the deterministic HB converge at a o(1/k) rate, which is faster than the previously known O(1/k).
+     Finally, in the nonconvex setting, we prove similar rates on the lowest gradient norm along the
+     trajectory of SGD.
+     Keywords: Stochastic Gradient Descent, Stochastic Heavy Ball, Momentum Method, Almost sure
+     convergence, convex, nonconvex.
+
+
+1. Introduction
+Consider the stochastic approximation problem
+                                                              def
+                                    x∗ ∈ argmin f (x) = Ev∼D [fv (x)] ,                                        (1)
+                                              x∈Rd
+
+where D is a distribution on an arbitrary space Ω and fv is a real-valued function. Let X∗ ⊂ Rd
+be the set of solutions of (1) (which we assume to be nonempty) and f∗ = f (x∗ ) for any solution
+x∗ ∈ X∗ . The stochastic approximation problem (1) encompasses several problems in machine
+learning, including Online Learning and Empirical Risk Minimization (ERM). In these settings,
+when the function f can be accessed only through sampling or when the size of the datasets is very
+high, first-order stochastic gradient methods have proven to be very effective thanks to their low
+iteration complexity. The methods we analyze, Stochastic Gradient descent (SGD, (Robbins and
+Monro, 1951)) and Stochastic Heavy Ball (SHB, (Polyak, 1964)), are among the most popular such
+methods.
+
+© 2021 O. Sebbouh, R.M. Gower & A. Defazio.
+                                     S EBBOUH G OWER D EFAZIO
+
+
+
+
+1.1. Contributions and Background
+Here we summarize the relevant background and our contributions. All of our rates of convergence
+are also given succinctly in Table 1.
+
+Almost sure convergence rates for SGD. The almost sure convergence of the iterates of SGD is a
+well-studied question (Bottou, 2003; Zhou et al., 2017; Nguyen et al., 2018). For functions satisfying
+∀(x, x∗ ) ∈ Rd × X∗ , h∇f (x), x − x∗ i ≥ 0, called variationally coherent, the convergence was
+shown in Bottou (2003) by assuming that the minimizer is unique. Recently in Zhou et al. (2017),
+the uniqueness assumption of the minimizer was dropped for variationally coherent functions by
+assuming bounded gradients. The easier question of the almost sure convergence of the norm of the
+gradients of SGD in the nonconvex setting, and of the objective values in the convex setting, has also
+been positively answered by several works, see Bertsekas and Tsitsiklis (2000) and references therein,
+or more recently Mertikopoulos et al. (2020); Orabona (2020a). In this work, we aim to quantify
+this convergence. Indeed, while convergence rates are commonplace for convergence in expectation
+(Nemirovski et al. (2009); Bach and Moulines (2011); Ghadimi and Lan (2013) for example), the
+litterature on the convergence rates of SGD in the almost sure sense is sparse. For an adaptive SGD
+method, Li and Orabona (2019) prove the convergence of a subsequence of the squared gradient at a
+                              √                                               1
+rate arbitrarily close to o(1/ k). More precisely, they show that lim inf k k 2 − k∇f (xk )k2 = 0 for
+all  > 0, where xk is the kth iterate of SGD. Godichon-Baggioni (2016) proves that, for locally
+strongly convex functions, the sequence (kxk − x∗ k2 )k , where x∗ is the unique minimizer of f ,
+converges almost surely at a rate arbitrarily close to o(1/k).
+
+Contributions: 1. In the convex and smooth setting, we show that the function values at√ a weighted
+average of the iterates of SGD converge almost surely at a rate arbitrarily close to o(1/ k). In the
+so-called overparametrized case, where the stochastic gradients at any minimizer ∇fv (x∗ ) are 0,
+we show that this rate improves to o(1/k). The proof of these results is surprisingly simple, and
+relies on a new weighted average of the iterates of SGD and on the classical Robbins-Siegmund
+supermartingale convergence theorem (Lemma 6). We also complement the well-known Robbins-
+Monro (Robbins and Monro, 1951) conditions on the stepsizes with new conditions (See Condition 1)
+that allow us to derive convergence rates in the almost sure sense. We also show that our theory
+still holds in the nonsmooth setting when we assume bounded subgradients (Appendix F). 2. In the
+nonconvex setting, under the recently introduced ABC condition (Khaled and Richtárik, 2020), we
+derive almost sure convergence rates for the minimum squared gradient norm along the trajectory of
+SGD which match the rates we derived for the objective values of SGD.
+
+Asymptotic convergence of SGD with adaptive step sizes. One drawback of the theory of SGD
+in the smooth setting is that it relies on the knowledge of the smoothness constant. Two of the earliest
+methods which have been proposed to address this issue are Line-Search (LS) (Nocedal and Wright,
+2006) and Polyak Stepsizes (PS) (Polyak, 1987). But while their convergence had been established
+in the deterministic case, it wasn’t until recently (Vaswani et al., 2019b, 2020; Loizou et al., 2020)
+that SGD with LS and with PS has been shown to converge assuming only smoothness and convexity
+of the functions fv . For both methods, it has been shown that SGD converges to the minimum at a
+rate O(1/k) in the overparametrized setting, but converges only to a neighborhood of the minimum
+when overparametrization does not hold.
+
+
+
+                                                   2
+                             Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+Contributions.
+        √      We show that SGD with LS √ or PS converges asymptotically at a rate arbitrarily close
+to O(1/ k) in expectation, and to o(1/ k) almost surely when using decreasing maximum step
+sizes. Moreover, in the overparametrized setting, using the proof technique we developed for SGD,
+we show that SGD with LS or PS converges almost surely to the minimum at a o(1/k) rate.
+
+Almost sure convergence rates for SHB and o(1/k) convergence for HB. The first local conver-
+gence of the deterministic Heavy Ball method was given in Polyak (1964), showing that it converges
+at an accelerated rate for twice differentiable strongly convex functions. Only recently did Ghadimi
+et al. (2015) show that the deterministic Heavy Ball method converged globally and sublinearly
+for smooth and convex functions. SHB has recently been analysed for nonconvex functions and
+for strongly
+          convex functions in Gadat et al. (2018). For strongly convex functions, they prove a
+O 1/tβ convergence rate for any β < 1. Using a similar Lyapunov function to the one in Ghadimi
+                      √
+et al. (2015), a O(1/ t) convergence rate for SHB in the convex setting was given in Yang et al.
+(2016) and Orvieto et al. (2019) under the bounded gradient variance assumption. For the specialized
+setting of minimizing quadratics, it has been shown that the SHB iterates converge linearly at an
+accelerated rate, but only in expectation rather than in L2 (Loizou and Richtárik, 2018). By using
+stronger assumptions on the noise as compared to Kidambi et al. (2018), Can et al. (2019) show that
+by using a specific parameter setting, the SHB applied on quadratics converges at an accelerated rate
+to a neighborhood of a minimizer. Finally, the almost sure convergence of SHB to a minimizer for
+nonconvex functions was proven in Gadat et al. (2018) under an elliptic condition which guarantees
+that SHB escapes any unstable point. But we are not aware of any convergence rates for the almost
+sure convergence of SHB.
+
+Contributions. 1. In the smooth and convex setting, we show      √ that the function values at the last
+iterate of SHB converge almost surely at a rate close to o(1/ k). Similarly to SGD, this rate can
+be improved to o(1/k) in the overparametrized setting. Moreover, we show that the last iterate of
+SHB converges to a minimizer almost surely. In the deterministic setting, where we use the gradient
+∇f at each iteration, we prove that the function values of the deterministic HB converge at a o(1/k)
+rate, which is faster than the previously known O(1/k) (Ghadimi et al., 2015) and matches the rate
+recently derived for Gradient Descent in Lee and Wright (2019). Compared to the SGD analysis we
+develop, the derivation of almost sure convergence rates for SHB is quite involved, and combines
+tools developed in Attouch and Peypouquet (2016) for the analysis of the (deterministic) Nesterov
+Accelerated Gradient method and the classical Robbins-Siegmund theorem. 2. Our results rely on
+an iterate averaging viewpoint of SHB (Proposition 5), which considerably simplifies our analysis
+and suggests parameter settings different from the usual settings of the momentum parameter, which
+is fixed at around 0.9, and often exhibits better empirical performance than SGD (Sutskever et al.,
+2013). We show through extensive numerical experiments in Figure 1 that our new parameter setting
+is statistically superior to the standard rule-of-thumb settings on convex problems. 3. Additionally,
+we show in Appendix G that the bounded gradients and bounded noise assumptions used in Yang
+et al. (2016); Orvieto et al. (2019) can be avoided, and prove that SHB at the last iterate
+                                                                                      √ converges
+in expectation at a O(1/k) rate to a neighborhood of the minimum and at a O(1/ k) rate to the
+minimum exactly.
+
+1.2. Assumptions and general consequences
+Our theory in the convex setting relies on the following assumption of convexity and smoothness.
+
+                                                  3
+                                       S EBBOUH G OWER D EFAZIO
+
+
+
+
+Assumption 1 For all v ∼ D, there exists Lv > 0 such that for every x, y ∈ Rd we have that
+
+                            fv (y) ≥ fv (x) + h∇fv (x), y − xi,                                    (2)
+                                                                   Lv
+                            fv (y) ≤ fv (x) + h∇fv (x), y − xi +      ky − xk2 ,                   (3)
+                                                                   2
+                      def
+almost surely. Let L = supv∼D Lv . We assume that L < ∞. Consequently, f is also smooth and we
+use L > 0 to denote its smoothness constant.
+
+Definition 1 Define the residual gradient noise as
+                                        def
+                                                  h            i
+                                    σ 2 = sup Ev∼D k∇fv (x∗ )k2 .                                  (4)
+                                          x∈X ∗
+
+    Assumption 1 has the following simple consequence on the expectation of the gradients.
+Lemma 2 If Assumption 1 holds, then
+                           h        i
+                       ED k∇fv (x)k2 ≤ 4L (f (x) − f∗ ) + 2σ 2 .                                   (5)
+
+In all our results of Sections 2 and 3, we only use convexity and the inequality (5). Thus, Assumption
+1 can be slightly relaxed by removing the smoothness condition (3) and re-branding (5) as an
+assumption, as opposed to a consequence. With this bound (5), we do not need to assume a uniform
+bound on the the squared norm of the gradients or on their variance, as is often done when analyzing
+SGD (Nemirovski et al., 2009) or SHB (Yang et al., 2016). Note, however, that the analysis carried
+for SGD and SHB in Nemirovski et al. (2009) and Yang et al. (2016) is more general and applies to
+the nonsmooth case, for which assuming bounded subgradients is often necessary. As an illustration,
+we show that our results hold in the nonsmooth case under the bounded subgradients assumption in
+Appendix F. Note also that all our results still hold with the usual but more restrictive assumption of
+bounded gradient variance (see for example Ghadimi and Lan (2013)). Indeed, when this assumption
+holds, (5) holds with L in place of L, where L is the smoothness constant of f .
+
+Definition 3 (Informal) When σ 2 = 0, we say that we have an overparametrized model.
+
+When our models have enough parameters to interpolate the data (Vaswani et al., 2019a), then
+∇fv (x∗ ) = 0, ∀v ∼ D, and consequently σ 2 = 0. This property has been observed especially for
+the training of large neural networks in Empirical Risk Minimization, where f is a finite-sum.
+                                                           def
+Remark 4 (Finite-sum setting) Let n ∈ N∗ and define [n] = {1, . . . , n}. Let f (x) = n1 ni=1 fi (x),
+                                                                                        P
+where each fi is Li -smooth and convex, and Lmax = maxi∈[n] Li < ∞. If we sample minibatches of
+size b without replacement, then Gazagnadou et al. (2019); Gower et al. (2019) show that (5) holds
+with
+                       def 1 n − b        n b−1                            1n−b 2
+             L ≡ L(b) =            Lmax +        L and σ 2 ≡ σ 2 (b) =              σ ,
+                           bn−1           b n−1                            bn−1 1
+           def
+where σ12 = n1 sup ni=1 k∇fi (x∗ )k2 . Note that σ 2 (n) = 0 and L(n) = L, as expected, since
+                      P
+               x∈X∗
+b = n corresponds to full batch gradients, or equivalently to using deterministic GD or HB. Similarly,
+L(1) = Lmax , since b = 1 corresponds to sampling one individual fi function.
+
+                                                    4
+                               Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+1.3. SGD and an iterate-averaging viewpoint of SHB
+In Section 2, we will analyze SGD, where we sample at each iteration vk ∼ D, and iterate
+
+                                      xk+1 = xk − ηk ∇fvk (xk ),                               (SGD)
+
+where ηk is a step size. In Section 3, we will analyze SHB, whose iterates are
+
+                           xk+1 = xk − αk ∇fvk (xk ) + βk (xk − xk−1 ) ,                        (SHB)
+
+where αk is commonly referred to as the step size and βk as the momentum parameter. Our
+forthcoming analysis of (SHB) leverages an iterate moving-average viewpoint of (SHB) and particular
+parameter choices that we present in Proposition 5.
+Proposition 5 Let z0 = x0 ∈ Rd and ηk , λk > 0. Consider the iterate-moving-average (IMA)
+method:
+                                                   λk+1           1
+         zk+1 = zk − ηk ∇fvk (xk ),     xk+1 =            xk +          zk+1              (SHB-IMA)
+                                                 λk+1 + 1      λk+1 + 1
+
+                                              ηk                λk
+                          If        αk =            and βk =          ,                            (6)
+                                           1 + λk+1          1 + λk+1
+then the xk iterates in (SHB-IMA) are equal to the xk iterates of the method (SHB) .
+The equivalence between this formulation and the original SHB is proven in the supplementary
+material (Section B.2). The IMA formulation (SHB-IMA) is crucial in comparing SHB and SGD as
+it allows to interpret the parameter αk in SHB as a scaled step size and unveils a natural stepsize
+ηk . In all of our theorems, the parameters ηk and λk naturally arise in the recurrences and Lyaponuv
+functions. We determine how to set the parameters ηk and λk , which in turn gives settings for αk
+and βk through (6). In the remainder of this work, we will directly analyze the method SHB-IMA.
+     Having new reformulations often leads to new insights. This is the case for Nesterov’s accelerated
+gradient method, where at least six forms are known (Defazio, 2019) and recent research suggests
+that iterate-averaged reformulations are the easiest to generalize to the combined proximal and
+variance-reduced case (Lan and Zhou, 2017).
+
+2. Almost sure convergence rates for SGD and SGD with adaptive stepsizes
+We will first present almost sure convergence rates for SGD, then for SGD with Line-Search and
+Polyak Stepsizes.
+
+2.1. SGD: average-iterates almost sure convergence
+Our results rely on a classical convergence result (Robbins and Siegmund, 1971).
+Lemma 6 Consider a filtration (Fk )k , the nonnegative sequences of (FP        k )k −adapted processes
+
+Qk∞)k , (Uk )k and (Zk )k , and a sequence of positive numbers (γk )k such that k Zk < ∞ almost surely,
+(V
+   k=0 (1 + γk ) < ∞, and
+
+                       ∀k ∈ N, E [Vk+1 |Fk ] + Uk+1 ≤ (1 + γk )Vk + Zk .
+                         P
+Then (Vk )k converges and k Uk < ∞ almost surely.
+
+                                                  5
+                                                  S EBBOUH G OWER D EFAZIO
+
+
+
+
+Algorithm              σ2          Stepsize                   Conv.     Rate                         Iterate    Ref
+SGD                    6= 0        O(k −1/2− )               a.s.      o(k −1/2+ )                 average    Cor. 9
+SGD                     =0         O(1)                       a.s.      o(k −1 )                     average    Cor. 9
+SGD-ALS, SGD-PS         6= 0       adaptive∗                  a.s., E   o(k −1/2+ ), O(k −1/2+ )   average    Cor. 12
+SGD-ALS, SGD-PS          =0        adaptive∗                  a.s., E   o(k −1 ), O(k −1 )           average    Cor. 12
+SHB                      6= 0      O(k −1/2+ ), O(k −1/2 )   a.s., E   o(k −1/2− ), O(k −1/2 )     last       Cor. 17, 25
+SHB                       =0       O(1)                       a.s., E   o(k −1 ), O(k −1 )           last       Cor. 14, 25
+SGD, nonconvex            C 6= 0   O(k −1/2+ )               a.s.      o(k −1/2+ )                 min k∇k2   Cor. 18
+SGD, nonconvex            C=0      O(1)                       a.s.      o(k −1 )                     min k∇k2   Cor. 18
+
+Table 1: Summary of the rates we obtain. All small-o (resp. big-O) rates are almost surely (resp. in expectation). The
+constants C, L and σ are defined in (ABC), (5) and (4), respectively. a.s.: almost surely, E: in expectation. min k∇k2 :
+lowest squared norm of the gradient along the trajectory of SGD. adaptive∗ : Maximum step sizes need to verify conditions
+similar to Condition 1, but do not require knowing the smoothness constant L.
+
+              We use the following condition on the step sizes in our almost sure convergence results.
+          Condition 1 The sequence (ηk )k is decreasing, k ηk = ∞, k ηk2 σ 2 < ∞ and k Pηkηj = ∞.
+                                                            P             P                  P
+                                                                                                     j
+                          P                P 2
+          The conditions k ηk = ∞ and k ηk < ∞ are known as the Robbins-Monro conditions (Robbins
+          and Monro, 1951) and are classical in P the SGD litterature (see Bertsekas and Tsitsiklis (2000) for
+          example). The additional conditions, k Pηkηj = ∞ and (ηk )k is decreasing, allow us to derive
+                                                        j
+          convergence rates for the almost sure convergence using a new proof technique. However, as we will
+          see in the next remark, the usual choices of step sizes which verify the Robbins-Monro conditions
+          verify Condition 1 as well.
+          Remark 7 Let ηk = kηξ with ξ, η > 0. Condition 1 is verified for all ξ ∈ ( 12 , 1] when σ 2 6= 0, and
+          for all ξ ∈ [0, 1] when σ 2 = 0.
+          See Appendix A for a proof of this remark. Indeed, all the formal proofs of our results are defered to
+          the appendix.
+         Theorem 8 Let Assumption 1 hold. Consider the iterates of SGD. Choose step sizes (ηk )k which
+         verify Condition 1, where ∀k ∈ N, 0 < ηk ≤ 1/(4L). Define for all k ∈ N
+                                                     
+                                     2ηk               x̄0 = x0
+                           wk = Pk             and                                                 (7)
+                                                       x̄k+1 = wk xk + (1 − wk )x̄k .
+                                     j=0 ηj
+                                                           
+                                                       1
+         Then, we have a.s. that f (x̄k ) − f∗ = o Pk−1       .
+                                                         t=0 ηt
+
+          Proof We present the main elements of the proof which help in understanding the difference between
+          the classical non-asymptotic analysis of SGD in expectation and our analysis. We present the
+          complete proof in Section C of the appendix.
+              In the convex setting, the bulk of the convergence proofs of SGD is in using convexity and
+                                                      1
+          smoothness of f to establish that, if ηk ≤ 4L , we have
+                              h                 i
+                           Ek kxk+1 − x∗ k2 + ηk (f (xk ) − f∗ ) ≤ kxk − x∗ k2 + 2ηk2 σ 2 .              (8)
+
+                                                              6
+                             Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+Classic non-asymptotic convergence analysis for SGD. Taking the expectation, using telescopic
+cancellation and Jensen’s inequality, it is possible to establish that
+                                                                            k−1
+                              kx0 − x∗ k2 2σ 2 k−1          2
+                                                   P
+                                                      t=0 ηt                      ηt
+                                                                            X
+          E [f (x̃k ) − f∗ ] ≤ Pk−1         + Pk−1            , where x̃k =     Pk−1 xt .
+                                  t=0 ηt           t=0 ηt                   t=0  j=0 ηj
+
+x̃k can then be computed on the fly using:
+                                                                       ηk
+                     x̃k+1 = w̃k xk + (1 − w̃k )x̃k ,    where w̃k = Pk             .               (9)
+                                                                           j=0 ηj
+                                                                                        η
+                                                                                      k+1 k w̃
+This sequence of weights (w̃k )k (which can be computed on the fly as w̃k+1 = ηk +η     k+1 w̃k
+                                                                                                ) is the
+one which allows to derive the tightest upper bound on the objective gap f (x) − f∗ in expectation.
+But it does not lend itself to tight almost sure asymptotic convergence, as we will show next.
+                                                                         P
+Naive asymptotic analysis. Applying Lemma 6 to (8) gives that k ηk (f (xk ) − f∗ ) < ∞.
+Unfortunately, this only gives that limk ηk (f (xk ) − f∗ ) = 0.
+Asymptotic analysis using the iterates defined in (9). What if we had used the sequence of
+iterates defined in (9)? Let δ̃k = f (x̃k ) − f∗ . Using Jensen’s inequality, we have
+                                                                    
+                                                  1            1
+                                f (xk ) − f∗ ≥      δ̃k+1 −       − 1 δ̃k .
+                                                w̃k           w̃k
+Using this bound in (8) gives, after replacing w̃k by its expression (9) and multiplying by ηk , that
+                h             i Xk                          k−1
+                                                            X
+              Ek kxk+1 − x∗ k2 +   ηj δ̃k+1 ≤ kxk − x∗ k2 +     ηj δ̃k + 2ηk2 σ 2 .
+                                      j=0                            j=0
+                                    P           
+                                     k−1
+    Applying Lemma 6 gives that      j=0 ηj δ̃k   converges almost surely. This, together with the
+                                           k        
+         P                                      1
+fact that j ηj = ∞, implies that δ̃k = O Pk−1          . This improves over the naive asymptotic
+                                                  j=0 ηj
+analysis, but we can actually do better with a different approach.
+                                                                                                     def
+Improved analysis. Now consider the alternative averaging of iterates x̄k given in (7). Let δk =
+f (x̄k ) − f∗ . As we have done in the last paragraph, we can use Jensen’s inequality to lower-bound
+f (xk ) − f∗ in (8) (detailed derivations are given in Appendix C), and we obtain:
+                           i 1X    k                                    k−1
+           h                                   ηk                     1X
+        Ek kxk+1 − x∗ k2 +            ηj δk+1 + δk ≤ kxk − x∗ k2 +           ηj δk + 2ηk2 σ 2 .
+                                2              2                      2
+                                  j=0                                    j=0
+                P            
+                    k−1                                       P
+By Lemma 6,         j=0 ηj δk    converges almost surely, and k ηk δk < ∞, which implies that
+                          P k ηk                                              Pk−1
+limk ηk δk = 0. But since k Pk−1       = ∞, we have the desired result: limk j=0     ηj δk = 0.
+                                 j=0 ηj
+    Note that in the first iteration, w0 = 2 and x̄1 = x0 , and we don’t use Jensen’s inequality.
+
+    With suitable choices of stepsizes, we can extract almost sure convergence rates for SGD, as we
+see in the next corollary. These choices and all the rates we derive are also summarized in Table 1.
+To the best of our knowledge, these are the first rates for the almost sure convergence of SGD in the
+convex setting.
+
+                                                     7
+                                        S EBBOUH G OWER D EFAZIO
+
+
+
+
+Corollary 9 (Corollary of Theorem 8) Let Assumption 1 hold. Let 0 < η ≤ 1/4L and  > 0.
+                               η
+    • if σ 2 6= 0. Let ηk = k1/2+ . Then                              
+                                                                  1
+                                          f (x̄k ) − f∗ = o                 .
+                                                             k 1/2−
+    • If σ 2 = 0. Let η   k = η. Then                          
+                                                                1
+                                            f (x̄k ) − f∗ = o       .
+                                                                k
+    Although the almost sure convergence of SGD with favourable convergence rates only requires
+the step sizes to verify Condition 1, there are other popular methods to set the step sizes, such as
+Line-Search (Nocedal and Wright, 2006) or Polyak Stepsizes (Polyak, 1987), which do not require
+knowing the smoothness constant L. A natural question is whether the result we have derived in
+Theorem 8 extends to these methods. We answer this question positively in the next section.
+
+2.2. Convergence of Adaptive step size methods
+We first present two adaptive step size selection methods and then present their convergence analysis.
+Armijo Line-Search Stepsize (ALS).              Polyak Stepsize (PS). Let g be a function lower
+We say that α is an Armijo line-seach step-     bounded by g ∗ . We say that α is a Polyak step size
+size at x ∈ Rd for the function g if, given     at x ∈ Rd if, given constants c, αmax > 0,
+constants c, αmax > 0, α is the largest
+                                                                        g(x) − g ∗
+                                                                                         
+step size in (0, αmax ] such that                         α = min                  , α max ,
+                                                                       ck∇g(x)k2
+g(x − α∇g(x)) ≤ g(x) − cα k∇g(x)k22 ,
+                               (10)             which we denote by
+which we denote by
+                                                                      α ∼ PSc,αmax (g, x)
+           α ∼ ALSc,αmax (g, x)
+                                                The drawback of this method is that we need to know
+In practice, we use backtracking to find        g ∗ . There is a range of applications where we know this
+this α, where we start with a value αmax        value and Polyak Stepsizes have been shown to work
+and decrease it by a factor β ∈ (0, 1) until    well experimentally. See Loizou et al. (2020) for more
+(10) is verified.                               details.
+    Instead of using a pre-determined step size in SGD, we can choose at each iteration ηk ∼
+ALSc,αmax (fvk , xk ) or ηk ∼ PSc,αmax (fvk , xk ). SGD with ALS or PS is known to converge
+sublinearly to a neighborhood of the minimum and to the minimum exactly if σ 2 = 0 (Vaswani et al.,
+2019b, 2020; Loizou et al., 2020). However, it is still not known whether these methods converge to
+the minimum when σ 2 6= 0.
+    Let (ηkmax )k and (γk ) be two strictly positive decreasing sequences. Consider the following
+modified SGD methods: at each iteration k, sample vk ∼ D and update
+
+          xk+1 = xk − ηk γk ∇fvk (xk ),      where ηk ∼ ALSc,ηkmax (fvk , xk ),             (SGD-ALS)
+          xk+1 = xk − ηk γk ∇fvk (xk ),      where ηk ∼ PSc,ηkmax (fvk , xk ).                (SGD-PS)
+
+Assumption 2 For all v ∼ D, fv is lower bounded by fv∗ > −∞ almost surely, and we define
+   def
+σ̄ 2 = f∗ − Ev [fv∗ ].
+
+                                                     8
+                               Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+    Similar to our analysis of SGD, we can derive almost sure convergence rates to the minimum for
+an average of the iterates. Remarkably, the analysis of the two methods SGD-ALS and SGD-PS can
+be unified.
+
+Theorem 10 Let Assumptions 1 and 2 hold. Consider the iterates of SGD-ALS    P and SGD-PS.
+Choose (ηkmax )k and (γk )k such that (ηkmax γk )k is decreasing, ηkmax → 0, k ηkmax γk = ∞,
+                               ηkmax γk
+                                         = ∞, c ≥ 12 and γk ≤ c. Define for all k ∈ N
+P max 2 2              P
+  k ηk  γk σ < ∞ and k Pk−1         max
+                                    j=0 ηj   γj
+
+
+                      2η max γk
+                                                   
+                                                       x̄0 = x0
+                wk = Pk k                    and                                                   (11)
+                           max γ                       x̄k+1 = wk xk + (1 − wk )x̄k .
+                      j=0 ηj     j
+                                                                           
+Then, we have almost surely that f (x̄k ) − f∗ = o          Pk−1 1 max          .
+                                                             t=0 ηt    γt
+
+
+We also present upper bounds on the suboptimality for SGD-ALS and SGD-PS in expectation, from
+which we can derive convergence rates.
+
+Theorem 11 Let Assumptions 1 and 2 hold. Let (ηkmax ) and (γk ) be strictly positive, decreasing
+sequences with γk ≤ c, for all k ∈ N and c ≥ 12 . Then the iterates of SGD-ALS and SGD-PS satisfy
+                                                                max      
+                       2ca0 kx0 − x∗ k2 + 4c k−1           max ηt L − 1
+                                                                                      Pk−1 2 max 2
+                                                                              σ̄ 2 + 2 t=0
+                                               P
+                                                 t=0 γ t η t      2(1−c)                   γt ηt σ̄
+                                                                            +
+  E [f (x̄k ) − f∗ ] ≤                                   Pk−1                                       ,
+                                                                      max
+                                                             t=0 γt ηt
+                                                     n max                                        (12)
+                          ηtmax γt
+                                                                     o
+                                                         η0 L
+where x̄k = k−1
+               P
+                 t=0   P k−1 max   x t and a 0 = max     2(1−c) ,  1  .
+                      j=0 ηj   γj
+
+    We now give precise convergence rates derived from the two previous theorems, in the over-
+parametrized as well as the non-overparametrized cases.
+                                                                                                     4
+Corollary 12 (Corollary of Theorems 10 and 11) Let , η, γ > 0, with γ ≤ c. If ηkmax = ηk − 3
+              1   
+and γk = γk − 2 + 3 then
+                                                                                
+                                   1                                          1
+             f (x̄k ) − f∗ = o     1      a.s. and E [f (x̄k ) − f∗ ] = O     1      .   (13)
+                                 k 2 −                                     k 2 −
+If σ̄ 2 = 0. Then, setting ηkmax = η > 0, c = 23 and γk = 1, then for all x∗ ∈ X∗ ,
+                                                                   n             o
+                         
+                         1                                  2 max    3ηLmax
+                                                                        2    , 1   kx0 − x∗ k2
+      f (x̄k ) − f∗ = o       a.s. and E [f (x̄k ) − f∗ ] ≤                                    .
+                         k                                                  ηk
+Notice from (12) and (13) that our analysis highlights a tradeoff between the asymptotic and the
+nonasymptotic convergence in expectation of SGD-ALS and SGD-PS. Indeed, (13) predicts that
+the slower the convergence of (ηkmax )k towards 0 (as  → 0), the better is the resulting asymptotic
+convergence rate. However, according to (12), if (ηkmax )k vanishes slowly, the second term on the
+right hand side of (13) vanishes slowly as well, which makes the bound in (12) looser.
+    Notice also that to be able to derive convergence rates in the non-overparametrized case from the
+previous theorem, we not only decrease the maximum step sizes, but also scale the adaptive step size
+ηk by multiplying it by a decreasing sequence γk .
+
+                                                       9
+                                     S EBBOUH G OWER D EFAZIO
+
+
+
+
+3. Almost sure convergence rates for Stochastic Heavy Ball
+The rates we derived for SGD, SGD-ALS and SGD-PS in the previous section all hold at some
+weighted average of the iterates. Yet, in practice, it is the last iterate of SGD which is used. In
+contrast, we show that these rates hold for the last iterate of SHB, which is due to the online averaging
+inherent to SHB that we highlight in Proposition 5. We present the first almost sure convergence rates
+for SHB, and also show that the deterministic HB converges at a o(1/k) rate, which is asymptotically
+faster than the previously established O(1/k) (Ghadimi et al., 2015).
+    We now present almost sure convergence rates for SHB
+
+Theorem 13 Let x−1 = x0 and consider the iterates of SHB-IMA. Let Assumption 1 hold. Let ηk
+be a sequence of stepsizes which verifies Condition 1 and ∀k ∈ N, 0 < ηk ≤ 1/8L. If
+                                                  Pk−1
+                                                     t=0 ηt
+                          λ0 = 0 and       λk =                for all k ∈ N∗ ,                      (14)
+                                                    4ηk
+                                                                                                        
+then we have almost surely that xk     →     x∗ for some x∗ ∈ X∗ , and f (xk ) − f∗ = o        P 1
+                                                                                                k−1          .
+                                     k→+∞                                                       t=0 ηt
+
+
+
+    Note that when specialized to full gradients sampling, i.e. when we use the deterministic HB
+method, our results hold without the need for almost sure statements.
+    To the best of our knowledge, Theorem 13 is the first result showing that the iterates of SHB
+converge to a minimizer assuming only smoothness and convexity. Note that this result is not directly
+comparable to Gadat et al. (2018), who study the more general nonconvex setting but use assumptions
+beyond smoothness.
+    In the general stochastic setting, Theorem 13 shows that SHB enjoys the same almost sure
+convergence rates as SGD with averaging (See Table 1). However, an added benefit of SHB is that
+these rates hold for the last iterate, which conforms to what is done in practice.
+
+
+Corollary 14 Assume σ 2 = 0 and let ηk = η < 1/4L for all k ∈ N. By Theorem 13 we have
+
+                             lim k (f (xk ) − f∗ ) = 0,       almost surely.
+                              k
+
+
+This corollary has fundamental implications in the deterministic and the stochastic case. In the
+stochastic case, it shows that when σ 2 = 0, SHB-IMA with a fixed step size converges at a o(1/k)
+rate at the last iterate. In the deterministic case, σ 2 = 0 always holds, as at each iteration we use
+the true gradient ∇f (xk ), and we have ∇f (x∗ ) = 0 for all x∗ ∈ X∗ . Thus Corollary 14 shows that
+the HB method enjoys the same o(1/k) asymptotic convergence rate as gradient descent (Lee and
+Wright, 2019).
+    It seems that it is our choice iteration-dependent momentum coefficients given by (6) and (14)
+that enable this fast ‘small o’ convergence of the objective values for SHB. Recent work by Attouch
+and Peypouquet (2016) corroborates with this finding, where the authors also showed that a version of
+(deterministic) Nesterov’s Accelerated Gradient algorithm with carefully chosen iteration dependent
+momentum coefficients converges at a o(1/k 2 ) rate, rather than the previously known O(1/k 2 ).
+
+                                                   10
+                             Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+4. Non-convex almost sure convergence rates for SGD
+We now move on to the non-convex case, where we use the following assumption from Khaled and
+Richtárik (2020).
+Assumption 3 There exist constants A, B, C ≥ 0 s.t. for all x ∈ Rd ,
+                     h             i
+                  Ev k∇fv (x)k2 ≤ A (f (x) − f∗ ) + Bk∇f (x)k2 + C.                           (ABC)
+
+This assumption is called Expected Smoothness in Khaled and Richtárik (2020). It includes the
+bounded gradients assumption, with A = B = 0 and C = G > 0, and the bounded gradient variance
+assumption, with A = 0, B = 1 and C = σ 2 , as special cases. See (Khaled and Richtárik, 2020,
+Th. 1) for a thorough investigation of the other assumptions used in the litterature which are implied
+by (ABC). A major benefit of this assumption is that when f is a finite-sum (Remark 4) and the fi
+functions are lower-bounded, (ABC) always holds (Khaled and Richtárik, 2020, Prop. 3).
+Remark 15 (Khaled and Richtárik (2020), Prop. 3) In the setting of Remark 4, and assuming that
+for all i ∈ [n], fi ≥ fi∗ > −∞, Assumption (ABC) holds with:
+                                                                         n
+                    n−b                  n(b − 1)                2A X
+                A=          Lmax ,    B=          ,     and   C=      (f∗ − fi∗ ) .
+                   b(n − b)              b(n − 1)                 n
+                                                                        i=1
+
+    Since a global minimizer of f does not always exist in the nonconvex case, we can now only
+hope to find a stationary point. Hence, we present asymptotic convergence rates for the squared
+gradient norm.
+
+Theorem 16 Consider the iterates of SGD. Assume that (ABC) holds. Choose stepsizes which
+                                     2
+                                of σ )such that ∀k ∈ N, 0 < ηk ≤ 1/(BL). Then, we have a.s
+verify Condition 1 (with C in place
+that      min    k∇f (xt )k2 = o     1
+                                   Pk−1       .
+       t=0,...,k−1                   t=0 ηt
+
+                                                                                       √
+From this result, we can derive almost sure convergence rates arbitrarily close to o(1/ k), which
+can be improved to o(1/k) in the overparametrized setting (See Table 1). Since these results are
+similar to Corollary 9, we omit them for brievity and report them in Table 1 and Corollary 18 in
+Appendix A.
+
+5. Experiments
+In our experiments, we aimed to examine whether or not SHB-IMA with the parameter settings
+suggested by our theory performed better than SGD and SGD with three common alternative
+parameter settings used throughout the machine learning literature: SGD with fixed momentum β of
+0.9 and 0.99 as well as no momentum.
+    For our experiments, we selected a diverse set of multi-class classification problems from the
+LibSVM repository, 25 problems in total. These datasets range from a few classes to a thousand, and
+they vary from hundreds of data-points to hundreds of thousands. We normalized each dataset by a
+constant so that the largest data vector had norm 1. We used a multi-class logistic regression loss
+with no regularization so we could test the non-strongly convex convergence properties, and we ran
+for 50 epochs with no batching.
+
+                                                  11
+                                                                                                       S EBBOUH G OWER D EFAZIO
+
+
+
+
+                                                                        SHB                 SGD                    Momentum 0.9                                          Momentum 0.99                                     No best method
+                       Best method for                                   11                  0                         0                                                      0                                                  14
+
+ Table 2: Count of how many problems each method is statistically significantly superior to the rest on
+
+
+
+     We use SHB to denote the method (SHB) with αk and βk set using (6) (or equivalently the
+ method (SHB-IMA)) and we left η, as well as the step sizes of all the methods we compare, as a
+ constant to be determined through grid search. For the gridsearch, we used power-of-2 grid (2i ),
+ we ran 5 random seeds and chose the learning rate that gave the lowest loss on average for each
+ combination of problem and method. We widened the grid search as necessary for each combination
+ to ensure that the chosen learning-rate was not from the endpoints of our grid search. Although it is
+ possible to give a closed-form bound for the Lipschitz smoothness constant for our test problems,
+ the above setting is less conservative and has the advantage of being usable without requiring any
+ knowledge about the problem structure.
+      We then ran 40 different random seeds to produce Figure 1. To determine which method, if any,
+ was best on each problem, we performed t-tests with Bonferroni correction, and we report how often
+ each method was statistically significantly superior to all of the other three methods in Table 2. The
+ stochastic heavy ball method using our theoretically motivated parameter settings performed better
+ than all other methods on 11 of the 25 problems. On the remaining problems, no other method was
+ statistically significantly better than all of the rest.
+
+                              acoustic                                                   aloi                                                 cifar10                                                connect-4                                               covtype
+                              SGD LR=9.8e-04                                          SHB LR=5.0e-01                                          SGD LR=1.9e-06                                         Momentum 0.99 LR=2.0e-05            6.9e-01            SGD LR=3.9e-03
+                              Momentum 0.99 LR=4.9e-06            1.4e+00             SGD LR=5.0e-01                                          SHB LR=1.9e-06                                         Momentum 0.90 LR=9.8e-05                               SHB LR=7.8e-03
+        8.0e-01               SHB LR=2.0e-03                                          Momentum 0.99 LR=5.0e-03            5.0e+02             Momentum 0.99 LR=1.9e-08            7.0e-01            SGD LR=9.8e-04
+                                                                                                                                                                                                                                         6.8e-01
+                                                                                                                                                                                                                                                            Momentum 0.99 LR=7.8e-05
+                              Momentum 0.90 LR=9.8e-05                                Momentum 0.90 LR=5.0e-02                                Momentum 0.90 LR=1.9e-07                               SHB LR=9.8e-04                                         Momentum 0.90 LR=3.9e-04
+                                                                  1.2e+00
+        7.8e-01                                                                                                           4.0e+02                                                 6.8e-01                                                6.7e-01
+                                                                  1.0e+00
+ Loss   7.6e-01                                           Loss                                                    Loss                                                     Loss   6.6e-01                                         Loss   6.6e-01
+                                                                  8.0e-01                                                 3.0e+02
+                                                                                                                                                                                  6.4e-01                                                6.5e-01
+        7.4e-01                                                   6.0e-01
+                                                                                                                          2.0e+02
+                                                                  4.0e-01                                                                                                         6.2e-01                                                6.4e-01
+        7.2e-01
+                                                                  2.0e-01                                                 1.0e+02                                                 6.0e-01                                                6.3e-01
+                   0    10    20   30         40     50                     0   10    20   30         40     50                      0   10   20   30         40     50                     0   10    20   30        40     50                     0   10    20   30        40     50
+                               Epoch                                                   Epoch                                                   Epoch                                                   Epoch                                                  Epoch
+                                 dna                                                    glass                                                    iris                                                 letter                                                  mnist
+                                                                                                                                                                                                                                         3.6e-01
+                              Momentum 0.90 LR=5.0e-02                                SGD LR=1.2e-01                                          SHB LR=2.0e+00                                         Momentum 0.90 LR=6.2e-03                               SHB LR=7.8e-03
+        1.0e+00               SHB LR=5.0e-01                                          SHB LR=2.5e-01                      3.0e-01             SGD LR=5.0e-01                      1.3e+00            Momentum 0.99 LR=6.3e-04                               Momentum 0.99 LR=7.8e-05
+                              Momentum 0.99 LR=5.0e-03            1.2e+00             Momentum 0.99 LR=2.5e-03                                Momentum 0.90 LR=1.0e-01                               SGD LR=6.2e-02                      3.4e-01            Momentum 0.90 LR=3.9e-04
+                              SGD LR=5.0e-01                                          Momentum 0.90 LR=1.2e-02                                Momentum 0.99 LR=1.0e-02                               SHB LR=6.2e-02                                         SGD LR=3.9e-03
+        8.0e-01                                                                                                           2.5e-01                                                 1.2e+00
+                                                                  1.1e+00                                                                                                                                                                3.2e-01
+        6.0e-01                                                                                                           2.0e-01
+                                                                                                                                                                                  1.1e+00                                                3.0e-01
+Loss                                                      Loss    1.0e+00                                          Loss   1.5e-01
+                                                                                                                                                                          Loss                                                    Loss
+        4.0e-01                                                                                                                                                                   1.0e+00                                                2.8e-01
+                                                                  9.0e-01
+        2.0e-01                                                                                                           1.0e-01                                                                                                        2.6e-01
+                                                                                                                                                                                  9.0e-01
+                                                                  8.0e-01                                                                                                                                                                2.4e-01
+        0.0e+00                                                                                                           5.0e-02
+                   0    10    20   30         40     50                     0   10    20   30         40     50                      0   10   20   30         40     50                     0   10    20   30        40     50                     0   10    20   30        40     50
+                               Epoch                                                   Epoch                                                   Epoch                                                   Epoch                                                  Epoch
+                             pendigits                                                 poker                                                  protein                                                satimage                                               segment
+                              SHB LR=3.1e-05                                          SGD LR=6.1e-05                      1.1e+00             Momentum 0.90 LR=7.8e-04                               Momentum 0.90 LR=6.2e-03            4.5e-01            Momentum 0.99 LR=1.3e-03
+                              Momentum 0.99 LR=3.1e-07            1.2e+00             Momentum 0.90 LR=1.2e-05                                Momentum 0.99 LR=7.8e-05                               Momentum 0.99 LR=6.3e-04                               Momentum 0.90 LR=6.2e-03
+                              SGD LR=3.1e-05                                          Momentum 0.99 LR=1.2e-06                                SHB LR=7.8e-03                                         SGD LR=6.2e-02                                         SGD LR=6.2e-02
+        4.0e+00               Momentum 0.90 LR=3.1e-06                                SHB LR=6.1e-05                      1.1e+00             SGD LR=7.8e-03                      4.0e-01            SHB LR=1.2e-01                      4.0e-01            SHB LR=2.5e-01
+                                                                  1.2e+00                                                 1.1e+00
+        3.0e+00                                                                                                                                                                   3.8e-01                                                3.5e-01
+                                                                  1.2e+00                                                 1.1e+00
+Loss    2.0e+00
+                                                          Loss                                                    Loss    1.1e+00                                          Loss   3.6e-01
+                                                                                                                                                                                                                                  Loss   3.0e-01
+                                                                  1.1e+00                                                 1.0e+00
+                                                                                                                                                                                                                                         2.5e-01
+                                                                  1.1e+00                                                 1.0e+00                                                 3.4e-01
+        1.0e+00
+                                                                                                                          1.0e+00                                                                                                        2.0e-01
+                                                                  1.0e+00                                                  9.8e-01                                                3.2e-01
+        0.0e+00                                                                                                                                                                                                                          1.5e-01
+                   0    10    20   30         40     50                     0   10    20   30         40     50                      0   10   20   30         40     50                     0   10    20   30        40     50                     0   10    20   30        40     50
+                               Epoch                                                   Epoch                                                   Epoch                                                   Epoch                                                  Epoch
+                              seismic                                                Sensorless                                               shuttle                                           smallNORB-32x32                                               SVHN
+        7.0e-01                                                   1.6e+00                                                                                                         2.2e+02
+                              Momentum 0.90 LR=4.9e-05                                SGD LR=1.6e-02                                          SGD LR=6.2e-02                                         Momentum 0.90 LR=1.9e-07                               Momentum 0.90 LR=2.4e-05
+                              Momentum 0.99 LR=9.8e-06                                SHB LR=1.6e-02                                          SHB LR=2.5e-01                                         SGD LR=1.9e-06                                         SGD LR=2.4e-04
+                              SHB LR=9.8e-04                                          Momentum 0.90 LR=1.6e-03            1.5e-01             Momentum 0.99 LR=6.3e-04            2.0e+02            Momentum 0.99 LR=3.8e-08            2.6e+00            Momentum 0.99 LR=4.9e-06
+        6.9e-01               SGD LR=4.9e-04                      1.4e+00             Momentum 0.99 LR=1.6e-04                                Momentum 0.90 LR=6.2e-03                               SHB LR=3.8e-06                                         SHB LR=4.9e-04
+                                                                                                                          1.5e-01                                                 1.8e+02
+                                                                                                                                                                                  1.5e+02                                                2.5e+00
+                                                                  1.2e+00                                                 1.4e-01
+        6.8e-01                                                                                                                                                                   1.2e+02
+ Loss                                                     Loss    1.0e+00                                          Loss   1.4e-01                                         Loss    1.0e+02
+                                                                                                                                                                                                                                 Loss    2.4e+00
+        6.7e-01                                                                                                           1.4e-01                                                 7.5e+01                                                2.3e+00
+                                                                  8.0e-01
+                                                                                                                          1.3e-01                                                 5.0e+01
+        6.6e-01                                                   6.0e-01                                                                                                                                                                2.2e+00
+                                                                                                                          1.2e-01                                                 2.5e+01
+                   0    10    20   30         40     50                     0   10    20   30         40     50                      0   10   20   30         40     50                     0   10    20   30        40     50                     0   10    20   30        40     50
+                               Epoch                                                   Epoch                                                   Epoch                                                   Epoch                                                  Epoch
+                             svmguide2                                                  usps                                                  vehicle                                                 vowel                                                    wine
+        1.3e+00               Momentum 0.90 LR=5.0e-02                                SGD LR=1.6e-02                                          Momentum 0.99 LR=1.3e-03            1.4e+00            Momentum 0.90 LR=2.5e-02                               SHB LR=5.1e+02
+                              SGD LR=1.0e+00                      2.4e-01             Momentum 0.90 LR=1.6e-03
+                                                                                                                          9.0e-01
+                                                                                                                                              SGD LR=1.2e-01                                         SGD LR=2.5e-01                      2.0e+02            SGD LR=1.0e+03
+        1.2e+00               SHB LR=2.0e+00
+                              Momentum 0.99 LR=5.0e-03
+                                                                                      SHB LR=1.6e-02
+                                                                                      Momentum 0.99 LR=1.6e-04
+                                                                                                                                              Momentum 0.90 LR=1.2e-02
+                                                                                                                                              SHB LR=2.5e-01                      1.3e+00
+                                                                                                                                                                                                     Momentum 0.99 LR=2.5e-03
+                                                                                                                                                                                                     SHB LR=1.0e+00
+                                                                                                                                                                                                                                                            Momentum 0.99 LR=5.1e+00
+                                                                                                                                                                                                                                                            Momentum 0.90 LR=1.0e+02
+                                                                  2.2e-01
+        1.1e+00
+                                                                  2.0e-01                                                 8.0e-01                                                 1.2e+00                                                1.5e+02
+        1.0e+00
+                                                                  1.8e-01                                                                                                         1.1e+00
+Loss     9.0e-01                                           Loss                                                    Loss   7.0e-01                                         Loss                                                   Loss    1.0e+02
+                                                                  1.6e-01                                                                                                         1.0e+00
+         8.0e-01
+                                                                  1.4e-01                                                 6.0e-01                                                 9.0e-01
+         7.0e-01                                                                                                                                                                                                                         5.0e+01
+         6.0e-01                                                  1.2e-01                                                                                                         8.0e-01
+                                                                                                                          5.0e-01
+         5.0e-01                                                  1.0e-01                                                                                                         7.0e-01                                                0.0e+00
+                   0    10    20   30         40     50                     0   10    20   30         40     50                      0   10   20   30         40     50                     0   10    20   30        40     50                     0   10    20   30        40     50
+                               Epoch                                                   Epoch                                                   Epoch                                                   Epoch                                                  Epoch
+
+
+
+
+ Figure 1: Average training error convergence plots for 25 LibSVM datasets, with using the best
+ learning rate for each method and problem combination. Averages are over 40 runs. Error bars show
+ a range of +/- 2SE.
+
+
+                                                                                                                                          12
+                          Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+Acknowledgements
+We thank the anonymous reviewers who helped us improve this work.
+    The work of Othmane Sebbouh was supported in part by the French government under man-
+agement of Agence Nationale de la Recherche as part of the ”Investissements d’avenir” program,
+reference ANR19- P3IA-0001 (PRAIRIE 3IA Institute). Othmane Sebbouh also acknowledges the
+support of a ”Chaire d’excellence de l’IDEX Paris Saclay”.
+
+
+
+
+                                             13
+                                   S EBBOUH G OWER D EFAZIO
+
+
+
+
+References
+Hédy Attouch and Juan Peypouquet. The rate of convergence of nesterov’s accelerated forward-
+  backward method is actually faster than 1/k2 . SIAM Journal on Optimization, 26(3):1824–1834,
+  2016.
+
+Francis Bach and Eric Moulines. Non-asymptotic analysis of stochastic approximation algorithms
+  for machine learning. In Neural Information Processing Systems (NIPS), 2011.
+
+Heinz H. Bauschke and Patrick L. Combettes. Convex Analysis and Monotone Operator Theory in
+  Hilbert Spaces. Springer Publishing Company, Incorporated, 1st edition, 2011.
+
+Dimitri P Bertsekas and John N Tsitsiklis. Gradient convergence in gradient methods with errors.
+  SIAM Journal on Optimization, 10(3):627–642, 2000.
+
+Leon Bottou. Stochastic learning. In Advanced Lectures on Machine Learning, volume 3176, pages
+  146–168, 2003.
+
+Bugra Can, Mert Gürbüzbalaban, and Lingjiong Zhu. Accelerated linear convergence of stochastic
+  momentum methods in wasserstein distances. In Proceedings of the 36th International Conference
+  on Machine Learning, pages 891–901, 2019.
+
+Aaron Defazio. On the curved geometry of accelerated optimization. Advances in Neural Information
+  Processing Systems 33 (NIPS 2019), 2019.
+
+Sébastien Gadat, Fabien Panloup, and Sofiane Saadane. Stochastic heavy ball. Electronic Journal of
+  Statistics, 12:461–529, 2018.
+
+Nidham Gazagnadou, Robert Mansel Gower, and Joseph Salmon. Optimal mini-batch and step sizes
+  for saga. The International Conference on Machine Learning, 2019.
+
+Euhanna Ghadimi, Hamid Feyzmahdavian, and Mikael Johansson. Global convergence of the
+  heavy-ball method for convex optimization. In 2015 European Control Conference (ECC), pages
+  310–315, 2015.
+
+Saeed Ghadimi and Guanghui Lan. Stochastic first- and zeroth-order methods for nonconvex
+  stochastic programming. SIAM J. Optimization, 23(4):2341–2368, 2013.
+
+Antoine Godichon-Baggioni. Lp and almost sure rates of convergence of averaged stochastic gradient
+  algorithms with applications to online robust estimation. arXiv preprint arXiv:1609.05479, 2016.
+
+Robert Mansel Gower, Nicolas Loizou, Xun Qian, Alibek Sailanbayev, Egor Shulgin, and Peter
+  Richtárik. SGD: General Analysis and Improved Rates. In Proceedings of the 36th International
+  Conference on Machine Learning, volume 97, pages 5200–5209, 2019.
+
+Prateek Jain, Dheeraj Nagaraj, and Praneeth Netrapalli. Making the last iterate of sgd information
+  theoretically optimal. In Conference on Learning Theory, COLT 2019, volume 99, pages 1752–
+  1755, 2019.
+
+Ahmed Khaled and Peter Richtárik. Better theory for SGD in the nonconvex world. arXiv:2002.03329,
+  2020.
+
+                                               14
+                            Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+Rahul Kidambi, Praneeth Netrapalli, Prateek Jain, and Sham M. Kakade. On the insufficiency of
+  existing momentum schemes for stochastic optimization. In International Conference on Learning
+  Representations, 2018.
+Guanghui Lan and Yi Zhou. An optimal randomized incremental gradient method. Mathematical
+  programming, pages 1–49, 2017.
+Ching-Pei Lee and Stephen Wright. First-order algorithms converge faster than o(1/k) on convex
+  problems. volume 97, pages 3754–3762, 2019.
+Xiaoyu Li and Francesco Orabona. On the convergence of stochastic gradient descent with adaptive
+  stepsizes. In The 22nd International Conference on Artificial Intelligence and Statistics, AISTATS,
+  pages 983–992, 2019.
+Nicolas Loizou and Peter Richtárik. Momentum and Stochastic Momentum for Stochastic Gradient,
+  Newton, Proximal Point and Subspace Descent Methods. arXiv:1712.09677, 2018.
+Nicolas Loizou, Sharan Vaswani, Issam Laradji, and Simon Lacoste-Julien. Stochastic polyak
+  step-size for sgd: An adaptive learning rate for fast convergence. arXiv preprint arXiv:2002.10542,
+  2020.
+Panayotis Mertikopoulos, Nadav Hallak, Ali Kavis, and Volkan Cevher. On the almost sure conver-
+  gence of stochastic gradient descent in non-convex problems. arXiv preprint arXiv:2006.11144,
+  2020.
+Arkadi Nemirovski, Anatoli B. Juditsky, Guanghui Lan, and Alexander Shapiro. Robust stochastic
+  approximation approach to stochastic programming. SIAM Journal on Optimization, 19(4):
+  1574–1609, 2009.
+Yurii Nesterov. Introductory lectures on convex optimization: A basic course, volume 87. 2013.
+Lam M. Nguyen, Phuong Ha Nguyen, Marten van Dijk, Peter Richtárik, Katya Scheinberg, and
+  Martin Takác. SGD and hogwild! convergence without the bounded gradients assumption. In
+  Proceedings of the 35th International Conference on Machine Learning, pages 3747–3755, 2018.
+Jorge Nocedal and Stephen J Wright. Sequential quadratic programming. Numerical optimization,
+  pages 529–562, 2006.
+Francesco Orabona.           Almost sure convergence of sgd on smooth non-
+  convex     functions.              https://parameterfree.com/2020/10/05/
+  almost-sure-convergence-of-sgd-on-smooth-non-convex-functions/,
+  2020a. Accessed: 2021-01-28.
+Francesco    Orabona.    Last   iterate of  sgd  converges (even    in
+  bounded      domains).      https://parameterfree.com/2020/08/07/
+  last-iterate-of-sgd-converges-even-in-unbounded-domains/,     2020b.
+  Accessed: 2021-01-28.
+Antonio Orvieto, Jonas Köhler, and Aurélien Lucchi. The role of memory in stochastic optimization.
+  In Proceedings of the Thirty-Fifth Conference on Uncertainty in Artificial Intelligence, UAI, page
+ 128, 2019.
+
+                                                 15
+                                    S EBBOUH G OWER D EFAZIO
+
+
+
+
+B. T. Polyak. Some methods of speeding up the convergence of iteration methods. USSR Computa-
+  tional Mathematics and Mathematical Physics, 4:1–17, 1964.
+
+BT Polyak. Introduction to optimization, translations series in mathematics and engineering. Opti-
+  mization Software, 1987.
+
+H. Robbins and S. Monro. A stochastic approximation method. Annals of Mathematical Statistics,
+  22:400–407, 1951.
+
+Herbert Robbins and David Siegmund. A convergence theorem for nonnegative almost supermartin-
+  gales and some applications. Optimizing methods in Statistics, pages 233–257, 1971.
+
+Ilya Sutskever, James Martens, George Dahl, and Geoffrey Hinton. On the importance of initializa-
+   tion and momentum in deep learning. In Proceedings of the 30th International Conference on
+   International Conference on Machine Learning - Volume 28, page III–1139–III–1147, 2013.
+
+Sharan Vaswani, Francis Bach, and Mark Schmidt. Fast and faster convergence of SGD for over-
+  parameterized models and an accelerated perceptron. In The 22nd International Conference on
+  Artificial Intelligence and Statistics, AISTATS 2019, 16-18 April 2019, Naha, Okinawa, Japan,
+  volume 89, pages 1195–1204, 2019a.
+
+Sharan Vaswani, Aaron Mishkin, Issam Laradji, Mark Schmidt, Gauthier Gidel, and Simon Lacoste-
+  Julien. Painless stochastic gradient: Interpolation, line-search, and convergence rates. In Advances
+  in Neural Information Processing Systems 32, pages 3727–3740. 2019b.
+
+Sharan Vaswani, Frederik Kunstner, Issam Laradji, Si Yi Meng, Mark Schmidt, and Simon Lacoste-
+  Julien. Adaptive gradient methods converge faster with over-parameterization (and you can do a
+  line-search). arXiv preprint arXiv:2006.06835, 2020.
+
+Tianbao Yang, Qihang Lin, and Zhe Li. Unified convergence analysis of stochastic momentum
+  methods for convex and non-convex optimization. arXiv:1604.03257, 2016.
+
+Zhengyuan Zhou, Panayotis Mertikopoulos, Nicholas Bambos, Stephen P. Boyd, and Peter W. Glynn.
+  Stochastic mirror descent in variationally coherent optimization problems. In Advances in Neural
+  Information Processing Systems 30, pages 7040–7049, 2017.
+
+
+
+
+                                                 16
+                            Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+                                           APPENDIX
+
+
+Contents
+
+1   Introduction                                                                                  1
+    1.1 Contributions and Background . . . . . . . . . . . . . . . . . . . . . . . . . . . .      2
+    1.2 Assumptions and general consequences . . . . . . . . . . . . . . . . . . . . . . .        3
+    1.3 SGD and an iterate-averaging viewpoint of SHB . . . . . . . . . . . . . . . . . . .       5
+
+2   Almost sure convergence rates for SGD and SGD with adaptive stepsizes                        5
+    2.1 SGD: average-iterates almost sure convergence . . . . . . . . . . . . . . . . . . .      5
+    2.2 Convergence of Adaptive step size methods . . . . . . . . . . . . . . . . . . . . .      8
+
+3   Almost sure convergence rates for Stochastic Heavy Ball                                      10
+
+4   Non-convex almost sure convergence rates for SGD                                             11
+
+5   Experiments                                                                                  11
+
+A Proofs of corollaries on convergence rates and stepsize choices                                19
+  A.1 Proof of remark 7 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    19
+  A.2 SGD: Proof of Corollary 9 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      19
+  A.3 SGD with adaptive step sizes: Proof of Corollary 12 . . . . . . . . . . . . . . . .        20
+  A.4 SHB . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    21
+  A.5 SGD, nonconvex . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       21
+
+B Proofs for Section 1                                                                           22
+  B.1 Proof of Lemma 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     22
+  B.2 Proof of Proposition 5 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   22
+
+C Proofs for Section 2                                                                           23
+  C.1 Proof of Theorem 8 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     23
+  C.2 Proofs of Theorems 10 and 11 . . . . . . . . . . . . . . . . . . . . . . . . . . . .       25
+       C.2.1 Proof of Theorem 10 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       26
+       C.2.2 Proof of Theorem 11 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       27
+
+D Proofs for Section 3                                                                           27
+  D.1 Proof of Theorem 13 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      27
+
+E Proofs for Section 4                                                                           32
+  E.1 Proof of Theorem 16 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      32
+
+F Extension of our results to the nonsmooth setting                                              33
+
+                                                17
+                                  S EBBOUH G OWER D EFAZIO
+
+
+
+
+G Convergence rates for SHB in expectation without the bounded gradients and bounded
+  gradient variance assumptions                                                               35
+  G.1 Proof of Theorem 24 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36
+  G.2 Proof of Corollary 25 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37
+
+
+
+
+                                              18
+                               Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+   The appendix is organized as follows:
+    • In Section A we present the proofs of Remark 7 and the stepsize choices and the corresponding
+      convergence rates derived in the corollaries listed in Table 1.
+    • In Section B we present proofs for Section 1.
+    • In Section C we present proofs for Section 2.
+    • In Section D we present proofs for Section 3.
+    • In Section E we present proofs for Section 4.
+    • In Section F, we present our results for the convergence of stochastic subgradient descent
+      under the bounded gradients assumptions.
+    • In Section G, we present convergence rates for SHB in expectation without the bounded
+      gradients and bounded gradient variance assumptions.
+
+A. Proofs of corollaries on convergence rates and stepsize choices
+A.1. Proof of remark 7
+Proof Let ηk = kηξ with η > 0 and ξ ∈ [0, 1). Clearly, (ηk )k is decreasing and
+                                                                                             P
+                                                                                                k ηk = ∞. And
+we have
+                                                 k−1
+                                                 X
+                                                       ηt ∼ ηk 1−ξ .
+                                                 t=0
+
+Hence,
+                                                   ηk               1
+                                                 Pk−1           ∼     .
+                                                       t=0 ηt
+                                                                    k
+         P     ηk
+Hence,     k Pk−1 ηt = ∞.
+               t=0
+
+    • If σ 2 6= 0. Let ξ ∈ ( 12 , 1]. Then        2
+                                             P
+                                               k ηk < ∞, and the stepsizes verify Condition 1.
+
+    • If σ 2 = 0. Let ξ ∈ [0, 1). We have                     2 2
+                                                        P
+                                                           k ηk σ         = 0 < ∞. Hence, the stepsizes verify
+      Condition 1.
+
+
+
+
+A.2. SGD: Proof of Corollary 9
+Proof
+                               η
+    • If σ 2 6= 0. Let ηk = k1/2+ . From Remark 7, we have that the stepsizes verify Condition 1.
+                                 −1/2+
+                   P 1
+      Moreover, k 1 + ∼ k              . Thus, from Theorem 8:
+                        k2
+                                                                                 
+                                                                            1
+                                             f (x̄k ) − f∗ = o                        .
+                                                                        k 1/2−
+
+                                                          19
+                                     S EBBOUH G OWER D EFAZIO
+
+
+
+
+    • If σ 2 = 0. Let ηk = η. From Remark 7, the stepsizes verify Condition 1. Thus, from
+      Theorem 8:
+                                                       
+                                                       1
+                                    f (x̄k ) − f∗ = o     .
+                                                       k
+
+
+
+
+A.3. SGD with adaptive step sizes: Proof of Corollary 12
+Proof Let η, γ, c > 0. We first prove the almost sure convergence results.
+                                                                1
+           2          max = ηk −4/3 and γ = γk − 2 +/3 . Clearly, (η max γ ) is decreasing,
+      Pσ̄ 6= 0. Let ηP
+    • If              k
+                           max γ 2 < ∞. And
+                                            k                         k     k k
+         k ηk = ∞ and   k ηk    k
+
+                                         k−1
+                                         X
+                                                ηtmax γt ∼ ηγk 1/2− .
+                                          t=0
+
+      Hence,
+                                              ηkmax γk     1
+                                            Pk−1          ∼ .
+                                             t=0 ηt
+                                                   max γt  k
+               P     ηkmax γk
+      Hence,     k Pk−1 η max γt = ∞. Thus, the stepsizes verify the conditions of Theorem 10, and
+                     t=0   t
+      we have
+                                                                         
+                                                                    1
+                                        f (x̄k ) − f∗ = o                     .
+                                                                k 1/2−
+
+    • If σ̄ 2 = 0. Let ηkmax = η and γk = 1. Clearly (ηkmax γk )k is decreasing since it is constant,
+      P max                                                     ηkmax γk
+                 γk = ∞, k ηkmax γk2 σ̄ 2 = 0 < ∞, and k Pk−1
+                           P                           P                     P
+         k ηk                                                        max  = k 1 = ∞. Thus, the
+                                                                        t=0 ηt    γt
+      stepsizes verify the conditions of Theorem 10, and we have
+                                                             
+                                                             1
+                                          f (x̄k ) − f∗ = o     .
+                                                             k
+
+    We now prove the convergence rates in expectation. Remember that from Theorem 11, we have
+that if (ηkmax ) and (γk ) are strictly positive, decreasing sequences with γk ≤ c for all k ∈ N and
+c ≥ 12 , then the iterates of SGD-ALS and SGD-PS satisfy
+                                                              max         
+                       2ca0 kx0 − x∗ k2 + 4c k−1         max ηt L − 1
+                                                                                       Pk−1 2 max 2
+                                                                               σ̄ 2 + 2 t=0
+                                               P
+                                                     γ η
+                                                  t=0 t t        2(1−c)                     γt ηt σ̄
+                                                                             +
+  E [f (x̄k ) − f∗ ] ≤                                  Pk−1 max                                     ,
+                                                           t=0  η t    γ t
+                                                                                                   (15)
+                                                      n max
+                          ηtmax γt
+                                                                    o
+                                                        η0 L
+where x̄k = k−1
+               P
+                  t=0  P k−1 max   x t and a 0 = max    2(1−c) ,  1  .
+                      j=0 ηj   γj
+
+
+                                                    20
+                                Almost sure SGD AND SHB CONVERGENCE
+
+
+
+                                                               1
+                                                     − 2 +/3
+    • If σ̄ 2 6= 0. Let ηkmax = ηk −4/3and γk = γk          Since ηtmax → 0, there exists k0 ∈ N
+                                              ηtmax L
+                                                  
+      such that for all t ≥ k0 , γt ηtmax     2(1−c) − 1 + = 0. Hence, for all k ≥ k0
+
+                                                                         max       
+                                                      Pk0 −1              ηt L
+                             2ca0 kx0 − x∗ k2 + 4c             γt ηtmax 2(1−c)   − 1 σ̄ 2 + 2 k−1  2 max σ̄ 2
+                                                                                             P
+                                                        t=0                                   t=0 γt ηt
+                                                                                      +
+      E [f (x̄k ) − f∗ ] ≤                                       Pk−1 max                                     .
+                                                                     t=0 ηt   γt
+
+      Replacing ηkmax and γk with their values gives
+                                                                                     
+                                                                              1
+                                        E [f (x̄k ) − f∗ ] = O                            .
+                                                                          k 1/2−
+
+    • If σ̄ 2 = 0. Let ηkmax = η > 0 and γ = 1. We have from (15) that for all k ∈ N,
+                                                        n       o
+                                                   2 max 3ηL
+                                                          2  , 1  kx0 − x∗ k2
+                              E [f (x̄k ) − f∗ ] ≤                            .
+                                                              ηk
+
+
+
+
+A.4. SHB
+Corollary 17 (Corollary of Theorem 13) Let Assumption 1 hold. Let 0 < η ≤ 1/4L and  > 0.
+                               η
+    • if σ 2 6= 0. Let ηk = k1/2+ . Then
+                                                                                 
+                                                                          1
+                                            f (xk ) − f∗ = o                          .
+                                                              k 1/2−
+    • If σ 2 = 0. Let η   k = η. Then
+                                                                
+                                                                 1
+                                              f (xk ) − f∗ = o       .
+                                                                 k
+Proof The proof is the same as the proof of Corollary 9, using Theorem 13 instead of Theorem 8.
+
+
+A.5. SGD, nonconvex
+Corollary 18 (Corollary of Theorem 16) Let Assumption (ABC) hold. Let 0 < η ≤ 1/4L and
+ > 0.
+                              η
+    • If σ 2 = 0. Let ηk = k1/2+ . Then,
+                                                                                         
+                                                              2                   1
+                                        min        k∇f (xk )k = o                             .
+                                     t=0,...,k−1                              k 1/2−
+
+    • If σ 2 6= 0. Let ηk = η. Then,
+                                                              
+                                                              1    2
+                                          min k∇f (xk )k = o     .
+                                        t=0,...,k−1           k
+
+                                                       21
+                                    S EBBOUH G OWER D EFAZIO
+
+
+
+
+Proof
+                             η
+    • If C 6= 0. Let ηk = k1/2+ . From Remark 7, we have that the stepsizes verify Condition 1 with
+      C in place of σ . Moreover, k 11+ ∼ k −1/2+ . Thus, from Theorem 16:
+                      2
+                                    P
+                                         k2
+                                                                               
+                                                                        1
+                                     min        k∇f (xk )k2 = o                     .
+                                  t=0,...,k−1                         k 1/2−
+
+    • If C = 0. Let ηk = η. From Remark 7, the stepsizes verify Condition 1 with C in place of σ 2 .
+      Thus, from Theorem 16:
+                                                              
+                                                      2        1
+                                    min k∇f (xk )k = o            .
+                                  t=0,...,k−1                  k
+
+
+
+
+B. Proofs for Section 1
+B.1. Proof of Lemma 2
+Proof Since for all v ∼ D, fv is convex and Lv smooth, we have from (Nesterov, 2013, Equation
+2.1.7) that
+
+             k∇fv (x) − ∇fv (x∗ )k2 ≤ 2Lv (fv (x) − fv (x∗ ) − h∇fv (x∗ ), x − x∗ i)
+                                     Asm. 1
+                                       ≤ 2L (fv (x) − fv (x∗ ) − h∇fv (x∗ ), x − x∗ i)
+
+Hence,
+                          h                      i
+                      Ev∼D k∇fv (x) − ∇fv (x∗ )k2 ≤ 2L (f (x) − f (x∗ )) .
+
+Therefore,
+             h          i          h                      i          h       i
+         Ev∼D k∇fv (x)k2 ≤ 2Ev∼D k∇fv (x) − ∇fv (x∗ )k2 + 2Ev∼D k∇fv (x∗ )k2
+                                                        h            i
+                          ≤ 4L (f (x) − f (x∗ )) + 2Ev∼D k∇fv (x∗ )k2 .
+
+
+
+
+B.2. Proof of Proposition 5
+Proof Consider the iterate-averaging method
+
+                             zk+1 = zk − ηk ∇fvk (xk ),                                        (16)
+                                      λk+1              1
+                             xk+1 =          xk +           zk+1 ,                             (17)
+                                    λk+1 + 1       λk+1 + 1
+
+                                                    22
+                             Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+and let
+                                         ηk                          λk
+                            αk =                      and βk =             .                      (18)
+                                      λk+1 + 1                    λk+1 + 1
+
+Substituting (16) into (17) gives
+
+                                  λk+1           1
+                      xk+1 =             xk +          (zk − ηk ∇fvk (xk )) .                     (19)
+                                λk+1 + 1      λk+1 + 1
+
+Now using (17) at the previous iteration we have that that
+                                                    
+                                           λk
+                 zk = (λk + 1) xk −             xk−1 = (λk + 1)xk − λk xk−1 .
+                                         λk + 1
+
+Substituting the above into (19) gives
+
+                      λk+1           1
+            xk+1 =           xk +            ((λk + 1)xk − λk xk−1 − ηk ∇fvk (xk ))
+                    λk+1 + 1      λk+1 + 1
+                            ηk                     λk
+                  = xk −          ∇fvk (xk ) +           (xk − xk−1 ) .
+                         λk+1 + 1               λk+1 + 1
+
+Consequently, (18) gives the desired expression.
+
+
+
+C. Proofs for Section 2
+C.1. Proof of Theorem 8
+Proof Consider the setting of Theorem 8. Expanding the squares we have that
+
+           kxk+1 − x∗ k2 = kxk − x∗ k2 − 2ηk h∇fvk (xk ), xk − x∗ i + ηk2 k∇fvk (xk )k2 .
+
+                                                def
+Then taking conditional expectation Ek [·] = E [· | xk ] gives
+      h              i                                                          h              i
+  Ek kxk+1 − x∗ k2        =      kxk − x∗ k2 − 2ηk h∇f (xk ), xk − x∗ i + ηk2 Ek k∇fvk (xk )k2
+                          (2)+(5)
+                            ≤       kxk − x∗ k2 − 2ηk (1 − 2ηk L) (f (xk ) − f∗ ) + 2ηk2 σ 2 .
+            1
+Since ηk ≤ 4L , we have that 1 − 2ηk L ≥ 21 . Hence, rearranging, we have
+                   h             i
+                 Ek kxk+1 − x∗ k2 + ηk (f (xk ) − f∗ ) ≤ kxk − x∗ k2 + 2ηk2 σ 2 .                 (20)
+
+    From (7) we have that wk = Pk2ηk            . Since w0 = 2 ηη00 = 2 we have that x̄1 = 2x0 − x̄0 =
+                                       j=0 ηj
+2x0 − x0 = x0 . Hence, it holds that
+
+             f (x̄1 ) − f∗ = f (x0 ) − f∗ = w0 (f (x0 ) − f∗ ) + (1 − w0 ) (f (x̄0 ) − f∗ ) .     (21)
+
+
+                                                      23
+                                       S EBBOUH G OWER D EFAZIO
+
+
+
+
+    Now for k ∈ N∗ we have that following equivalence
+
+                                                          k
+                                                          X                      k−1
+                                                                                 X
+                    wk ∈ [0, 1]      ⇐⇒       2ηk ≤             ηj   ⇐⇒   ηk ≤         ηj .
+                                                          j=0                    j=0
+
+
+    The right hand side of the equivalence holds because (ηk )k is a decreasing sequence. Hence, by
+Jensen’s inequality, we have ∀k ∈ N∗ ,
+
+                     f (x̄k+1 ) − f∗ ≤ wk (f (xk ) − f∗ ) + (1 − wk ) (f (x̄k ) − f∗ ) .
+
+    Together with (21), this shows that the last inequality holds for all k ∈ N. Thus,
+                                                                      
+                                  ηk                            1
+             ηk (f (xk ) − f∗ ) ≥    (f (x̄k+1 ) − f∗ ) − ηk       − 1 (f (x̄k ) − f∗ ) .
+                                  wk                           wk
+
+Replacing this expression in (20) gives:
+                      h               i η
+                                          k
+                  Ek kxk+1 − x∗ k2 +        (f (x̄k+1 ) − f∗ )
+                                         wk
+                                                     
+                                              1
+                        ≤ kxk − x∗ k2 + ηk        − 1 (f (x̄k ) − f∗ ) + 2ηk2 σ 2 .
+                                              wk
+
+Hence substituting in the definition of wk from (7) gives
+
+                     h             i 1 kX
+                   Ek kxk+1 − x∗ k2 +       ηj (f (x̄k+1 ) − f∗ )
+                                      2
+                                        j=0
+                                                      
+                                          k−1
+                                      1   X
+                       ≤ kxk − x∗ k2 +        ηj − ηk  (f (x̄k ) − f∗ ) + 2ηk2 σ 2 .
+                                      2
+                                                    j=0
+
+
+Thus re-arranging
+
+                                 i 1Xk
+                  h
+                               2                               ηk
+                Ek kxk+1 − x∗ k +      ηj (f (x̄k+1 ) − f∗ ) +    (f (x̄k ) − f∗ )
+                                   2                           2
+                                             j=0
+                                             k−1
+                                      2 1X
+                         ≤ kxk − x∗ k +    ηj (f (x̄k ) − f∗ ) + 2ηk2 σ 2 ,
+                                        2
+                                             j=0
+
+which, by Lemma 6, has the three following consequences:
+                                                          
+                                  Xk
+            (kxk − x∗ k2 )k and      ηj (f (x̄k+1 ) − f∗ ) converge almost surely,
+                                       j=0
+                                                                     k
+                   X
+             and         ηk (f (x̄k ) − f∗ ) < ∞.
+                     k
+
+
+                                                          24
+                              Almost sure SGD AND SHB CONVERGENCE
+
+
+
+                           ηk   Pk−1
+Hence, we have that limk Pk−1
+                              η   j=0 ηj (f (x̄k ) − f∗ ) = limk ηk (f (x̄k ) − f∗ ) = 0. But since
+                          j=0 j
+               P       ηk                                   Pk−1
+we assumed that k Pk−1     diverges, this implies that limk j=0   ηj (f (x̄k+1 ) − f∗ ) = 0, that is
+                         j=0 ηj
+
+                                                                  !
+                                                          1
+                                   f (x̄k ) − f∗ = o   Pk−1
+                                                         j=0 ηj
+
+
+
+
+C.2. Proofs of Theorems 10 and 11
+The results of Theorems 10 and 11 can be derived as corollaries of the following theorem.
+Theorem 19 Let (ηkmax ) and (γk ) be strictly positive, decreasing sequences with γk ≤ 3c
+                                                                                        2 for all
+                2
+k ∈ N and c ≥ 3 . Then the iterates of (SGD-ALS) and the iterates of (SGD-PS) satisfy
+          h               i
+2ak+1 Ek kxk+1 − x∗ k2 + ηkmax γk (f (xk ) − f∗ ) ≤ 2ak kxk − x∗ k2                            (22)
+                                                               max
+                                                                                      2γ 2 η max σ̄ 2
+                                                                            
+                                                                 ηk L
+                                                  + 4γk ηkmax            −1     σ̄ 2 + k k            ,
+                                                                2(1 − c)      +              c
+           def
+                                     n max      o                 def
+                                        ηk L
+where σ̄ 2 = f∗ − Ev [fv∗ ], ak = max 2(1−c) , 1 and where (b)+ = max(b, 0) for all b ∈ R.
+
+    Before proving Theorem 19, we need the following lemma:
+Lemma 20 (Vaswani et al. (2019b), Loizou et al. (2020)) Let g be an Lg -smooth function, αmax >
+0 and c ∈ [0, 1]. If α ∼ SALSc,αmax (g, x) or SPc,αmax (g, x), then
+                                                                        g(x) − g ∗
+                                   
+                     2(1 − c)
+            min               , αmax ≤ α ≤ αmax and αk∇g(x)k2 ≤                    .       (23)
+                        Lg                                             ck∇g(x)k2
+Proof [Proof of Theorem 19] Let us now prove Theorem 19.
+
+  kxk+1 − x∗ k2 = kxk − x∗ k2 − 2ηk γk h∇fvk (xk ), xk − x∗ i + ηk2 γk2 k∇fvk (xk )k2
+                (2)
+                ≤ kxk − x∗ k2 − 2ηk γk fvk (xk ) − fv∗k + ηk2 γk2 k∇fvk (xk )k2
+                                                       
+
+                  (23)                                              ηk γk2
+                  ≤ kxk − x∗ k2 − 2ηk γk (fvk (xk ) − fvk (x∗ )) +         fvk (xk ) − fv∗k
+                                                                                            
+                                                                      c
+                              2
+                                              γk 
+                                                     fvk (xk ) − fvk + 2ηk γk fvk (x∗ ) − fv∗k .
+                                                                   ∗
+                                                                                             
+                  = kxk − x∗ k − 2ηk γk 1 −
+                                               2c
+Rearranging, we have
+                γk 
+                       fvk (xk ) − fv∗k ≤ kxk − x∗ k2 − kxk+1 − x∗ k2 + 2ηk γk fvk (x∗ ) − fv∗k .
+                                                                                              
+  2ηk γk 1 −
+                 2c
+                      n                o
+             def
+Define ηkmin = min 2(1−c)  L   , η max . Then,
+                                   k
+
+              γk                   (23)
+ 2ηkmin γk 1 −      fvk (xk ) − fv∗k ≤ kxk − x∗ k2 − kxk+1 − x∗ k2 + 2ηk γk fvk (x∗ ) − fv∗k .
+                                                                                            
+               2c
+
+                                                 25
+                                             S EBBOUH G OWER D EFAZIO
+
+
+
+
+Hence,
+              γk 
+ 2ηkmin γk 1 −      (fvk (xk ) − fvk (x∗ )) ≤ kxk − x∗ k2 − kxk+1 − x∗ k2                       (24)
+               2c                                           γk min
+                                                                     
+                                                                          fvk (x∗ ) − fv∗k
+                                                                                           
+                                            + 2γk ηk − 1 −        η
+                                                              2c k
+                                            ≤ kxk − x∗ k2 − kxk+1 − x∗ k2
+                                                              γk  min 
+                                            + 2γk ηkmax − 1 −                fvk (x∗ ) − fv∗k .
+                                                                                             
+                                                                    ηk
+                                                                2c
+Notice that
+                                         ηkmax                  ηkmax L
+                                                                         
+                                               = max                    ,1 .
+                                         ηkmin                 2(1 − c)
+                                    max 
+                                     ηk
+Since (ηkmax )k is decreasing,       ηkmin
+                                                  is decreasing as well. Hence, multiplying both sides of (24)
+                                              k
+     ηkmax
+by   ηkmin
+             ,
+
+               γk                            η max             η max
+  2ηkmax γk 1 −      (fvk (xk ) − fvk (x∗ )) ≤ kmin kxk − x∗ k2 − k+1
+                                                                   min
+                                                                       kxk+1 − x∗ k2
+                2c                              ηk               ηk+1
+                                                        max            
+                                                    max ηk           γk
+                                                                          fvk (x∗ ) − fv∗k .
+                                                                                          
+                                             + 2γk ηk     min
+                                                               −1+
+                                                         ηk          2c
+
+Hence, taking the expectation,
+                          γk                    η max             η max h                        i
+             2ηkmax γk 1 −      (f (xk ) − f∗ ) ≤ kmin kxk − x∗ k2 − k+1
+                                                                      min
+                                                                          E k   kx   k+1 − x ∗ k 2
+                           2c                      ηk               ηk+1
+                                                           max            
+                                                       max ηk           γk
+                                                + 2γk ηk          −1+         σ̄ 2 .
+                                                            ηkmin       2c
+
+                 def
+where σ̄ 2 = f∗ − Ev [fv∗ ]. Using the fact that 1 − γ2ck ≥ 14 and rearranging, we have
+   max
+2ηk+1     h
+                          2
+                            i                                2ηkmax
+  min
+       Ek   kx k+1 − x ∗ k    + η max
+                                  k   γ k (f (x k ) − f∗ ) ≤        kxk − x∗ k2
+ ηk+1                                                         ηkmin
+                                                                       max
+                                                                                             2γ 2 η max σ̄ 2
+                                                                                    
+                                                                  max    ηk L
+                                                           + 4γk ηk              −1    σ̄ 2 + k k            ,
+                                                                        2(1 − c)     +              c
+
+where for all a ∈ R, (a)+ = max(a, 0).
+
+
+C.2.1. P ROOF OF T HEOREM 10
+Proof Using the inequality (22) from Theorem 19, the proof of Theorem 10 procedes exactly as the
+proof of Theorem 8, with the conditions on the stepsizes of Theorem 10 instead of Condition 1. See
+Section 2 and C.
+
+
+                                                           26
+                               Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+C.2.2. P ROOF OF T HEOREM 11
+Proof Taking the expectation in (22), rearranging and summing between t = 0, . . . , k − 1, we have,
+
+    k−1
+    X                                                           h              i
+          ηtmax γt E [f (xt ) − f∗ ] ≤ 2a0 kx0 − x∗ k2 − 2ak+1 E kxk+1 − x∗ k2
+    t=0
+                                         k−1                                                  Pk−1  2 max σ̄ 2
+                                                               ηtmax L
+                                                                           
+                                         X                                                2    t=0 γt ηt
+                                 +4            γt ηtmax                −1         σ̄ +2
+                                                                                                                 .
+                                                              2(1 − c)        +                      c
+                                         t=0
+
+              Pk−1    max γ and using Jensen’s inequality gives the desired result.
+Dividing by      j=0 ηt    t
+
+
+
+
+D. Proofs for Section 3
+D.1. Proof of Theorem 13
+In the remainder of this section and the forthcoming lemmas we consider the iterates of (SHB) and
+the setting of Theorem 13, that is
+                                          Pk−1
+                                               t=0 ηt                 ηk                λk
+                λ0 = 0, λk = λk =                       , αk =              and βk =          ,                      (25)
+                                               4ηk                 1 + λk+1          1 + λk+1
+
+where
+                                                X                               X
+                          0 < ηk ≤ 1/4L,             ηk2 σ 2 < ∞ and                  ηk = ∞.                        (26)
+                                                 k                                k
+
+Note that from (SHB-IMA), we have
+
+                                         zk = xk + λk (xk − xk−1 ) .                                                 (27)
+
+We also assume that Assumption 1 holds throughout.
+   To make the proof more readable, we first state and prove the two following lemmas.
+
+               P
+Lemma 21           k ηk (f (xk ) − f∗ ) < +∞ almost surely.
+
+                                         2
+                                              < +∞, and thus, limk λk+1 kxk+1 − xk k2 = 0 almost surely.
+               P
+Lemma 22         k λk+1 kxk − xk−1 k
+
+
+   We first prove Lemma 21.
+Proof [Proof of Lemma 21] From (43), we have
+                                                                                
+                      h
+                                     2
+                                         i
+                                                               2           1
+                   Ek kzk+1 − x∗ k           ≤ kzk − x∗ k − 2ηk              + λk (f (xk ) − f∗ )
+                                                                           2
+                                             + 2ηk λk (f (xk−1 ) − f∗ ) + 2ηk2 σ 2 .                                 (28)
+
+
+                                                              27
+                                        S EBBOUH G OWER D EFAZIO
+
+
+
+
+    Using (14) we have that
+                                                                              !
+                                                              2ηk + k−1
+                                                                  P
+                                      1                               t=0  ηt
+                          2ηk           + λk       = 2ηk
+                                      2                            4ηk
+                                                                    Pk−1 !
+                                                               ηk          ηt
+                                                   = 2ηk          + t=0
+                                                              4ηk      4ηk
+                                                                  Pk−1          !
+                                                              1         η   η
+                                                                          t k+1
+                                                   = 2ηk        + t=0
+                                                              4    4ηk+1 ηk
+                                                       ηk
+                                                   =      + 2ηk+1 λk+1 .                        (29)
+                                                       2
+Using (29) in (28) gives
+                   h                                         i
+                Ek kzk+1 − x∗ k2 + 2ηk+1 λk+1 (f (xk ) − f∗ ) + ηk (f (xk ) − f∗ )
+                           ≤ kzk − x∗ k2 + 2ηk λk (f (xk−1 ) − f∗ ) + 2ηk2 σ 2 .
+
+    Hence, applying Lemma 6 with
+
+Vk = kzk − x∗ k2 + 2ηk λk (f (xk−1 ) − f∗ ) , γk = 0, Uk+1 = ηk (f (xk ) − f∗ ) and Zk = 2ηk2 σ 2 ,
+
+we have by (26) that          X
+                                  ηk (f (xk ) − f∗ ) < +∞ almost surely.
+                              k
+
+
+
+   We now turn to prove Lemma 22.
+Proof [Proof of Lemma 22] We have,
+    h              i
+                     (SHB)
+  Ek kxk+1 − xk k2 = βk2 kxk − xk−1 k2 + αk2 k∇fvk (xk )k2 − 2αk βk h∇f (xk ), xk − xk−1 i.
+
+    Multiplying by (1 + λk+1 )2 and using (25) we have that βk = 1+λλk
+                                                                      k+1
+                                                                          and αk = 1+ληkk+1 and
+thus
+               h              i
+(1 + λk+1 )2 Ek kxk+1 − xk k2 = λ2k kxk − xk−1 k2 + ηk2 k∇fvk (xk )k2 − 2ηk λk h∇f (xk ), xk − xk−1 i.
+
+Thus using the convexity of f and (5), which follows from Lemma 2, we have
+                h              i
+(1 + λk+1 )2 Ek kxk+1 − xk k2 ≤ λ2k kxk − xk−1 k2 + 4ηk2 L (f (xk ) − f∗ ) + 2ηk λk (f (xk−1 ) − f (xk )) + 2ηk2 σ 2
+                                      = λ2k kxk − xk−1 k2 − 2ηk (λk − 2ηk L) (f (xk ) − f∗ )
+                                        + 2ηk λk (f (xk−1 ) − f∗ ) + 2ηk2 σ 2 .
+
+    Re-arranging the above gives,
+                               h            i
+               (1 + λk+1 )2 Ek kxk+1 − xk k2 + 2ηk (λk − 2ηk L) (f (xk ) − f∗ )
+                           ≤ λ2k kxk − xk−1 k2 + 2ηk λk (f (xk−1 ) − f∗ ) + 2ηk2 σ 2 .          (30)
+
+
+                                                         28
+                                       Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+Combining both (30) and (28) we have that
+                                         
+   h
+                 2
+                   i        1                                               h              i
+ Ek kzk+1 − x∗ k + 4ηk        − 2ηk L + λk (f (xk ) − f∗ ) + (1 + λk+1 )2 Ek kxk+1 − xk k2
+                            2
+               ≤ kzk − x∗ k2 + 4ηk λk (f (xk−1 ) − f∗ ) + λ2k kxk − xk−1 k2 + 4ηk2 σ 2 .
+                   1
+Hence, since ηk ≤ 8L ,
+                                    
+         h              i      1                                       h              i
+                      2
+       Ek kzk+1 − x∗ k + 4ηk     + λk (f (xk ) − f∗ ) + (1 + λk+1 )2 Ek kxk+1 − xk k2
+                               4
+                ≤ kzk − x∗ k2 + 4ηk λk (f (xk−1 ) − f∗ ) + λ2k kxk − xk−1 k2 + 4ηk2 σ 2 .
+
+Using (25), we have ηk 41 + λk = ηk+1 λk+1 . Hence,
+                              
+
+
+             kzk+1 − x∗ k2 + 4ηk+1 λk+1 (f (xk ) − f∗ ) + (1 + λk+1 )2 kxk+1 − xk k2
+                            ≤ kzk − x∗ k2 + 4ηk λk (f (xk−1 ) − f∗ ) + λ2k kxk − xk−1 k2 + 4ηk2 σ 2 .
+                          def
+Hence, noting Vk = kzk − x∗ k2 + 4ηk λk (f (xk−1 ) − f∗ ) + λ2k kxk − xk−1 k2 , we have
+
+                                Ek [Vk+1 ] + (2λk+1 + 1) kxk − xk−1 k2 ≤ Vk + 4ηk2 σ 2 .
+                        2 2
+                 P
+Hence, since         k ηk σ < +∞, applying Lemma 6, we have
+
+X
+     λk+1 kxk − xk−1 k2 < +∞                    almost surely, thus   lim λk+1 kxk+1 − xk k2 = 0 almost surely.
+                                                                       k
+ k
+
+
+
+
+   We can now prove Theorem 13.
+Proof [Proof of Theorem 13] This proof aims at proving that, almost surely
+
+     1. xk     →      x∗ for some x∗ ∈ X∗ .
+             k→+∞
+                                              
+     2. f (xk ) − f∗ = o             P 1
+                                      k−1       .
+                                      t=0 ηt
+
+
+In our road to prove the first point, we will prove the second point as a byproduct.
+    We will now prove that limk kzk − x∗ k2 exists almost surely.
+                   (27)
+kzk − x∗ k2        =        kxk − x∗ + λk (xk − xk−1 )k2
+                   =        λ2k kxk − xk−1 k2 + 2λk hxk − x∗ , xk − xk−1 i + kxk − x∗ k2
+                                                                                        
+                             λ2k + λk kxk − xk−1 k2 + λk kxk − x∗ k2 − kxk−1 − x∗ k2 + kxk − x∗ k2 .
+                                      
+                   =
+
+Define
+                                                                  
+                                   def
+                                δk = λk kxk − x∗ k2 − kxk−1 − x∗ k2 + kxk − x∗ k2 ,                       (31)
+
+
+                                                              29
+                                      S EBBOUH G OWER D EFAZIO
+
+
+
+
+so that
+
+                             kzk − x∗ k2 = λ2k + λk kxk − xk−1 k2 + δk .
+                                                   
+
+
+We will first prove that limk λ2k + λk kxk − xk−1 k2 exists almost surely, then that limk δk exists
+                                       
+
+almost surely.
+     First, we have from Lemma 22 that (λk kxk − xk−1 k2 )k converges to zero almost surely. Hence,
+it remains to show that limk λ2k kxk − xk−1 k2 exists almost surely. From (30), we have that
+                           h             i
+                  λ2k+1 Ek kxk+1 − xk k2 + 2ηk (λk − 2ηk L) (f (xk ) − f∗ )
+                             ≤ λ2k kxk − xk−1 k2 + 2ηk λk (f (xk−1 ) − f∗ ) + 2ηk2 σ 2 .
+                                    1
+                                      , we have that 2ηk+1 λk+1 = 2ηk 14 + λk ≤ 2ηk        1
+                                                                                                           
+Using (25) and the fact that ηk ≤ 8L                                                       2 − 2ηk L + λk       .
+Hence, 2ηk (λk − 2ηl L) ≥ 2ηk+1 λk+1 − ηk . Therefore, denoting
+                             def                            def
+                        dk = kxk − xk−1 k2 and θk = 2ηk (f (xk−1 ) − f∗ ) ,
+
+we have
+
+              Ek λ2k+1 dk + λk+1 θk+1 ≤ λ2k dk + λk θk + ηk (f (xk ) − f∗ ) + 2ηk2 σ 2 .
+                                    
+
+
+   From Lemma 21, we have k ηk (f (xk ) − f∗ ) < +∞. Moreover, k ηk2 σ 2 < +∞. Hence,
+                            P                                    P
+                            λ2k dk + λk θk exists almost surely.
+we have by Lemma 6 that limkP                               P
+P Moreover, by Lemma 22, k λk dk < +∞, and we have k θk < +∞ almost surely. Hence,
+  k λk dk + θk < +∞ a.s. Rewriting
+
+                                                   1
+                                                      λ2k dk + λk θk ,
+                                                                    
+                                   λk dk + θk =
+                                                   λk
+
+we have, since limk λ2k dk + λk θk exists almost surely and
+                        X 1                1
+                                   0<ηk ≤ 4L       X      ηk         Condition 1
+                                      =        4        Pk−1             =       ∞
+                              λk                            t=0 ηt
+                         k                         k
+
+that
+
+                                          lim λ2k dk + λk θk = 0,
+                                           k
+
+which means that both limk λ2k dk = 0 and limk λk θk = 0 a.s. Writing out limk λk θk = 0 explicitly,
+we have
+                                                       !
+                                                 1
+                          f (xk ) − f∗ = o Pk−1          almost surely
+                                                t=0 ηt
+
+
+This proves the second point of Theorem 13 and that limk λ2k dk = 0 almost surely. To prove the first
+point of Theorem 13 it remains to show that limk δk exists almost surely.
+
+                                                       30
+                              Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+   Note uk = kxk − x∗ k2 . We have
+
+        (SHB)
+uk+1     =       kxk − x∗ + βk (xk − xk−1 )k2 + αk2 k∇fvk (xk )k2 − 2αk βk h∇fvk (xk ), xk − xk−1 i
+                                                                                               (32)
+                 −2αk h∇fvk (xk ), xk − x∗ i.
+
+Taking expectation conditioned on xk , and using the convexity of f and Lemma 2 we have that
+
+        Ek [uk+1 ] ≤ kxk − x∗ + βk (xk − xk−1 )k2 − 2αk (1 + βk − 2αk L) (f (xk ) − f∗ )
+                    + 2αk βk (f (xk−1 ) − f∗ ) + 2αk2 σ 2 .                                   (33)
+
+Furthermore note that
+
+              kxk − x∗ + βk (xk − xk−1 )k2 = uk + βk2 dk + 2βk hxk − x∗ , xk − xk−1 i
+                                           = uk + βk2 + βk dk + βk (uk − uk−1 ) .
+                                                            
+                                                                                              (34)
+
+   Hence, using the fact that 0 ≤ βk ≤ 1 and inserting (34) into (33) gives
+
+         Ek [uk+1 ] ≤ uk + 2dk + βk (uk − uk−1 ) − 2αk (1 + βk − 2αk L) (f (xk ) − f∗ )
+                     + 2αk βk (f (xk−1 ) − f∗ ) + 2αk2 σ 2 .
+
+Multiplying the above by (1 + λk+1 ), rearranging and using (6) results in
+
+(1 + λk+1 )Ek [uk+1 − uk ] ≤ 2 (1 + λk+1 ) dk + λk (uk − uk−1 ) − 2ηk (1 + βk − 2αk L) (f (xk ) − f∗ )
+                                                                 ηk2 σ 2
+                             + 2ηk βk (f (xk−1 ) − f∗ ) + 2              .                    (35)
+                                                               1 + λk+1
+
+Using the definition of δk+1 given in (31) we have that
+
+                      δk+1 − δk = (1 + λk+1 ) (uk+1 − uk ) − λk (uk − uk−1 ) ,
+
+which we use to re-write (35) as we have
+
+                 ηk                                                             η2σ2
+     δk+1 +          (1 + βk − 2αk L) θk+1 ≤ δk + 2 (1 + λk+1 ) dk + βk θk + 2 k       .
+                ηk+1                                                          1 + λk+1
+
+Hence, since ηk+1 ≤ ηk ,
+
+                                                                                 ηk2
+    Ek [δk+1 + (1 + βk − 2αk L) θk+1 ] ≤ δk + βk θk + 2 (1 + λk+1 ) dk + 2             σ2.
+                                                                              1 + λk+1
+
+And since,
+
+                                   λk      2ηk L        1
+       1 + βk − 2αk L = 1 +             −         =          (1 + λk+1 + λk − 2ηk L)
+                                1 + λk+1 1 + λk+1   1 + λk+1
+                                                      λk+1        λk+1
+                                                  ≥          ≥           = βk+1 ,
+                                                    1 + λk+1    1 + λk+2
+
+                                                    31
+                                        S EBBOUH G OWER D EFAZIO
+
+
+
+
+we have
+
+                                                                                      2ηk2
+             Ek [δk+1 + βk+1 θk+1 ] ≤ (δk + βk θk ) + 2 (1 + λk+1 ) dk +                    σ2.
+                                                                                   1 + λk+1
+                                P                                              P ηk2 σ2
+Since by Lemma 22 we have that k 2 (1 + λk+1 ) dk < +∞ almost surely, and k 1+λ        k+1
+                                                                                           < +∞,
+we have by Lemma 6 that limk δk +βk θk exists almost surely And since limk βk θk = 0 almost surely,
+we deduce that limk δk exists almost surely.
+    Thus we have now shown that limk kzk − x∗ k2 exists almost surely. Therefore, since xk − x∗ =
+zk − x∗ − λk (xk − xk−1 ) and
+
+              | kxk − x∗ k − kzk − x∗ k | ≤ λk kxk − xk−1 k             →     0   almost surely,
+                                                                       k→+∞
+
+we have that limk kxk − x∗ k − kzk − x∗ k exists almost surely, and so does limk kxk − x∗ k.
+    We also have that both kzk − x∗ k and λk kxk − xk−1 k are bounded almost surely, thus kxk − x∗ k
+is bounded almost surely Hence, (xk )k is bounded almost surely, thus almost surely sequentially
+compact.
+    Let (xnk )k be a subsequence of (xn )n which converges to some x ∈ Rd a.s. Since f (xn ) →n
+f∗ almost surely for all x∗ ∈ argmin f , we have x ∈ argmin f a.s. Finally, applying Lemma
+2.39 in Bauschke and Combettes (2011) (restricted to our finite dimensional setting, where weak
+convergence and strong convergence are equivalent), there exists x∗ ∈ argmin f such that
+
+                                      xk    →     x∗ ,        almost surely
+                                           k→+∞
+
+
+    This proves the first point of Theorem 13.
+
+
+
+E. Proofs for Section 4
+E.1. Proof of Theorem 16
+                                                    1
+Proof Consider the setting of Theorem 16. Let ηk ≤ LB for all k ∈ N. From (Khaled and Richtárik,
+2020, Proof of Lemma 2), we have
+
+                                                                                η 2 LC
+            Ek [f (xk+1 ) − f∗ ] + ηk k∇f (xk )k2 ≤ 1 + ηk2 AL (f (xk ) − f∗ ) + k
+                                                              
+                                                                                       .
+                                                                                    2
+Define for all k ∈ N,
+
+                2ηk
+          wk = Pk             ,   g0 = k∇f (x0 )k2 ,      gk+1 = (1 − wk )gk + wk k∇f (xk )k2 .
+                    j=0 ηj
+
+Note that since (ηk )k is decreasing, wk ∈ [0, 1]. Plugging this back in the previous inequality gives
+                         Pk                                                            Pk−1
+                          j=0 ηj         ηk                                               j=0 ηj          ηk2 LC
+                                   gk+1 + gk ≤ 1 + ηk2 AL (f (xk ) − f∗ ) +
+                                                         
+Ek [f (xk+1 ) − f∗ ] +                                                                             gk +          .
+                              2          2                                                 2                  2
+
+                                                         32
+                             Almost sure SGD AND SHB CONVERGENCE
+
+
+
+        P    2
+                                          Q∞                2
+Since     k ηk < ∞, we also have that             k=0 (1 + ηk AL) < ∞. Thus, by Lemma 6, we have
+                                       
+                           k−1
+                           X                                                                X
+(f (xk ) − f∗ )k and           ηj  gk  converge almost surely, and                          ηk gk < ∞ almost surely
+                           j=0                                                              k
+                                              k
+
+                               ηk              Pk−1
+    Hence, we have that limk Pk−1                  j=0 ηj gk = limk ηk gk = 0. But since we assumed that
+                                     j=0 ηj
+P     ηk                                     Pk−1
+  k Pk−1 ηj diverges, this implies that limk  j=0 ηj gk = 0, that is, we have that,
+        j=0
+
+                                                                   !
+                                                          1
+                                   gk = o          Pk−1                 almost surely
+                                                       j=0 ηj
+
+
+But since for all k ∈ N, gk+1 = (1 − wk )gk + wk k∇f (xk )k2 , gk is a weighted average of all
+past k∇f (xj )k2 , j = 0, . . . , k − 1. Hence, there exists a sequence (w̃j )j in [0, 1] which verifies
+Pk−1                                Pk−1                 2                                       2
+  j=0 w̃j = 1 such that gk =           j=0 w̃j k∇f (xj )k . Thus, gk ≥ mint=0,...,k−1 k∇f (xt )k ≥ 0.
+Hence we have almost surely
+                                                                                        !
+                                                                2              1
+                                    min        k∇f (xt )k = o               Pk−1
+                                                                              j=0 ηj
+                                 t=0,...,k−1
+
+
+
+
+F. Extension of our results to the nonsmooth setting
+In this section, we will consider the stochastic subgradient descent method under the bounded
+gradients assumption, as in Nemirovski et al. (2009) . Under this assumption, we show that we can
+derive the same convergence rates as in Theorem 8.
+
+Proposition 23 Consider the following method: at each iteration k, let gk be such that Ek [gk ] =
+g(xk ) for some g(xk ) ∈ ∂f (xk ), and update
+
+                                               xk+1 = xk − ηk gk ,
+                                                                            h      i
+where we assume that f is convex and that there exists G such that ∀k ∈ N, E kgk k2 ≤ G.
+    Choose step sizes (ηk )k which verify Condition 1 (with G in place of σ 2 ). Define for all k ∈ N
+                                                      
+                        2ηk                               x̄0 = x0
+                  wk = Pk               and                                                                        (36)
+                                                          x̄k+1 = wk xk + (1 − wk )x̄k .
+                            j=0 ηj
+                                                               
+Then, we have a.s. that f (x̄k ) − f∗ = o             P 1
+                                                       k−1          .
+                                                       t=0 ηt
+
+
+
+                                                              33
+                                     S EBBOUH G OWER D EFAZIO
+
+
+
+
+Proof The proof procedes
+                 h      i exactly as in the smooth case, but with replacing the bound (5) by the
+                      2
+bound ∀k ∈ N, E kgk k ≤ G. Indeed, expanding the squares we have that
+
+                   kxk+1 − x∗ k2 = kxk − x∗ k2 − 2ηk hgk , xk − x∗ i + ηk2 kgk k2 .
+                                                 def
+Then taking conditional expectation Ek [·] = E [· | xk ] gives, since Ek [gk ] = g(xk ) for some
+g(xk ) ∈ ∂f (xk ), we have
+             h             i                                                   h     i
+          Ek kxk+1 − x∗ k2 = kxk − x∗ k2 − 2ηk hg(xk ), xk − x∗ i + ηk2 Ek kgk k2
+                                 ≤ kxk − x∗ k2 − 2ηk (f (xk ) − f∗ ) + ηk2 G,
+
+  h we iused in the last inequality the fact that g(xk ) is a subgradient of f at xk , and that
+where
+Ek kgk k2 ≤ G. Hence, rearranging, we have
+                 h               i
+              Ek kxk+1 − x∗ k2 + 2ηk (f (xk ) − f∗ ) ≤ kxk − x∗ k2 + ηk2 G.                (37)
+
+   From (36) we have that wk = Pk2ηk            . Since w0 = 2 ηη00 = 2 we have that x̄1 = 2x0 − x̄0 =
+                                       j=0 ηj
+2x0 − x0 = x0 . Hence, it holds that
+             f (x̄1 ) − f∗ = f (x0 ) − f∗ = w0 (f (x0 ) − f∗ ) + (1 − w0 ) (f (x̄0 ) − f∗ ) .    (38)
+   Now for k ∈ N∗ we have that following equivalence
+                                                       k
+                                                       X                           k−1
+                                                                                   X
+                   wk ∈ [0, 1]     ⇐⇒       2ηk ≤            ηj       ⇐⇒    ηk ≤         ηj .
+                                                       j=0                         j=0
+
+    The right hand side of the equivalence holds because (ηk )k is a decreasing sequence. Hence, by
+Jensen’s inequality, we have ∀k ∈ N∗ ,
+                   f (x̄k+1 ) − f∗ ≤ wk (f (xk ) − f∗ ) + (1 − wk ) (f (x̄k ) − f∗ ) .
+   Together with (38), this shows that the last inequality holds for all k ∈ N. Thus,
+                                                                     
+                                 ηk                            1
+            ηk (f (xk ) − f∗ ) ≥    (f (x̄k+1 ) − f∗ ) − ηk       − 1 (f (x̄k ) − f∗ ) .
+                                 wk                           wk
+Replacing this expression in (37) gives:
+                       h               i η
+                                           k
+                   Ek kxk+1 − x∗ k2 +        (f (x̄k+1 ) − f∗ )
+                                         wk
+                                                      
+                                       2       1
+                         ≤ kxk − x∗ k + ηk         − 1 (f (x̄k ) − f∗ ) + ηk2 G.
+                                               wk
+Hence substituting in the definition of wk from (36) gives
+                     h             i Xk
+                   Ek kxk+1 − x∗ k2 +   ηj (f (x̄k+1 ) − f∗ )
+                                            j=0
+                                                                 
+                                                 k−1
+                                                 X
+                         ≤ kxk − x∗ k2 +              ηj − ηk  (f (x̄k ) − f∗ ) + ηk2 G.
+                                                 j=0
+
+
+
+                                                       34
+                              Almost sure SGD AND SHB CONVERGENCE
+
+
+
+
+Thus re-arranging
+
+                     h                k
+                                    i X
+                                  2
+                   Ek kxk+1 − x∗ k +    ηj (f (x̄k+1 ) − f∗ ) + ηk (f (x̄k ) − f∗ )
+                                            j=0
+                                            k−1
+                                            X
+                                       2
+                         ≤ kxk − x∗ k +           ηj (f (x̄k ) − f∗ ) + ηk2 G,
+                                            j=0
+
+which, by Lemma 6, has the three following consequences:
+                                                          
+                                  Xk
+            (kxk − x∗ k2 )k and      ηj (f (x̄k+1 ) − f∗ ) converge almost surely,
+                                      j=0
+                                                                      k
+                   X
+             and        ηk (f (x̄k ) − f∗ ) < ∞.
+                    k
+
+                           ηk    Pk−1
+Hence, we have that limk Pk−1     j=0 ηj (f (x̄k ) − f∗ ) = limk ηk (f (x̄k ) − f∗ ) = 0. But since
+                          j=0 ηj
+               P       ηk                                   Pk−1
+we assumed that k Pk−1     diverges, this implies that limk j=0   ηj (f (x̄k+1 ) − f∗ ) = 0, that is
+                         j=0 ηj
+
+                                                                          !
+                                                                  1
+                                     f (x̄k ) − f∗ = o         Pk−1
+                                                                 j=0 ηj
+
+
+
+
+G. Convergence rates for SHB in expectation without the bounded gradients and
+   bounded gradient variance assumptions
+Our first theorem provides a non-asymptotic upper bound on the suboptimality given any sequence of
+step sizes. Later we develop special cases of this theorem through different choices of the stepsizes.
+
+Theorem 24 Let Assumption 1 hold. Let x−1 = x0 . Consider the iterates of SHB-IMA. Let (ηk )k
+                                                                              Pk−1
+                       1                                   def                   t=0 ηt
+be such that 0 < ηk ≤ 4L for all k ∈ N. Define λ0 = 0 and λk =                   2ηk      for k ≥ 1. Then,
+                                                                 Pk
+                                               kx0 − x∗ k2     2      ηt2
+                            E [f (xk ) − f∗ ] ≤ Pk         + 2σ Pt=0
+                                                                  k
+                                                                          .
+                                                   t=0 ηt         t=0 ηt
+
+Note that in Theorem 24 the only free parameters are the ηk ’s which in the iterate-moving-average
+viewpoint (SHB-IMA) play the role of a learning rate. The scaled step sizes αk and the momentum
+parameters βk of the usual formulation (SHB) are given by (6) once we have chosen ηk . We now
+explore three different settings of the ηk ’s in the following corollaries.
+
+Corollary 25 Consider the setting of Theorem 24. Let η ≤ 1/4L.
+                                                           2
+   1. Let ηk = η. Then, E [f (xk ) − f∗ ] ≤ kxη(k+1)
+                                               0 −x∗ k
+                                                       + 2ησ 2 .                                             (39)
+                                                      35
+                                        S EBBOUH G OWER D EFAZIO
+
+
+
+                                                               2
+                                                      kx0 −x∗ k2 +4σ2 η2 (log(k+1)+1)
+                                                                                                        
+                η                                                                               log(k)
+   2. Let ηk = √k+1 . Then, E [f (xk ) − f∗ ] ≤                    √
+                                                               2η ( k+1−1)
+                                                                                      ∼ O         √
+                                                                                                    k
+                                                                                                             .   (40)
+
+   3. Suppose Algorithm (SHB) is run for T iterations. Let ηk = √Tη+1 for all k ∈ {0, . . . , T }.
+      Then,
+                                                        2
+                                               x0 − x∗ 2 + 2σ 2 η 2
+                           E [f (xT ) − f∗ ] ≤      √               .                       (41)
+                                                   η T +1
+     (39) shows how to set the parameters of SHB so that the last iterate converges sublinearly to a
+neighborhood of the minimum. In particular, for overparametrized models with σ 2 = 0, the last
+iterate of SHB converges sublinearly to the minimum. Moreover, when using the full gradient, which
+corresponds to directly using the gradient ∇f (xk ) at each iteration, we have L = L and σ 2 = 0,
+which recovers the rate derived in Ghadimi et al. (2015) for the deterministic HB method upto a
+constant.            √ 
+     The O log(k)/ k convergence rate in (40) is the same rate that can be derived for the iterates
+of SGD, as is done by Nemirovski et al. (2009) for a weighted average of the iterates of SGD, or
+by Orabona (2020b) for the last iterate. The difference with SGD is that it is also possible to drop
+the log(k) factor in (40) for the last iterate if we know the stopping time of the algorithm as shown
+in (41). So far in the litterature, shaving of this log factor has been shown only for convex lipschitz
+functions over closed bounded sets (Jain et al., 2019).
+
+G.1. Proof of Theorem 24
+The proof uses the following Lyaponuv function
+                                h           i
+                         Lk = E kzk − x∗ k2 + 2ηk λk E [f (xk−1 ) − f∗ ]
+Proof We have
+kzk+1 − x∗ k2 = kzk − x∗ − ηk ∇fvk (xk )k2
+               (SHB-IMA)
+                  =        kzk − x∗ k2 − 2ηk h∇fvk (xk ), zk − x∗ i + ηk2 k∇fvk (xk )k2
+               (SHB-IMA)
+                  =        kzk − x∗ k2 − 2ηk h∇fvk (xk ), xk − x∗ i − 2ηk λk h∇fvk (xk ), xk − xk−1 i + ηk2 k∇fvk (xk )k2
+                                                     def
+    Then taking conditional expectation Ek [·] = E [· | xk ] we have
+              h              i
+           Ek kzk+1 − x∗ k2 = kzk − x∗ k2 − 2ηk h∇f (xk ), xk − x∗ i
+                                                                       h             i
+                               − 2ηk λk h∇f (xk ), xk − xk−1 i + ηk2 Ek k∇fvk (xk )k2 ,
+                                  (5)+(2)
+                                    ≤       Ak + 4ηk2 L (f (xk ) − f∗ ) + 2ηk2 σ 2
+                                  − 2ηk (f (xk ) − f∗ )) − 2ηk λk (f (xk ) − f (xk−1 ))
+                                  = kzk − x∗ k2 − 2ηk (1 + λk − 2ηk L) (f (xk ) − f∗ )
+                                  + 2ηk λk (f (xk−1 ) − f∗ ) + 2ηk2 σ 2 .                                        (42)
+                                                                 
+                                               2          1
+                                  ≤ kzk − x∗ k − 2ηk         + λk (f (xk ) − f∗ )
+                                                          2
+                                  + 2ηk λk (f (xk−1 ) − f∗ ) + 2ηk2 σ 2 ,                                        (43)
+
+
+                                                       36
+                                   Almost sure SGD AND SHB CONVERGENCE
+
+
+
+                                                                                   Pk
+                                  1                                                 t=0 ηt
+where we used the fact that ηk ≤ 4L in the last inequality. Since λk+1 =           2ηk+1 we have that
+                                                                  
+                                                             1
+                                        ηk+1 λk+1 = ηk         + λk .
+                                                             2
+
+Using this in (42) then taking expectation and rearranging gives
+ h                i                                   h          i
+E kzk+1 − x∗ k2 + 2ηk+1 λk+1 E [f (xk ) − f∗ ] ≤ E kzk − x∗ k2 + 2ηk λk E [f (xk−1 ) − f∗ ] + 2ηk2 σ 2 .
+
+Summing over t = 0 to k and using a telescopic sum, we have
+                                k                                           k
+                                     !
+         h               i    X                                             X
+      E kzk+1 − x∗ k + 2
+                                  ηt E [f (xk ) − f∗ ] ≤ kx0 − x∗ k2 + 2σ 2   ηt2 ,
+                                      t=0                                                t=0
+
+where we used that λ0 = 0. Thus, writing λk explicitly, gives
+
+                                            kx0 − x∗ k2 2σ 2 kt=0 ηt2
+                                                            P
+                         E [f (xk ) − f∗ ] ≤ Pk        + Pk           .
+                                                t=0 ηt      t=0 ηt
+
+
+
+
+G.2. Proof of Corollary 25
+Proof (39) and (41) can be easily derived from Theorem 24. (40) requires some additional sum
+computations. Using the integral bound and plugging in our choice of ηk gives
+           k−1               k−1                                     k−1                √
+           X                 X      1                                X                          
+                 ηt2 = η 2             ≤ η 2 (log(k) + 1)      and            ηt ≥ 2η        k−1 ,
+                                   t+1
+           t=0               t=0                                        t=0
+
+which we use to obtain (40).
+
+
+
+
+                                                    37
+

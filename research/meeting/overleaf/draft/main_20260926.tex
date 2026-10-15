@@ -1,0 +1,323 @@
+\documentclass[11pt]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx,array}
+\usepackage{xcolor}
+\usepackage[authoryear,round]{natbib}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\tbv}{\textcolor{red}{[待核]}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\begin{document}
+
+% ============================================================
+\section{基础凸随机：SGD 的速率与下界}
+% ============================================================
+
+\subsection{设定与噪声假设}
+
+$f$ 凸且 $L$-光滑，$S:=\arg\min f\neq\emptyset$，$x^\star\in S$，
+$D:=\|x_0-x^\star\|$，$\Delta_t:=f(x_t)-f^\star$。SGD \citep{robbins1951} 为
+\[
+x_{t+1}=x_t-s_t\bigl(\nabla f(x_t)+e_t\bigr),
+\]
+其中 $\E_t[\cdot]:=\E[\cdot\mid\F_t]$，$e_t$ 为随机梯度误差。
+各类文献使用的噪声假设不同，下文统一用表~\ref{tab:noise} 的编号引用。
+
+\begin{table}[htbp]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\caption{噪声假设（$g_k=\nabla f(\cdot)+e_k$ 为随机梯度）}
+\label{tab:noise}
+\begin{tabularx}{\textwidth}{@{}p{1.0cm}p{2.6cm}Yp{3.2cm}@{}}
+\toprule
+编号 & 名称 & 数学形式 & 使用者 \\
+\midrule
+(N1) & 条件无偏 & $\E[e_k\mid\F_k]=0$ & 所有工作 \\
+(N2) & 方差有界 & $\E[\|e_k\|^2\mid\F_k]\le\sigma^2$ & \citet{lan2012}；JOTA 持续噪声情形 \\
+(N3) & 梯度有界 & $\|\partial f(x)\|\le G$ 或 $\|g(x,\xi)\|\le G$ & \citet{nemirovski2009}（非光滑） \\
+(N4) & ABC 条件 & $\E\|g_k\|^2\le A\,(f(x_k)-f^\star)+B\,\|\nabla f(x_k)\|^2+C$ & \citet{liu2022} \\
+(N5) & 相对噪声 & $\E[\|e_k\|^2\mid\F_k]\le\nu^2\|\nabla f(y_k)\|^2$ & \citet{vaswani2019fast,gupta2024nesterov} \\
+(N6) & 噪声递减 & $\sigma_k^2:=\E[\|e_k\|^2\mid\F_k]$，$(s_kt_k\sigma_k)\in\ell^2$ 或 $\ell^1$ & \citet{attouch2026ravine} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+(N2) 与 (N3) 都是 (N4) 的特例；(N5) 写在梯度计算点 $y_k$ 上，因为随机 Nesterov 在外推点处取梯度。
+
+\subsection{一步不等式与偏差--方差界}
+
+在 (N1)(N2) 与 $s_t\le 1/(2L)$ 下，展开 $\|x_{t+1}-x^\star\|^2$ 并取条件期望（推导见附录~\ref{app:sgd}）：
+\begin{equation}
+\E_t\|x_{t+1}-x^\star\|^2+s_t\Delta_t\le\|x_t-x^\star\|^2+s_t^2\sigma^2 .
+\label{eq:onestep}
+\end{equation}
+\textbf{含义：}每步距离至少减少 $s_t\Delta_t$，代价是噪声项 $s_t^2\sigma^2$。
+
+记 $S_k:=\sum_{t<k}s_t$、$\widetilde x_k:=S_k^{-1}\sum_{t<k}s_tx_t$。对 \eqref{eq:onestep} 取全期望、从 $0$ 到 $k-1$ 求和，再用 Jensen 不等式：
+\begin{equation}
+\boxed{\;
+\E[f(\widetilde x_k)-f^\star]
+\le
+\underbrace{\frac{D^2}{S_k}}_{\text{偏差}}
++\underbrace{\frac{\sigma^2\sum_{t<k}s_t^2}{S_k}}_{\text{方差}} .
+\;}
+\label{eq:biasvar}
+\end{equation}
+\textbf{含义：}偏差项希望步长大，方差项希望步长小，一切速率都来自二者的平衡。
+
+\subsection{由 \eqref{eq:biasvar} 得到的速率}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}Yl Y@{}}
+\toprule
+步长 & 期望速率（加权平均点） & 说明 \\
+\midrule
+常数 $s\asymp\min\{1/L,\,D/(\sigma\sqrt T)\}$，已知 $T$ & $O\bigl(LD^2/T+\sigma D/\sqrt T\bigr)$ & 平衡 $D^2/(sT)$ 与 $s\sigma^2$ \citep{nemirovski2009} \\
+$s_t\asymp t^{-p}$，$p<1/2$ & $O(k^{-p})$ & 方差主导 \\
+$p=1/2$ & $O(\log k/\sqrt k)$ & 与 $T$ 无关时的最好选择 \\
+$p=1/2+\varepsilon$, $\varepsilon\in(0,1/2)$ & $O(k^{-1/2+\varepsilon})$ & $\sum_t s_t^2<\infty$；速率可任意接近临界阶 $k^{-1/2}$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+后三行是把 $s_t\asymp t^{-p}$ 直接代入 \eqref{eq:biasvar} 的计算。
+
+\subsection{下界：加速只能改善偏差项}
+
+在凸光滑、(N1)(N2) 的随机一阶 oracle 模型下，minimax 下界为
+\[
+\Omega\Bigl(\frac{LD^2}{T^2}+\frac{\sigma D}{\sqrt T}\Bigr).
+\]
+偏差项的下界来自确定性一阶方法 \citep[Theorem~2.1.7]{nesterov2004}；
+噪声项的下界来自信息论论证 \citep{nemirovski1983,agarwal2012}；
+加速方法 AC-SA 同时达到两项 \citep{lan2012}。
+因此 SGD 在噪声项上已经最优，加速只把偏差项从 $LD^2/T$ 改进到 $LD^2/T^2$。
+当 $k\to\infty$ 时，渐近阶由 $\sigma D/\sqrt k$ 决定：\textbf{持续噪声下不存在渐近意义的加速。}
+
+\subsection{a.s.\ 分析的入口}
+
+若 $\sum_t s_t=\infty$ 且 $\sum_t s_t^2<\infty$，\eqref{eq:onestep} 中的噪声项可和。由 Robbins--Siegmund 引理 \citep{robbins1971}，有
+\[
+\sum_t s_t\Delta_t<\infty \qquad \text{a.s.}
+\]
+对于多项式步长 $s_t\asymp t^{-p}$，平方可和要求 $p>1/2$。令 $p=1/2+\varepsilon$，其中 $\varepsilon>0$ 可任意小，则上面的期望界为 $O(k^{-1/2+\varepsilon})$。因此，在这一步长分析框架下，速率可以接近但不能达到临界阶 $k^{-1/2}$；相应的几乎处处速率还需要在上述可和性结论之外进行额外论证。
+
+% ============================================================
+\section{随机 Nesterov：同一结构，同一上限}
+% ============================================================
+
+随机 Nesterov 为
+$y_k=x_k+\alpha_k(x_k-x_{k-1})$，$x_{k+1}=y_k-s_k(\nabla f(y_k)+e_k)$。
+令 $\alpha_k=(t_k-1)/t_{k+1}$，$z_k:=x_{k-1}+t_k(x_k-x_{k-1})$，JOTA 的能量为
+\[
+V_k=s\,t_k^2\bigl(f(x_k)-f^\star\bigr)+\tfrac12\dist(z_k,S)^2 .
+\]
+一步之后 $\E[V_{k+1}\mid\F_k]\le V_k+Cs^2t_{k+1}^2\sigma_k^2$（在 $(K_1)$ 下），噪声只从这一项进入。
+对它取期望并求和，再除以 $s_kt_k^2$：
+\[
+\E[f(x_k)-f^\star]
+\lesssim
+\underbrace{\frac{D^2}{s_kt_k^2}}_{\text{偏差}}
++\underbrace{\frac{\sum_{i\le k}s_i^2t_i^2\sigma_i^2}{s_kt_k^2}}_{\text{方差}} .
+\]
+\textbf{含义：}这与 \eqref{eq:biasvar} 同构，只是分母从 $\sum s_t$ 变成 $s_kt_k^2$。
+加速放大了分母，也用同样的 $t_i^2$ 放大了噪声。
+
+代入 $t_k\sim k$，两种噪声体制的结果如下 \citep[Remark~3.1--3.2]{attouch2026ravine}：
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}lYllY@{}}
+\toprule
+噪声体制 & 参数 & 偏差 & 方差 & 结果 \\
+\midrule
+噪声递减 & $s$ 常数，$\sum_k k^2\sigma_k^2<\infty$ & $1/k^2$ & $1/k^2$ & 加速保住；加 $(K_1^+)$ 得 a.s.\ $o(1/k^2)$ \\
+持续噪声 $\sigma_k\equiv\sigma$ & 必须 $s_k=c\,k^{-\delta}$ & $k^{\delta-2}$ & $k^{1-\delta}$（$\delta<3/2$） & 平衡于 $\delta=3/2$，期望 $O(\log k/\sqrt k)$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+持续噪声下，a.s.\ 分析还要求噪声项可和，即 $\sum_k k^{2-2\delta}<\infty$，也就是 $\delta>3/2$。
+此时速率为 $k^{-(2-\delta)}$：能得到的 a.s.\ 速率都\textbf{比 $k^{-1/2}$ 略慢}，只能任意接近 $k^{-1/2}$，
+与 SGD 的噪声主导阶一致。\textbf{持续噪声下，随机 Nesterov 与 SGD 同阶；只有噪声递减时加速才保得住。}
+
+% ============================================================
+\section{随机加速的研究格局}
+% ============================================================
+
+比较随机加速的结果，必须同时固定四件事：噪声模型、取值点、收敛意义与总样本预算。
+a.s.\ 意义下还要区分“速率”与“收敛”：
+$f(x_k)-f^\star=O(r_k)$ a.s.\ 表示对几乎每条轨道存在随机常数 $C(\omega)$，使 $f(x_k)-f^\star\le C(\omega)\,r_k$；
+而 $f(x_k)\to f^\star$ a.s.\ 只说明误差趋于零，不给出速率。
+按噪声体制，现有文献可分为五条子线（表~\ref{tab:lines}）。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{随机加速的五条子线（凸、$L$-光滑）}
+\label{tab:lines}
+\begin{tabularx}{\textwidth}{@{}p{2.1cm}p{2.4cm}Yp{3.2cm}@{}}
+\toprule
+子线 & 噪声 & 已知结果 & 代表工作 \\
+\midrule
+期望复杂度
+& (N2)，持续
+& 已知 $T$ 时，加速方法达到 $O\big(LD^2/T^2+\sigma D/\sqrt T\big)$，与下界匹配；
+  不依赖 $T$ 的版本差一个对数因子。
+& \citet{lan2012,cutkosky2019anytime}；
+  下界 \citet{nemirovski1983,agarwal2012} \\
+\addlinespace
+动量的 a.s.\ 理论
+& (N2)/(N4)，持续
+& SHB，动量由步长决定（约 $1-(3-4\varepsilon)/k$）：末次点 $o(k^{-1/2+\varepsilon})$ a.s.，迭代点收敛；
+  SHB、SNAG，常数动量：$O(k^{-1/3+\varepsilon})$ a.s.，迭代点收敛。
+& \citet{sebbouh2021,liu2022} \\
+\addlinespace
+相对噪声
+& (N5)
+& 期望意义下可恢复 $O(1/k^2)$：原始 NAG 需要 $\nu<1$，修正方法可适用于任意 $\nu$；
+  标准参数下一般不加速，甚至可能发散；a.s.\ 速率与迭代点收敛\tbv。
+& \citet{vaswani2019fast,gupta2024nesterov,yu2026shang}；
+  负结果 \citet{kidambi2018insufficiency,liu2020accelerating} \\
+\addlinespace
+噪声递减
+& (N6)
+& 一般 $\alpha_k$ 的 SNAG/SRAG：a.s.\ $O(1/(s_kt_k^2))$ 及其 $o$ 形式、梯度可和、迭代点收敛；
+  临界参数下 FISTA 的迭代点 a.s.\ 弱收敛（条件\tbv）。
+& \citet{attouch2026ravine,salzo2025iterates} \\
+\addlinespace
+连续时间
+& 随机惯性 SDE
+& 消失阻尼或 Hessian 阻尼下的收敛性质；用时间尺度变换与平均，把一阶结论转移到二阶系统。
+& \citet{maulensoto2026stochastic,maulensoto2025sde} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{持续噪声：主导阶被下界锁定。}
+前两条子线说明，持续噪声下噪声项不快于 $\sigma D/\sqrt T$，加速只能改善偏差项。
+a.s.\ 意义下，动量方法末次点的最好速率任意接近 $k^{-1/2}$。
+动量由步长决定的 SHB 达到这一水平，常数动量只到 $k^{-1/3}$：
+前者的末次点是全历史平均，后者只是短记忆平均。
+
+\paragraph{相对噪声：加速真实存在，但原始 SNAG 并不总是有效。}
+\citet{vaswani2019fast} 使用强增长条件 $\E\|g_k\|^2\le\rho\|\nabla f\|^2$；在 (N1) 下它等价于
+$\E\|e_k\|^2\le(\rho-1)\|\nabla f\|^2$，即 (N5) 取 $\nu^2=\rho-1$。
+负结果表明，标准参数的 Nesterov SGD 在插值设定下一般不能保证加速，甚至可能发散
+\citep{kidambi2018insufficiency,liu2020accelerating}。
+所以真正的问题是“在什么噪声比例和参数下有效”。
+SHANG++ \citep{yu2026shang} 由 Hessian 驱动的 Nesterov 流离散得到，
+而 Ravine 方法的高分辨率 ODE 同样含 Hessian 驱动阻尼 \citep{attouch2026ravine}。
+\emph{推断：}相对噪声下的稳健加速可能依赖这一阻尼项，Ravine 一侧的梯度可和性分析是自然的切入口。
+
+\paragraph{噪声递减：JOTA 所在的格子。}
+条件分三层：$(K_2)$ 给出 a.s.\ $O(1/(s_kt_k^2))$；
+再加上 $(K_1^+)$ 与 $\sum_k t_{k+1}/t_k^2=\infty$，得到函数值的 a.s.\ $o$ 速率；
+迭代点收敛还需要 $\alpha_k\in[0,1]$、$\inf_k s_k>0$ 与 $\ell^1$ 型条件 $(K_2^+)$。
+$\ell^1$ 条件来自对距离增量取正部的证明手法，是否必要尚无结论。
+
+% ============================================================
+\section{JOTA 的位置与剩余问题}
+% ============================================================
+
+JOTA 位于“一般 $\alpha_k$ $\times$ 噪声递减 $\times$ SNAG/SRAG”这一格，增量有三点：
+动量从“常数”或“由步长决定”推广到一般 $\alpha_k$；
+噪声递减时允许不降步长，从而保住加速速率；
+借助 Nesterov 与 Ravine 的对应，把结果转移到 SRAG。
+持续噪声下，JOTA 与 \citet{sebbouh2021} 处于同一参数体制、速率主导阶相同，区别只在算法与参数范围。
+表~\ref{tab:gaps} 按 $\alpha$ 与噪声体制汇总已知结果与空白。
+
+\begin{table}[htbp]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\caption{已知结果与空白（$\alpha_k=1-\alpha/k$；\textbf{空白}为未检索到结果）}
+\label{tab:gaps}
+\begin{tabularx}{\textwidth}{@{}p{1.0cm}YYYY@{}}
+\toprule
+$\alpha$ & 确定性 & 随机：噪声递减 & 随机：持续噪声 & 随机：相对噪声 \\
+\midrule
+$=3$
+& $O(1/k^2)$ \citep{nesterov1983,beck2009fista}；
+  迭代点收敛 \citep{jang2025point,bot2025iterates}
+& a.s.\ $O(1/k^2)$ \citep{attouch2026ravine}；
+  FISTA 迭代点 a.s.\ 弱收敛 \citep{salzo2025iterates}\tbv；
+  \textbf{空白：}a.s.\ $o(1/k^2)$
+& a.s.\ 速率任意接近 $k^{-1/2}$ \citep{attouch2026ravine}；
+  \textbf{空白：}迭代点收敛
+& 期望 $O(1/k^2)$，需 $\nu<1$ \citep{gupta2024nesterov}；
+  \textbf{空白：}a.s.\ 速率、迭代点收敛 \\
+\addlinespace
+$>3$
+& $o(1/k^2)$ \citep{attouch2016rate}；
+  迭代点收敛 \citep{chambolle2015}
+& a.s.\ $o(1/k^2)$、梯度可和、迭代点收敛 \citep{attouch2026ravine}；
+  备用：$(K_2^+)$ 是否必要
+& 同左栏上一行；SHB 已有迭代点结果 \citep{sebbouh2021,liu2022}；
+  \textbf{空白：}SNAG/SRAG 迭代点收敛
+& \textbf{空白} \\
+\bottomrule
+\end{tabularx}
+
+\vspace{2mm}
+\begin{minipage}{0.96\textwidth}
+\footnotesize
+噪声递减、持续噪声、相对噪声分别对应 (N6)、(N2)、(N5)。
+$\alpha<3$ 不满足 $(K_1)$，确定性情形速率已降为 $O(k^{-2\alpha/3})$，不列入主表。
+\end{minipage}
+\end{table}
+
+据此，汇报保留三个剩余问题。
+
+\paragraph{问题 1：相对噪声下的 a.s.\ 理论。}
+在 $\alpha_k=1-\alpha/k$ 与 (N5) 下，第一式是标准 Nesterov 动量，第二式说明噪声随梯度一同消失。
+问题是：在 $\nu<\nu_0(\alpha)$ 与常数步长下，是否有
+\[
+f(x_k)-f^\star=o(1/k^2)\quad\text{a.s.}
+\]
+以及迭代点收敛？阈值 $\nu_0$ 如何依赖 $\alpha$，临界 $\alpha=3$ 时又如何？
+负结果决定了 $\nu$ 必须受限，因此 $\nu_0(\alpha)$ 本身就是要刻画的对象。
+
+\paragraph{问题 2：持续噪声下 SNAG/SRAG 的迭代点收敛。}
+速率已被下界锁定，但迭代点收敛是独立的问题。
+SHB 已有结果 \citep{sebbouh2021,liu2022}；
+JOTA 的迭代点结论要求 $\inf_k s_k>0$，与持续噪声下必须递减的步长相冲突。
+
+\paragraph{问题 3：噪声递减、临界 $\alpha=3$ 下的 a.s.\ $o$ 速率。}
+$(K_1^+)$ 的余量在 $\alpha=3$ 时消失，JOTA 的 $o$ 速率论证因此失效。
+需要核对 \citet{salzo2025iterates} 是否覆盖同一随机模型，并判断其技术能否给出速率。
+
+
+
+% ============================================================
+\appendix
+\section{一步不等式的推导}\label{app:sgd}
+% ============================================================
+
+展开距离平方：
+\[
+\|x_{t+1}-x^\star\|^2
+=\|x_t-x^\star\|^2
+-2s_t\langle\nabla f(x_t)+e_t,\,x_t-x^\star\rangle
++s_t^2\|\nabla f(x_t)+e_t\|^2 .
+\]
+取条件期望，由 (N1) 交叉项 $\langle e_t,x_t-x^\star\rangle$ 消失；
+由凸性 $\langle\nabla f(x_t),x_t-x^\star\rangle\ge\Delta_t$；
+由凸性与 $L$-光滑性 $\|\nabla f(x_t)\|^2\le2L\Delta_t$ \citep[Theorem~2.1.5]{nesterov2004}；
+由 (N1)(N2) $\E_t\|\nabla f(x_t)+e_t\|^2\le2L\Delta_t+\sigma^2$。于是
+\[
+\E_t\|x_{t+1}-x^\star\|^2
+\le\|x_t-x^\star\|^2-s_t(2-2Ls_t)\Delta_t+s_t^2\sigma^2 .
+\]
+当 $s_t\le1/(2L)$ 时 $2-2Ls_t\ge1$，即得 \eqref{eq:onestep}。
+
+\bibliographystyle{plainnat}
+\bibliography{../refs}
+
+\end{document}

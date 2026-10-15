@@ -1,0 +1,1452 @@
+Stochastic Halpern Iteration with Variance Reduction for Stochastic Monotone Inclusions
+Report GitHub Issue
+×
+Title:
+Content selection saved. Describe the issue below:
+Description:
+Submit without GitHub
+Submit in GitHub
+arXiv is now an independent nonprofit!
+Learn more
+×
+Back to arXiv
+Why HTML?
+Report Issue
+Back to Abstract
+Download PDF
+Abstract
+1 Introduction
+1.1 Contributions
+1.2 Techniques
+1.3 Related work
+Monotone inclusion and variational inequalities.
+Halpern iteration.
+Stochastic settings and variance reduction.
+2 Preliminaries
+Classes of monotone operators.
+Monotone inclusion and variational inequalities.
+Stochastic access to the operator.
+PAGE variance-reduced estimator.
+3 Stochastic Halpern Iteration for Cocoercive Operators
+3.1 Stochastic Oracle Complexity With a Simple Mini-batch Estimate
+3.2 Improved Oracle Complexity via Variance Reduction
+4 Monotone and Lipschitz Setup
+5 Faster Convergence Under a Sharpness Condition
+6 Numerical experiments and discussion
+7 (Near) Tightness of Stochastic Oracle Complexity Bounds
+8 Conclusion
+References
+A Omitted proofs from Section
+B Omitted proofs from Section
+B.1 Unconstrained settings
+B.2 Constrained setting with a cocoercive operator
+C Omitted proofs from Section
+D Omitted proofs from Section
+License: arXiv.org perpetual non-exclusive license
+arXiv:2203.09436v4 [math.OC] 08 Jan 2023
+Stochastic Halpern Iteration with Variance Reduction
+for Stochastic Monotone Inclusions
+Xufeng Cai
+Note: Department of Computer Sciences, University of Wisconsin-Madison. XC (xcai74@wisc.edu), CS (chaobing.song@wisc.edu), JD (jelena@cs.wisc.edu).
+Chaobing Song††footnotemark:
+Cristóbal Guzmán
+Note: Institute for Mathematical and Computational Eng., Facultad de Matemáticas and Escuela de Ingeniería, Pontificia Universidad Católica de Chile. crguzmanp@mat.uc.cl.
+Jelena Diakonikolas††footnotemark:
+Abstract
+We study stochastic monotone inclusion problems, which widely appear in machine learning applications, including robust regression and adversarial learning. We propose novel variants of stochastic Halpern iteration with recursive variance reduction. In the cocoercive—and more generally Lipschitz-monotone—setup, our algorithm attains $\epsilon$ norm of the operator with $\mathcal{O}(\frac{1}{\epsilon^{3}})$ stochastic operator evaluations, which significantly improves over state of the art $\mathcal{O}(\frac{1}{\epsilon^{4}})$ stochastic operator evaluations required for existing monotone inclusion solvers applied to the same problem classes. We further show how to couple one of the proposed variants of stochastic Halpern iteration with a scheduled restart scheme to solve stochastic monotone inclusion problems with ${\mathcal{O}}(\frac{\log(1/\epsilon)}{\epsilon^{2}})$ stochastic operator evaluations under additional sharpness or strong monotonicity assumptions.
+1 Introduction
+Recent trends in machine learning (ML) involve the study of models whose solutions do not reduce to optimization but rather to equilibrium conditions. Standard examples include generative adversarial networks, adversarially robust training of ML models, and training of ML models under notions of fairness. It turns out that several of these equilibrium conditions (including, but not limited to, first-order stationary points, saddle-points, and Nash equilibria of minimax games) can be cast as solutions to a monotone inclusion problem, which is defined as the problem of computing a zero of a (maximal) monotone operator $F:\mathbb{R}^{d}\to\mathbb{R}^{d}$ (see (MI) for a formal definition). In the context of min-max optimization problems, monotone inclusion reduces to a stationarity condition, which for unconstrained problems boils down to finding a point with small gradient norm.
+Of particular interest to machine learning are stochastic versions of these problems, in which the operator $F$ is not readily available, but can only be accessed through a stochastic oracle $\widehat{F}$ . Such are the settings mentioned above, where the definitions of equilibria involve expectations over continuous high-dimensional spaces. The corresponding problem, known as the stochastic monotone inclusion, has not been thoroughly studied, particularly in the context of its stochastic oracle complexity. Understanding stochastic oracle complexity of monotone inclusion in all standard settings with Lipschitz operators, from the algorithmic aspect, is the main motivation of this work.
+1.1 Contributions
+We study three main classes of stochastic monotone inclusion problems with Lipschitz operators, defined by the assumptions made about the operator itself: (i) cocoercive class, which is the most restricted class, but nevertheless fundamental for understanding monotone inclusion, as it relates to the problem of finding a fixed point of a nonexpansive (1-Lipschitz) operator; (ii) Lipschitz monotone class, which is perhaps the most basic class arising in the study of smooth convex-concave min-max optimization problems; and (iii) Lipschitz monotone class with an additional sharpness property of the operator. Sharpness is a widely studied property of optimization problems, often referred to as the “local error bound” condition, which is weaker than strong convexity and roughly corresponds to the problem landscape being curved outside of the solution set (see Pang (1997) for a survey of classical results).
+From an algorithmic standpoint, we consider variants of classical Halpern iteration (Halpern, 1967), which was originally introduced for solving fixed point equations with nonexpansive operators. Variants of this iteration have recently been shown to lead to (near-)optimal first-order oracle complexity for all aforementioned standard problem classes in deterministic settings (Diakonikolas, 2020; Diakonikolas and Wang, 2022; Yoon and Ryu, 2021).
+However, to the best of our knowledge, stochastic variants of these methods have received very limited attention prior to our work. The only results we are aware of are for a two-step extragradient-like variant of Halpern iteration in negative comonotone Lipschitz settings (Lee and Kim, 2021) and which show that when variance of operator estimates is bounded by order- $\frac{\epsilon^{2}}{k}$ in iteration $k,$ the method attains operator norm $\epsilon$ after $\mathcal{O}(\frac{1}{\epsilon})$ iterations. However, Lee and Kim (2021) does not discuss how such variance control would be obtained. Simple mini-batching, as we show, only leads to $\mathcal{O}(\frac{1}{\epsilon^{4}})$ stochastic oracle complexity.
+We show that existing variants of the Halpern iteration (Diakonikolas, 2020; Tran-Dinh and Luo, 2021) can be effectively combined with recursive variance reduction (Li et al., 2021) to obtain $\mathcal{O}(\frac{1}{\epsilon^{3}})$ stochastic oracle complexity in the cocoercive and Lipschitz monotone setups. We then show that the complexity can be further reduced to $\mathcal{O}\big(\frac{1}{\epsilon^{2}}\log(\frac{1}{\epsilon})\big)$ under an additional sharpness assumption about the operator.
+The last bound is unimprovable in terms of the dependence on $\epsilon,$ due to existing lower bounds, as we argue for completeness in Section 7.
+To the best of our knowledge, our work is the first to use variance reduction to reduce stochastic oracle complexity of monotone inclusion (small gradient norm in min-max optimization settings), and the attained bounds are the best achieved to date for direct methods.
+1.2 Techniques
+Inspired by the potential function originally used by Diakonikolas (2020) and later used either in the same or slightly modified form by Diakonikolas and Wang (2022); Yoon and Ryu (2021); Tran-Dinh and Luo (2021); Lee and Kim (2021), we adapt this potential function-based argument to account for stochastic error terms arising due to the stochastic oracle access to the operator. We first show that in the cocoercive minibatch setting, this argument only leads to $\mathcal{O}(\frac{1}{\epsilon^{4}})$ stochastic oracle complexity, and it is unclear how to improve it directly, as the analysis appears tight. We then combine the cocoercive variant of Halpern iteration (Diakonikolas, 2020) with the PAGE estimator (Li et al., 2021) to reduce the stochastic oracle complexity to $\mathcal{O}(\frac{1}{\epsilon^{3}})$ . The same variance reduced estimator is also used in conjunction with the two-step extrapolated variant of Halpern iteration introduced by Tran-Dinh and Luo (2021), as a direct application of Halpern iteration is not known to converge on the class of Lipschitz monotone operators.
+While the basic ideas in our arguments are simple, their realization requires addressing major technical obstacles. First, the variance reduced estimator that we use (Li et al., 2021) was originally devised for smooth nonconvex optimization problems, where it was coupled with a stochastic variant of gradient descent. This is significant, because the proof relies on a descent lemma, which allows cancelling the error arising from the variance of the estimator by the “descent” part. Such an argument is not possible in our setting, as there is no objective function to descend on. Instead, our analysis relies on an intricate inductive argument that ensures that the expected norm of the operator is bounded in each iteration, assuming a suitable bound on the variance of the estimator. To obtain our desired result for the variance, we propose a data-dependent batch allocation in PAGE estimator (Li et al., 2021) (see Corollary 2.2), which scales proportionally to the squared distance between successive iterates, similar to Arjevani et al. (2020). We inductively argue that the squared distance between successive iterates arising in the batch size of the estimator reduces at rate $\frac{1}{k^{2}}$ in expectation.
+This allows us to further certify that the estimators do not only remain accurate, but their variance decreases as ${\cal O}(\epsilon^{2}/k)$ , where $k$ is the iteration count.
+In the context of the potential function argument, unlike in the deterministic settings, we do not establish that the potential function is non-increasing, even in expectation. The stochastic error terms that arise due to the stochastic nature of the operator evaluations are controlled by taking slightly smaller step sizes than in the vanilla methods from Diakonikolas (2020); Tran-Dinh and Luo (2021), which allows us to “leak” negative quadratic terms that are further used in controlling the stochastic error. The argument for controlling the value of the potential function is itself coupled with the inductive argument for ensuring that the expected operator norm remains bounded.
+Finally, while applying a restarting strategy is standard under sharpness conditions (Roulet and d’Aspremont, 2020), obtaining the claimed stochastic oracle complexity result of $\mathcal{O}\big(\frac{1}{\epsilon^{2}}\log(\frac{1}{\epsilon})\big)$ requires a rather technical argument to bound the total number of stochastic queries to the operator.
+1.3 Related work
+Monotone inclusion and variational inequalities.
+Variational inequality problems were originally devised to deal with approximating equilibria. Their systematic study was initiated by Stampacchia (1964). The relationship between variational inequalities and min-max optimization was observed soon after Rockafellar (1970), while one of the earliest papers to study solving monotone inclusion as a generalization of variational inequalities, convex and min-max optimization, and complementarity problems is Rockafellar (1976). For a historical overview of this area and an extensive review of classical results, see Facchinei and Pang (2003).
+In the case of monotone operators, standard variants of variational inequality problems (see Section 2) and monotone inclusion are equivalent—their solution sets coincide. This is a consequence of the celebrated Minty Theorem (Minty, 1962). However, there is a major difference between these problems when it comes to solving them to a finite accuracy. In particular, on unbounded domains, approximating variational inequalities is meaningless, whereas monotone inclusion remains well-defined. This is most readily seen from the observation that mapping from min-max optimization, variational inequalities correspond to primal-dual gap guarantees, while monotone inclusion corresponds to a guarantee in gradient norm. For a simple bilinear function $f(x,y)=xy$ which has the unique min-max solution at $(x,y)=(0,0)$ , the primal-dual gap is infinite for any point other than $(0,0),$ while the gradient remains finite and is a good proxy for measuring quality of a solution. Further, even on bounded domains or using restricted gap functions on unbounded domains as in e.g., Nesterov (2007), optimal oracle complexity guarantees for approximate monotone inclusion imply optimal complexity guarantees for approximately satisfied variational inequalities (see, e.g., Diakonikolas (2020)). The opposite does not hold in general. In particular, in deterministic settings, standard algorithms such as the celebrated extragradient (Korpelevich, 1977; Nemirovski, 2004), dual extrapolation (Nesterov, 2007), or Popov’s method (Popov, 1980) that have the optimal oracle complexity $O(\frac{1}{\epsilon})$ for approximating variational inequalities are suboptimal for monotone inclusion and attain oracle complexity of the order $O(\frac{1}{\epsilon^{2}})$ (Golowich et al., 2020; Diakonikolas and Wang, 2022).
+Halpern iteration.
+Halpern iteration is a classical fixed point iteration originally introduced by Halpern (1967), and studied extensively in terms of both its asymptotic and non-asymptotic convergence guarantees (Wittmann, 1992; Leustean, 2007; Lieder, 2021; Kohlenbach, 2011; Kohlenbach and Leuştean, 2012; Cheval et al., 2022).. The first tight nonasymptotic convergence rate guarantee of $1/t$ was obtained in Lieder (2021); Sabach and Shtern (2017). This rate was also matched by an alternative method proposed by Kim (2019).
+The usefulness of Halpern iteration for solving monotone inclusion problems was first observed by Diakonikolas (2020),11
+1
+Interestingly, the algorithm proposed by Kim (2019) for cocoercive inclusion coincides with the Halpern iteration for a related nonexpansive operator (see Contreras and Cominetti (2021, Proposition 4.3)). who showed that its variants can be used to obtain near-optimal oracle complexity results for all standard classes of monotone inclusion problems with Lipschitz operators also studied in this work. The near-tightness (up to poly-logarithmic factors) of the results from Diakonikolas (2020) was certified using lower bound reductions from min-max optimization lower bounds introduced by Ouyang and Xu (2019). These lower bounds were made tight for the cocoercive setup in Diakonikolas and Wang (2022).
+The generalization of Halpern iteration from the cocoercive to Lipschitz monotone setup in Diakonikolas (2020) utilized approximating what is known as the resolvent operator, which led to a double-loop algorithm and an additional $\log(1/\epsilon)$ in the resulting complexity. This log factor was shaved off in Yoon and Ryu (2021), who introduced a two-step variant of Halpern iteration, inspired by the extragradient method of Korpelevich (1977).
+The results of Diakonikolas (2020); Yoon and Ryu (2021) were further extended to other classes of Lipschitz operators by Tran-Dinh and Luo (2021); Lee and Kim (2021).
+Except for Lee and Kim (2021) which considered controlled variance as discussed above, all of the existing results only targeted deterministic settings.
+Stochastic settings and variance reduction.
+Vanilla stochastic gradient methods have constant variance of stochastic gradients, which creates a bottleneck in the convergence rate. To improve the convergence rate, in the past decade, powerful variance reduction techniques have been proposed.
+For strongly convex finite-sum problems, SAG (Schmidt et al., 2017), which used a biased stochastic estimator of the full gradient, was the first stochastic gradient method with a linear convergence rate. Johnson and Zhang (2013) and Defazio et al. (2014) improved Schmidt et al. (2017) by proposing unbiased estimators of SVRG-type and SAGA-type, respectively. Such unbiased estimators were further combined with Nesterov acceleration (Allen-Zhu, 2017; Song et al., 2020), or applied to nonconvex finite-sum/infinite-sum problems (Reddi et al., 2016; Lei et al., 2017).
+For nonconvex stochastic (infinite-sum) problems, SARAH (Nguyen et al., 2017) and SPIDER (Fang et al., 2018; Zhou et al., 2018a; Zhou et al., 2018b) estimators were proposed to attain the optimal oracle complexity of $\mathcal{O}(1/\epsilon^{3})$ for finding an $\epsilon$ -approximate stationary point. Both estimators are referred to as “recursive” variance reduction estimators, as they are biased when taking expectation w.r.t. current randomness but unbiased w.r.t. all the randomness in history. PAGE (Li et al., 2021) and STORM (Cutkosky and Orabona, 2019) significantly simplified SARAH and SPIDER in terms of reducing the number of loops and avoiding large minibatches, respectively. Arjevani et al. (2020) further extended this line of work by incorporating second-order information and dynamic batch sizes.
+In the setting of min-max optimization and variational inequalities/monotone inclusion, variance reduction has primarily been used for approximating variational inequalities, corresponding to the primal-dual gap in min-max optimization; see, for example Palaniappan and Bach (2016); Alacaoglu and Malitsky (2022); Iusem et al. (2017); Chavdarova et al. (2019); Carmon et al. (2019); Loizou et al. (2021). Under strong monotonicity (or sharpness in the case of Loizou et al. (2021)), such results generalize to monotone inclusion; however, to the best of our knowledge, there have been no results that address monotone inclusion under the weaker assumptions considered in this work. In the context of monotone inclusion with Lipschitz operators, the tightest complexity result that we are aware of is $\mathcal{O}(\frac{1}{\epsilon^{4}}),$ due to Diakonikolas et al. (2021), and it applies to a more general class of structured non-monotone Lipschitz operators, for the best iterate.
+The same oracle complexity can be deduced for the last iterate of a two-step variant of Halpern from Lee and Kim (2021, Theorem 6.1), using mini-batching. All the results in our work are also for the last iterate.
+2 Preliminaries
+We consider a real $d$ -dimensional normed space $(\mathbb{R}^{d},\left\|\cdot\right\|)$ , where $\left\|\cdot\right\|$ is induced by an inner product associated with the space, i.e., $\left\|\cdot\right\|=\sqrt{\left\langle\cdot,\cdot\right\rangle}$ . Let $\mathcal{U}\subseteq\mathbb{R}^{d}$ be closed and convex; in the unconstrained case, $\mathcal{U}\equiv\mathbb{R}^{d}$ . When $\mathcal{U}$ is bounded, $D=\max_{\mathbf{u},\mathbf{v}\in\mathcal{U}}\|\mathbf{u}-\mathbf{v}\|$ denotes its diameter.
+Classes of monotone operators.
+We say that an operator $F:\mathbb{R}^{d}\rightarrow\mathbb{R}^{d}$ is
+1.
+monotone, if $\forall\mathbf{u},\mathbf{v}\in\mathbb{R}^{d},$
+$\left\langle F(\mathbf{u})-F(\mathbf{v}),\mathbf{u}-\mathbf{v}\right\rangle\geq 0.$
+2.
+$L$ -Lipschitz continuous for some $L>0$ , if $\forall\mathbf{u},\mathbf{v}\in\mathbb{R}^{d},$
+$\|F(\mathbf{u})-F(\mathbf{v})\|\leq L\left\|\mathbf{u}-\mathbf{v}\right\|.$
+3.
+$\gamma$ -cocoercive for some $\gamma>0$ , if $\forall\mathbf{u},\mathbf{v}\in\mathbb{R}^{d}$ ,
+$\left\langle F(\mathbf{u})-F(\mathbf{v}),\mathbf{u}-\mathbf{v}\right\rangle\geq\gamma\left\|F(\mathbf{u})-F(\mathbf{v})\right\|^{2}.$
+4.
+$\mu$ -strongly monotone for some $\mu>0$ , if $\forall\mathbf{u},\mathbf{v}\in\mathbb{R}^{d}$ ,
+$\left\langle F(\mathbf{u})-F(\mathbf{v}),\mathbf{u}-\mathbf{v}\right\rangle\geq\mu\left\|\mathbf{u}-\mathbf{v}\right\|^{2}.$
+Note that we can easily specialize these definitions to the set $\mathcal{U}$ by restricting $\mathbf{u},\mathbf{v}$ to be from $\mathcal{U}$ .
+Throughout the paper, the minimum assumption that we make about an operator $F$ is that it is monotone and Lipschitz. Observe that any $\gamma$ -cocoercive operator is monotone and $\frac{1}{\gamma}$ -Lipschitz. The converse to this statement does not hold in general.
+Monotone inclusion and variational inequalities.
+Monotone inclusion asks for $\mathbf{u}^{*}$ such that
+$\mathbf{0}\in F(\mathbf{u}^{*})+\partial I_{\mathcal{U}}(\mathbf{u}^{*}),$
+(MI)
+where $I_{\mathcal{U}}$ is the indicator function of the set $\mathcal{U}$ and $\partial I_{\mathcal{U}}(\cdot)$ denotes the subdifferential of $I_{\mathcal{U}}$ .
+If $F$ is continuous and monotone, the solution set to (MI) is the same as the solution set of the Stampacchia Variational Inequality (SVI) problem, which asks for $\mathbf{u}^{*}\in\mathcal{U}$ such that
+$(\forall\mathbf{u}\in\mathcal{U}):\quad\left\langle F\left(\mathbf{u}^{*}\right),\mathbf{u}-\mathbf{u}^{*}\right\rangle\geq 0.$
+(SVI)
+Further, when $F$ is monotone, the solution set of (SVI) is equivalent to the solution set of the Minty Variational Inequality (MVI) problem consisting in finding $\mathbf{u}^{*}$ such that
+$(\forall\mathbf{u}\in\mathcal{U}):\quad\left\langle F(\mathbf{u}),\mathbf{u}^{*}-\mathbf{u}\right\rangle\leq 0.$
+(MVI)
+We assume throughout the paper that a solution to monotone inclusion (MI) exists, which implies that solutions to both (SVI) and (MVI) exist as well. Existence of solutions follows from standard results and is guaranteed whenever e.g., $\mathcal{U}$ is compact, or, if there exists a compact set $\mathcal{U}^{\prime}$ such that $\mathrm{Id}-\frac{1}{L}F$ maps $\mathcal{U}^{\prime}$ to itself, where $\mathrm{Id}$ is the identity map (Facchinei and Pang, 2003). As remarked in the introduction, in unbounded setups it is generally not possible to approximate (MVI) and (SVI), whereas approximating (MI) is quite natural: we only need to find $\mathbf{u}$ such that $\textbf{0}\in F(\mathbf{u})+\partial I_{\mathcal{U}}(\mathbf{u})+\mathcal{B}(\epsilon)$ , where 0 denotes the zero vector and $\mathcal{B}(\epsilon)$ denotes the centered ball of radius $\epsilon$ .
+Stochastic access to the operator.
+We consider the stochastic setting for monotone inclusion problems. More specifically, we make the following assumptions for stochastic queries to $F.$ These assumptions are made throughout the paper, without being explicitly invoked.
+Assumption 1 (Unbiased samples with bounded variance).
+For each query point $\mathbf{x}\in\mathcal{U}$ , we observe $\widehat{F}(\mathbf{x},z)$ where $z\sim P_{z}$ is a random variable that satisfies the following assumptions:
+$\mathbb{E}_{z}\big[\widehat{F}(\mathbf{x},z)\big]=F(\mathbf{x})\quad\text{ and }\quad\mathbb{E}_{z}\big[\big\|{\widehat{F}(\mathbf{x},z)-F(\mathbf{x})}\big\|^{2}\big]\leq\sigma^{2}.$
+Assumption 2 (Multi-point oracle).
+We can query a set of points $(\mathbf{x}_{1},\dots,\mathbf{x}_{n})$ and receive
+$\widehat{F}(\mathbf{x}_{1},z),\dots,\widehat{F}(\mathbf{x}_{n},z)\quad\text{where}\quad z\sim P_{z}.$
+Assumption 3 (Lipschitz in expectation).
+$\mathbb{E}_{z}\big[\big\|{\widehat{F}(\mathbf{u},z)-\widehat{F}(\mathbf{v},z)}\big\|^{2}\big]\leq L^{2}\left\|\mathbf{u}-\mathbf{v}\right\|^{2}$ , $\forall\mathbf{u},\mathbf{v}\in\mathcal{U}$ .
+We note that complexity results of the paper will bound the total number of queries made to this oracle. In particular, if multiple query points and/or multiple samples $z$ are used in a single iteration, our complexity is given by the sum of all those queries throughout all iterations of the method. Also, Assumption 3 is primary with parameter $L$ , by which $F$ is also $L$ -Lipschitz using Jensen’s inequality.
+PAGE variance-reduced estimator.
+We now summarize a variant of the PAGE estimator, originally developed for smooth nonconvex optimization by Li et al. (2021), adapted to our setting. In particular, given queries to $\widehat{F}$ , we define the variance reduced estimator $\widetilde{F}(\mathbf{u}_{k})$ for $k\geq 1$ by
+$\widetilde{F}(\mathbf{u}_{k})=\begin{cases}\frac{1}{S_{1}^{(k)}}\sum_{i=1}^{S_{1}^{(k)}}\widehat{F}(\mathbf{u}_{k},z^{(k)}_{i})&\text{w.~p. }p_{k},\\
+\widetilde{F}(\mathbf{u}_{k-1})+\frac{1}{S_{2}^{(k)}}\sum_{i=1}^{S_{2}^{(k)}}\left(\widehat{F}(\mathbf{u}_{k},z^{(k)}_{i})-\widehat{F}(\mathbf{u}_{k-1},z^{(k)}_{i})\right)&\text{w.~p. }1-p_{k},\end{cases}$
+(2.1)
+where $p_{0}=1$ , $z^{(k)}_{i}\overset{\text{i.i.d.}}{\sim}P_{z}$ , and $S_{1}^{(k)}$ and $S_{2}^{(k)}$ are the sample sizes at iteration $k$ . Observe that Assumption 2 guarantees that we can query $\widehat{F}$ at $\mathbf{u}_{k}$ and $\mathbf{u}_{k-1}$ using the same random seed. Our analysis will make use of conditional expectations, and to that end, we define natural filtration $\mathcal{F}_{k}$ by $\mathcal{F}_{k}:=\sigma(\{\widetilde{F}(\mathbf{u}_{j})\}_{j\leq k})$ ; namely $\mathcal{F}_{k}$ contains all the randomness that arises in the definitions of $\widetilde{F}(\mathbf{u}_{j})$ for $j\leq k.$ Following a similar argument as in Li et al. (2021), we recursively bound the variance of the estimator $\widetilde{F}$ , as summarized in the following lemma. The proof is provided in Appendix A.
+Lemma 2.1.
+Let $F$ be a monotone operator accessed via stochastic queries $\widehat{F}$ , under Assumptions 1–3. Then, the variance of $\widetilde{F}$ defined by Eq. (2.1) satisfies the following recursive bound: for all $k\geq 1,$
+$\displaystyle\mathbb{E}[\|{\widetilde{F}(\mathbf{u}_{k})-F(\mathbf{u}_{k})}\|^{2}]\leq$
+$\displaystyle\frac{p_{k}\sigma^{2}}{S_{1}^{(k)}}+(1-p_{k})\Big(\mathbb{E}[\|{\widetilde{F}(\mathbf{u}_{k-1})-F(\mathbf{u}_{k-1})}\|^{2}]+\mathbb{E}\Big[\frac{L^{2}\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\|^{2}}{S_{2}^{(k)}}\Big]\Big).$
+With the choices of $p_{k},S_{1}^{(k)},S_{2}^{(k)}$ specified in the following corollary and using induction with the inequality from Lemma 2.1, we obtain the following bound on the variance.
+Corollary 2.2.
+Given a target error $\epsilon>0$ , if for all $k\geq 1$ , $p_{k}=\frac{2}{k+1},S_{1}^{(k)}\geq\big\lceil\frac{8\sigma^{2}}{p_{k}\epsilon^{2}}\big\rceil,S_{2}^{(k)}\geq\big\lceil\frac{8L^{2}\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}}{p_{k}^{2}\epsilon^{2}}\big\rceil$ , then
+$\mathbb{E}\big[\big\|{\widetilde{F}(\mathbf{u}_{k})-F(\mathbf{u}_{k})}\big\|^{2}\big]\leq\frac{\epsilon^{2}}{k}.$
+3 Stochastic Halpern Iteration for Cocoercive Operators
+In this section, we consider the setting of $\frac{1}{L}$ -cocoercive operators $F.$ While cocoercivity is a strong assumption that implies that an operator is both Lipschitz and monotone (as discussed in Section 2), it is nevertheless the most basic setup for studying the Halpern iteration. In particular, while Halpern iteration can be applied directly to the nonexpansive counterpart of a cocoercive operator $F$ (i.e., to the linear transformation $\mathrm{Id}-\frac{2}{L}F$ , where $\frac{1}{L}$ is an upper bound on the cocoercivity parameter of $F$ ), convergence does not seem possible to establish for the more general class of Lipschitz monotone operators. We begin this section by providing a generic proof of stochastic oracle complexity, which we then use to briefly illustrate how to obtain ${\cal O}(\frac{1}{\epsilon^{4}})$ oracle complexity with a simple minibatch stochastic estimator of $F$ . We then show how to improve this bound to ${\cal O}(\frac{1}{\epsilon^{3}})$ by applying the proposed variant of the PAGE estimator from Eq. (2.1) to Halpern iteration.
+The stochastic variant of Halpern iteration that we consider is defined by
+$\mathbf{u}_{k+1}=\lambda_{k+1}\mathbf{u}_{0}+(1-\lambda_{k+1})\Big(\mathbf{u}_{k}-\frac{2}{L_{k+1}}\widetilde{F}(\mathbf{u}_{k})\Big),$
+(3.1)
+where $\widetilde{F}$ is a stochastic (possibly biased) estimator of $F$ , $\lambda_{k+1}=\Theta(\frac{1}{k})$ is the step size, and $L_{k+1}\geq L$ is a parameter of the algorithm.
+Compared to the classical iteration $\mathbf{u}_{k+1}=\lambda_{k+1}\mathbf{u}_{0}+(1-\lambda_{k+1})T(\mathbf{u}_{k})$ ,
+where $T:\mathbb{R}^{d}\to\mathbb{R}^{d}$ is a nonexpansive (1-Lipschitz) map (Halpern, 1967), $T$ is replaced by the mapping $\mathrm{Id}-\frac{2}{L_{k+1}}\widetilde{F}$ , which is stochastic and may not be nonexpansive (as the stochastic estimate $\widetilde{F}$ of $F$ is not guaranteed to be cocoercive even when $F$ is). Compared to the iteration variant considered by Diakonikolas (2020), the access to the monotone operator is stochastic and we also take slightly larger (by a factor of 2) values of $L_{k+1}$ to bound the stochastic error terms.
+Our argument for bounding the total number of stochastic queries to $F$ is based on the use of the following potential function $\mathcal{C}_{k}=\frac{A_{k}}{L_{k}}\lVert F(\mathbf{u}_{k})\rVert^{2}+B_{k}\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}_{0}\right\rangle$ ,
+where $\{A_{k}\}_{k\geq 1}$ and $\{B_{k}\}_{k\geq 1}$ are positive and non-decreasing sequences of real numbers, while the step size $\lambda_{k}$ is defined by $\lambda_{k}:=\frac{B_{k}}{A_{k}+B_{k}}$ .
+Such potential function was previously used for the deterministic case of Halpern iteration in Diakonikolas (2020); Diakonikolas and Wang (2022).
+Observe that even though we make oracle queries to $\widehat{F}$ , the potential function $\mathcal{C}_{k}$ and the final bound we obtain are in terms of the true operator value $F.$
+Compared to the analysis of Halpern iteration in the deterministic case (Diakonikolas, 2020; Diakonikolas and Wang, 2022), our analysis for the stochastic case needs to account for the error terms caused by accessing $F$ via stochastic queries and is based on an intricate inductive argument. A generic bound on iteration complexity, under mild assumptions about the estimator $\widetilde{F},$ is summarized in Theorem 3.1. The proof is in Appendix B.
+Theorem 3.1.
+Given an arbitrary $\mathbf{u}_{0}\in\mathbb{R}^{d},$ suppose that iterates $\mathbf{u}_{k}$ evolve according to Halpern iteration from Eq. (3.1) for $k\geq 1,$ where $L_{k}=2L$ and $\lambda_{k}=\frac{1}{k+1}.$
+Assume further that the stochastic estimate $\widetilde{F}(\mathbf{u})$ is unbiased for $\mathbf{u}=\mathbf{u}_{0}$ and $\mathbb{E}[\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\|^{2}]\leq\frac{\epsilon^{2}}{8}$ .
+Given $\epsilon>0,$ if for all $k\geq 1,$ we have that $\mathbb{E}\big[\big\|{F(\mathbf{u}_{k})-\widetilde{F}(\mathbf{u}_{k})}\big\|^{2}\big]\leq\frac{\epsilon^{2}}{k}$ , then for all $k\geq 1,$
+$\mathbb{E}[\left\|F(\mathbf{u}_{k}))\right\|]\leq\frac{\Lambda_{0}}{k}+\Lambda_{1}\epsilon,$
+(3.2)
+where $\Lambda_{0}=76L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|$ and $\Lambda_{1}=4\sqrt{\frac{2}{{3}}}$ .
+As a result, stochastic Halpern iteration from Eq. (3.1) returns a point $\mathbf{u}_{k}$ such that $\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|]\leq 4\epsilon$ after at most $N=\lceil\frac{2\Lambda_{0}}{\epsilon}\rceil=\mathcal{O}\big(\frac{L\|\mathbf{u}_{0}-\mathbf{u}^{*}\|}{\epsilon}\big)$ iterations.
+We remark that the previous result states an iteration complexity bound under a rather high accuracy assumption for the operator estimators at each iteration. In order to attain these accuracy requirements, we could either use a minibatch at every iteration, or use variance reduction. In what follows we explore both approaches. We further remark that we made no effort to optimize the constants in the bound above, and thus the constants are likely improvable.
+Finally, observe that due to the required low error for the estimates $\mathbb{E}[\|F(\mathbf{u}_{k})-\widetilde{F}(\mathbf{u}_{k})\|^{2}]\leq\frac{\epsilon^{2}}{k},$ we can certify by Chebyshev bound that $\mathbb{P}[\|F(\mathbf{u}_{k})-\widetilde{F}(\mathbf{u}_{k})\|\geq\epsilon]\leq\frac{1}{k}.$ In particular,
+after $O(\frac{1}{\epsilon})$ iterations, if we have $\|\tilde{F}(\mathbf{u}_{k})\|\leq\epsilon$ (which holds in expectation), then $\|F(\mathbf{u}_{k})\|$ is also $O(\epsilon)$ with probability at least $1-\epsilon$ . This is particularly important for practical implementations, where a stopping criterion can be based on the value of $\|\widetilde{F}(\mathbf{u}_{k})\|$ , which, unlike $\|F(\mathbf{u}_{k})\|$ , can be efficiently evaluated.
+3.1 Stochastic Oracle Complexity With a Simple Mini-batch Estimate
+A direct consequence of Theorem 3.1 is that a simple estimator $\widetilde{F}(\mathbf{u}_{k})=\frac{1}{S_{k}}\sum_{i=1}^{S_{k}}\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})$ leads to the overall $\mathcal{O}(\frac{1}{\epsilon^{4}})$ oracle complexity, as stated in the following corollary of Theorem 3.1.
+Corollary 3.2.
+Under the assumptions of Theorem 3.1, if $\widetilde{F}(\mathbf{u}_{k})=\frac{1}{S_{k}}\sum_{i=1}^{S_{k}}\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})$ , where $\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})$ satisfies Assumption 1 and $z^{(k)}_{i}\overset{\text{i.i.d.}}{\sim}P_{z}$ , then setting $S_{k}=\frac{\sigma^{2}(k+1)}{\epsilon^{2}}$ for all $k\geq 0$ guarantees that $\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|]\leq 4\epsilon$ after at most $\mathcal{O}\big(\frac{\sigma^{2}L^{2}\|\mathbf{u}_{0}-\mathbf{u}^{*}\|^{2}}{\epsilon^{4}}\big)$ queries to $\widehat{F}$ .
+Proof.
+The averaged operator from the theorem statement is unbiased, by Assumption 1. Further, as by Assumption 1, $\|F(\mathbf{u}_{k})-\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})\|^{2}\leq\sigma^{2},$ it immediately follows that $\|F(\mathbf{u}_{k})-\widetilde{F}(\mathbf{u}_{k})\|^{2}\leq\frac{\sigma^{2}}{S_{k}}=\frac{\epsilon^{2}}{k+1}$ . Applying Theorem 3.1, the total number of iterations $N$ of Halpern iteration until $\mathbb{E}[\|F(\mathbf{u}_{N})\|]\leq 4\epsilon$ is $N=\mathcal{O}(\frac{L\|\mathbf{u}_{0}-\mathbf{u}^{*}\|}{\epsilon}).$ To complete the proof, it remains to bound the total number of oracle queries $\widehat{F}$ to $F,$ which is simply $\sum_{k=0}^{N}S_{k}=\mathcal{O}\big(\frac{N^{2}\sigma^{2}}{\epsilon^{2}}\big)=\mathcal{O}\big(\frac{\sigma^{2}L^{2}\|\mathbf{u}_{0}-\mathbf{u}^{*}\|^{2}}{\epsilon^{4}}\big).$
+∎
+3.2 Improved Oracle Complexity via Variance Reduction
+We now consider using the recursive variance reduction method from Eq. (2.1) to obtain the variance bound required in Theorem 3.1.
+The algorithm with all its corresponding parameter settings is summarized in Algorithm 1. Of course, in practice, $\|\mathbf{u}_{0}-\mathbf{u}^{*}\|$ is not known, and instead of running the algorithm for a fixed number of iterations $N,$ one could run it, for example, until reaching a point with $\|\widetilde{F}(\mathbf{u}_{k})\|\leq\epsilon.$ Notice that convergence is guaranteed by Theorem 3.1; however it does not directly address the problem of the oracle complexity (as batch sizes depend on successive iterate distances). To resolve this issue, we first provide a bound on $\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|$ .
+Algorithm 1 Stochastic Halpern-Cocoercive
+Input $\mathbf{u}_{0}\in\mathbb{R}^{d},$ $\|\mathbf{u}_{0}-\mathbf{u}^{*}\|,$ $L,$ $\epsilon>0$ , $\sigma$ ;
+Initialization: $\Lambda_{0}=\frac{76L\|\mathbf{u}_{0}-\mathbf{u}^{*}\|}{\epsilon}$ , $N=\lceil\frac{2\Lambda_{0}}{\epsilon}\rceil$ , $S_{1}^{(0)}=\lceil\frac{8\sigma^{2}}{\epsilon^{2}}\rceil$ ;
+$\widetilde{F}(\mathbf{u}_{0})=\frac{1}{S_{1}^{(0)}}\sum_{i=1}^{S_{1}^{(0)}}\widehat{F}(\mathbf{u}_{0},z_{i}^{(0)})$ ;
+for $k=1:N$ do
+$\mathbf{u}_{k}=\frac{1}{k+1}\mathbf{u}_{0}+\frac{k}{k+1}\big(\mathbf{u}_{k-1}-\frac{1}{L}\widetilde{F}(\mathbf{u}_{k-1})\big)$ ;
+$p_{k}=\frac{2}{k+1},$ $S_{1}^{(k)}=\lceil\frac{8\sigma^{2}}{p_{k}\epsilon^{2}}\rceil,$ $S_{2}^{(k)}=\lceil\frac{8L^{2}\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\|^{2}}{{p_{k}}^{2}\epsilon^{2}}\rceil$ ;
+Compute $\widetilde{F}(\mathbf{u}_{k})$ based on Eq. (2.1)
+end for
+Return: $\mathbf{u}_{N}$
+Lemma 3.3.
+Given an arbitrary initial point $\mathbf{u}_{0}\in\mathbb{R}^{d},$ let $\{\mathbf{u}_{k}\}_{k\geq 1}$ be the sequence of points produced by Algorithm 1. Assume further that $\lambda_{k}=\frac{1}{k+1}$ , $L_{k}=2L$ for all $k\geq 0$ .
+Then,
+$\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}\leq\begin{cases}\frac{1}{4L^{2}}\|{\widetilde{F}(\mathbf{u}_{0})}\|^{2}&\text{if }k=1,\\
+\frac{2k^{2}}{L^{2}(k+1)^{2}}\|{\widetilde{F}(\mathbf{u}_{k-1})}\|^{2}+\sum_{i=0}^{k-2}\frac{2(i+1)^{2}}{k(k+1)^{2}L^{2}}\|{\widetilde{F}(\mathbf{u}_{i})}\|^{2}&\text{if }k\geq 2.\end{cases}$
+(3.3)
+Moreover,
+if for $1\leq i\leq k-1$ , all of the following conditions hold (same as in Theorem 3.1): (i) $\mathbb{E}[\|{F(\mathbf{u}_{i})}\|]\leq\frac{\Lambda_{0}}{i}+\Lambda_{1}\epsilon,$
+where $\Lambda_{0}=76L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|$ and $\Lambda_{1}=4\sqrt{\frac{2}{{3}}}$ , (ii) $\mathbb{E}\big[\big\|{F(\mathbf{u}_{i})-\widetilde{F}(\mathbf{u}_{i})}\big\|^{2}\big]\leq\frac{\epsilon^{2}}{i}$ , and (iii) $\epsilon\leq\frac{\Lambda_{0}}{k}$ , then
+$\mathbb{E}[\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}]=\mathcal{O}\Big(\frac{\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k^{2}}\Big).$
+Proof.
+For $k=1$ , $\mathbf{u}_{1}=\frac{1}{2}\mathbf{u}_{0}+\frac{1}{2}\big(\mathbf{u}_{0}-\frac{1}{L}\widetilde{F}(\mathbf{u}_{0})\big)$ , which leads to $\|{\mathbf{u}_{1}-\mathbf{u}_{0}}\|^{2}=\big\|{-\frac{1}{2L}\widetilde{F}(\mathbf{u}_{0})}\big\|^{2}=\frac{1}{4L^{2}}\big\|{\widetilde{F}(\mathbf{u}_{0})}\big\|^{2}$ . For $k\geq 2$ , recursively applying Eq. (3.1), we have $\mathbf{u}_{k}-\mathbf{u}_{k-1}=\lambda_{k}(\mathbf{u}_{0}-\mathbf{u}_{k-1})-\frac{1-\lambda_{k}}{L}\widetilde{F}(\mathbf{u}_{k-1})=\lambda_{k}(1-\lambda_{k-1})(\mathbf{u}_{0}-\mathbf{u}_{k-2})+\frac{\lambda_{k}(1-\lambda_{k-1})}{L}\widetilde{F}(\mathbf{u}_{k-2})-\frac{1-\lambda_{k}}{L}\widetilde{F}(\mathbf{u}_{k-1})$ , leading to
+$\mathbf{u}_{k}-\mathbf{u}_{k-1}=-\frac{1-\lambda_{k}}{L}\widetilde{F}(\mathbf{u}_{k-1})+\sum_{i=0}^{k-2}\frac{\lambda_{k}}{L}\Big(\prod_{j=i+1}^{k-1}(1-\lambda_{j})\Big)\widetilde{F}(\mathbf{u}_{i}).$
+Recalling that $\lambda_{k}=\frac{1}{k+1}$ , we have $\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}=\left\|-\frac{k}{L(k+1)}\widetilde{F}(\mathbf{u}_{k-1})+\sum_{i=0}^{k-2}\frac{i+1}{k(k+1)L}\widetilde{F}(\mathbf{u}_{i})\right\|^{2}$ , which gives us Inequality (3.3) by applying a generalized variant of Young’s inequality $\left\|\sum_{i=1}^{K}X_{i}\right\|^{2}\leq\sum_{i=1}^{K}K\left\|X_{i}\right\|^{2}$ twice (first to the sum of $-\frac{k}{L(k+1)}\widetilde{F}(\mathbf{u}_{k-1})$ and the summation term, then to the summation term, while noticing that $\frac{k-1}{k}\leq 1$ ).
+For the second claim, by the lemma assumptions and the analysis in the proof for Theorem 3.1, we have $\mathbb{E}[\|{F(\mathbf{u}_{i})}\|^{2}]=\mathcal{O}(\frac{L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{i^{2}})$
+for $i\leq k-1\leq\mathcal{O}\big(\frac{1}{\epsilon}\big)$ , thus $\mathbb{E}[\|{\widetilde{F}(\mathbf{u}_{i})}\|^{2}]\leq 2\mathbb{E}[\|{F(\mathbf{u}_{i})}\|]^{2}+2\mathbb{E}[\|{F(\mathbf{u}_{i})-\widetilde{F}(\mathbf{u}_{i})}\|^{2}]=\mathcal{O}(\frac{L^{2}\|{\mathbf{u}_{0}-\mathbf{u}^{*}}\|^{2}}{i^{2}})$ . Plugging this bound into Inequality (3.3), we get $\mathbb{E}[\|{\mathbf{u}_{k}-\mathbf{u}_{k-1}}\|^{2}]=\mathcal{O}(\frac{\|{\mathbf{u}_{0}-\mathbf{u}^{*}}\|^{2}}{k^{2}})$ . ∎
+Using Lemma 3.3 and making the appropriate parameter settings for the estimator from Eq. (2.1), it is now possible to apply Theorem 3.1 to obtain the improved ${\cal O}(\frac{1}{\epsilon^{3}})$ stochastic oracle complexity bound, as stated in the following corollary of Theorem 3.1.
+Corollary 3.4.
+Given arbitrary $\mathbf{u}_{0}\in\mathbb{R}^{d}$ and $\epsilon>0,$ consider $\mathbf{u}_{N}$ returned by Algorithm 1.
+Then, $\mathbb{E}[\left\|F(\mathbf{u}_{N})\right\|]\leq 4\epsilon$ with
+expected
+$\mathcal{O}(\frac{\sigma^{2}L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{3}}{\epsilon^{3}})$ oracle queries to $\widehat{F}$ .
+Proof.
+Let $m_{k}$ be the number of stochastic queries made by the estimator from Eq. (2.1) in iteration $k$ . Using Corollary 2.2, we have
+$\displaystyle\mathbb{E}\big[m_{k+1}|\mathcal{F}_{k-1}\big]=$
+$\displaystyle p_{k}S_{1}^{(k)}+2(1-p_{k})S_{2}^{(k)}=p_{k}\big\lceil\textstyle\frac{8\sigma^{2}}{p_{k}\epsilon^{2}}\big\rceil+2(1-p_{k})\big\lceil\textstyle\frac{8L^{2}\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}}{p_{k}^{2}\epsilon^{2}}\big\rceil,$
+where the first equality holds because $S_{2}^{(k)}$ is measurable w.r.t. $\mathcal{F}_{k-1}$ and the only random choice that remains is the selection of the estimator in Eq. (2.1) determined by probabilities $p_{k}$ and $1-p_{k}.$
+Taking expectation with respect to all randomness on both sides, rearranging the terms, and using the fact that $\lceil x\rceil\leq x+1$ for any $x\in\mathbb{R}$ , we obtain $\mathbb{E}[m_{k+1}]\leq\frac{8\sigma^{2}}{\epsilon^{2}}+\frac{16(1-p_{k})L^{2}\mathbb{E}[\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}]}{p_{k}^{2}\epsilon^{2}}+2$ . Recalling that $p_{k}=\frac{2}{k+1}=\mathcal{O}(\frac{1}{k})$ and $\mathbb{E}[\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}]=\mathcal{O}\big(\frac{\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k^{2}}\big)$ by Lemma 3.3, it follows that $\mathbb{E}[m_{k+1}]=\mathcal{O}\big(\frac{\sigma^{2}+L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\epsilon^{2}}\big)$ . As, by Theorem 3.1, the total number of iterations to attain $4\epsilon$ norm of the operator in expectation is $N=\left\lceil\frac{2\Lambda_{0}}{\epsilon}\right\rceil=\mathcal{O}\big(\frac{L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{\epsilon}\big)$ and $m_{0}=S_{1}^{(0)}=\mathcal{O}\big(\frac{\sigma^{2}}{\epsilon^{2}}\big)$ , the total number of queries to $\widehat{F}$ is $\mathbb{E}[M]=\mathbb{E}[\sum_{k=1}^{N}m_{k}]=\mathcal{O}\big(\frac{\sigma^{2}L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{3}}{\epsilon^{3}}\big)$ .
+∎
+We note in passing that the running time guarantee of this algorithm is of Las Vegas-type: despite its iteration number being surely bounded by $\big\lceil\frac{2\Lambda_{0}}{\epsilon}\big\rceil=\mathcal{O}\big(\frac{L\|\mathbf{u}_{0}-\mathbf{u}^{*}\|}{\epsilon}\big)$ , the batch sizes (in particular $S_{2}^{(k)}$ ) are random, and are not universally bounded.
+We further argue that Algorithm 1 can be extended to constrained settings by defining the operator mapping as in Diakonikolas (2020) and modifying the variance-reduced stochastic estimator accordingly based on the projection of $\widetilde{F}$ . We show that the newly defined operator mapping is also cocoercive while the variance of the modified estimator is bounded by the variance of $\widetilde{F}$ , so arguments from Theorem 3.1 and Corollary 3.4 extend to this case. This modified estimator need not be unbiased (as neither is $\widetilde{F}$ ); however, this is irrelevant to our analysis as it does not require unbiasedness. For completeness, a detailed extension to the constrained case is provided in Appendix B.2.
+4 Monotone and Lipschitz Setup
+Throughout this section, we assume that $F$ is monotone and $L$ -Lipschitz. While the previous section addresses the cocoercive setup using the classical version of Halpern iteration adapted to cocoercive operators, it is unclear how to directly generalize this result to the setting with monotone Lipschitz operators. In the deterministic setting, generalization to monotone Lipschitz operators can be achieved through the use of a resolvent operator (see Diakonikolas (2020)). However, such an approach incurs an additional $\log(1/\epsilon)$ factor in the iteration complexity coming from approximating the resolvent and it is further unclear how to generalize it to stochastic settings, as the properties of the stochastic estimate $\widetilde{F}$ of $F$ do not readily translate into the same or similar properties for the resolvent of $\widetilde{F}.$
+Instead of taking the approach based on the resolvent, we consider a recently proposed two-step variant of Halpern iteration (Tran-Dinh and Luo, 2021), adapted here to the stochastic setting. The variant uses extrapolation and is defined by
+$\left\{\begin{aligned} \mathbf{v}_{k}\quad&:=\lambda_{k}\mathbf{u}_{0}+\left(1-\lambda_{k}\right)\mathbf{u}_{k}-\eta_{k}\widetilde{F}(\mathbf{v}_{k-1}),\\
+\mathbf{u}_{k+1}&:=\lambda_{k}\mathbf{u}_{0}+\left(1-\lambda_{k}\right)\mathbf{u}_{k}-\eta_{k}\widetilde{F}(\mathbf{v}_{k}),\end{aligned}\right.$
+(4.1)
+where $\lambda_{k}\in\left[0,1\right)$ , $\eta_{k}>0$ , and $\widetilde{F}$ is defined by (2.1). The resulting algorithm with a complete parameter setting is provided in Algorithm 2.
+Algorithm 2 Extrapolated Stochastic Halpern-Monotone (E-Halpern)
+Input: $\mathbf{u}_{0}\in\mathbb{R}^{d},$ $\|\mathbf{u}_{0}-\mathbf{u}^{*}\|,$ $0<\eta_{0}\leq\frac{1}{3\sqrt{3}L},$ $L,$ $\epsilon>0$ , $\sigma$ ;
+Initialize: $\mathbf{v}_{-1}=\mathbf{u}_{0},$ $S_{1}^{(-1)}=S_{1}^{(0)}=\lceil\frac{8\sigma^{2}}{\epsilon^{2}}\rceil$ , $M=9L^{2}$ , $\underline{\eta}=\frac{\eta_{0}(1-2M\eta_{0}^{2})}{1-M\eta_{0}^{2}}$ ;
+Set $\Lambda_{0}=\frac{4(L^{2}\eta_{0}\underline{\eta}+1)\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\underline{\eta}^{2}}$ , $\Lambda_{1}=\frac{5\left(1+M\underline{\eta}\eta_{0}\right)}{M\underline{\eta}^{2}}$ , $N=\big\lceil\frac{\sqrt{\Lambda_{0}}}{\sqrt{\Lambda_{1}}\epsilon}\big\rceil$ ;
+$\widetilde{F}(\mathbf{v}_{-1})=\frac{1}{S_{1}^{(-1)}}\sum_{i=1}^{S_{1}^{(-1)}}\widehat{F}(\mathbf{v}_{-1},z_{i}^{(-1)})$ , where $z_{i}^{(-1)}\stackrel{{\scriptstyle\text{i.i.d.}}}{{\sim}}{\cal P}_{z}$ ;
+for $k=1:N$ do
+$\mathbf{v}_{k-1}=\frac{1}{k+1}\mathbf{u}_{0}+\frac{k}{k+1}\mathbf{u}_{k-1}-\eta_{k-1}\widetilde{F}(\mathbf{v}_{k-2})$ ;
+$p_{k-1}=\min(\frac{2}{k},1),$ $S_{1}^{(k-1)}=\lceil\frac{8\sigma^{2}}{p_{k-1}\epsilon^{2}}\rceil,$ $S_{2}^{(k-1)}=\lceil\frac{8L^{2}\|\mathbf{v}_{k-1}-\mathbf{v}_{k-2}\|^{2}}{{p_{k-1}}^{2}\epsilon^{2}}\rceil$ ;
+Compute $\widetilde{F}(\mathbf{v}_{k-1})$ based on Eq. (2.1);
+$\mathbf{u}_{k}=\frac{1}{k+1}\mathbf{u}_{0}+\frac{k}{k+1}\mathbf{u}_{k-1}-\eta_{k-1}\widetilde{F}(\mathbf{v}_{k-1})$ ;
+$\eta_{k}=\frac{(1-\frac{1}{(k+1)^{2}}-M{\eta_{k-1}}^{2})(k+1)^{2}}{(1-M{\eta_{k-1}}^{2})k(k+2)}\eta_{k-1}$
+end for
+Return: $\mathbf{u}_{N}$
+To analyze the convergence of the extrapolated Halpern variant from Eq. (4.1), we use the potential function $\mathcal{V}_{k}=A_{k}\|F(\mathbf{u}_{k})\|^{2}+B_{k}\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}_{0}\right\rangle+c_{k}L^{2}\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\|^{2}$ , previously used by Tran-Dinh and Luo (2021),
+where $A_{k}$ , $B_{k}$ and $c_{k}$ are positive parameters to be determined later. Observe that this is essentially the same potential function as $\mathcal{C}_{k},$ corrected by the quadratic term $c_{k}L^{2}\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\|^{2}$ to account for error terms appearing in the analysis of the two-step variant from Eq. (4.1). Similarly as in the cocoercive setup, the potential function is not monotonically non-increasing, due to the error terms that arise due to the stochastic access to $F.$ Bounding these error terms requires a careful technical argument, and is the main technical contribution of this section. Due to space constraints, the complete technical argument is deferred to Appendix C, while the main results are stated below.
+Theorem 4.1.
+Given an arbitrary initial point $\mathbf{u}_{0}\in\mathbb{R}^{d}$ and target error $\epsilon>0$ , assume that the iterates $\mathbf{u}_{k}$ evolve according to Algorithm 2 for $k\geq 1$ . Then, for all $k\geq 2,$
+$\displaystyle\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|^{2}+2L^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}\right]\leq$
+$\displaystyle\frac{\Lambda_{0}}{(k+1)(k+2)}+\Lambda_{1}\epsilon^{2},$
+(4.2)
+where $\Lambda_{0}=\frac{4(L^{2}\eta_{0}\underline{\eta}+1)\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\underline{\eta}^{2}}$ and $\Lambda_{1}=\frac{5\left(1+M\underline{\eta}\eta_{0}\right)}{M\underline{\eta}^{2}}$ .
+In particular, $\mathbb{E}\big[\left\|F(\mathbf{u}_{N})\right\|^{2}+2L^{2}\left\|\mathbf{u}_{N}-\mathbf{v}_{N-1}\right\|^{2}\big]\leq 2\Lambda_{1}\epsilon^{2}=\mathcal{O}(\epsilon^{2})$ after at most $N=\big\lceil\frac{\sqrt{\Lambda_{0}}}{\sqrt{\Lambda_{1}}\epsilon}\big\rceil=\mathcal{O}\big(\frac{L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{\epsilon}\big)$ iterations. The total number of oracle queries to $\widehat{F}$ is $\mathcal{O}\big(\frac{\sigma^{2}L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{3}}{\epsilon^{3}}\big)$
+in expectation.
+5 Faster Convergence Under a Sharpness Condition
+We now show that by restarting Algorithm 2, we can achieve the $\mathcal{O}\left(\frac{1}{\epsilon^{2}}\log\frac{1}{\epsilon}\right)$ oracle complexity under a milder than strong monotonicity $\mu$ -sharpness condition: for all $\mathbf{u}\in\mathcal{U}$ , $\left\langle F(\mathbf{u})-F(\mathbf{u}^{*}),\mathbf{u}-\mathbf{u}^{*}\right\rangle\geq\mu\left\|\mathbf{u}-\mathbf{u}^{*}\right\|^{2}$ . The scheme is summarized in Algorithm 3, and the proof is deferred to Appendix D.
+Algorithm 3 Restarted Extrapolated Stochastic Halpern-Sharp (Restarted E-Halpern)
+Input: $\mathbf{v}_{-1}=\mathbf{u}_{0}\in\mathbb{R}^{d},$ $\|\mathbf{u}_{0}-\mathbf{u}^{*}\|,$ $0<\eta_{0}\leq\frac{1}{3\sqrt{3}L},$ $L,$ $\mu$ , $\epsilon>0$ , $\sigma$ ;
+Initialize: $M=9L^{2},$ $\underline{\eta}=\frac{\eta_{0}\left(1-2M\eta_{0}^{2}\right)}{1-M\eta_{0}^{2}},$ $N=\Big\lceil\log\Big(\frac{\sqrt{6}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{2\epsilon}\Big)\Big\rceil$ ;
+for $k=1:N$ do
+Call Algorithm 2 with initialization $\mathbf{v}_{-1}^{(k)}=\mathbf{u}_{0}^{(k)}=\mathbf{u}_{k-1},$ $\epsilon_{k}=\frac{\mu\epsilon\sqrt{M\underline{\eta}^{2}}}{2\sqrt{5\left(1+M\underline{\eta}\eta_{0}\right)}},$ and $S_{1}^{(-1)}=S_{1}^{(0)}=\lceil\frac{8\sigma^{2}}{\epsilon_{k}^{2}}\rceil$ , for $K=\Big\lceil\frac{4\sqrt{L^{2}\eta_{0}\underline{\eta}+1}}{\mu\underline{\eta}}\Big\rceil$ iterations, and return $\mathbf{u}_{k}$ ;
+end for
+Return: $\mathbf{u}_{N}$
+Theorem 5.1.
+Given $F$ that is $L$ -Lipschitz and $\mu$ -sharp and the precision parameter $\epsilon$ , Algorithm 3 outputs $\mathbf{u}_{N}$ with $\mathbb{E}[\left\|\mathbf{u}_{N}-\mathbf{u}^{*}\right\|^{2}]\leq\epsilon^{2}$ as well as $\mathbb{E}\big[\left\|F(\mathbf{u}_{N})\right\|^{2}\big]\leq L^{2}\epsilon^{2}$ after $N=\mathcal{O}\left(\frac{L}{\mu}\log\frac{\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{\epsilon}\right)$ iterations with at most $\mathcal{O}\Big(\frac{\sigma^{2}(\mu+L)\log(\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|/\epsilon)+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\mu^{3}\epsilon^{2}}\Big)$ queries to $\widehat{F}$
+in expectation.
+6 Numerical experiments and discussion
+We now illustrate the empirical performance of stochastic Halpern iteration on robust least square problems. Specifically, given data matrix $\mathbf{A}\in\mathbb{R}^{n\times d}$ and noisy observation vector $\mathbf{b}\in\mathbb{R}^{n}$ subject to bounded deterministic perturbation $\delta$ with $\left\|\delta\right\|\leq\rho$ , robust least square (RLS) minimizes the worst-case residue as $\min_{\mathbf{x}\in\mathbb{R}^{d}}\max_{\delta:\left\|\delta\right\|\leq\rho}\left\|\mathbf{A}\mathbf{x}-\mathbf{y}\right\|^{2}_{2}$ with $\mathbf{y}=\mathbf{b}+\delta$ (El Ghaoui and Lebret, 1997). We consider solving MI induced from RLS with Lagrangian relaxation
+where $\mathbf{u}=(\mathbf{x},\mathbf{y})^{T}$ and $F(\mathbf{u})=\big(\nabla_{\mathbf{x}}L_{\lambda}(\mathbf{x},\mathbf{y}),-\nabla_{\mathbf{y}}L_{\lambda}(\mathbf{x},\mathbf{y})\big)^{T}$ for $L_{\lambda}(\mathbf{x},\mathbf{y})=\frac{1}{2n}\left\|A\mathbf{x}-\mathbf{y}\right\|^{2}_{2}-\frac{\lambda}{2n}\left\|\mathbf{y}-\mathbf{b}\right\|_{2}^{2}$ .
+We use a real-world superconductivity dataset (Hamidieh, 2018) from UCI Machine Learning Repository (Dua and Graff, 2017) for our experiment, which is of size $21263\times 81$ . To ensure the problem is concave in $\mathbf{y},$ we need that $\lambda>1;$ in the experiments, we set $\lambda=1.5$ .
+(a) Comparison on superconductivity dataset.
+(b) E-Halpern with different stochastic estimators.
+Figure 1: Empirical comparison of min-max algorithms on the robust least squares problem.
+For the experiment, we compare Halpern, E-Halpern, and Restarted E-Halpern algorithms with gradient descent-ascent (GDA), extragradient (EG) (Korpelevich, 1977), and Popov’s method (Popov, 1980)
+in stochastic settings. Even though our theoretical results for Restarted E-Halpern require scheduled restarts based on known problem parameters, in the implementation, to avoid complicated parameter tuning and illustrate empirical performance, we restart E-Halpern whenever the norm of stochastic estimator $\widetilde{F}$ used in E-Halpern halves. All Halpern variants are implemented with PAGE estimator considered in our paper; all other algorithms are implemented using minibatches. Additionally, we compare E-Halpern with the PAGE estimator against E-Halpern with single-sample and mini-batch estimators.
+We report and plot the (empirical) operator norm $\|F(\mathbf{u})\|$ against the number of stochastic operator evaluations. Note that evaluations of $\|F(\mathbf{u})\|$ are only used for plotting but not for running any of the algorithms.
+We use the same random initialization and tune
+the batch sizes and step sizes (to the values achieving fastest convergence under noise) for each method by grid search. We use constant batch sizes and constant step sizes for GDA, EG, and Popov. We also choose the batch sizes of PAGE estimator to ensure $\mathbb{E}[\|F(\mathbf{u}_{k})-\widetilde{F}(\mathbf{u}_{k})\|^{2}]\leq\mathcal{O}(\frac{1}{k})$ , which handles error accumulation (Lee and Kim, 2021) and early stagnation of stochastic Halpern iteration. We implement all the algorithms in Python and run each algorithm using one CPU core on a macOS machine with Intel 2.3GHz Dual Core i5 Processor and 8GB RAM.22
+2
+Code is available at https://github.com/zephyr-cai/Halpern.
+We observe that (i) in Figure 1(a) both Halpern and E-Halpern exhibit faster convergence to approximate stationary points (with much smaller gradient norm after same number of gradient evaluations) than other algorithms, and restarting E-Halpern provides additional speedup, validating our theoretical insights;
+(ii) in Figure 1(b), E-Halpern with PAGE estimator displays faster convergence compared to other two estimators, in agreement with our theoretical analysis.
+7 (Near) Tightness of Stochastic Oracle Complexity Bounds
+In this section, we briefly discuss lower bound reductions which imply that our results for Lipschitz sharp setups are unimprovable in terms of the dependence on $\epsilon.$
+To keep the discussion simple, we only focus on the $\epsilon$ dependence here and unconstrained settings. The near-optimality of our bounds
+is implied by the known lower bound for the optimality gap in $L$ -smooth $\mu$ -strongly convex stochastic optimization, which is of the order $\Omega(\frac{\sigma^{2}}{\mu\epsilon})$ in the high noise $\sigma^{2}$ or low error $\epsilon$ regimes; see, for example, the discussion in Ghadimi and Lan (2016) (the omitted part of the lower bound comes from the deterministic complexity of smooth strongly convex optimization and is less interesting in our context). The same lower bound implies a lower bound of $\Omega(\frac{\sigma^{2}}{\epsilon^{2}})$ for minimizing the gradient of a smooth strongly convex function $f$ . Suppose not (for the purpose of contradiction); i.e., suppose that there were an algorithm that constructs a point $\mathbf{x}$ with $\mathbb{E}[\|\nabla f(\mathbf{x})\|^{2}]\leq\bar{\epsilon}^{2}$ in $o(\frac{\sigma^{2}}{\bar{\epsilon}^{2}})$ oracle queries to the stochastic gradient. By $\mu$ -strong convexity of $f,$ this would imply that we get $\mathbb{E}[f(\mathbf{x})-\min_{\mathbf{u}}f(\mathbf{u})]\leq\frac{1}{2\mu}\mathbb{E}[\|\nabla f(\mathbf{x})\|^{2}]\leq\frac{\bar{\epsilon}^{2}}{2\mu}$ with $o(\frac{\sigma^{2}}{\bar{\epsilon}^{2}})$ oracle queries to the stochastic gradient. Setting $\bar{\epsilon}=\sqrt{{\epsilon}{\mu}},$ we get that this would imply oracle complexity $o(\frac{\sigma^{2}}{\mu\epsilon})$ , and we reach a contradiction on the lower bound for the optimality gap.
+Hence, $\Omega(\frac{\sigma^{2}}{\epsilon^{2}})$ lower bound applies to the minimization of the gradient of smooth strongly convex functions in stochastic regimes.
+Observe that the gradients of smooth strongly convex functions are Lipschitz and strongly monotone (thus also sharp), so a lower bound for this problem class implies a lower bound for the class of sharp Lipschitz monotone inclusion problems. Thus, we can conclude that our result from Section 5 for sharp Lipschitz monotone inclusion problems that gives $\mathcal{O}\Big(\frac{\sigma^{2}(\mu+L)\log(\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|/\epsilon)+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\mu^{3}\epsilon^{2}}\Big)$ stochastic oracle complexity is near-optimal in terms of the dependence on $\sigma$ and $\epsilon$ (but likely not near-optimal in terms of the dependence on the remaining problem parameters).
+8 Conclusion
+We introduced stochastic variance reduced variants of Halpern iteration for addressing monotone inclusion problems. Our work addresses all standard classes of Lipschitz monotone problems and achieves improved stochastic oracle complexity guarantees, all for the last iterate. Subsequent to this work, Chen and Luo (2022) obtained near-optimal bounds for the cases considered in this work, by reducing the Lipschitz monotone case to the Lipschitz strongly monotone case, using regularization. It is an open question to obtain such near-optimal bounds with a direct method, without the use of regularization.
+Acknowledgements
+XC and CS were supported in part by the NSF grant 2023239.
+CG’s research was partially supported by
+INRIA Associate Teams project, FONDECYT 1210362 grant, ANID Anillo ACT210005 grant, and National Center for Artificial Intelligence CENIA FB210017, Basal ANID. Part of this work was done while CG was at the University of Twente. JD was supported by the NSF grant 2007757, by the Office of Naval Research under contract number N00014-22-1-2348, and by the Wisconsin Alumni Research Foundation. Part of this work was done while JD and CS were visiting Simons Institute for the Theory of Computing.
+References
+Alacaoglu and Malitsky (2022)
+Ahmet Alacaoglu and Yura Malitsky.
+Stochastic variance reduction for variational inequality methods.
+In Proc. COLT’22, 2022.
+Allen-Zhu (2017)
+Zeyuan Allen-Zhu.
+Katyusha: The first direct acceleration of stochastic gradient
+methods.
+The Journal of Machine Learning Research, 18(1):8194–8244, 2017.
+Arjevani et al. (2020)
+Yossi Arjevani, Yair Carmon, John C Duchi, Dylan J Foster, Ayush Sekhari, and
+Karthik Sridharan.
+Second-order information in non-convex stochastic optimization: Power
+and limitations.
+In Proc. COLT’20, 2020.
+Beck (2017)
+Amir Beck.
+First-order methods in optimization, volume 25.
+SIAM, 2017.
+Carmon et al. (2019)
+Yair Carmon, Yujia Jin, Aaron Sidford, and Kevin Tian.
+Variance reduction for matrix games.
+In Proc. NeurIPS’19, 2019.
+Chavdarova et al. (2019)
+Tatjana Chavdarova, Gauthier Gidel, François Fleuret, and Simon
+Lacoste-Julien.
+Reducing noise in GAN training with variance reduced extragradient.
+In Proc. NeurIPS’19, 2019.
+Chen and Luo (2022)
+Lesi Chen and Luo Luo.
+Near-optimal algorithms for making the gradient small in stochastic
+minimax optimization.
+arXiv preprint arXiv:2208.05925, 2022.
+Cheval et al. (2022)
+Horatiu Cheval, Ulrich Kohlenbach, and Laurentiu Leustean.
+On modified Halpern and Tikhonov-Mann iterations.
+arXiv preprint arXiv:2203.11003, 2022.
+Contreras and Cominetti (2021)
+Juan Pablo Contreras and Roberto Cominetti.
+Optimal error bounds for nonexpansive fixed-point iterations in
+normed spaces.
+arXiv preprint, arXiv:2108.10969, 2021.
+Cutkosky and Orabona (2019)
+Ashok Cutkosky and Francesco Orabona.
+Momentum-based variance reduction in non-convex SGD.
+In Proc. NeurIPS’19, 2019.
+Defazio et al. (2014)
+Aaron Defazio, Francis Bach, and Simon Lacoste-Julien.
+SAGA: A fast incremental gradient method with support for
+non-strongly convex composite objectives.
+In Proc. NeurIPS’14, 2014.
+Diakonikolas (2020)
+Jelena Diakonikolas.
+Halpern iteration for near-optimal and parameter-free monotone
+inclusion and strong solutions to variational inequalities.
+In Proc. COLT’20, 2020.
+Diakonikolas and Wang (2022)
+Jelena Diakonikolas and Puqian Wang.
+Potential function-based framework for minimizing gradients in convex
+and min-max optimization.
+SIAM Journal on Optimization, 32(3):1668–1697, 2022.
+Diakonikolas et al. (2021)
+Jelena Diakonikolas, Constantinos Daskalakis, and Michael Jordan.
+Efficient methods for structured nonconvex-nonconcave min-max
+optimization.
+In Proc. AISTATS’21, 2021.
+Dua and Graff (2017)
+Dheeru Dua and Casey Graff.
+UCI Machine Learning Repository, 2017.
+URL http://archive.ics.uci.edu/ml.
+El Ghaoui and Lebret (1997)
+Laurent El Ghaoui and Hervé Lebret.
+Robust solutions to least-squares problems with uncertain data.
+SIAM Journal on Matrix Analysis and Applications, 18(4):1035–1064, 1997.
+Facchinei and Pang (2003)
+Francisco Facchinei and Jong-Shi Pang.
+Finite-dimensional variational inequalities and complementarity
+problems.
+Springer Science & Business Media, 2003.
+Fang et al. (2018)
+Cong Fang, Chris Junchi Li, Zhouchen Lin, and Tong Zhang.
+Spider: Near-optimal non-convex optimization via stochastic
+path-integrated differential estimator.
+In Proc. NeurIPS’18, 2018.
+Ghadimi and Lan (2016)
+Saeed Ghadimi and Guanghui Lan.
+Accelerated gradient methods for nonconvex nonlinear and stochastic
+programming.
+Mathematical Programming, 156(1-2):59–99,
+2016.
+Golowich et al. (2020)
+Noah Golowich, Sarath Pattathil, Constantinos Daskalakis, and Asuman Ozdaglar.
+Last iterate is slower than averaged iterate in smooth convex-concave
+saddle point problems.
+In Proc. COLT’20, 2020.
+Halpern (1967)
+Benjamin Halpern.
+Fixed points of nonexpanding maps.
+Bulletin of the American Mathematical Society, 73(6):957–961, 1967.
+Hamidieh (2018)
+Kam Hamidieh.
+A data-driven statistical model for predicting the critical
+temperature of a superconductor.
+Computational Materials Science, 154:346–354, 2018.
+Iusem et al. (2017)
+Alfredo N Iusem, Alejandro Jofré, Roberto Imbuzeiro Oliveira, and Philip
+Thompson.
+Extragradient method with variance reduction for stochastic
+variational inequalities.
+SIAM Journal on Optimization, 27(2):686–724, 2017.
+Johnson and Zhang (2013)
+Rie Johnson and Tong Zhang.
+Accelerating stochastic gradient descent using predictive variance
+reduction.
+In Proc. NeurIPS’13, 2013.
+Kim (2019)
+Donghwan Kim.
+Accelerated proximal point method and forward method for monotone
+inclusions.
+arXiv preprint arXiv:1905.05149, 2019.
+Kohlenbach (2011)
+Ulrich Kohlenbach.
+On quantitative versions of theorems due to F.E. Browder and R.
+Wittmann.
+Advances in Mathematics, 226(3):2764–2795, 2011.
+Kohlenbach and Leuştean (2012)
+Ulrich Kohlenbach and Laurenţiu Leuştean.
+Effective metastability of Halpern iterates in CAT(0) spaces.
+Advances in Mathematics, 231(5):2526–2556, 2012.
+Korpelevich (1977)
+GM Korpelevich.
+Extragradient method for finding saddle points and other problems.
+Matekon, 13(4):35–49, 1977.
+Lee and Kim (2021)
+Sucheol Lee and Donghwan Kim.
+Fast extra gradient methods for smooth structured
+nonconvex-nonconcave minimax problems.
+In Proc. NeurIPS’21, 2021.
+Lei et al. (2017)
+Lihua Lei, Cheng Ju, Jianbo Chen, and Michael I Jordan.
+Non-convex finite-sum optimization via SCSG methods.
+In Proc. NeurIPS’17, 2017.
+Leustean (2007)
+Laurentiu Leustean.
+Rates of asymptotic regularity for Halpern iterations of
+nonexpansive mappings.
+Journal of Universal Computer Science, 13(11):1680–1691, 2007.
+Li et al. (2021)
+Zhize Li, Hongyan Bao, Xiangliang Zhang, and Peter Richtárik.
+PAGE: A simple and optimal probabilistic gradient estimator for
+nonconvex optimization.
+In Proc. ICML’21, 2021.
+Lieder (2021)
+Felix Lieder.
+On the convergence rate of the Halpern-iteration.
+Optimization Letters, 15(2):405–418,
+2021.
+Loizou et al. (2021)
+Nicolas Loizou, Hugo Berard, Gauthier Gidel, Ioannis Mitliagkas, and Simon
+Lacoste-Julien.
+Stochastic gradient descent-ascent and consensus optimization for
+smooth games: Convergence analysis under expected co-coercivity.
+In Proc. NeurIPS’21, 2021.
+Minty (1962)
+George J Minty.
+Monotone (nonlinear) operators in Hilbert space.
+Duke Mathematical Journal, 29(3):341–346,
+1962.
+Nemirovski (2004)
+Arkadi Nemirovski.
+Prox-method with rate of convergence $O(1/t)$ for variational
+inequalities with Lipschitz continuous monotone operators and smooth
+convex-concave saddle point problems.
+SIAM Journal on Optimization, 15(1):229–251, 2004.
+Nesterov (2007)
+Yurii Nesterov.
+Dual extrapolation and its applications to solving variational
+inequalities and related problems.
+Mathematical Programming, 109(2-3):319–344, 2007.
+Nguyen et al. (2017)
+Lam M Nguyen, Jie Liu, Katya Scheinberg, and Martin Takáč.
+SARAH: A novel method for machine learning problems using
+stochastic recursive gradient.
+In Proc. ICML’17, 2017.
+Ouyang and Xu (2019)
+Yuyuan Ouyang and Yangyang Xu.
+Lower complexity bounds of first-order methods for convex-concave
+bilinear saddle-point problems.
+Mathematical Programming, Aug 2019.
+Palaniappan and Bach (2016)
+Balamurugan Palaniappan and Francis Bach.
+Stochastic variance reduction methods for saddle-point problems.
+In Proc. NeurIPS’16, 2016.
+Pang (1997)
+Jong-Shi Pang.
+Error bounds in mathematical programming.
+Mathematical Programming, 79(1):299–332,
+1997.
+Popov (1980)
+L. D. Popov.
+A modification of the Arrow-Hurwicz method for search of saddle
+points.
+Mathematical notes of the Academy of Sciences of the USSR,
+28(5):845–848, Nov 1980.
+Reddi et al. (2016)
+Sashank J Reddi, Ahmed Hefny, Suvrit Sra, Barnabas Poczos, and Alex Smola.
+Stochastic variance reduction for nonconvex optimization.
+In Proc. ICML’16, 2016.
+Rockafellar (1970)
+R Tyrrell Rockafellar.
+Monotone operators associated with saddle-functions and minimax
+problems.
+Nonlinear Functional Analysis, 18(part 1):397–407, 1970.
+Rockafellar (1976)
+R Tyrrell Rockafellar.
+Monotone operators and the proximal point algorithm.
+SIAM Journal on Control and Optimization, 14(5):877–898, 1976.
+Roulet and d’Aspremont (2020)
+Vincent Roulet and Alexandre d’Aspremont.
+Sharpness, restart, and acceleration.
+SIAM Journal on Optimization, 30(1):262–289, 2020.
+Sabach and Shtern (2017)
+Shoham Sabach and Shimrit Shtern.
+A first order method for solving convex bilevel optimization
+problems.
+SIAM Journal on Optimization, 27(2):640–660, 2017.
+Schmidt et al. (2017)
+Mark Schmidt, Nicolas Le Roux, and Francis Bach.
+Minimizing finite sums with the stochastic average gradient.
+Mathematical Programming, 162(1):83–112,
+2017.
+Song et al. (2020)
+Chaobing Song, Yong Jiang, and Yi Ma.
+Variance reduction via accelerated dual averaging for finite-sum
+optimization.
+In Proc. NeurIPS’20, 2020.
+Stampacchia (1964)
+Guido Stampacchia.
+Formes bilineaires coercitives sur les ensembles convexes.
+Académie des Sciences de Paris, 258:4413–4416,
+1964.
+Tran-Dinh and Luo (2021)
+Quoc Tran-Dinh and Yang Luo.
+Halpern-type accelerated and splitting algorithms for monotone
+inclusions.
+arXiv preprint arXiv:2110.08150, 2021.
+Wittmann (1992)
+Rainer Wittmann.
+Approximation of fixed points of nonexpansive mappings.
+Archiv der Mathematik, 58(5):486–491,
+1992.
+Yoon and Ryu (2021)
+Taeho Yoon and Ernest K Ryu.
+Accelerated algorithms for smooth convex-concave minimax problems
+with $O(1/k^{2})$ rate on squared gradient norm.
+In Proc. ICML’21, 2021.
+Zhou et al. (2018a)
+Dongruo Zhou, Pan Xu, and Quanquan Gu.
+Finding local minima via stochastic nested variance reduction.
+arXiv preprint arXiv:1806.08782, 2018a.
+Zhou et al. (2018b)
+Dongruo Zhou, Pan Xu, and Quanquan Gu.
+Stochastic nested variance reduction for nonconvex optimization.
+In Proc. NeurIPS’18, 2018b.
+Appendix A Omitted proofs from Section 2
+See 2.1
+Proof.
+Using the definition of $\widetilde{F},$ conditional on $\mathcal{F}_{k-1}$ , we have for all $k\geq 1$
+$\displaystyle\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{k})-F(\mathbf{u}_{k})\right\|^{2}\Big|\mathcal{F}_{k-1}\Big]$
+$\displaystyle=$
+$\displaystyle p_{k}\mathbb{E}\Big[\Big\|\frac{1}{S_{1}^{(k)}}\sum_{i=1}^{S_{1}^{(k)}}\widehat{F}(\mathbf{u}_{k},z^{(k)}_{i})-F(\mathbf{u}_{k})\Big\|^{2}\Big|\mathcal{F}_{k-1}\Big]$
+$\displaystyle+(1-p_{k})\mathbb{E}\Big[\Big\|\widetilde{F}(\mathbf{u}_{k-1})+\frac{1}{S_{2}^{(k)}}\sum_{i=1}^{S_{2}^{(k)}}\left(\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})-\widehat{F}(\mathbf{u}_{k-1},z_{i}^{(k)})\right)-F(\mathbf{u}_{k})\Big\|^{2}\Big|\mathcal{F}_{k-1}\Big],$
+where $\mathcal{F}_{k-1}=\sigma(\{\widetilde{F}(\mathbf{u}_{j})\}_{j\leq{k-1}})$ is the natural filtration, as defined in Section 2. Note that both $\mathbf{u}_{k-1}\in\mathcal{F}_{k-1}$ and $\mathbf{u}_{k}\in\mathcal{F}_{k-1}$ by the updating scheme considered in this paper, so we have
+$\displaystyle\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{k})-F(\mathbf{u}_{k})\right\|^{2}\Big|\mathcal{F}_{k-1}\Big]$
+(A.1)
+$\displaystyle=$
+$\displaystyle p_{k}\underbrace{\mathbb{E}_{z^{(k)}}\Big[\Big\|\frac{1}{S_{1}^{(k)}}\sum_{i=1}^{S_{1}^{(k)}}\widehat{F}(\mathbf{u}_{k},z^{(k)}_{i})-F(\mathbf{u}_{k})\Big\|^{2}\Big]}_{\mathcal{T}_{1}}$
+$\displaystyle+(1-p_{k})\underbrace{\mathbb{E}_{z^{(k)}}\Big[\Big\|\widetilde{F}(\mathbf{u}_{k-1})+\frac{1}{S_{2}^{(k)}}\sum_{i=1}^{S_{2}^{(k)}}\left(\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})-\widehat{F}(\mathbf{u}_{k-1},z_{i}^{(k)})\right)-F(\mathbf{u}_{k})\Big\|^{2}\Big]}_{\mathcal{T}_{2}}.$
+Here we use $\mathbb{E}_{z^{(k)}}$ to denote taking expectation with respect to the randomness of random seeds $z^{(k)}_{i}\overset{\text{i.i.d.}}{\sim}P_{z}$ sampled at iteration $k$ .
+For the term $\mathcal{T}_{1}$ , we have
+$\displaystyle\mathbb{E}_{z^{(k)}}\Big[\Big\|\frac{1}{S_{1}^{(k)}}\sum_{i=1}^{S_{1}^{(k)}}\widehat{F}(\mathbf{u}_{k},z^{(k)}_{i})-F(\mathbf{u}_{k})\Big\|^{2}\Big]$
+(A.2)
+$\displaystyle\overset{(i)}{=}$
+$\displaystyle\mathbb{E}_{z^{(k)}}\Big[\frac{1}{\big(S_{1}^{(k)}\big)^{2}}\sum_{i=1}^{S_{1}^{(k)}}\left\|\widehat{F}(\mathbf{u}_{k},z^{(k)}_{i})-F(\mathbf{u}_{k})\right\|^{2}\Big]\leq\frac{\sigma^{2}}{S_{1}^{(k)}},$
+where $(i)$ is due to $z_{i}^{(k)}\overset{\text{i.i.d.}}{\sim}P_{z}$ and $\mathbb{E}\left[\widehat{F}(\mathbf{u}_{k},z^{(k)}_{i})\right]=F(\mathbf{u}_{k})$ .
+For the term $\mathcal{T}_{2}$ , we have
+$\displaystyle\mathbb{E}_{z^{(k)}}\Big[\Big\|\widetilde{F}(\mathbf{u}_{k-1})+\frac{1}{S_{2}^{(k)}}\sum_{i=1}^{S_{2}^{(k)}}\left(\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})-\widehat{F}(\mathbf{u}_{k-1},z_{i}^{(k)})\right)-F(\mathbf{u}_{k})\Big\|^{2}\Big]$
+$\displaystyle\overset{(i)}{=}$
+$\displaystyle\mathbb{E}_{z^{(k)}}\Big[\frac{1}{\big(S_{2}^{(k)}\big)^{2}}\Big\|\sum_{i=1}^{S_{2}^{(k)}}\left[\left(\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})-\widehat{F}(\mathbf{u}_{k-1},z_{i}^{(k)})\right)-\left(F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right)\right]\Big\|^{2}\Big]$
+$\displaystyle+\mathbb{E}_{z^{(k)}}\Big[\Big\|\widetilde{F}(\mathbf{u}_{k-1})-F(\mathbf{u}_{k-1})\Big\|^{2}\Big]$
+$\displaystyle\overset{(ii)}{=}$
+$\displaystyle\mathbb{E}_{z^{(k)}}\Big[\frac{1}{\big(S_{2}^{(k)}\big)^{2}}\sum_{i=1}^{S_{2}^{(k)}}\Big\|\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})-\widehat{F}(\mathbf{u}_{k-1},z_{i}^{(k)})-\left(F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right)\Big\|^{2}\Big]$
+$\displaystyle+\mathbb{E}_{z^{(k)}}\Big[\Big\|\widetilde{F}(\mathbf{u}_{k-1})-F(\mathbf{u}_{k-1})\Big\|^{2}\Big],$
+where $(i)$ and $(ii)$ can be verified by expanding the square norm and using the assumption that all $z_{i}^{(k)}$ are i.i.d. and $\widehat{F}(\mathbf{x},z_{i}^{(k)})$ is unbiased. Since $\mathbb{E}[\left\|X-\mathbb{E}X\right\|^{2}]\leq\mathbb{E}[\left\|X\right\|^{2}]$ for any random variable $X$ , and using Assumption 3 for the stochastic queries, we have
+$\displaystyle\mathbb{E}_{z^{(k)}}\Big[\frac{1}{\big(S_{2}^{(k)}\big)^{2}}\sum_{i=1}^{S_{2}^{(k)}}\Big\|\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})-\widehat{F}(\mathbf{u}_{k-1},z_{i}^{(k)})-\left(F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right)\Big\|^{2}\Big]$
+$\displaystyle\leq$
+$\displaystyle\frac{1}{\big(S_{2}^{(k)}\big)^{2}}\sum_{i=1}^{S_{2}^{(k)}}\mathbb{E}_{z_{i}^{(k)}}\Big[\left\|\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})-\widehat{F}(\mathbf{u}_{k-1},z_{i}^{(k)})\right\|^{2}\Big]\leq\frac{L^{2}\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}}{S_{2}^{(k)}}.$
+So we obtain
+$\displaystyle\mathbb{E}_{z^{(k)}}\Big[\Big\|\widetilde{F}(\mathbf{u}_{k-1})+\frac{1}{S_{2}^{(k)}}\sum_{i=1}^{S_{2}^{(k)}}\left(\widehat{F}(\mathbf{u}_{k},z_{i}^{(k)})-\widehat{F}(\mathbf{u}_{k-1},z_{i}^{(k)})\right)-F(\mathbf{u}_{k})\Big\|^{2}\Big]$
+(A.3)
+$\displaystyle\leq$
+$\displaystyle\left\|\widetilde{F}(\mathbf{u}_{k-1})-F(\mathbf{u}_{k-1})\right\|^{2}+\frac{L^{2}\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}}{S_{2}^{(k)}}.$
+Plugging Inequalities (A.2) and (A.3) into Eq. (A.1), we have
+$\displaystyle\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{k})-F(\mathbf{u}_{k})\right\|^{2}\big|\mathcal{F}_{k-1}\Big]$
+$\displaystyle\leq$
+$\displaystyle\frac{p_{k}\sigma^{2}}{S_{1}^{(k)}}+(1-p_{k})\left\|\widetilde{F}(\mathbf{u}_{k-1})-F(\mathbf{u}_{k-1})\right\|^{2}+\frac{(1-p_{k})L^{2}\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}}{S_{2}^{(k)}}.$
+Taking expectation with respect to all the randomness on both sides, and by the tower property of conditional expectations, we now obtain
+$\displaystyle\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{k})-F(\mathbf{u}_{k})\right\|^{2}\Big]\leq$
+$\displaystyle p_{k}\sigma^{2}\mathbb{E}\Big[\frac{1}{S_{1}^{(k)}}\Big]+(1-p_{k})\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{k-1})-F(\mathbf{u}_{k-1})\right\|^{2}\Big]$
+$\displaystyle+(1-p_{k})L^{2}\mathbb{E}\Big[\frac{\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}}{S_{2}^{(k)}}\Big],$
+which leads to the inequality in the lemma when $S_{1}^{(k)}$ are deterministic, thus completing the proof.
+∎
+See 2.2
+Proof.
+We prove it by induction whose base step is
+$\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{1})-F(\mathbf{u}_{1})\right\|^{2}\Big]\leq\frac{p_{1}\sigma^{2}}{S_{1}^{(1)}}\leq\frac{\epsilon^{2}}{8}\leq\epsilon^{2},$
+where we use that $p_{1}=1$ .
+Assume that the result holds for all $j2.1, we have that at iteration $k$
+$\displaystyle\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{k})-F(\mathbf{u}_{k})\right\|^{2}\Big]$
+$\displaystyle\leq$
+$\displaystyle\frac{p_{k}\sigma^{2}}{S_{1}^{(k)}}+(1-p_{k})\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{k-1})-F(\mathbf{u}_{k-1})\right\|^{2}\Big]+(1-p_{k})L^{2}\mathbb{E}\Big[\frac{\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}}{S_{2}^{(k)}}\Big].$
+Plugging in our choice of $p_{k}$ , $S_{1}^{(k)}$ and $S_{2}^{(k)}$ , we have
+$\displaystyle\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{k})-F(\mathbf{u}_{k})\right\|^{2}\Big]\leq$
+$\displaystyle\frac{p_{k}^{2}\epsilon^{2}}{8}+\frac{(1-p_{k})\epsilon^{2}}{k-1}+\frac{p_{k}^{2}(1-p_{k})\epsilon^{2}}{8}$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\frac{p_{k}^{2}\epsilon^{2}}{4}+\frac{(1-p_{k})\epsilon^{2}}{k-1}=\left(\frac{1}{(k+1)^{2}}+\frac{1}{k+1}\right)\epsilon^{2}\overset{(ii)}{\leq}\frac{\epsilon^{2}}{k},$
+where $(i)$ is due to $\frac{p_{k}^{2}(1-p_{k})\epsilon^{2}}{8}\leq\frac{p_{k}^{2}\epsilon^{2}}{8}$ , and $(ii)$ is because $k(k+2)\leq(k+1)^{2}$ . Hence, by induction, we can conclude that the result holds for all $k\geq 1$ .
+∎
+Appendix B Omitted proofs from Section 3
+B.1 Unconstrained settings
+Our argument for bounding the total number of stochastic queries to $F$ is based on the use of the following potential function, which was previously used for the deterministic case of Halpern iteration in (Diakonikolas, 2020; Diakonikolas and Wang, 2022),
+$\mathcal{C}_{k}=\frac{A_{k}}{L_{k}}\lVert F(\mathbf{u}_{k})\rVert^{2}+B_{k}\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}_{0}\right\rangle,$
+(B.1)
+where $\{A_{k}\}_{k\geq 1}$ and $\{B_{k}\}_{k\geq 1}$ are positive and non-decreasing sequences of real numbers, while the step size $\lambda_{k}$ is defined by $\lambda_{k}:=\frac{B_{k}}{A_{k}+B_{k}}$ .
+We start the proof by first justifying that a bound on the chosen potential function $\mathcal{C}_{k}$ leads to a bound on $\|F(\mathbf{u}_{k})\|$ in expectation. The proof is a simple extension of (Diakonikolas, 2020, Lemma 4) and is provided for completeness.
+Lemma B.1.
+Given $k\geq 1,$ let $\mathcal{C}_{k}$ be defined as in Eq. (B.1) and let $\mathbf{u}^{*}$ be a solution to the monotone inclusion problem corresponding to $F$ . If $\mathbb{E}\left[\mathcal{C}_{k}\right]\leq\mathbb{E}\left[\mathcal{E}_{k}\right]$ for some error term $\mathcal{E}_{k}$ , then
+$\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|^{2}\right]\leq\frac{B_{k}L_{k}}{A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|\right]+\frac{L_{k}}{A_{k}}\mathbb{E}\left[\mathcal{E}_{k}\right],$
+(B.2)
+where the expectation is taken with respect to all random queries to $F$ .
+Proof.
+By the definition of $\mathcal{C}_{k}$ , we have
+$\displaystyle\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|^{2}\right]\leq$
+$\displaystyle\frac{B_{k}L_{k}}{A_{k}}\mathbb{E}\left[\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{0}-\mathbf{u}_{k}\right\rangle\right]+\frac{L_{k}}{A_{k}}\mathbb{E}\left[\mathcal{E}_{k}\right]$
+$\displaystyle=$
+$\displaystyle\frac{B_{k}L_{k}}{A_{k}}\mathbb{E}\left[\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{0}-\mathbf{u}^{*}+\mathbf{u}^{*}-\mathbf{u}_{k}\right\rangle\right]+\frac{L_{k}}{A_{k}}\mathbb{E}\left[\mathcal{E}_{k}\right]$
+$\displaystyle=$
+$\displaystyle\frac{B_{k}L_{k}}{A_{k}}\mathbb{E}\left[\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{0}-\mathbf{u}^{*}\right\rangle\right]+\frac{B_{k}L_{k}}{A_{k}}\mathbb{E}\left[\left\langle F(\mathbf{u}_{k}),\mathbf{u}^{*}-\mathbf{u}_{k}\right\rangle\right]+\frac{L_{k}}{A_{k}}\mathbb{E}\left[\mathcal{E}_{k}\right].$
+Since $\mathbf{u}^{*}$ is a solution to the monotone inclusion problem, as discussed in Section 2, it is also a weak VI (or MVI) solution, and thus
+$(\forall k\geq 0)\quad\left\langle F(\mathbf{u}_{k}),\mathbf{u}^{*}-\mathbf{u}_{k}\right\rangle\leq 0.$
+As a result,
+$\displaystyle\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|^{2}\right]\leq$
+$\displaystyle\frac{B_{k}L_{k}}{A_{k}}\mathbb{E}\left[\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{0}-\mathbf{u}^{*}\right\rangle\right]+\frac{L_{k}}{A_{k}}\mathbb{E}\left[\mathcal{E}_{k}\right]$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\frac{B_{k}L_{k}}{A_{k}}\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\right]+\frac{L_{k}}{A_{k}}\mathbb{E}\left[\mathcal{E}_{k}\right]$
+$\displaystyle\overset{(ii)}{=}$
+$\displaystyle\frac{B_{k}L_{k}}{A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|\right]+\frac{L_{k}}{A_{k}}\mathbb{E}\left[\mathcal{E}_{k}\right],$
+where we use Cauchy-Schwarz inequality for $(i)$ , while $(ii)$ holds because $\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|$ involves no randomness.
+∎
+Using Lemma B.1, our goal now is to show that we can provide a bound on $\mathbb{E}[\mathcal{C}_{k}]$ by appropriately choosing the algorithm parameters. In the deterministic setup, it is sufficient to choose $L_{k}=\mathcal{O}(L)$ and $\lambda_{k}=\mathcal{O}(\frac{1}{k})$ to ensure that $\{A_{k}\mathcal{C}_{k}\}_{k\geq 1}$ is monotonically non-increasing, which immediately leads to $\mathcal{C}_{k}\leq\frac{A_{1}}{A_{k}}\mathcal{C}_{1}$ . In the stochastic setup considered here, we follow the same motivation, but need to deal with additional error terms caused by the stochastic access to $F$ .
+We assume throughout that $L$ is known, and make the following assumption on the choice of $\{A_{k}\}_{k\geq 1}$ , $\{B_{k}\}_{k\geq 1}$ , and $\{L_{k}\}_{k\geq 1}$ , and provide a corresponding bound on the change of $\mathcal{C}_{k}$ in Lemma B.2.
+Assumption 4.
+$\{L_{k}\}_{k\geq 1}$ is a sequence of positive reals such that $L_{k}\geq L$ for all $k\in\mathbb{N}$ . Sequences $\{A_{k}\}_{k\geq 1}$ and $\{B_{k}\}_{k\geq 1}$ are positive and non-decreasing, satisfying the following for all $k\geq 2$ :
+$\frac{B_{k-1}}{A_{k}}=\frac{B_{k}}{A_{k}+B_{k}},\qquad\frac{1}{L_{k}}\left(1-\frac{2B_{k}}{A_{k}+B_{k}}\right)=\frac{A_{k-1}}{A_{k}L_{k-1}}.$
+Lemma B.2.
+Let $\mathcal{C}_{k}$ be defined as in
+Eq. (B.1), where $\{A_{k}\}_{k\geq 1}$ and $\{B_{k}\}_{k\geq 1}$ satisfy Assumption 4. Let $L_{k}=2L$ for all $k\geq 1$ . Then, for any $k\geq 2$ , we have
+$\displaystyle\mathcal{C}_{k}-\mathcal{C}_{k-1}\leq\frac{A_{k}}{2L}\left\|F(\mathbf{u}_{k-1})-\widetilde{F}(\mathbf{u}_{k-1})\right\|^{2}+\frac{A_{k}-A_{k-1}}{2L}\left\langle F(\mathbf{u}_{k-1}),F(\mathbf{u}_{k-1})-\widetilde{F}(\mathbf{u}_{k-1})\right\rangle.$
+Proof.
+By the definition of $\mathcal{C}_{k}$ , we have
+$\displaystyle\mathcal{C}_{k}-\mathcal{C}_{k-1}=$
+$\displaystyle\frac{A_{k}}{L_{k}}\left\|F(\mathbf{u}_{k})\right\|^{2}+B_{k}\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}_{0}\right\rangle$
+$\displaystyle-\frac{A_{k-1}}{L_{k-1}}\left\|F(\mathbf{u}_{k-1})\right\|^{2}-B_{k-1}\left\langle F(\mathbf{u}_{k-1}),\mathbf{u}_{k-1}-\mathbf{u}_{0}\right\rangle.$
+Since the operator $F$ is cocoercive with parameter $\frac{1}{L}$ , we have
+$\displaystyle\left\langle F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1}),\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\rangle$
+$\displaystyle\geq$
+$\displaystyle\frac{1}{L}\left\|F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right\|^{2}$
+$\displaystyle=$
+$\displaystyle\frac{1}{L_{k}}\left\|F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right\|^{2}+\Big(\frac{1}{L}-\frac{1}{L_{k}}\Big)\left\|F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right\|^{2}$
+$\displaystyle=$
+$\displaystyle\frac{1}{L_{k}}\left\|F(\mathbf{u}_{k})\right\|^{2}-\frac{2}{L_{k}}\left\langle F(\mathbf{u}_{k}),F(\mathbf{u}_{k-1})\right\rangle+\frac{1}{L_{k}}\left\|F(\mathbf{u}_{k-1})\right\|^{2}$
+$\displaystyle+\Big(\frac{1}{L}-\frac{1}{L_{k}}\Big)\left\|F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right\|^{2}.$
+By rearranging, we obtain
+$\displaystyle\frac{1}{L_{k}}\left\|F(\mathbf{u}_{k})\right\|^{2}\leq\;$
+$\displaystyle\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}_{k-1}+\frac{2}{L_{k}}F(\mathbf{u}_{k-1})\right\rangle-\left\langle F(\mathbf{u}_{k-1}),\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\rangle$
+$\displaystyle-\frac{1}{L_{k}}\left\|F(\mathbf{u}_{k-1})\right\|^{2}-\left(\frac{1}{L}-\frac{1}{L_{k}}\right)\left\|F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right\|^{2}.$
+Multiplying $A_{k}$ on both sides and plugging into $\mathcal{C}_{k}-\mathcal{C}_{k-1}$ , we have
+$\displaystyle\mathcal{C}_{k}-\mathcal{C}_{k-1}\leq$
+$\displaystyle\left\langle F(\mathbf{u}_{k}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+\frac{2A_{k}}{L_{k}}F(\mathbf{u}_{k-1})+B_{k}(\mathbf{u}_{k}-\mathbf{u}_{0})\right\rangle$
+$\displaystyle-\left\langle F(\mathbf{u}_{k-1}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+B_{k-1}(\mathbf{u}_{k-1}-\mathbf{u}_{0})\right\rangle$
+$\displaystyle-\Big(\frac{A_{k}}{L_{k}}+\frac{A_{k-1}}{L_{k-1}}\Big)\left\|F(\mathbf{u}_{k-1})\right\|^{2}-A_{k}\Big(\frac{1}{L}-\frac{1}{L_{k}}\Big)\left\|F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right\|^{2}.$
+Since $\lambda_{k}=\frac{B_{k}}{A_{k}+B_{k}}$ , we have
+$\mathbf{u}_{k}=\frac{B_{k}}{A_{k}+B_{k}}\mathbf{u}_{0}+\frac{A_{k}}{A_{k}+B_{k}}\Big(\mathbf{u}_{k-1}-\frac{2}{L_{k}}\widetilde{F}(\mathbf{u}_{k-1})\Big),$
+which leads to $A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+\frac{2A_{k}}{L_{k}}F(\mathbf{u}_{k-1})+B_{k}(\mathbf{u}_{k}-\mathbf{u}_{0})=\frac{2A_{k}}{L_{k}}\big(F(\mathbf{u}_{k-1})-\widetilde{F}(\mathbf{u}_{k-1})\big)$ .
+Further, as $\frac{B_{k-1}}{A_{k}}=\frac{B_{k}}{A_{k}+B_{k}}$ by Assumption 4, we have
+$\displaystyle\left\langle F(\mathbf{u}_{k-1}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+B_{k-1}(\mathbf{u}_{k-1}-\mathbf{u}_{0})\right\rangle$
+$\displaystyle=$
+$\displaystyle A_{k}\left\langle F(\mathbf{u}_{k-1}),\mathbf{u}_{k}-\frac{B_{k-1}}{A_{k}}\mathbf{u}_{0}-\frac{A_{k}-B_{k-1}}{A_{k}}\mathbf{u}_{k-1}\right\rangle$
+$\displaystyle=$
+$\displaystyle A_{k}\left\langle F(\mathbf{u}_{k-1}),\mathbf{u}_{k}-\frac{B_{k}}{A_{k}+B_{k}}\mathbf{u}_{0}-\frac{A_{k}}{A_{k}+B_{k}}\mathbf{u}_{k-1}\right\rangle$
+$\displaystyle=$
+$\displaystyle-A_{k}\left\langle F(\mathbf{u}_{k-1}),\frac{2A_{k}}{L_{k}(A_{k}+B_{k})}\widetilde{F}(\mathbf{u}_{k-1})\right\rangle.$
+Moreover, by Assumption 4, we have $\frac{1}{L_{k}}\Big(1-\frac{2B_{k}}{A_{k}+B_{k}}\Big)=\frac{A_{k-1}}{A_{k}L_{k-1}}$ , so we obtain
+$\displaystyle\left\langle F(\mathbf{u}_{k-1}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+B_{k-1}(\mathbf{u}_{k-1}-\mathbf{u}_{0})\right\rangle$
+$\displaystyle=$
+$\displaystyle-A_{k}\left\langle F(\mathbf{u}_{k-1}),\frac{2A_{k}}{L_{k}(A_{k}+B_{k})}\widetilde{F}(\mathbf{u}_{k-1})\right\rangle$
+$\displaystyle=$
+$\displaystyle-\left\langle F(\mathbf{u}_{k-1}),\Big(\frac{A_{k}}{L_{k}}+\frac{A_{k-1}}{L_{k-1}}\Big)\widetilde{F}(\mathbf{u}_{k-1})\right\rangle.$
+Since by hypothesis $L_{k}=2L$ for all $k\geq 1$ ,
+we have
+$\displaystyle\mathcal{C}_{k}-\mathcal{C}_{k-1}\leq$
+$\displaystyle\left\langle F(\mathbf{u}_{k}),\frac{A_{k}}{L}(F(\mathbf{u}_{k-1})-\widetilde{F}(\mathbf{u}_{k-1}))\right\rangle+\left\langle F(\mathbf{u}_{k-1}),\frac{A_{k}+A_{k-1}}{2L}\widetilde{F}(\mathbf{u}_{k-1})\right\rangle$
+$\displaystyle-\frac{A_{k}+A_{k-1}}{2L}\left\|F(\mathbf{u}_{k-1})\right\|^{2}-\frac{A_{k}}{2L}\left\|F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right\|^{2}$
+$\displaystyle\overset{(i)}{=}$
+$\displaystyle\frac{A_{k}}{L}\left\langle F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1}),F(\mathbf{u}_{k-1})-\widetilde{F}(\mathbf{u}_{k-1})\right\rangle-\frac{A_{k}}{2L}\left\|F(\mathbf{u}_{k})-F(\mathbf{u}_{k-1})\right\|^{2}$
+$\displaystyle+\left\langle F(\mathbf{u}_{k-1}),\frac{A_{k}-A_{k-1}}{2L}\left(F(\mathbf{u}_{k-1})-\widetilde{F}(\mathbf{u}_{k-1})\right)\right\rangle,$
+where $(i)$ is derived by rearranging and grouping terms. Using that $2\left\langle p,q\right\rangle-\left\|p\right\|^{2}\leq\left\|q\right\|^{2}$ holds for any $p,q\in\mathbb{R}^{d}$ , we finally obtain
+$\displaystyle\mathcal{C}_{k}-\mathcal{C}_{k-1}\leq\;$
+$\displaystyle\frac{A_{k}}{2L}\left\|F(\mathbf{u}_{k-1})-\widetilde{F}(\mathbf{u}_{k-1})\right\|^{2}+\frac{A_{k}-A_{k-1}}{2L}\left\langle F(\mathbf{u}_{k-1}),F(\mathbf{u}_{k-1})-\widetilde{F}(\mathbf{u}_{k-1})\right\rangle,$
+thus completing the proof.
+∎
+By Lemma B.2, if we choose $A_{k}=\mathcal{O}(k^{2})$ and $B_{k}=\mathcal{O}(k)$ satisfying Assumption 4, and take sufficiently large size of samples queried to ensure that $\mathbb{E}\big[\big\|{F(\mathbf{u}_{k})-\widetilde{F}(\mathbf{u}_{k})}\big\|^{2}\big]\leq\frac{\epsilon^{2}}{k}$ for $k\geq 0$ , then we can obtain $\mathcal{O}(1/k)$ expected convergence rate in the norm of the operator by induction. Observe that we do not need an assumption that $\widetilde{F}$ is an unbiased estimator of $F$ for any point except for the initial one; all that is needed is that the second moment of the estimation error, $\|F(\mathbf{u}_{k})-\widetilde{F}(\mathbf{u}_{k})\|_{2}^{2}$ , is bounded.
+See 3.1
+Proof.
+Observe first that the chosen sequence of numbers $A_{k},B_{k}$ satisfies Assumption 4, and thus Lemma B.2 applies.
+Observe further that, by Jensen’s Inequality,
+$\mathbb{E}[\left\|F(\mathbf{u}_{k}))\right\|]\leq\Big(\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|^{2}]\Big)^{\frac{1}{2}}.$
+and, thus, to prove the theorem, it suffices to show that there exists $\Lambda_{0}$ and $\Lambda_{1}$ such that for all $k\geq 1$
+$\Big(\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|^{2}]\Big)^{\frac{1}{2}}\leq\frac{\Lambda_{0}}{k}+\Lambda_{1}\epsilon.$
+We prove this claim by induction on $k$ . For the base case $k=1$ , in which $\mathbf{u}_{1}=\mathbf{u}_{0}-\frac{1}{2L}\widetilde{F}(\mathbf{u}_{0})$ , we have
+$\mathcal{C}_{1}=\frac{1}{L}\left\|F(\mathbf{u}_{1})\right\|^{2}+2\left\langle F(\mathbf{u}_{1}),\mathbf{u}_{1}-\mathbf{u}_{0}\right\rangle=\frac{1}{L}\Big(\left\|F(\mathbf{u}_{1})\right\|^{2}-\left\langle F(\mathbf{u}_{1}),\widetilde{F}(\mathbf{u}_{0})\right\rangle\Big).$
+(B.3)
+Further, since the operator $F$ is cocoercive with parameter $\frac{1}{L}$ , it is also cocoercive with parameter $\frac{1}{2L}$ , and thus we have
+$\left\|F(\mathbf{u}_{1})-F(\mathbf{u}_{0})\right\|^{2}\leq 2L\left\langle F(\mathbf{u}_{1})-F(\mathbf{u}_{0}),\mathbf{u}_{1}-\mathbf{u}_{0}\right\rangle=\left\langle F(\mathbf{u}_{1})-F(\mathbf{u}_{0}),-\widetilde{F}(\mathbf{u}_{0})\right\rangle.$
+Expanding and rearranging the terms, we have
+$\left\|F(\mathbf{u}_{1})\right\|^{2}\leq\left\langle F(\mathbf{u}_{0}),\widetilde{F}(\mathbf{u}_{0})-F(\mathbf{u}_{0})\right\rangle+2\left\langle F(\mathbf{u}_{1}),F(\mathbf{u}_{0})\right\rangle-\left\langle F(\mathbf{u}_{1}),\widetilde{F}(\mathbf{u}_{0})\right\rangle.$
+Recall that, by assumption, $\mathbb{E}[\widetilde{F}(\mathbf{u}_{0})]=F(\mathbf{u}_{0})$ . Subtracting $\left\langle F(\mathbf{u}_{1}),\widetilde{F}(\mathbf{u}_{0})\right\rangle$ from both sides in the last inequality and taking expectation with respect to all the randomness on both sides, we have
+$\displaystyle\mathbb{E}\Big[\left\|F(\mathbf{u}_{1})\right\|^{2}-\left\langle F(\mathbf{u}_{1}),\widetilde{F}(\mathbf{u}_{0})\right\rangle\Big]$
+$\displaystyle\leq$
+$\displaystyle\mathbb{E}\Big[\left\langle F(\mathbf{u}_{0}),\widetilde{F}(\mathbf{u}_{0})-F(\mathbf{u}_{0})\right\rangle+2\left\langle F(\mathbf{u}_{1}),F(\mathbf{u}_{0})\right\rangle-2\left\langle F(\mathbf{u}_{1}),\widetilde{F}(\mathbf{u}_{0})\right\rangle\Big]$
+$\displaystyle=$
+$\displaystyle 2\mathbb{E}\Big[\left\langle F(\mathbf{u}_{1}),F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\right\rangle\Big]$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\mathbb{E}\Big[\frac{1}{2}\big\|{F(\mathbf{u}_{1})}\big\|^{2}+2\big\|{F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})}\big\|^{2}\Big],$
+where for $(i)$ we use Young’s inequality. Plugging into Eq. (B.3), we obtain that
+$\mathbb{E}[\mathcal{C}_{1}]\leq\frac{1}{L}\mathbb{E}\Big[\frac{1}{2}\left\|F(\mathbf{u}_{1})\right\|^{2}+2\big\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\big\|^{2}\Big].$
+Note that $A_{1}=B_{1}=2$ and $L_{1}=2L$ , by Lemma B.1 we have
+$\displaystyle\mathbb{E}[\left\|F(\mathbf{u}_{1})\right\|^{2}]\leq$
+$\displaystyle\frac{B_{1}L_{1}}{A_{1}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|F(\mathbf{u}_{1})\right\|]+\frac{L_{1}}{A_{1}}\frac{1}{L}\mathbb{E}\Big[\frac{1}{2}\left\|F(\mathbf{u}_{1})\right\|^{2}+2\big\|{F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})}\big\|^{2}\Big]$
+$\displaystyle=$
+$\displaystyle 2L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|F(\mathbf{u}_{1})\right\|]+\mathbb{E}\Big[\frac{1}{2}\left\|F(\mathbf{u}_{1})\right\|^{2}+2\big\|{F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})}\big\|^{2}\Big].$
+Subtracting $\mathbb{E}[\frac{1}{2}\left\|F(\mathbf{u}_{1})\right\|^{2}]$ on both sides and using that (by Jensen’s inequality) $\mathbb{E}[\left\|F(\mathbf{u}_{1})\right\|]\leq\big(\mathbb{E}[\left\|F(\mathbf{u}_{1})\right\|^{2}]\big)^{\frac{1}{2}}$ and (by assumption) $\mathbb{E}[\|{F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})}\|^{2}]\leq\frac{\epsilon^{2}}{8}$ , we have
+$\mathbb{E}[[\left\|F(\mathbf{u}_{1})\right\|^{2}]\leq 4L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\big(\mathbb{E}[\left\|F(\mathbf{u}_{1})\right\|^{2}]\big)^{\frac{1}{2}}+\frac{\epsilon^{2}}{2},$
+which is a quadratic inequality in $(\mathbb{E}[\left\|F(\mathbf{u}_{1})\right\|^{2}])^{\frac{1}{2}}$ . Bounding the solution to this quadratic inequality by its larger root, we have
+$\displaystyle(\mathbb{E}[\left\|F(\mathbf{u}_{1})\right\|^{2}])^{\frac{1}{2}}\leq$
+$\displaystyle 2L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\frac{1}{2}\sqrt{16L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+2\epsilon^{2}}$
+$\displaystyle\leq$
+$\displaystyle 2L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\frac{1}{2}(4L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\sqrt{2}\epsilon)$
+$\displaystyle\leq$
+$\displaystyle 4L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\epsilon$
+$\displaystyle\leq$
+$\displaystyle\Lambda_{0}+\Lambda_{1}\epsilon.$
+This completes the proof for the base case. Moreover, we can get a bound for $\mathbb{E}[\mathcal{C}_{1}]$ as follows
+$\displaystyle\mathbb{E}[\mathcal{C}_{1}]\leq$
+$\displaystyle\frac{1}{L}\mathbb{E}\Big[\frac{1}{2}\left\|F(\mathbf{u}_{1})\right\|^{2}+2\left\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\right\|^{2}\Big]$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\frac{1}{2L}\Big(24L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{3}{2}\epsilon^{2}\Big)+\frac{2}{L}\frac{\epsilon^{2}}{8}$
+$\displaystyle=$
+$\displaystyle 12L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{L},$
+where $(i)$ can be verified by the bound we get above for $\mathbb{E}[\left\|F(\mathbf{u}_{1})\right\|^{2}]$ and by applying Young’s inequality and that, by assumption, $\mathbb{E}[\|{F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})}\|^{2}]\leq\frac{\epsilon^{2}}{8}$ .
+For the inductive hypothesis, assume that the result holds for all $1\leq i\leq k-1$ , and consider iteration $k$ . By Lemma B.2, we have for $\forall i\geq 2$
+$\displaystyle\mathcal{C}_{i}-\mathcal{C}_{i-1}\leq$
+$\displaystyle\frac{A_{i}}{2L}\left\|F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})\right\|^{2}+\frac{A_{i}-A_{i-1}}{2L}\left\langle F(\mathbf{u}_{i-1}),F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})\right\rangle$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\frac{5i(i+1)}{2L}\left\|F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})\right\|^{2}+\frac{i}{8L(i+1)}\left\|F(\mathbf{u}_{i-1})\right\|^{2},$
+where we use Young’s inequality and $A_{i}=i(i+1)$ for $(i)$ . Taking expectation with respect to all randomness on both sides and telescoping from $i=2$ to $k$ , we obtain
+$\displaystyle\mathbb{E}[\mathcal{C}_{k}]\leq$
+$\displaystyle\mathbb{E}\Big[\mathcal{C}_{1}+\sum_{i=2}^{k}\Big(\frac{5i(i+1)}{2L}\big\|{F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})}\big\|^{2}+\frac{i}{8L(i+1)}\left\|F(\mathbf{u}_{i-1})\right\|^{2}\Big)\Big]$
+(B.4)
+$\displaystyle\leq$
+$\displaystyle\mathbb{E}\Big[\sum_{i=2}^{k}\Big(\frac{5i(i+1)}{2L}\left\|F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})\right\|^{2}+\frac{i}{8L(i+1)}\left\|F(\mathbf{u}_{i-1})\right\|^{2}\Big)\Big]$
+$\displaystyle+12L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{L}.$
+Using that, by assumption, for $k\geq 1,$ $\mathbb{E}[\|F(\mathbf{u}_{k})-\widetilde{F}(\mathbf{u}_{k})\|^{2}]\leq\frac{\epsilon^{2}}{k},$ we further have
+$\displaystyle\mathbb{E}\Big[\sum_{i=2}^{k}\frac{5i(i+1)}{2L}\big\|{F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})}\big\|^{2}\Big]\leq$
+$\displaystyle\sum_{i=2}^{k}\frac{5i(i+1)}{2L}\frac{\epsilon^{2}}{i-1}$
+(B.5)
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\sum_{i=2}^{k}\frac{5(i+1)\epsilon^{2}}{L}$
+$\displaystyle=$
+$\displaystyle\frac{5(k+4)(k-1)\epsilon^{2}}{2L},$
+where $(i)$ is because $\frac{i}{i-1}\leq 2$ for all $i\geq 2$ . By induction, we have
+$\displaystyle\mathbb{E}\Big[\sum_{i=2}^{k}\frac{i}{8L(i+1)}\left\|F(\mathbf{u}_{i-1})\right\|^{2}\Big]\overset{(i)}{\leq}$
+$\displaystyle\sum_{i=2}^{k}\frac{1}{8L}\Big(\frac{2\Lambda_{0}^{2}}{(i-1)^{2}}+2\Lambda_{1}^{2}\epsilon^{2}\Big)$
+(B.6)
+$\displaystyle\overset{(ii)}{\leq}$
+$\displaystyle\frac{1}{4L}\Big(\Lambda_{0}^{2}\frac{\pi^{2}}{6}+(k-1)\Lambda_{1}^{2}\epsilon^{2}\Big)$
+$\displaystyle=$
+$\displaystyle\frac{1}{L}\Big(\frac{\Lambda_{0}^{2}\pi^{2}}{24}+\frac{(k-1)\Lambda_{1}^{2}\epsilon^{2}}{4}\Big),$
+where $(i)$ follows from induction and $\frac{i}{i+1}\leq 1$ , and $(ii)$ is due to $\sum_{i=2}^{k}\frac{1}{(i-1)^{2}}\leq\sum_{i=1}^{\infty}\frac{1}{i^{2}}=\frac{\pi^{2}}{6}$ . Combining Eqs. (B.4)–(B.6), we get
+$\displaystyle\mathbb{E}[\mathcal{C}_{k}]\leq 12L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{L}+\frac{5(k+4)(k-1)\epsilon^{2}}{2L}+\frac{1}{L}\Big(\frac{\Lambda_{0}^{2}\pi^{2}}{24}+\frac{(k-1)\Lambda_{1}^{2}\epsilon^{2}}{4}\Big).$
+Applying Lemma B.1 to the bound on $\mathcal{C}_{k}$ from the last inequality, we have
+$\displaystyle\mathbb{E}\big[\left\|F(\mathbf{u}_{k})\right\|^{2}\big]$
+$\displaystyle\leq$
+$\displaystyle\frac{B_{k}L_{k}}{A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|]$
+$\displaystyle+\frac{L_{k}}{A_{k}}\Big(12L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{L}+\frac{5(k+4)(k-1)\epsilon^{2}}{2L}+\frac{\Lambda_{0}^{2}\pi^{2}}{24L}+\frac{(k-1)\Lambda_{1}^{2}\epsilon^{2}}{4L}\Big)$
+$\displaystyle=$
+$\displaystyle\frac{2L}{k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|]$
+$\displaystyle+\frac{1}{k(k+1)}\Big(24L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+2\epsilon^{2}+5(k+4)(k-1)\epsilon^{2}+\frac{\Lambda_{0}^{2}\pi^{2}}{12}+\frac{(k-1)\Lambda_{1}^{2}\epsilon^{2}}{2}\Big)$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\frac{2L}{k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|]+\Big(\frac{24L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k^{2}}+\Big(8+\frac{\Lambda_{1}^{2}}{2(k+1)}\Big)\epsilon^{2}+\frac{\Lambda_{0}^{2}\pi^{2}}{12k^{2}}\Big),$
+where $(i)$ is due to $\frac{1}{k(k+1)}\leq\frac{1}{k^{2}}$ ,
+$\frac{5(k+1)(k-1)}{k(k+1)}\leq 6$ and $\frac{k-1}{k(k+1)}\leq\frac{1}{k+1}$ . Since $\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|]\leq(\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|^{2}])^{\frac{1}{2}}$ by Jensen’s inequality, we have
+$\displaystyle\mathbb{E}\big[\left\|F(\mathbf{u}_{k})\right\|^{2}\big]$
+$\displaystyle\leq$
+$\displaystyle\frac{2L}{k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\Big(\mathbb{E}\big[\left\|F(\mathbf{u}_{k})\right\|^{2}\big]\Big)^{\frac{1}{2}}+\Big(\frac{24L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k^{2}}+\Big(8+\frac{\Lambda_{1}^{2}}{2(k+1)}\Big)\epsilon^{2}+\frac{\Lambda_{0}^{2}\pi^{2}}{12k^{2}}\Big),$
+which is a quadratic inequality with respect to $(\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|^{2}])^{\frac{1}{2}}$ . Similarly as for $k=1,$ bounding its solution by its larger root, we obtain
+$\displaystyle\Big(\mathbb{E}\big[\left\|F(\mathbf{u}_{k})\right\|^{2}\big]\Big)^{\frac{1}{2}}$
+$\displaystyle\leq$
+$\displaystyle\frac{L}{k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\frac{1}{2}\sqrt{\frac{4L^{2}}{k^{2}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+4\Big(\frac{24L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k^{2}}+\Big(8+\frac{\Lambda_{1}^{2}}{2(k+1)}\Big)\epsilon^{2}+\frac{\Lambda_{0}^{2}\pi^{2}}{12k^{2}}\Big)}$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\frac{2L}{k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\Big(\frac{5L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{k}+\sqrt{8+\frac{\Lambda_{1}^{2}}{2(k+1)}}\epsilon+\frac{\Lambda_{0}\pi}{2\sqrt{3}k}\Big)$
+$\displaystyle=$
+$\displaystyle\frac{7L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\frac{\Lambda_{0}\pi}{2\sqrt{3}}}{k}+\sqrt{8+\frac{\Lambda_{1}^{2}}{2(k+1)}}\epsilon$
+$\displaystyle\overset{(ii)}{\leq}$
+$\displaystyle\frac{\Lambda_{0}}{k}+\Lambda_{1}\epsilon,$
+where $(i)$ is due to the fact that $\sqrt{\sum_{i=1}^{n}X_{i}^{2}}\leq\sum_{i=1}^{n}|X_{i}|$ , and $(ii)$ is because of our choice of $\Lambda_{0},\Lambda_{1}$ . Hence, the result also holds for the case $k$ . Then by induction we know that the result holds for all $k\geq 1$ .
+Finally, when $k\geq\frac{2\Lambda_{0}}{\epsilon}$ , we have $\frac{\Lambda_{0}}{k}\leq\epsilon/2$ . Also, since we have $\Lambda_{1}=4\sqrt{\frac{2}{3}}<3.5$ , we obtain
+$\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|]\leq\Big(\frac{1}{2}+4\sqrt{\frac{2}{3}}\Big)\epsilon\leq 4\epsilon.$
+Hence, the total number of iterations needed to attain $4\epsilon$ norm of the operator is
+$N=\Big\lceil\frac{2\Lambda_{0}}{\epsilon}\Big\rceil=\mathcal{O}\Big(\frac{L\left\|\mathbf{u}-\mathbf{u}^{*}\right\|}{\epsilon}\Big),$
+thus completing the proof.
+∎
+B.2 Constrained setting with a cocoercive operator
+To extend the results to possibly constrained settings, similar to Diakonikolas (2020), we make use of the operator mapping defined by
+$\displaystyle G_{\eta}(\mathbf{u})=\eta\Big(\mathbf{u}-\Pi_{\mathcal{U}}\big(\mathbf{u}-\frac{1}{\eta}F(\mathbf{u})\big)\Big),$
+(B.7)
+where $\mathcal{U}\subseteq\mathbb{R}^{d}$ is the closed convex constraint set and $\Pi_{\mathcal{U}}(\mathbf{u})$ is the projection operator. Operator $G_{\eta}$ is a valid proxy for approximating (MI); see (Diakonikolas, 2020) for further details.
+The extension of our results to constrained stochastic settings is not immediate; the reason is that the stochastic query assumptions (Assumptions 1 and 2) are made for the operator $F$ , not $G_{\eta}.$ Nevertheless, as we show in this subsection, it is not hard to match the stochastic oracle complexity of the unconstrained setups by proving an additional auxiliary result that bounds the variance of an operator mapping corresponding to $\widetilde{F}$ (Lemma B.4).
+We begin by recalling that whenever $F$ is $\frac{1}{L}$ -cocoercive and $\eta\geq L$ , the operator mapping $G_{\eta}$ is $\frac{3}{4\eta}$ -cocoercive (see, e.g., (Diakonikolas, 2020, Proposition 7) and (Beck, 2017, Lemma 10.11)).
+Proposition B.3.
+Let $F$ be $\frac{1}{L}$ -cocoercive and let $G_{\eta}$ be defined as in Eq. (B.7), where $\eta\geq L$ . Then $G_{\eta}$ is $\frac{3}{4\eta}$ -cocoercive.
+To state the variant of stochastic Halpern iteration for constrained settings, we also define the operator mapping corresponding to the stochastic estimate $\widetilde{F}$ by
+$\displaystyle\widetilde{G}_{\eta}(\mathbf{u})=\eta\Big(\mathbf{u}-\Pi_{\mathcal{U}}\big(\mathbf{u}-\frac{1}{\eta}\widetilde{F}(\mathbf{u})\big)\Big).$
+(B.8)
+In the following lemma, we bound the error between the stochastic operator mapping and true operator mapping by the variance of stochastic queries.
+Lemma B.4.
+Let $G_{\eta}(\cdot)$ and $\widetilde{G}_{\eta}(\cdot)$ be defined as in Eq. (B.7) and Eq. (B.8), respectively. Then, for any $\mathbf{u}\in\mathcal{U}$ and any $\eta>0$ , we have
+$\|{G_{\eta}(\mathbf{u})-\widetilde{G}_{\eta}(\mathbf{u})}\|^{2}\leq\|{F(\mathbf{u})-\widetilde{F}(\mathbf{u})}\|^{2}.$
+(B.9)
+Proof.
+By the definition of gradient mapping, we have
+$\displaystyle\left\|G_{\eta}(\mathbf{u})-\widetilde{G}_{\eta}(\mathbf{u})\right\|^{2}=\eta^{2}\Big\|\Pi_{\mathcal{U}}\Big(\mathbf{u}-\frac{1}{\eta}F(\mathbf{u})\Big)-\Pi_{\mathcal{U}}\Big(\mathbf{u}-\frac{1}{\eta}\widetilde{F}(\mathbf{u})\Big)\Big\|^{2}.$
+Since the projection operator is non-expansive, we obtain
+$\displaystyle\left\|G_{\eta}(\mathbf{u})-\widetilde{G}_{\eta}(\mathbf{u})\right\|^{2}\leq$
+$\displaystyle\eta^{2}\Big\|\Big(\mathbf{u}-\frac{1}{\eta}F(\mathbf{u})\Big)-\Big(\mathbf{u}-\frac{1}{\eta}\widetilde{F}(\mathbf{u})\Big)\Big\|^{2}=\left\|F(\mathbf{u})-\widetilde{F}(\mathbf{u})\right\|^{2},$
+thus completing the proof.
+∎
+Similar to the unconstrained setup, we define the following stochastic Halpern iteration for the constrained setup:
+$\displaystyle\mathbf{u}_{k+1}=\lambda_{k+1}\mathbf{u}_{0}+(1-\lambda_{k+1})\big(\mathbf{u}_{k}-\widetilde{G}_{L_{k}}(\mathbf{u}_{k})/L_{k+1}\big),$
+(B.10)
+where $L_{k}\geq L$ , $\forall k\geq 0$ . By the cocoercivity of the operator mapping and the error bound in Lemma B.4, we can immediately obtain the results for the iteration complexity and stochastic oracle complexity as in the unconstrained case, by applying Theorem 3.1 and Corollary 3.4 to $G_{L}$ and $\widetilde{G}_{L}$ . This is summarized in the following Theorem B.6 and Corollary B.7. To prove these, we make use of the potential function as in the unconstrained settings
+$\mathcal{C}_{k}=\frac{A_{k}}{2L_{k}}\lVert G_{L_{k}}(\mathbf{u}_{k})\rVert^{2}+B_{k}\left\langle G_{L_{k}}(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}_{0}\right\rangle,$
+(B.11)
+and first bound the change of $\mathcal{C}_{k}$ in the following Lemma B.5. For short, we denote $G_{L}$ as $G$ below.
+Lemma B.5.
+Let $\mathcal{C}_{k}$ be defined as in Eq. (B.11), where $A_{k}$ and $B_{k}$ satisfy Assumption 4. Assume that $L$ is already known and we set $L_{k}=L$ for any $k\geq 1$ . Then for any $k\geq 2$ , we have
+$\mathcal{C}_{k}-\mathcal{C}_{k-1}\leq\frac{A_{k}}{L}\left\|G(\mathbf{u}_{k-1})-\widetilde{G}(\mathbf{u}_{k-1})\right\|^{2}+\frac{A_{k}-A_{k-1}}{2L}\left\langle G(\mathbf{u}_{k-1}),G(\mathbf{u}_{k-1})-\widetilde{G}(\mathbf{u}_{k-1})\right\rangle.$
+Proof.
+By the definition of $\mathcal{C}_{k}$ , we have
+$\displaystyle\mathcal{C}_{k}-\mathcal{C}_{k-1}=\;$
+$\displaystyle\frac{A_{k}}{2L_{k}}\left\|G_{L_{k}}(\mathbf{u}_{k})\right\|^{2}+B_{k}\left\langle G_{L_{k}}(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}_{0}\right\rangle$
+$\displaystyle-\frac{A_{k-1}}{2L_{k-1}}\left\|G_{L_{k-1}}(\mathbf{u}_{k-1})\right\|^{2}-B_{k-1}\left\langle G_{L_{k-1}}(\mathbf{u}_{k-1}),\mathbf{u}_{k-1}-\mathbf{u}_{0}\right\rangle.$
+Since $G_{L_{k}}$ is cocoercive with parameter $\frac{3}{4L_{k}}$ when $L_{k}\geq L$ , we have
+$\displaystyle\left\langle G_{L_{k}}(\mathbf{u}_{k})-G_{L_{k}}(\mathbf{u}_{k-1}),\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\rangle$
+$\displaystyle\geq\;$
+$\displaystyle\frac{3}{4L_{k}}\left\|G_{L_{k}}(\mathbf{u}_{k})-G_{L_{k}}(\mathbf{u}_{k-1})\right\|^{2}$
+$\displaystyle=\;$
+$\displaystyle\frac{1}{2L_{k}}\Big(\left\|G_{L_{k}}(\mathbf{u}_{k})\right\|^{2}-2\left\langle G_{L_{k}}(\mathbf{u}_{k}),G_{L_{k}}(\mathbf{u}_{k-1})\right\rangle+\left\|G_{L_{k}}(\mathbf{u}_{k-1})\right\|^{2}\Big)$
+$\displaystyle+\frac{1}{4L_{k}}\left\|G_{L_{k}}(\mathbf{u}_{k})-G_{L_{k}}(\mathbf{u}_{k-1})\right\|^{2}.$
+Multiplying $A_{k}$ on both sides and rearranging the terms, we obtain
+$\displaystyle\frac{A_{k}}{2L_{k}}\left\|G_{L_{k}}(\mathbf{u}_{k})\right\|^{2}\leq\;$
+$\displaystyle\left\langle G_{L_{k}}(\mathbf{u}_{k}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+\frac{A_{k}}{L_{k}}G_{L_{k}}(\mathbf{u}_{k-1})\right\rangle$
+$\displaystyle-\left\langle G_{L_{k}}(\mathbf{u}_{k-1}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})\right\rangle$
+$\displaystyle-\frac{A_{k}}{2L_{k}}\left\|G_{L_{k}}(\mathbf{u}_{k-1})\right\|^{2}-\frac{A_{k}}{4L_{k}}\left\|G_{L_{k}}(\mathbf{u}_{k})-G_{L_{k}}(\mathbf{u}_{k-1})\right\|^{2}.$
+Plugging this into $\mathcal{C}_{k}-\mathcal{C}_{k-1}$ , we have
+$\displaystyle\mathcal{C}_{k}-\mathcal{C}_{k-1}\leq\;$
+$\displaystyle\left\langle G_{L_{k}}(\mathbf{u}_{k}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+\frac{A_{k}}{L_{k}}G_{L_{k}}(\mathbf{u}_{k-1})+B_{k}(\mathbf{u}_{k}-\mathbf{u}_{0})\right\rangle$
+$\displaystyle-\left\langle G_{L_{k}}(\mathbf{u}_{k-1}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})\right\rangle+\left\langle G_{L_{k-1}}(\mathbf{u}_{k-1}),B_{k-1}(\mathbf{u}_{k-1}-\mathbf{u}_{0})\right\rangle$
+$\displaystyle-\Big(\frac{A_{k}}{2L_{k}}\left\|G_{L_{k}}(\mathbf{u}_{k-1})\right\|^{2}+\frac{A_{k-1}}{2L_{k-1}}\left\|G_{L_{k-1}}(\mathbf{u}_{k-1})\right\|^{2}\Big)$
+$\displaystyle-\frac{A_{k}}{4L_{k}}\left\|G_{L_{k}}(\mathbf{u}_{k})-G_{L_{k}}(\mathbf{u}_{k-1})\right\|^{2}.$
+Since $\lambda_{k}=\frac{B_{k}}{A_{k}+B_{k}}$ , we have
+$\displaystyle\mathbf{u}_{k}=\frac{B_{k}}{A_{k}+B_{k}}\mathbf{u}_{0}+\frac{A_{k}}{A_{k}+B_{k}}\Big(\mathbf{u}_{k-1}-\widetilde{G}_{L_{k-1}}(\mathbf{u}_{k-1})/L_{k}\Big),$
+which leads to $A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+\frac{A_{k}}{L_{k}}G_{L_{k}}(\mathbf{u}_{k-1})+B_{k}(\mathbf{u}_{k}-\mathbf{u}_{0})=\frac{A_{k}}{L_{k}}\Big(G_{L_{k-1}}(\mathbf{u}_{k-1})-\widetilde{G}_{L_{k-1}}(\mathbf{u}_{k-1})\Big)$ .
+Further, as $\frac{B_{k-1}}{A_{k}}=\frac{B_{k}}{A_{k}+B_{k}}$ by https://www.overleaf.com/project/5fe36b9ad2991b26777b720dAssumption 4, we have
+$\displaystyle\left\langle G_{L_{k}}(\mathbf{u}_{k-1}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+B_{k-1}(\mathbf{u}_{k-1}-\mathbf{u}_{0})\right\rangle$
+$\displaystyle=\;$
+$\displaystyle A_{k}\left\langle G_{L_{k}}(\mathbf{u}_{k-1}),\mathbf{u}_{k}-\mathbf{u}_{k-1}+\frac{B_{k-1}}{A_{k}}(\mathbf{u}_{k-1}-\mathbf{u}_{0})\right\rangle$
+$\displaystyle=\;$
+$\displaystyle A_{k}\left\langle G_{L_{k}}(\mathbf{u}_{k-1}),\mathbf{u}_{k}-\frac{A_{k}}{A_{k}+B_{k}}\mathbf{u}_{k-1}-\frac{B_{k}}{A_{k}+B_{k}}\mathbf{u}_{0}\right\rangle$
+$\displaystyle=\;$
+$\displaystyle A_{k}\left\langle G_{L_{k}}(\mathbf{u}_{k-1}),-\frac{A_{k}}{A_{k}+B_{k}}\widetilde{G}_{L_{k-1}}(\mathbf{u}_{k-1})/L_{k}\right\rangle.$
+Moreover, by Assumption 4, we have $\frac{1}{L_{k}}(1-\frac{2B_{k}}{A_{k}+B_{k}})=\frac{A_{k-1}}{A_{k}L_{k-1}}$ , so we obtain
+$\displaystyle\left\langle G_{L_{k}}(\mathbf{u}_{k-1}),A_{k}(\mathbf{u}_{k}-\mathbf{u}_{k-1})+B_{k-1}(\mathbf{u}_{k-1}-\mathbf{u}_{0})\right\rangle$
+$\displaystyle=$
+$\displaystyle A_{k}\left\langle G_{L_{k}}(\mathbf{u}_{k-1}),-\frac{A_{k}}{A_{k}+B_{k}}\widetilde{G}_{L_{k-1}}(\mathbf{u}_{k-1})/L_{k}\right\rangle$
+$\displaystyle=$
+$\displaystyle-\frac{1}{2}\left\langle G_{L_{k}}(\mathbf{u}_{k-1}),\Big(\frac{A_{k}}{L_{k}}+\frac{A_{k-1}}{L_{k-1}}\Big)\widetilde{G}_{L_{k-1}}(\mathbf{u}_{k-1})\right\rangle.$
+Having $L_{k}=L$ and denoting $G_{L}=G$ for short, we have
+$\displaystyle\mathcal{C}_{k}-\mathcal{C}_{k-1}\leq$
+$\displaystyle\left\langle G(\mathbf{u}_{k}),\frac{A_{k}}{L}\Big(G(\mathbf{u}_{k-1})-\widetilde{G}(\mathbf{u}_{k-1})\Big)\right\rangle+\left\langle G(\mathbf{u}_{k-1}),\frac{A_{k}+A_{k-1}}{2L}\widetilde{G}(\mathbf{u}_{k-1})\right\rangle$
+$\displaystyle-\frac{A_{k}+A_{k-1}}{2L}\left\|G(\mathbf{u}_{k-1})\right\|^{2}-\frac{A_{k}}{4L}\left\|G(\mathbf{u}_{k})-G(\mathbf{u}_{k-1})\right\|^{2}$
+$\displaystyle=$
+$\displaystyle\frac{A_{k}}{L}\left\langle G(\mathbf{u}_{k}),G(\mathbf{u}_{k-1})-\widetilde{G}(\mathbf{u}_{k-1})\right\rangle-\frac{A_{k}}{4L}\left\|G(\mathbf{u}_{k})-G(\mathbf{u}_{k-1})\right\|^{2}$
+$\displaystyle-\frac{A_{k}+A_{k-1}}{2L}\left\langle G(\mathbf{u}_{k-1}),G(\mathbf{u}_{k-1})-\widetilde{G}(\mathbf{u}_{k-1})\right\rangle$
+$\displaystyle=$
+$\displaystyle\frac{A_{k}}{L}\left\langle G(\mathbf{u}_{k})-G(\mathbf{u}_{k-1}),G(\mathbf{u}_{k-1})-\widetilde{G}(\mathbf{u}_{k-1})\right\rangle-\frac{A_{k}}{4L}\left\|G(\mathbf{u}_{k})-G(\mathbf{u}_{k-1})\right\|^{2}$
+$\displaystyle+\frac{A_{k}-A_{k-1}}{2L}\left\langle G(\mathbf{u}_{k-1}),G(\mathbf{u}_{k-1})-\widetilde{G}(\mathbf{u}_{k-1})\right\rangle.$
+Since $2\left\langle p,q\right\rangle+\left\|p\right\|^{2}\leq\left\|q\right\|^{2}$ for any $p,q\in\mathbb{R}^{d}$ , we have
+$\displaystyle\mathcal{C}_{k}-\mathcal{C}_{k-1}\leq\;$
+$\displaystyle\frac{A_{k}}{L}\left\|G(\mathbf{u}_{k-1})-\widetilde{G}(\mathbf{u}_{k-1})\right\|^{2}+\frac{A_{k}-A_{k-1}}{2L}\left\langle G(\mathbf{u}_{k-1}),G(\mathbf{u}_{k-1})-\widetilde{G}(\mathbf{u}_{k-1})\right\rangle,$
+thus completing the proof.
+∎
+Theorem B.6.
+Given an arbitrary $\mathbf{u}_{0}\in\mathbb{R}^{d},$ suppose that iterates $\mathbf{u}_{k}$ evolve according to Halpern iteration for the constrained setup from Eq. (B.10) for $k\geq 1,$ where $L_{k}=L$ and $\lambda_{k}=\frac{1}{k+1}.$
+Given $\epsilon>0,$ if we have that $\mathbb{E}[\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\|^{2}]\leq\frac{\epsilon^{2}}{8}$ and $\mathbb{E}\big[\big\|{F(\mathbf{u}_{k})-\widetilde{F}(\mathbf{u}_{k})}\big\|^{2}\big]\leq\frac{\epsilon^{2}}{k}$ for all $k\geq 1$ , then for all $k\geq 1,$
+$\mathbb{E}[\left\|G(\mathbf{u}_{k}))\right\|]\leq\frac{\Lambda_{0}}{k}+\Lambda_{1}\epsilon,$
+(B.12)
+where $\Lambda_{0}=20L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|$ and $\Lambda_{1}=\sqrt{13}$ .
+As a result, stochastic Halpern iteration from Eq. (3.1) returns a point $\mathbf{u}_{k}$ such that $\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|]\leq 5\epsilon$ after at most $N=\lceil\frac{2\Lambda_{0}}{\epsilon}\rceil=\mathcal{O}\big(\frac{L\|\mathbf{u}_{0}-\mathbf{u}^{*}\|}{\epsilon}\big)$ iterations.
+Proof.
+First note that since $\mathcal{U}$ is convex and closed, and $\mathbf{u}_{k}-\widetilde{G}(\mathbf{u}_{k})/L=\Pi_{\mathcal{U}}\Big(\mathbf{u}_{k}-\frac{1}{L}\widetilde{F}(\mathbf{u}_{k})\Big)$ , then we have for $\forall k>0$ .
+$\displaystyle\mathbf{u}_{k+1}=$
+$\displaystyle\lambda_{k+1}\mathbf{u}_{0}+(1-\lambda_{k+1})\Big(\mathbf{u}_{k}-\widetilde{G}(\mathbf{u}_{k})/L\Big)$
+$\displaystyle=$
+$\displaystyle\lambda_{k+1}\mathbf{u}_{0}+(1-\lambda_{k+1})\Pi_{\mathcal{U}}\Big(\mathbf{u}_{k}-\frac{1}{L}\widetilde{F}(\mathbf{u}_{k})\Big)\in\mathcal{U}.$
+Then we come to prove the convergence. By Jensen’s Inequality, we have for $k\geq 1$
+$\displaystyle\mathbb{E}[\left\|G(\mathbf{u}_{k}))\right\|]\leq\Big(\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|^{2}]\Big)^{\frac{1}{2}}.$
+So it suffices to show that there exists $\Lambda_{0}$ and $\Lambda_{1}$ such that for all $k\geq 1$
+$\displaystyle\Big(\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|^{2}]\Big)^{\frac{1}{2}}\leq\frac{\Lambda_{0}}{k}+\Lambda_{1}\epsilon.$
+We prove it by induction. First, we consider the basis case $k=1$ in which $\mathbf{u}_{1}=\mathbf{u}_{0}-\frac{1}{2L}\widetilde{G}(\mathbf{u}_{0})$ , so we have $\mathcal{C}_{1}=\frac{1}{L}\left\|G(\mathbf{u}_{1})\right\|^{2}+2\left\langle G(\mathbf{u}_{1}),\mathbf{u}_{1}-\mathbf{u}_{0}\right\rangle=\frac{1}{L}\Big(\left\|G(\mathbf{u}_{1})\right\|^{2}-\left\langle G(\mathbf{u}_{1}),\widetilde{G}(\mathbf{u}_{0})\right\rangle\Big)$ . Also, since the operator $G$ is cocoercive with parameter $\frac{3}{4L}$ , thus cocoercive with $\frac{1}{2L}$ , we have
+$\displaystyle\left\|G(\mathbf{u}_{1})-G(\mathbf{u}_{0})\right\|^{2}\leq 2L\left\langle G(\mathbf{u}_{1})-G(\mathbf{u}_{0}),\mathbf{u}_{1}-\mathbf{u}_{0}\right\rangle=\left\langle G(\mathbf{u}_{1})-G(\mathbf{u}_{0}),-\widetilde{G}(\mathbf{u}_{0})\right\rangle.$
+Expanding and rearranging the terms, we have
+$\displaystyle\left\|G(\mathbf{u}_{1})\right\|^{2}\leq\left\langle G(\mathbf{u}_{0}),\widetilde{G}(\mathbf{u}_{0})-G(\mathbf{u}_{0})\right\rangle+2\left\langle G(\mathbf{u}_{1}),G(\mathbf{u}_{0})\right\rangle-\left\langle G(\mathbf{u}_{1}),\widetilde{G}(\mathbf{u}_{0})\right\rangle.$
+Subtracting $\left\langle G(\mathbf{u}_{1}),\widetilde{G}(\mathbf{u}_{0})\right\rangle$ and taking expectation with respect to all randomness on both sides, we have
+$\displaystyle\mathbb{E}\Big[\left\|G(\mathbf{u}_{1})\right\|^{2}-\left\langle G(\mathbf{u}_{1}),\widetilde{G}(\mathbf{u}_{0})\right\rangle\Big]$
+$\displaystyle\leq$
+$\displaystyle\mathbb{E}\Big[\left\langle G(\mathbf{u}_{0}),\widetilde{G}(\mathbf{u}_{0})-G(\mathbf{u}_{0})\right\rangle+2\left\langle G(\mathbf{u}_{1}),G(\mathbf{u}_{0})\right\rangle-2\left\langle G(\mathbf{u}_{1}),\widetilde{G}(\mathbf{u}_{0})\right\rangle\Big]$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\mathbb{E}\Big[\frac{1}{2}\left\|G(\mathbf{u}_{0})\right\|^{2}+\frac{1}{2}\left\|G(\mathbf{u}_{1})\right\|^{2}+\frac{5}{2}\left\|G(\mathbf{u}_{0})-\widetilde{G}(\mathbf{u}_{0})\right\|^{2}\Big],$
+where for $(i)$ we use Young’s Inequality. Since $\mathbf{u}^{*}$ is the solution of monotone inclusion, then we have $G(\mathbf{u}^{*})=0$ . So we have
+$\displaystyle\left\|G(\mathbf{u}_{0})\right\|^{2}=\left\|G(\mathbf{u}_{0})-G(\mathbf{u}^{*})\right\|^{2}\overset{(i)}{\leq}10L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2},$
+where $(i)$ can be verified by Young’s Inequality and using the fact that the projection operator is non-expansive. Also using the results in Lemma B.4, we obtain that
+$\mathbb{E}[\mathcal{C}_{1}]\leq\frac{1}{L}\mathbb{E}\big[5L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{1}{2}\left\|G(\mathbf{u}_{1})\right\|^{2}+\frac{5}{2}\left\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\right\|^{2}\big].$
+Proceeding similar to Lemma B.1, we have
+$\displaystyle\mathbb{E}[\left\|G(\mathbf{u}_{1})\right\|^{2}]\leq\;$
+$\displaystyle\frac{2B_{1}L_{1}}{A_{1}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|G(\mathbf{u}_{1})\right\|]$
+$\displaystyle+\frac{2L_{1}}{A_{1}L}\mathbb{E}\Big[5L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{1}{2}\left\|G(\mathbf{u}_{1})\right\|^{2}+\frac{5}{2}\left\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\right\|^{2}\Big]$
+$\displaystyle=\;$
+$\displaystyle 2L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|G(\mathbf{u}_{1})\right\|]$
+$\displaystyle+\mathbb{E}\Big[5L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{1}{2}\left\|G(\mathbf{u}_{1})\right\|^{2}+\frac{5}{2}\left\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\right\|^{2}\Big].$
+Subtracting $\mathbb{E}[\frac{1}{2}\left\|G(\mathbf{u}_{1})\right\|^{2}]$ on both sides and using the fact that $\mathbb{E}[\left\|G(\mathbf{u}_{1})\right\|]\leq\big(\mathbb{E}[\left\|G(\mathbf{u}_{1})\right\|^{2}]\big)^{\frac{1}{2}}$ and $\mathbb{E}[\left\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\right\|^{2}]\leq\frac{\epsilon^{2}}{8}$ , we have
+$\displaystyle\mathbb{E}[[\left\|G(\mathbf{u}_{1})\right\|^{2}]\leq 4L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\big(\mathbb{E}[\left\|G(\mathbf{u}_{1})\right\|^{2}]\big)^{\frac{1}{2}}+10L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{5\epsilon^{2}}{8},$
+which is a quadratic function with respect to $(\mathbb{E}[\left\|G(\mathbf{u}_{1})\right\|^{2}])^{\frac{1}{2}}$ . So by its larger root we have
+$\displaystyle(\mathbb{E}[\left\|G(\mathbf{u}_{1})\right\|^{2}])^{\frac{1}{2}}\leq\;$
+$\displaystyle 2L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\frac{1}{2}\sqrt{56L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{5}{2}\epsilon^{2}}$
+$\displaystyle\leq\;$
+$\displaystyle 2L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\frac{1}{2}(2\sqrt{14}L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\frac{\sqrt{10}}{2}\epsilon)$
+$\displaystyle\leq\;$
+$\displaystyle 6L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\epsilon\leq\Lambda_{0}+\Lambda_{1}\epsilon.$
+So the result holds for the basis case. Moreover, we can get a bound for $\mathbb{E}[\mathcal{C}_{1}]$ as follows
+$\displaystyle\mathbb{E}[\mathcal{C}_{1}]\leq\;$
+$\displaystyle\frac{1}{L}\mathbb{E}\Big[5L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{1}{2}\left\|G(\mathbf{u}_{1})\right\|^{2}+\frac{5}{2}\left\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\right\|^{2}\Big]$
+$\displaystyle\overset{(i)}{\leq}\;$
+$\displaystyle 5L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{1}{2L}\Big(50L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{5}{4}\epsilon^{2}\Big)+\frac{5}{2L}\frac{\epsilon^{2}}{8}$
+$\displaystyle\leq\;$
+$\displaystyle 30L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{L},$
+where $(i)$ can be verified by using the bound we get above for $\mathbb{E}[\left\|G(\mathbf{u}_{1})\right\|^{2}]$ and applying Young’s Inequaltiy, and the fact that $\mathbb{E}[\left\|F(\mathbf{u}_{0})-\widetilde{F}(\mathbf{u}_{0})\right\|^{2}]\leq\frac{\epsilon^{2}}{8}$ .
+Assume that the result holds for all $1\leq i\leq k-1$ , then we come to prove the case $k$ . By Lemma B.5 we have for $\forall i\geq 2$
+$\displaystyle\mathcal{C}_{i}-\mathcal{C}_{i-1}\leq\;$
+$\displaystyle\frac{A_{i}}{L}\left\|G(\mathbf{u}_{i-1})-\widetilde{G}(\mathbf{u}_{i-1})\right\|^{2}+\frac{A_{i}-A_{i-1}}{2L}\left\langle G(\mathbf{u}_{i-1}),G(\mathbf{u}_{i-1})-\widetilde{G}(\mathbf{u}_{i-1})\right\rangle$
+$\displaystyle\overset{(i)}{\leq}\;$
+$\displaystyle\frac{3i(i+1)}{L}\left\|G(\mathbf{u}_{i-1})-\widetilde{G}(\mathbf{u}_{i-1})\right\|^{2}+\frac{i}{8L(i+1)}\left\|G(\mathbf{u}_{i-1})\right\|^{2}$
+$\displaystyle\overset{(ii)}{\leq}\;$
+$\displaystyle\frac{3i(i+1)}{L}\left\|F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})\right\|^{2}+\frac{i}{8L(i+1)}\left\|G(\mathbf{u}_{i-1})\right\|^{2},$
+where we use Young’s Inequality and $A_{i}=i(i+1)$ for $(i)$ , and $(ii)$ is due to Lemma B.4. Taking expectation with respect to all randomness on both sides and telescoping from $i=2$ to $k$ , we obtain
+$\displaystyle\mathbb{E}[\mathcal{C}_{k}]\leq\;$
+$\displaystyle\mathbb{E}\Big[\mathcal{C}_{1}+\sum_{i=2}^{k}\Big(\frac{3i(i+1)}{L}\left\|F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})\right\|^{2}+\frac{i}{8L(i+1)}\left\|G(\mathbf{u}_{i-1})\right\|^{2}\Big)\Big]$
+$\displaystyle\leq\;$
+$\displaystyle 30L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{L}+\mathbb{E}\Big[\sum_{i=2}^{k}\frac{i}{8L(i+1)}\left\|G(\mathbf{u}_{i-1})\right\|^{2}\Big]$
+$\displaystyle+\mathbb{E}\Big[\sum_{i=2}^{k}\frac{3i(i+1)}{L}\left\|F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})\right\|^{2}\Big].$
+By Corollary 2.2, we have
+$\displaystyle\mathbb{E}\Big[\sum_{i=2}^{k}\frac{3i(i+1)}{L}\left\|F(\mathbf{u}_{i-1})-\widetilde{F}(\mathbf{u}_{i-1})\right\|^{2}\Big]$
+$\displaystyle\leq\;$
+$\displaystyle\sum_{i=2}^{k}\frac{3i(i+1)}{L}\frac{\epsilon^{2}}{i-1}\overset{(i)}{\leq}\sum_{i=2}^{k}\frac{6(i+1)\epsilon^{2}}{L}=\frac{3(k+4)(k-1)\epsilon^{2}}{L},$
+where $(i)$ is because $\frac{i}{i-1}\leq 2$ for all $i\geq 2$ . By induction, we have
+$\displaystyle\mathbb{E}\Big[\sum_{i=2}^{k}\frac{i}{8L(i+1)}\left\|G(\mathbf{u}_{i-1})\right\|^{2}\Big]$
+$\displaystyle\overset{(i)}{\leq}\;$
+$\displaystyle\sum_{i=2}^{k}\frac{1}{8L}\Big(2\frac{\Lambda_{0}^{2}}{(i-1)^{2}}+2\Lambda_{1}^{2}\epsilon^{2}\Big)$
+$\displaystyle\overset{(ii)}{\leq}\;$
+$\displaystyle\frac{1}{4L}\Big(\Lambda_{0}^{2}\frac{\pi^{2}}{6}+(k-1)\Lambda_{1}^{2}\epsilon^{2}\Big)=\frac{1}{L}\Big(\frac{\Lambda_{0}^{2}\pi^{2}}{24}+\frac{(k-1)\Lambda_{1}^{2}\epsilon^{2}}{4}\Big),$
+where $(i)$ follows from induction and $\frac{i}{i+1}\leq 1$ , and $(ii)$ is due to $\sum_{i=2}^{k}\frac{1}{(i-1)^{2}}\leq\sum_{i=1}^{\infty}\frac{1}{i^{2}}=\frac{\pi^{2}}{6}$ . We now obtain
+$\displaystyle\mathbb{E}[\mathcal{C}_{k}]\leq 30L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{L}+\frac{3(k+4)(k-1)\epsilon^{2}}{L}+\frac{1}{L}\Big(\frac{\Lambda_{0}^{2}\pi^{2}}{24}+\frac{(k-1)\Lambda_{1}^{2}\epsilon^{2}}{4}\Big).$
+By the same derivation of Lemma B.1, we have
+$\displaystyle\mathbb{E}\big[\left\|G(\mathbf{u}_{k})\right\|^{2}\big]\leq\;$
+$\displaystyle\frac{B_{k}L_{k}}{A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|]$
+$\displaystyle+\frac{L_{k}}{A_{k}}\Big(30L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{L}+\frac{3(k+4)(k-1)\epsilon^{2}}{L}+\frac{\Lambda_{0}^{2}\pi^{2}}{24L}+\frac{(k-1)\Lambda_{1}^{2}\epsilon^{2}}{4L}\Big)$
+$\displaystyle=\;$
+$\displaystyle\frac{L}{k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|]+\frac{30L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k(k+1)}$
+$\displaystyle+\frac{1}{k(k+1)}\Big(\epsilon^{2}+3(k+4)(k-1)\epsilon^{2}+\frac{\Lambda_{0}^{2}\pi^{2}}{24}+\frac{(k-1)\Lambda_{1}^{2}\epsilon^{2}}{4}\Big)$
+$\displaystyle\overset{(i)}{\leq}\;$
+$\displaystyle\frac{L}{k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|]+\Big(\frac{30L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k^{2}}+(11+\frac{\Lambda_{1}^{2}}{4k})\epsilon^{2}+\frac{\Lambda_{0}^{2}\pi^{2}}{24k^{2}}\Big),$
+where $(i)$ is due to $\frac{1}{k(k+1)}\leq\frac{1}{k^{2}}$ , $\frac{3(k+1)(k-1)}{k(k+1)}\leq 10$ and $\frac{k-1}{k(k+1)}\leq\frac{1}{k}$ . Since $\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|]\leq(\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|^{2}])^{\frac{1}{2}}$ by Jensen’s Inequality, we have
+$\displaystyle\mathbb{E}\big[\left\|G(\mathbf{u}_{k})\right\|^{2}\big]\leq\;$
+$\displaystyle\frac{L}{k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\Big(\mathbb{E}\big[\left\|G(\mathbf{u}_{k})\right\|^{2}\big]\Big)^{\frac{1}{2}}$
+$\displaystyle+\Big(\frac{30L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k^{2}}+(11+\frac{\Lambda_{1}^{2}}{4k})\epsilon^{2}+\frac{\Lambda_{0}^{2}\pi^{2}}{24k^{2}}\Big),$
+which is a quadratic function with respect to $(\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|^{2}])^{\frac{1}{2}}$ . So by its larger root we obtain
+$\displaystyle\Big(\mathbb{E}\big[\left\|G(\mathbf{u}_{k})\right\|^{2}\big]\Big)^{\frac{1}{2}}$
+$\displaystyle\leq\;$
+$\displaystyle\frac{L}{2k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\frac{1}{2}\sqrt{\frac{L^{2}}{k^{2}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+4\Big(\frac{30L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k^{2}}+(11+\frac{\Lambda_{1}^{2}}{4k})\epsilon^{2}+\frac{\Lambda_{0}^{2}\pi^{2}}{24k^{2}}\Big)}$
+$\displaystyle\overset{(i)}{\leq}\;$
+$\displaystyle\frac{L}{k}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\Big(\frac{\sqrt{30}L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{k}+\sqrt{11+\frac{\Lambda_{1}^{2}}{4k}}\epsilon+\frac{\Lambda_{0}\pi}{2\sqrt{6}k}\Big)$
+$\displaystyle=\;$
+$\displaystyle\frac{(1+\sqrt{30})L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+\frac{\Lambda_{0}\pi}{2\sqrt{6}}}{k}+\sqrt{11+\frac{\Lambda_{1}^{2}}{4k}}\epsilon$
+$\displaystyle\overset{(ii)}{\leq}\;$
+$\displaystyle\frac{\Lambda_{0}}{k}+\Lambda_{1}\epsilon,$
+where $(i)$ is due to the fact that $\sqrt{\sum_{i=1}^{n}X_{i}^{2}}\leq\sum_{i=1}^{n}|X_{i}|$ , and $(ii)$ is because of our choice of $\Lambda_{0},\Lambda_{1}$ . Hence, the result also holds for the case $k$ . Then by induction we know that the result holds for all $k\geq 1$ .
+Finally, when $k\geq\frac{2\Lambda_{0}}{\epsilon}$ , we have $\frac{\Lambda_{0}}{k}\leq\epsilon/2$ . Also, since we have $\Lambda_{1}=\sqrt{13}$ , we obtain
+$\displaystyle\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|]\leq\Big(\frac{1}{2}+\sqrt{13}\Big)\epsilon\leq 5\epsilon.$
+Hence, the total number of iterations needed to attain $5\epsilon$ norm of the operator is
+$\displaystyle N=\Big\lceil\frac{2\Lambda_{0}}{\epsilon}\Big\rceil\leq\frac{2\Lambda_{0}}{\epsilon}+1=\frac{\Delta}{\epsilon},$
+thus completing the proof.
+∎
+Corollary B.7.
+Given an arbitrary $\mathbf{u}_{0}\in\mathbb{R}^{d},$ suppose that iterates $\mathbf{u}_{k}$ evolve according to Halpern iteration from Eq. (B.10) for $k\geq 1,$ where $L_{k}=L$ , and $\lambda_{k}=\frac{1}{k+1}$ . Assume further that the stochastic estimate $\widetilde{F}(\mathbf{u})$ is defined according to Eq. (2.1), with its parameters set according to Corollary 2.2.
+Then, given any $\epsilon>0,$ stochastic Halpern iteration from Eq. (B.10) returns a point $\mathbf{u}_{k}$ such that $\mathbb{E}[\left\|G(\mathbf{u}_{k})\right\|]\leq 5\epsilon$ with at most $\mathcal{O}(\frac{\sigma^{2}L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{3}}{\epsilon^{3}})$ oracle queries to $\widehat{F}$
+in expectation.
+Proof.
+Let $m_{k}$ be the number of stochastic queries made by the estimator from Eq. (2.1) at iteration $k$ . Conditional on $\mathcal{F}_{k}$ and using Corollary 2.2, since each stochastic gradient mapping $\widetilde{G}(\mathbf{u}_{k})$ only involves one PAGE invariant stochastic estimate $\widetilde{F}(\mathbf{u}_{k})$ , we have
+$\displaystyle\mathbb{E}\big[m_{k+1}|\mathcal{F}_{k-1}\big]=\;$
+$\displaystyle p_{k}\Big\lceil\frac{8\sigma^{2}}{p_{k}\epsilon^{2}}\Big\rceil+2(1-p_{k})\Big\lceil\frac{8L^{2}\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}}{p_{k}^{2}\epsilon^{2}}\Big\rceil$
+$\displaystyle\overset{(i)}{\leq}\;$
+$\displaystyle p_{k}\Big(\frac{8\sigma^{2}}{p_{k}\epsilon^{2}}+1\Big)+2(1-p_{k})\Big(\frac{8L^{2}\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}}{p_{k}^{2}\epsilon^{2}}+1\Big),$
+where $(i)$ is due to the fact that $\lceil x\rceil\leq x+1$ for any $x\in\mathbb{R}$ . Taking expectation with respect to all randomness on both sides, and rearranging the terms, we obtain
+$\displaystyle\mathbb{E}[m_{k+1}]\leq\frac{8\sigma^{2}}{\epsilon^{2}}+\frac{16(1-p_{k})L^{2}\mathbb{E}\big[\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}\big]}{p_{k}^{2}\epsilon^{2}}+2.$
+By the same derivation as Lemma 3.3, we have
+$\displaystyle\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}\leq\left\{\begin{array}[]{ll}\frac{1}{4L^{2}}\left\|\widetilde{G}(\mathbf{u}_{0})\right\|^{2}&\text{if }k=1,\\
+&\\
+\frac{2k^{2}}{L^{2}(k+1)^{2}}\left\|\widetilde{G}(\mathbf{u}_{k-1})\right\|^{2}+\sum_{i=0}^{k-2}\frac{2(i+1)^{2}}{k(k+1)^{2}L^{2}}\left\|\widetilde{G}(\mathbf{u}_{i})\right\|^{2}&\text{if }k\geq 2.\end{array}\right.$
+By the corollary assumptions, we have $\mathbb{E}[\left\|G(\mathbf{u}_{i})\right\|^{2}]\leq\mathcal{O}(\frac{L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{i^{2}})$ for $i\leq k-1$ by Theorem B.6. Then we obtain
+$\displaystyle\mathbb{E}\Big[\left\|\widetilde{G}(\mathbf{u}_{i})\right\|^{2}\Big]\leq$
+$\displaystyle 2\mathbb{E}\Big[\left\|G(\mathbf{u}_{i})\right\|^{2}\Big]+2\mathbb{E}\Big[\left\|\widetilde{G}(\mathbf{u}_{i})-G(\mathbf{u}_{i})\right\|^{2}\Big]$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle 2\mathbb{E}\Big[\left\|G(\mathbf{u}_{i})\right\|^{2}\Big]+2\mathbb{E}\Big[\left\|\widetilde{F}(\mathbf{u}_{i})-F(\mathbf{u}_{i})\right\|^{2}\Big]$
+$\displaystyle\leq$
+$\displaystyle\mathcal{O}\Big(\frac{L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{i^{2}}\Big),$
+where $(i)$ is due to Lemma B.4.
+Plugging it into Inequality (B.2), we have $\mathbb{E}[\left\|\mathbf{u}_{k}-\mathbf{u}_{k-1}\right\|^{2}]=\mathcal{O}(\frac{\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{k^{2}})$ , which leads to
+$\mathbb{E}[m_{k+1}]=\mathcal{O}\Big(\frac{\sigma^{2}+L^{2}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\epsilon^{2}}\Big)$
+using $p_{k}=\frac{2}{k+1}=\mathcal{O}(1/k)$ .
+Further, by Theorem B.6, the total number of iterations to attain $5\epsilon$ norm of the operator in expectation is $N=\mathcal{O}(\frac{L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{\epsilon})$ and $m_{1}=S_{1}^{(0)}=\mathcal{O}(\frac{\sigma^{2}}{\epsilon^{2}})$ , we conclude that the total number of stochastic queries to $F$ is
+$\mathbb{E}[M]=\mathbb{E}\Big[\sum_{k=1}^{N}m_{k}\Big]=\mathcal{O}\Big(\frac{\sigma^{2}L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{3}}{\epsilon^{3}}\Big),$
+thus completing the proof.
+∎
+Appendix C Omitted proofs from Section 4
+We use the potential function, previously used by (Tran-Dinh and Luo, 2021),
+$\displaystyle\mathcal{V}_{k}:=$
+$\displaystyle A_{k}\|F(\mathbf{u}_{k})\|^{2}+B_{k}\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}_{0}\right\rangle+c_{k}L^{2}\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\|^{2},$
+(C.1)
+prove Theorem 4.1. Here $A_{k}$ , $B_{k}$ and $c_{k}$ are positive parameters to be determined later. We start by bounding the change of $\mathcal{V}_{k}$ under the following assumption on the parameters.
+Assumption 5.
+$\lambda_{k}\in\left[0,1\right)$ , $\eta_{k}>0$ , and $A_{k}$ , $B_{k}$ and $c_{k}$ are positive parameters satisfying $B_{k+1}=\frac{B_{k}}{1-\lambda_{k}}$ , $A_{k}=\frac{B_{k}\eta_{k}}{2\lambda_{k}}$ ,
+$0<\eta_{k+1}=\frac{\big(1-\lambda_{k}^{2}-M\eta_{k}^{2}\big)\lambda_{k+1}\eta_{k}}{\big(1-M\eta_{k}^{2}\big)\big(1-\lambda_{k}\big)\lambda_{k}},\quad M\eta_{k}^{2}+\lambda_{k}^{2}<1,\quad\text{and }\quad\eta_{k+1}\leq\frac{\lambda_{k+1}\big(1-\lambda_{k}\big)}{M\lambda_{k}\eta_{k}},$
+(C.2)
+where $M=3L^{2}(2+\theta)$ and $\theta>0$ is some parameter that can be determined later.
+The following lemma gives a bound on the difference between the potential function values at two consecutive iterations with the control of the parameters above.
+Lemma C.1.
+Let $\mathcal{V}_{k}$ be defined as in Eq. (C.1), where the parameters satisfy Assumption 5. Then the difference of potential function between two consecutive iterations can be bounded by
+$\displaystyle\mathcal{V}_{k+1}-\mathcal{V}_{k}\leq$
+$\displaystyle-L^{2}\bigg(\frac{\theta A_{k}}{M\eta_{k}^{2}}-c_{k+1}\bigg)\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\|^{2}-L^{2}(c_{k}-A_{k})\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\|^{2}$
+(C.3)
+$\displaystyle+\frac{2A_{k}}{M\eta_{k}^{2}}\left\|F(\mathbf{v}_{k})-\widetilde{F}(\mathbf{v}_{k})\right\|^{2}+A_{k}\left\|F(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}.$
+Proof.
+By the iteration scheme in Eq. (4.1), we can deduce the following identities:
+$\left\{\begin{aligned} \mathbf{u}_{k+1}-\mathbf{u}_{k}&=\lambda_{k}(\mathbf{u}_{0}-\mathbf{u}_{k})-\eta_{k}\widetilde{F}(\mathbf{v}_{k})\\
+\mathbf{u}_{k+1}-\mathbf{u}_{k}&=\frac{\lambda_{k}}{1-\lambda_{k}}(\mathbf{u}_{0}-\mathbf{u}_{k+1})-\frac{\eta_{k}}{1-\lambda_{k}}\widetilde{F}(\mathbf{v}_{k})\\
+\mathbf{u}_{k+1}-\mathbf{v}_{k}&=-\eta_{k}\left(\widetilde{F}\left(\mathbf{v}_{k}\right)-\widetilde{F}\left(\mathbf{v}_{k-1}\right)\right)\end{aligned}\right.$
+(C.4)
+Further, by the definition of the potential function $\mathcal{V}_{k}$ , we can write
+$\displaystyle\mathcal{V}_{k}-\mathcal{V}_{k+1}=$
+$\displaystyle\underbrace{A_{k}\left\|F\left(\mathbf{u}_{k}\right)\right\|^{2}-A_{k+1}\left\|F\left(\mathbf{u}_{k+1}\right)\right\|^{2}}_{\mathcal{T}_{[1]}}$
+(C.5)
+$\displaystyle+\underbrace{B_{k}\left\langle F\left(\mathbf{u}_{k}\right),\mathbf{u}_{k}-\mathbf{u}_{0}\right\rangle-B_{k+1}\left\langle F\left(\mathbf{u}_{k+1}\right),\mathbf{u}_{k+1}-\mathbf{u}_{0}\right\rangle}_{\mathcal{T}_{[2]}}$
+$\displaystyle+c_{k}L^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}-c_{k+1}L^{2}\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}.$
+To obtain the claimed bound, in the rest of the proof we focus on bounding $\mathcal{T}_{[1]}$ and $\mathcal{T}_{[2]}.$
+To bound $\mathcal{T}_{[1]}$ , by the Lipschitz continuity of $F$ , we have
+$\left\|F\left(\mathbf{u}_{k+1}\right)-F\left(\mathbf{v}_{k}\right)\right\|^{2}\leq L^{2}\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}=L^{2}\eta_{k}^{2}\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)-\widetilde{F}\left(\mathbf{v}_{k-1}\right)\right\|^{2},$
+where in the last step we used the third identity from Eq. (C.4).
+Further, for any $\theta>0$
+$\displaystyle\left\|F\left(\mathbf{u}_{k+1}\right)-\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}+\theta L^{2}\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}$
+(C.6)
+$\displaystyle\leq$
+$\displaystyle 2\left\|F\left(\mathbf{u}_{k+1}\right)-F\left(\mathbf{v}_{k}\right)\right\|^{2}+2\left\|F\left(\mathbf{v}_{k}\right)-\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}+\theta L^{2}\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle\eta_{k}^{2}L^{2}(2+\theta)\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)-\widetilde{F}\left(\mathbf{v}_{k-1}\right)\right\|^{2}+2\left\|F\left(\mathbf{v}_{k}\right)-\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2},$
+where again in the last step we used the third identity from Eq. (C.4).
+Notice that
+$\displaystyle\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)-\widetilde{F}\left(\mathbf{v}_{k-1}\right)\right\|^{2}$
+$\displaystyle=$
+$\displaystyle\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)-F\left(\mathbf{u}_{k}\right)+F\left(\mathbf{u}_{k}\right)-F\left(\mathbf{v}_{k-1}\right)+F\left(\mathbf{v}_{k-1}\right)-\widetilde{F}\left(\mathbf{v}_{k-1}\right)\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle 3\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)-F\left(\mathbf{u}_{k}\right)\right\|^{2}+3\left\|F\left(\mathbf{u}_{k}\right)-F\left(\mathbf{v}_{k-1}\right)\right\|^{2}+3\left\|F\left(\mathbf{v}_{k-1}\right)-\widetilde{F}\left(\mathbf{v}_{k-1}\right)\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle 3\Big(\left\|F\left(\mathbf{u}_{k}\right)\right\|^{2}-2\left\langle F\left(\mathbf{u}_{k}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle+\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}\Big)+3L^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle+3\left\|F\left(\mathbf{v}_{k-1}\right)-\widetilde{F}\left(\mathbf{v}_{k-1}\right)\right\|^{2}.$
+Let $M:=3L^{2}(2+\theta)$ . Expanding the term $\|{F(\mathbf{u}_{k+1})-\widetilde{F}(\mathbf{v}_{k})}\|^{2}$ on the LHS in Inequality (C.6) and combining with the inequality above, we have
+$\displaystyle\left\|F\left(\mathbf{u}_{k+1}\right)\right\|^{2}+\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}-2\left\langle F\left(\mathbf{u}_{k+1}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle+\theta L^{2}\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle M\eta_{k}^{2}\left(\left\|F\left(\mathbf{u}_{k}\right)\right\|^{2}-2\left\langle F\left(\mathbf{u}_{k}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle+\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}\right)+ML^{2}\eta_{k}^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle+M\eta_{k}^{2}\left\|F\left(\mathbf{v}_{k-1}\right)-\widetilde{F}\left(\mathbf{v}_{k-1}\right)\right\|^{2}+2\left\|F\left(\mathbf{v}_{k}\right)-\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}.$
+Multiplying both sides by $\frac{A_{k}}{M\eta_{k}^{2}}$ , rearranging this inequality and subtracting $A_{k+1}\left\|F(\mathbf{u}_{k+1})\right\|^{2}$ on both sides, we obtain
+$\displaystyle\mathcal{T}_{[1]}=$
+$\displaystyle A_{k}\left\|F\left(\mathbf{u}_{k}\right)\right\|^{2}-A_{k+1}\left\|F(\mathbf{u}_{k+1})\right\|^{2}$
+(C.7)
+$\displaystyle\geq$
+$\displaystyle\left(\frac{A_{k}}{M\eta_{k}^{2}}-A_{k+1}\right)\left\|F\left(\mathbf{u}_{k+1}\right)\right\|^{2}+\frac{A_{k}\left(1-M\eta_{k}^{2}\right)}{M\eta_{k}^{2}}\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}$
+$\displaystyle-\frac{2A_{k}\left(1-M\eta_{k}^{2}\right)}{M\eta_{k}^{2}}\left\langle F\left(\mathbf{u}_{k+1}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle-2A_{k}\left\langle F\left(\mathbf{u}_{k+1}\right)-F\left(\mathbf{u}_{k}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle$
+$\displaystyle+\frac{A_{k}\theta L^{2}}{M\eta_{k}^{2}}\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}-A_{k}L^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle-\frac{2A_{k}}{M\eta_{k}^{2}}\left\|F(\mathbf{v}_{k})-\widetilde{F}(\mathbf{v}_{k})\right\|^{2}-A_{k}\left\|F(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}.$
+To bound $\mathcal{T}_{[2]}$ , notice that $F$ is monotone, so we have
+$\left\langle F\left(\mathbf{u}_{k+1}\right),\mathbf{u}_{k+1}-\mathbf{u}_{k}\right\rangle\geq\left\langle F\left(\mathbf{u}_{k}\right),\mathbf{u}_{k+1}-\mathbf{u}_{k}\right\rangle.$
+Using the first line in Eq. (C.4) for the RHS and the second line for the LHS, we can obtain
+$\displaystyle\frac{\lambda_{k}}{1-\lambda_{k}}\left\langle F\left(\mathbf{u}_{k+1}\right),\mathbf{u}_{0}-\mathbf{u}_{k+1}\right\rangle\geq$
+$\displaystyle\lambda_{k}\left\langle F\left(\mathbf{u}_{k}\right),\mathbf{u}_{0}-\mathbf{u}_{k}\right\rangle-\eta_{k}\left\langle F\left(\mathbf{u}_{k}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle$
+$\displaystyle+\frac{\eta_{k}}{1-\lambda_{k}}\left\langle F\left(\mathbf{u}_{k+1}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle.$
+Multiplying both sides by $\frac{B_{k}}{\lambda_{k}}$ and using that $B_{k+1}=\frac{B_{k}}{1-\lambda_{k}}$ by Assumption 5, we have
+$\displaystyle\mathcal{T}_{[2]}\geq$
+$\displaystyle\frac{B_{k}\eta_{k}}{\lambda_{k}\left(1-\lambda_{k}\right)}\left\langle F\left(\mathbf{u}_{k+1}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle-\frac{B_{k}\eta_{k}}{\lambda_{k}}\left\langle F\left(\mathbf{u}_{k}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle$
+(C.8)
+$\displaystyle=$
+$\displaystyle B_{k+1}\eta_{k}\left\langle F\left(\mathbf{u}_{k+1}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle+\frac{B_{k}\eta_{k}}{\lambda_{k}}\left\langle F\left(\mathbf{u}_{k+1}\right)-F\left(\mathbf{u}_{k}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle.$
+Combining Inequalities (C.7) and (C.8) and plugging the bounds into Eq. (C.5), we obtain
+$\displaystyle\mathcal{V}_{k}-\mathcal{V}_{k+1}\geq$
+$\displaystyle\left(\frac{A_{k}}{M\eta_{k}^{2}}-A_{k+1}\right)\left\|F\left(\mathbf{u}_{k+1}\right)\right\|^{2}+\frac{A_{k}\left(1-M\eta_{k}^{2}\right)}{M\eta_{k}^{2}}\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}$
+$\displaystyle-2\left(\frac{A_{k}\left(1-M\eta_{k}^{2}\right)}{M\eta_{k}^{2}}-\frac{B_{k+1}\eta_{k}}{2}\right)\left\langle F\left(\mathbf{u}_{k+1}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle$
+$\displaystyle+\left(\frac{B_{k}\eta_{k}}{\lambda_{k}}-2A_{k}\right)\left\langle F\left(\mathbf{u}_{k+1}\right)-F\left(\mathbf{u}_{k}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle$
+$\displaystyle+L^{2}\left(\frac{A_{k}\theta}{M\eta_{k}^{2}}-c_{k+1}\right)\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}+L^{2}\left(c_{k}-A_{k}\right)\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle-\frac{2A_{k}}{M\eta_{k}^{2}}\left\|F(\mathbf{v}_{k})-\widetilde{F}(\mathbf{v}_{k})\right\|^{2}-A_{k}\left\|F(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}.$
+By Assumption 5, we choose $A_{k}=\frac{B_{k}\eta_{k}}{2\lambda_{k}}$ . Define:
+$\left\{\begin{aligned} S_{k}^{11}:=\;&\frac{A_{k}}{M\eta_{k}^{2}}-A_{k+1}=\frac{B_{k}}{2M\lambda_{k}\eta_{k}}-\frac{B_{k}\eta_{k+1}}{2\left(1-\lambda_{k}\right)\lambda_{k+1}}\\
+S_{k}^{22}:=\;&\frac{A_{k}\left(1-M\eta_{k}^{2}\right)}{M\eta_{k}^{2}}=\frac{B_{k}\left(1-M\eta_{k}^{2}\right)}{2M\eta_{k}\lambda_{k}}\\
+S_{k}^{12}:=\;&\frac{A_{k}\left(1-M\eta_{k}^{2}\right)}{M\eta_{k}^{2}}-\frac{B_{k+1}\eta_{k}}{2}=\frac{\left(1-\lambda_{k}-M\eta_{k}^{2}\right)B_{k}}{2M\left(1-\lambda_{k}\right)\lambda_{k}\eta_{k}}.\end{aligned}\right.$
+Then, we obtain
+$\displaystyle\mathcal{V}_{k}-\mathcal{V}_{k+1}\geq$
+$\displaystyle S_{k}^{11}\left\|F\left(\mathbf{u}_{k+1}\right)\right\|^{2}+S_{k}^{22}\left\|\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}-2S_{k}^{12}\left\langle F\left(\mathbf{u}_{k+1}\right),\widetilde{F}\left(\mathbf{v}_{k}\right)\right\rangle$
+$\displaystyle+L^{2}\left(\frac{A_{k}\theta}{M\eta_{k}^{2}}-c_{k+1}\right)\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}+L^{2}\left(c_{k}-A_{k}\right)\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle-\frac{2A_{k}}{M\eta_{k}^{2}}\left\|F(\mathbf{v}_{k})-\widetilde{F}(\mathbf{v}_{k})\right\|^{2}-A_{k}\left\|F(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}.$
+Suppose that $S_{k}^{11}\geq 0$ , $S_{k}^{22}\geq 0$ and $\sqrt{S_{k}^{11}S_{k}^{22}}=S_{k}^{12}$ . Then, we can conclude
+$\displaystyle\mathcal{V}_{k}-\mathcal{V}_{k+1}=$
+$\displaystyle\left\|\sqrt{S_{k}^{11}}F\left(\mathbf{u}_{k+1}\right)-\sqrt{S_{k}^{22}}\widetilde{F}\left(\mathbf{v}_{k}\right)\right\|^{2}$
+$\displaystyle+L^{2}\left(\frac{A_{k}\theta}{M\eta_{k}^{2}}-c_{k+1}\right)\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}+L^{2}\left(c_{k}-A_{k}\right)\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle-\frac{2A_{k}}{M\eta_{k}^{2}}\left\|F(\mathbf{v}_{k})-\widetilde{F}(\mathbf{v}_{k})\right\|^{2}-A_{k}\left\|F(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}$
+$\displaystyle\geq$
+$\displaystyle L^{2}\left(\frac{A_{k}\theta}{M\eta_{k}^{2}}-c_{k+1}\right)\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}+L^{2}\left(c_{k}-A_{k}\right)\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle-\frac{2A_{k}}{M\eta_{k}^{2}}\left\|F(\mathbf{v}_{k})-\widetilde{F}(\mathbf{v}_{k})\right\|^{2}-A_{k}\left\|F(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}.$
+To complete the proof, let us argue that the assumptions that $S_{k}^{11}\geq 0$ , $S_{k}^{22}\geq 0$ and $\sqrt{S_{k}^{11}S_{k}^{22}}=S_{k}^{12}$ we made above are valid.
+First, notice that $S_{k}^{11}\geq 0$ is equivalent to $\eta_{k+1}\leq\frac{\lambda_{k+1}\left(1-\lambda_{k}\right)}{M\lambda_{k}\eta_{k}}$ , and $S_{k}^{22}\geq 0$ is equivalent to $M\eta_{k}^{2}\leq 1$ , which are both included in Assumption 5. Moreover, since $B_{k}>0,$ $\sqrt{S_{k}^{11}S_{k}^{22}}=S_{k}^{12}$ is equivalent to
+$\frac{\left(1-M\eta_{k}^{2}\right)}{M\eta_{k}}\cdot\left(\frac{1}{M\eta_{k}}-\frac{\lambda_{k}\eta_{k+1}}{\left(1-\lambda_{k}\right)\lambda_{k+1}}\right)=\left(\frac{1-\lambda_{k}-M\eta_{k}^{2}}{M\left(1-\lambda_{k}\right)\eta_{k}}\right)^{2},$
+which is further equivalent to $\eta_{k+1}=\frac{\lambda_{k+1}\left(1-M\eta_{k}^{2}-\lambda_{k}^{2}\right)}{\lambda_{k}\left(1-\lambda_{k}\right)\left(1-M\eta_{k}^{2}\right)}\cdot\eta_{k}$ , provided that $M\eta_{k}^{2}+\lambda_{k}^{2}\leq 1$ . Both these inequalities hold by Assumption 5, thus completing the proof.
+∎
+Motivated by Assumption 5 and Lemma C.1, we make the choice of $\lambda_{k}$ and $\eta_{k}$ as
+$\lambda_{k}:=\frac{1}{k+2}\quad\text{ and }\quad\eta_{k+1}:=\frac{\left(1-\lambda_{k}^{2}-M\eta_{k}^{2}\right)\lambda_{k+1}\eta_{k}}{\left(1-M\eta_{k}^{2}\right)\left(1-\lambda_{k}\right)\lambda_{k}},$
+(C.9)
+where $M=3L^{2}\left(2+\theta\right)$ and $0<\eta_{0}<\frac{1}{\sqrt{2M}}$ . The sequence $\{\eta_{k}\}_{k\geq 1}$ given by Eq. (C.9) is actually non-increasing and has a positive limit. We summarize this result in the following lemma for completeness, and the proof can be found in (Tran-Dinh and Luo, 2021).
+Lemma C.2.
+Given $M>0$ , the sequence $\{\eta_{k}\}$ generated by Eq. (C.9) is non-increasing, i.e. $\eta_{k+1}\leq\eta_{k}\leq\eta_{0}<\frac{\sqrt{3}}{2\sqrt{M}}$ . Moreover, if $0<\eta_{0}<\frac{1}{\sqrt{2M}}$ , we have that $\eta_{*}:=\lim_{k\rightarrow\infty}\eta_{k}$ exists and
+$\eta_{*}\geq\underline{\eta}:=\frac{\eta_{0}\left(1-2M\eta_{0}^{2}\right)}{1-M\eta_{0}^{2}}>0.$
+(C.10)
+We now prove the results for the iteration complexity and the corresponding oracle complexity for Algorithm 2.
+See 4.1
+Proof.
+We start with verifying that the conditions in Eq. (C.2) of Lemma C.1 are all satisfied. By Eq. (C.9) and Lemma C.2, we know that $\{\eta_{k}\}$ is non-increasing and $\eta_{*}=\lim_{k\rightarrow\infty}\eta_{k}>0$ , so the first condition in Eq. (C.2) is satisfied. Also, as $0<\eta_{k}\leq\eta_{0}\leq\frac{1}{\sqrt{2M}}$ , we have $M\eta_{k}^{2}\leq M\eta_{0}^{2}\leq\frac{1}{2}<1-\frac{1}{(k+2)^{2}}$ . So the second condition in Eq. (C.2) holds. Moreover, since $\eta_{k+1}\leq\eta_{k}$ , the third condition holds if $\eta_{k}^{2}\leq\frac{\lambda_{k+1}\left(1-\lambda_{k}\right)}{M\lambda_{k}}=\frac{k+1}{M(k+3)}$ . Due to the fact that $\frac{k+1}{M(k+3)}\geq\frac{1}{3M}$ and $\eta_{k}\leq\eta_{0}$ for all $k\geq 1$ , we can have this condition hold if $\eta_{0}\leq\frac{1}{\sqrt{3M}}$ . Hence all the conditions hold with our parameter update and letting $\eta_{0}\leq\frac{1}{\sqrt{3M}}$ .
+Let $c_{k}=A_{k}$ , then we obtain
+$\displaystyle L^{2}\left(\frac{A_{k}\theta}{M\eta_{k}^{2}}-c_{k+1}\right)\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}+L^{2}\left(c_{k}-A_{k}\right)\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle=$
+$\displaystyle L^{2}\left(\frac{A_{k}\theta}{M\eta_{k}^{2}}-A_{k+1}\right)\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}$
+$\displaystyle=$
+$\displaystyle\frac{L^{2}B_{k}}{2}\left(\frac{\theta}{M\lambda_{k}\eta_{k}}-\frac{\eta_{k+1}}{\lambda_{k+1}\left(1-\lambda_{k}\right)}\right)\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}.$
+Here we choose the parameters such that $\eta_{k}\eta_{k+1}\leq\frac{\theta\lambda_{k+1}\left(1-\lambda_{k}\right)}{M\lambda_{k}}=\frac{\theta(k+1)}{M(k+3)}$ to ensure $\left(\frac{\theta}{M\lambda_{k}\eta_{k}}-\frac{\eta_{k+1}}{\lambda_{k+1}\left(1-\lambda_{k}\right)}\right)\geq 0$ . Since $\eta_{k+1}\leq\eta_{k}$ , the required inequality holds if $\eta_{k}\leq\sqrt{\frac{\theta(k+1)}{M(k+3)}}$ , which is satisfied if we let $\eta_{0}\leq\sqrt{\frac{\theta}{3M}}$ as $\eta_{k}\leq\eta_{0}$ for all $k\geq 1$ .
+Combining the two conditions on $\eta_{0}$ , and choosing $\theta=1$ , we have
+$\eta_{0}\leq\frac{1}{\sqrt{3M}}=\frac{1}{3L\sqrt{2+\theta}}=\frac{1}{3L\sqrt{3}},$
+which is required by Algorithm 2 and thus satisfied.
+Hence, with $0<\eta_{0}\leq\frac{1}{3L\sqrt{3}}$ , we have
+$\displaystyle\mathcal{V}_{k}-\mathcal{V}_{k+1}\geq$
+$\displaystyle L^{2}\left(\frac{A_{k}\theta}{M\eta_{k}^{2}}-c_{k+1}\right)\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}+L^{2}\left(c_{k}-A_{k}\right)\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+(C.11)
+$\displaystyle-\frac{2A_{k}}{M\eta_{k}^{2}}\left\|F(\mathbf{v}_{k})-\widetilde{F}(\mathbf{v}_{k})\right\|^{2}-A_{k}\left\|F(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}$
+$\displaystyle\geq$
+$\displaystyle-\frac{2A_{k}}{M\eta_{k}^{2}}\left\|F(\mathbf{v}_{k})-\widetilde{F}(\mathbf{v}_{k})\right\|^{2}-A_{k}\left\|F(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}.$
+Consider $\mathcal{C}_{k}=A_{k}\left\|F(\mathbf{u}_{k})\right\|^{2}+B_{k}\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}_{0}\right\rangle$ . Then:
+$\displaystyle\mathcal{C}_{k}\overset{(i)}{\geq}$
+$\displaystyle A_{k}\left\|F(\mathbf{u}_{k})\right\|^{2}+B_{k}\left\langle F(\mathbf{u}_{k})-F(\mathbf{u}^{*}),\mathbf{u}_{k}-\mathbf{u}^{*}\right\rangle+B_{k}\left\langle F(\mathbf{u}_{k}),\mathbf{u}^{*}-\mathbf{u}_{0}\right\rangle$
+$\displaystyle\overset{(ii)}{\geq}$
+$\displaystyle A_{k}\left\|F(\mathbf{u}_{k})\right\|^{2}-\frac{A_{k}}{2}\left\|F(\mathbf{u}_{k})\right\|^{2}-\frac{B_{k}^{2}}{2A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}$
+$\displaystyle=$
+$\displaystyle\frac{A_{k}}{2}\left\|F(\mathbf{u}_{k})\right\|^{2}-\frac{B_{k}^{2}}{2A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2},$
+where $(i)$ is due to $\mathbf{u}^{*}$ being the solution to the monotone inclusion problem so an (SVI) solution as well, and we use monotonicity and Young’s Inequality for $(ii)$ . So we obtain
+$\displaystyle\frac{A_{k}}{2}\left\|F(\mathbf{u}_{k})\right\|^{2}+A_{k}L^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}\leq$
+$\displaystyle\mathcal{C}_{k}+A_{k}L^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}+\frac{B_{k}^{2}}{2A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}$
+$\displaystyle=$
+$\displaystyle\mathcal{V}_{k}+\frac{B_{k}^{2}}{2A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}.$
+Since $B_{k+1}=\frac{B_{k}}{1-\lambda_{k}}$ and $\lambda_{k}=\frac{1}{k+2}$ , we have $B_{k}=(k+1)B_{0}$ for any $B_{0}>0$ . Then we obtain $A_{k}=c_{k}=\frac{B_{k}\eta_{k}}{2\lambda_{k}}=\frac{B_{0}(k+1)(k+2)\eta_{k}}{2}$ . By Lemma C.2, we know that $0<\underline{\eta}\leq\eta_{*}\leq\eta_{k}\leq\eta_{0}$ , so $\frac{B_{0}(k+1)(k+2)\underline{\eta}}{2}\leq A_{k}=c_{k}\leq\frac{B_{0}(k+1)(k+2)\eta_{0}}{2}$ . By Inequality (C.11) and noticing $\mathbf{v}_{-1}=\mathbf{u}_{0}$ , we have
+$\displaystyle\frac{B_{0}\underline{\eta}(k+1)(k+2)}{4}\left\|F(\mathbf{u}_{k})\right\|^{2}+\frac{B_{0}\underline{\eta}L^{2}(k+1)(k+2)}{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle\frac{A_{k}}{2}\left\|F(\mathbf{u}_{k})\right\|^{2}+A_{k}L^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle\mathcal{V}_{k}+\frac{B_{k}^{2}}{2A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle\mathcal{V}_{k-1}+\frac{B_{k}^{2}}{2A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{2A_{k-1}}{M\eta_{k-1}^{2}}\left\|F(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}+A_{k-1}\left\|F(\mathbf{v}_{k-2})-\widetilde{F}(\mathbf{v}_{k-2})\right\|^{2}.$
+Unrolling this recursive bound down to $\mathcal{V}_{0}$ , we obtain
+$\displaystyle\frac{B_{0}\underline{\eta}(k+1)(k+2)}{4}\left\|F(\mathbf{u}_{k})\right\|^{2}+\frac{B_{0}\underline{\eta}L^{2}(k+1)(k+2)}{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle\mathcal{V}_{0}+\frac{B_{k}^{2}}{2A_{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\sum_{i=0}^{k-1}\frac{2A_{i}}{M\eta_{i}^{2}}\left\|F(\mathbf{v}_{i})-\widetilde{F}(\mathbf{v}_{i})\right\|^{2}+\sum_{i=0}^{k-1}A_{i}\left\|F(\mathbf{v}_{i-1})-\widetilde{F}(\mathbf{v}_{i-1})\right\|^{2}$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle B_{0}\eta_{0}\left\|F(\mathbf{u}_{0})\right\|^{2}+\frac{B_{0}(k+1)^{2}}{\underline{\eta}(k+1)(k+2)}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}$
+$\displaystyle+\sum_{i=0}^{k-1}\frac{B_{0}(i+1)(i+2)}{M\underline{\eta}}\left\|F(\mathbf{v}_{i})-\widetilde{F}(\mathbf{v}_{i})\right\|^{2}$
+$\displaystyle+\sum_{i=0}^{k-1}\frac{B_{0}(i+1)(i+2)\eta_{0}}{2}\left\|F(\mathbf{v}_{i-1})-\widetilde{F}(\mathbf{v}_{i-1})\right\|^{2},$
+where we plug in the bound for $A_{i}$ and $\eta_{i}$ in $(i)$ .
+Taking expectation with respect to all randomness on both sides and using the variance bound from Corollary 2.2, we obtain that
+$\displaystyle\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|^{2}+2L^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}\right]$
+$\displaystyle\leq$
+$\displaystyle\frac{4}{B_{0}\underline{\eta}(k+1)(k+2)}\bigg[B_{0}\eta_{0}\left\|F(\mathbf{u}_{0})\right\|^{2}+\frac{B_{0}(k+1)^{2}}{\underline{\eta}(k+1)(k+2)}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}$
+$\displaystyle+\sum_{i=0}^{k-1}\frac{B_{0}(i+1)(i+2)}{M\underline{\eta}}\mathbb{E}\Big[\left\|F(\mathbf{v}_{i})-\widetilde{F}(\mathbf{v}_{i})\right\|^{2}\Big]$
+$\displaystyle+\sum_{i=0}^{k-1}\frac{B_{0}(i+1)(i+2)\eta_{0}}{2}\mathbb{E}\Big[\left\|F(\mathbf{v}_{i-1})-\widetilde{F}(\mathbf{v}_{i-1})\right\|^{2}\Big]\bigg]$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\frac{4}{\underline{\eta}(k+1)(k+2)}\bigg[\left(L^{2}\eta_{0}+\frac{1}{\underline{\eta}}\right)\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\left(\frac{2}{M\underline{\eta}}+\eta_{0}+3\eta_{0}\right)\frac{\epsilon^{2}}{8}$
+$\displaystyle+\sum_{i=1}^{k-1}\frac{(i+1)(i+2)}{M\underline{\eta}}\frac{\epsilon^{2}}{i}+\sum_{i=2}^{k-1}\frac{(i+1)(i+2)\eta_{0}}{2}\frac{\epsilon^{2}}{i-1}\bigg]$
+$\displaystyle\overset{(ii)}{\leq}$
+$\displaystyle\frac{4\left(L^{2}\eta_{0}\underline{\eta}+1\right)\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\underline{\eta}^{2}(k+1)(k+2)}+\frac{1+2M\underline{\eta}\eta_{0}}{M\underline{\eta}(k+1)(k+2)}\epsilon^{2}$
+$\displaystyle+\frac{4(k-1)(k+4)}{M\underline{\eta}^{2}(k+1)(k+2)}\epsilon^{2}+\frac{4\eta_{0}(k-2)(k+3)}{\underline{\eta}(k+1)(k+2)}\epsilon^{2}$
+$\displaystyle\overset{(iii)}{\leq}$
+$\displaystyle\frac{4\left(L^{2}\eta_{0}\underline{\eta}+1\right)\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\underline{\eta}^{2}(k+1)(k+2)}+\frac{\left(1+2M\underline{\eta}\eta_{0}\right)}{M\underline{\eta}^{2}(k+1)(k+2)}\epsilon^{2}+\frac{4\left(1+M\eta_{0}\underline{\eta}\right)}{M\underline{\eta}^{2}}\epsilon^{2},$
+where we use Lipschitz property and variance bounds by variance reduction for $(i)$ . For $(ii)$ , we use the fact that $\frac{i+1}{i}\leq 2$ and $\frac{i+2}{i-1}\leq 4$ and sum over $2(i+1)$ , respectively. Moreover, $(iii)$ is due to $\frac{(k-1)(k+4)}{(k+1)(k+3)}\leq 1$ and $\frac{(k-2)(k+3)}{(k+1)(k+2)}\leq 1$ and by combining the last two terms.
+When $k\geq\frac{\sqrt{\Lambda_{0}}}{\sqrt{\Lambda_{1}}\epsilon}=\mathcal{O}\Big(\frac{L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{\epsilon}\Big)$ , where $\Lambda_{0}=\frac{4\left(L^{2}\eta_{0}\underline{\eta}+1\right)\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\underline{\eta}^{2}}$ and $\Lambda_{1}=\frac{5\left(1+M\underline{\eta}\eta_{0}\right)}{M\underline{\eta}^{2}}$ , we have
+$\displaystyle\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|^{2}+2L^{2}\left\|\mathbf{u}_{k}-\mathbf{v}_{k-1}\right\|^{2}\right]\leq$
+$\displaystyle\frac{\Lambda_{0}}{(k+1)(k+2)}+\Lambda_{1}\epsilon^{2}\leq 2\Lambda_{1}\epsilon^{2}.$
+Claimed stochastic oracle complexity follows from Lemma C.3 below.
+∎
+Lemma C.3.
+Let $\mathbf{u}_{0}\in\mathbb{R}^{d}$ be an arbitrary initial point and assume that iterates $\mathbf{u}_{k}$ evolve according to Algorithm 2. Then, Algorithm 2
+returns a point $\mathbf{u}_{N}$ such that $\mathbb{E}\big[\left\|F(\mathbf{u}_{N})\right\|^{2}\big]\leq 2\Lambda_{1}\epsilon^{2}$ after at most $\mathcal{O}\big(\frac{\sigma^{2}L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{3}}{\epsilon^{3}}\big)$ stochastic queries to $F$ .
+Proof.
+Let $m_{k}$ be the number of stochastic queries made by the variance reduction method at iteration $k$ for $k\geq 1$ . Conditional on $\mathcal{F}_{k-1}$ , we have
+$\displaystyle\mathbb{E}\big[m_{k+1}|\mathcal{F}_{k-1}\big]=\;$
+$\displaystyle\mathbb{E}\Big[p_{k}S_{1}^{(k)}+2(1-p_{k})S_{2}^{(k)}\Big|\mathcal{F}_{k-1}\Big]$
+$\displaystyle=\;$
+$\displaystyle p_{k}\Big\lceil\frac{8\sigma^{2}}{p_{k}\epsilon^{2}}\Big\rceil+2(1-p_{k})\Big\lceil\frac{8L^{2}\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}}{p_{k}^{2}\epsilon^{2}}\Big\rceil$
+$\displaystyle\overset{(i)}{\leq}\;$
+$\displaystyle p_{k}\Big(\frac{8\sigma^{2}}{p_{k}\epsilon^{2}}+1\Big)+2(1-p_{k})\Big(\frac{8L^{2}\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}}{p_{k}^{2}\epsilon^{2}}+1\Big),$
+where $(i)$ is due to the fact that $\lceil x\rceil\leq x+1$ for any $x\in\mathbb{R}$ . Taking expectation with respect to all randomness on both sides, and rearranging the terms, we obtain
+$\displaystyle\mathbb{E}[m_{k+1}]\leq\frac{8\sigma^{2}}{\epsilon^{2}}+\frac{16(1-p_{k})L^{2}\mathbb{E}\big[\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}\big]}{p_{k}^{2}\epsilon^{2}}+2.$
+With $m_{0}=m_{1}=S_{1}^{(0)}=\big\lceil\frac{8\sigma^{2}}{\epsilon^{2}}\big\rceil$ , let $M$ be the total number of stochastic queries up to iteration $N$ such that $\mathbb{E}[\left\|F(\mathbf{u}_{k})\right\|]\leq 2\Lambda_{1}\epsilon$ for all $k\geq N$ , we have
+$\displaystyle\mathbb{E}[M]=\mathbb{E}\Big[\sum_{k=0}^{N}m_{k}\Big]=\;$
+$\displaystyle 2\Big\lceil\frac{8\sigma^{2}}{\epsilon^{2}}\Big\rceil+\mathbb{E}\Big[\sum_{k=2}^{N}m_{k}\Big]$
+$\displaystyle\leq\;$
+$\displaystyle\frac{16\sigma^{2}}{\epsilon^{2}}+2+\sum_{k=1}^{N}\Big(\frac{8\sigma^{2}}{\epsilon^{2}}+\frac{16(1-p_{k})L^{2}\mathbb{E}\big[\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}\big]}{p_{k}^{2}\epsilon^{2}}+2\Big)$
+$\displaystyle\overset{(i)}{\leq}\;$
+$\displaystyle\frac{8\sigma^{2}\Delta}{\epsilon^{3}}+\frac{16\sigma^{2}}{\epsilon^{2}}+\frac{2\Delta}{\epsilon}+\frac{16L^{2}}{\epsilon^{2}}\sum_{k=1}^{N}\frac{(1-p_{k})\mathbb{E}\big[\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}\big]}{p_{k}^{2}},$
+(C.12)
+where $(i)$ follows from $N\leq\frac{\Delta}{\epsilon}$ with $\Delta=\sqrt{\frac{\Lambda_{0}}{\Lambda_{1}}}+\epsilon$ , and $1-p_{k}\leq 1$ .
+Then we come to bound $\mathbb{E}\big[\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}\big]$ . Notice that for $k\geq 1$
+$\displaystyle\mathbf{v}_{k}-\mathbf{v}_{k-1}=$
+$\displaystyle\mathbf{v}_{k}-\mathbf{u}_{k+1}+\mathbf{u}_{k+1}-\mathbf{u}_{k}+\mathbf{u}_{k}-\mathbf{v}_{k-1}$
+$\displaystyle\overset{(i)}{=}$
+$\displaystyle\eta_{k}\big(\widetilde{F}(\mathbf{v}_{k})-\widetilde{F}(\mathbf{v}_{k-1})\big)-\eta_{k-1}\big(\widetilde{F}(\mathbf{v}_{k-1})-\widetilde{F}(\mathbf{v}_{k-2})\big)+\mathbf{u}_{k+1}-\mathbf{u}_{k}$
+$\displaystyle=$
+$\displaystyle\eta_{k}\widetilde{F}(\mathbf{v}_{k})-\big(\eta_{k}+\eta_{k-1}\big)\widetilde{F}(\mathbf{v}_{k-1})+\eta_{k-1}\widetilde{F}(\mathbf{v}_{k-2})+\mathbf{u}_{k+1}-\mathbf{u}_{k},$
+where $(i)$ is based on the third line in Eq. (C.4). To estimate $\mathbf{u}_{k+1}-\mathbf{u}_{k}$ , we recursively use the first line in Eq. (C.4), and obtain for $k\geq 2$ ,
+$\displaystyle\mathbf{u}_{k+1}-\mathbf{u}_{k}=$
+$\displaystyle\lambda_{k}\left(\mathbf{u}_{0}-\mathbf{u}_{k}\right)-\eta_{k}\widetilde{F}\left(\mathbf{v}_{k}\right)$
+$\displaystyle=$
+$\displaystyle\lambda_{k}\left(1-\lambda_{k-1}\right)\left(\mathbf{u}_{0}-\mathbf{u}_{k-1}\right)+\lambda_{k}\eta_{k-1}\widetilde{F}\left(\mathbf{v}_{k-1}\right)-\eta_{k}\widetilde{F}\left(\mathbf{v}_{k}\right)$
+$\displaystyle=$
+$\displaystyle\lambda_{k}\sum_{i=0}^{k-2}\Big(\prod_{j=i+1}^{k-1}\left(1-\lambda_{j}\right)\Big)\eta_{i}\widetilde{F}(\mathbf{v}_{i})+\lambda_{k}\eta_{k-1}\widetilde{F}\left(\mathbf{v}_{k-1}\right)-\eta_{k}\widetilde{F}\left(\mathbf{v}_{k}\right)$
+$\displaystyle=$
+$\displaystyle\sum_{i=0}^{k-2}\frac{i+2}{(k+2)(k+1)}\eta_{i}\widetilde{F}(\mathbf{v}_{i})+\frac{\eta_{k-1}}{k+2}\widetilde{F}(\mathbf{v}_{k-1})-\eta_{k}\widetilde{F}(\mathbf{v}_{k}).$
+So we have
+$\displaystyle\mathbf{u}_{k+1}-\mathbf{u}_{k}=\begin{cases}-\eta_{0}\widetilde{F}(\mathbf{v}_{0})&\text{if }k=0,\\
+&\\
+\lambda_{1}\eta_{0}\widetilde{F}(\mathbf{v}_{0})-\eta_{1}\widetilde{F}(\mathbf{v}_{1})&\text{if }k=1,\\
+&\\
+\sum_{i=0}^{k-2}\frac{i+2}{(k+2)(k+1)}\eta_{i}\widetilde{F}(\mathbf{v}_{i})+\frac{\eta_{k-1}}{k+2}\widetilde{F}(\mathbf{v}_{k-1})-\eta_{k}\widetilde{F}(\mathbf{v}_{k})&\text{if }k\geq 2.\end{cases}$
+(C.13)
+Then we obtain for $k\geq 3$
+$\displaystyle\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle=$
+$\displaystyle\left\|\Big(\frac{\eta_{k-1}}{k+2}-\eta_{k}-\eta_{k-1}\Big)\widetilde{F}(\mathbf{v}_{k-1})+\eta_{k-1}\widetilde{F}(\mathbf{v}_{k-2})+\sum_{i=0}^{k-2}\frac{i+2}{(k+2)(k+1)}\eta_{i}\widetilde{F}(\mathbf{v}_{i})\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle 3\Big(\frac{\eta_{k-1}}{k+2}-\eta_{k}-\eta_{k-1}\Big)^{2}\left\|\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}+3\Big(\eta_{k-1}+\frac{k\eta_{k-2}}{(k+1)(k+2)}\Big)^{2}\left\|\widetilde{F}(\mathbf{v}_{k-2})\right\|^{2}$
+$\displaystyle+\sum_{i=0}^{k-3}\frac{3(i+2)^{2}(k-2)}{k^{2}(k+1)^{2}}\eta_{i}^{2}\left\|\widetilde{F}(\mathbf{v}_{i})\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle\eta_{0}^{2}\Big(12\left\|\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}+5\left\|\widetilde{F}(\mathbf{v}_{k-2})\right\|^{2}\Big)+\sum_{i=0}^{k-3}\frac{3(i+2)^{2}}{k(k+1)^{2}}\eta_{0}^{2}\left\|\widetilde{F}(\mathbf{v}_{i})\right\|^{2}.$
+Taking expectation with respect to all randomness on both sides, we have
+$\mathbb{E}\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}\leq\eta_{0}^{2}\Big(12\mathbb{E}\left\|\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}+5\mathbb{E}\left\|\widetilde{F}(\mathbf{v}_{k-2})\right\|^{2}\Big)+\sum_{i=0}^{k-3}\frac{3(i+2)^{2}}{k(k+1)^{2}}\eta_{0}^{2}\mathbb{E}\left\|\widetilde{F}(\mathbf{v}_{i})\right\|^{2}.$
+Note that for $k\geq 1$ , we have
+$\displaystyle\mathbb{E}\left\|\widetilde{F}(\mathbf{v}_{k})\right\|^{2}\leq$
+$\displaystyle 2\mathbb{E}\left\|F(\mathbf{u}_{k+1})\right\|^{2}+4\mathbb{E}\left\|F(\mathbf{u}_{k+1})-F(\mathbf{v}_{k})\right\|^{2}+4\mathbb{E}\left\|\widetilde{F}(\mathbf{v}_{k})-F(\mathbf{v}_{k})\right\|^{2}$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle 2\mathbb{E}\left(\left\|F(\mathbf{u}_{k+1})\right\|^{2}+2L^{2}\left\|\mathbf{u}_{k+1}-\mathbf{v}_{k}\right\|^{2}\right)+4\frac{\epsilon^{2}}{k}$
+$\displaystyle\overset{(ii)}{\leq}$
+$\displaystyle 2\left(\frac{\Lambda_{0}}{(k+1)^{2}}+\Lambda_{1}\epsilon^{2}\right)+4\frac{\epsilon^{2}}{k},$
+where $(i)$ is due to the Lipschitz property and the variance bound, and we use the result of Theorem 4.1 for $(ii)$ .
+Proceeding similarly, we have $\mathbb{E}\left\|\widetilde{F}(\mathbf{v}_{0})\right\|^{2}\leq 2\left(\Lambda_{0}+\Lambda_{1}\epsilon^{2}\right)+\frac{\epsilon^{2}}{2}$ , so we obtain for $k\geq 4$ ,
+$\displaystyle\mathbb{E}\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle\eta_{0}^{2}\Big(12\left\|\widetilde{F}(\mathbf{v}_{k-1})\right\|^{2}+5\left\|\widetilde{F}(\mathbf{v}_{k-2})\right\|^{2}\Big)+\sum_{i=0}^{k-3}\frac{3(i+2)^{2}}{k(k+1)^{2}}\eta_{0}^{2}\left\|\widetilde{F}(\mathbf{v}_{i})\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle\eta_{0}^{2}\left[24\left(\frac{\Lambda_{0}}{k^{2}}+\Lambda_{1}\epsilon^{2}+2\frac{\epsilon^{2}}{k-1}\right)+10\left(\frac{\Lambda_{0}}{(k-1)^{2}}+\Lambda_{1}\epsilon^{2}+2\frac{\epsilon^{2}}{k-2}\right)\right]$
+$\displaystyle+\frac{12\eta_{0}^{2}}{k(k+1)^{2}}\left[2\left(\Lambda_{0}+\Lambda_{1}\epsilon^{2}\right)+\frac{\epsilon^{2}}{2}\right]+\sum_{i=1}^{k-3}\frac{6(i+2)^{2}}{k(k+1)^{2}}\eta_{0}^{2}\left(\frac{\Lambda_{0}}{(i+1)^{2}}+\Lambda_{1}\epsilon^{2}+2\frac{\epsilon^{2}}{i}\right)$
+$\displaystyle\leq$
+$\displaystyle 40\eta_{0}^{2}\frac{\Lambda_{0}}{(k-1)^{2}}+35\eta_{0}^{2}\left(\Lambda_{1}+1\right)\epsilon^{2}+6\eta_{0}^{2}\sum_{i=1}^{k-3}\left(\frac{4\Lambda_{0}}{k(k+1)^{2}}+\frac{\Lambda_{1}\epsilon^{2}}{k}+\frac{2\epsilon^{2}}{k}\right)$
+$\displaystyle\leq$
+$\displaystyle 40\eta_{0}^{2}\frac{\Lambda_{0}}{(k-1)^{2}}+35\eta_{0}^{2}\left(\Lambda_{1}+1\right)\epsilon^{2}+6\eta_{0}^{2}\left(\frac{4\Lambda_{0}}{(k+1)^{2}}+\left(\Lambda_{1}+2\right)\epsilon^{2}\right)$
+$\displaystyle=$
+$\displaystyle\eta_{0}^{2}\Lambda_{0}\Big(\frac{40}{(k-1)^{2}}+\frac{24}{(k+1)^{2}}\Big)+41\eta_{0}^{2}\left(\Lambda_{1}+2\right)\epsilon^{2}.$
+Since $p_{k}=\frac{2}{k+1}$ , we have for $k\geq 4$
+$\displaystyle\frac{\mathbb{E}\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}}{p_{k}^{2}}\leq$
+$\displaystyle\frac{(k+1)^{2}}{4}\left[\eta_{0}^{2}\Lambda_{0}\Big(\frac{40}{(k-1)^{2}}+\frac{24}{(k+1)^{2}}\Big)+41\eta_{0}^{2}\left(\Lambda_{1}+2\right)\epsilon^{2}\right]$
+$\displaystyle\leq$
+$\displaystyle 30\eta_{0}^{2}\Lambda_{0}+11\eta_{0}^{2}\left(\Lambda_{1}+2\right)\epsilon^{2}(k+1)^{2}$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle 30\eta_{0}^{2}\Lambda_{0}+11\eta_{0}^{2}\left(\Lambda_{1}+2\right)\epsilon^{2}\frac{\Delta^{2}}{\epsilon^{2}}$
+$\displaystyle=$
+$\displaystyle 30\eta_{0}^{2}\Lambda_{0}+11\eta_{0}^{2}\left(\Lambda_{1}+2\right)\Delta^{2},$
+where $(i)$ is due to $k\leq N<\frac{\Delta}{\epsilon}$ .
+So we obtain
+$\displaystyle\sum_{k=4}^{N}\frac{(1-p_{k})\mathbb{E}\big[\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}\big]}{p_{k}^{2}}\leq$
+$\displaystyle\sum_{k=1}^{N}\frac{\mathbb{E}\big[\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}\big]}{p_{k}^{2}}$
+$\displaystyle\leq$
+$\displaystyle\sum_{k=1}^{N}\left[30\eta_{0}^{2}\Lambda_{0}+11\eta_{0}^{2}\left(\Lambda_{1}+2\right)\Delta^{2}\right]$
+$\displaystyle\leq$
+$\displaystyle\frac{\Delta\left(30\eta_{0}^{2}\Lambda_{0}+11\eta_{0}^{2}\left(\Lambda_{1}+2\right)\Delta^{2}\right)}{\epsilon}.$
+For $k=3$ , we have
+$\displaystyle\frac{(1-p_{3})\mathbb{E}\left\|\mathbf{v}_{3}-\mathbf{v}_{2}\right\|^{2}}{p_{3}^{2}}=$
+$\displaystyle 2\mathbb{E}\left\|\mathbf{v}_{3}-\mathbf{v}_{2}\right\|^{2}\leq 2\Big(10\eta_{0}^{2}\Lambda_{0}+35\eta_{0}^{2}\left(\Lambda_{1}+2\right)\epsilon^{2}\Big).$
+Moreover, we have
+$\displaystyle\frac{(1-p_{2})\mathbb{E}\left\|\mathbf{v}_{2}-\mathbf{v}_{1}\right\|^{2}}{p_{2}^{2}}=$
+$\displaystyle\frac{3}{4}\mathbb{E}\left\|\mathbf{v}_{2}-\mathbf{v}_{1}\right\|^{2}$
+$\displaystyle\leq$
+$\displaystyle\frac{3}{2}\mathbb{E}\left[\Big(\frac{\eta_{0}}{6}+\eta_{1}\Big)^{2}\left\|\widetilde{F}(\mathbf{u}_{0})\right\|^{2}+\Big(\frac{3\eta_{1}}{4}+\eta_{2}\Big)^{2}\left\|\widetilde{F}(\mathbf{u}_{1})\right\|^{2}\right]$
+$\displaystyle\leq$
+$\displaystyle\frac{3}{2}\eta_{0}^{2}\left[\frac{49}{36}\left(2\Lambda_{0}+2\Lambda_{1}\epsilon^{2}+\epsilon^{2}/2\right)+\frac{49}{16}\Big(\frac{\Lambda_{0}}{2}+2\Lambda_{1}\epsilon^{2}+4\epsilon^{2}\Big)\right]$
+$\displaystyle\leq$
+$\displaystyle 7\eta_{0}^{2}\Lambda_{0}+14\left(\Lambda_{1}+2\right)\epsilon^{2}.$
+Note that $p_{1}=1$ , so we have
+$\displaystyle\mathbb{E}\left[M\right]\leq$
+$\displaystyle\frac{8\sigma^{2}\Delta}{\epsilon^{3}}+\frac{16\sigma^{2}}{\epsilon^{2}}+\frac{2\Delta}{\epsilon}+\frac{16L^{2}}{\epsilon^{2}}\sum_{k=1}^{N}\frac{(1-p_{k})\mathbb{E}\big[\left\|\mathbf{v}_{k}-\mathbf{v}_{k-1}\right\|^{2}\big]}{p_{k}^{2}}$
+$\displaystyle\leq$
+$\displaystyle\frac{8\sigma^{2}\Delta}{\epsilon^{3}}+\frac{16\sigma^{2}}{\epsilon^{2}}+\frac{2\Delta}{\epsilon}+\frac{16L^{2}\Delta\left(24\eta_{0}^{2}\Lambda_{0}+5\eta_{0}^{2}\left(\Lambda_{1}+2\right)\Delta^{2}\right)}{\epsilon^{3}}$
+$\displaystyle+\frac{32L^{2}\Big(10\eta_{0}^{2}\Lambda_{0}+35\eta_{0}^{2}\left(\Lambda_{1}+2\right)\epsilon^{2}\Big)}{\epsilon^{2}}+\frac{16L^{2}\Big(7\eta_{0}^{2}\Lambda_{0}+14\left(\Lambda_{1}+2\right)\epsilon^{2}\Big)}{\epsilon^{2}}$
+$\displaystyle=$
+$\displaystyle\mathcal{O}\Big(\frac{\sigma^{2}L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{3}}{\epsilon^{3}}\Big),$
+where we assume without loss of generality that $L\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|\geq 1$ , thus completing the proof.
+∎
+Appendix D Omitted proofs from Section 5
+See 5.1
+Proof.
+Let ${\cal G}_{k-1}$ be the natural filtration of all the random variables used up to (and including) the $(k-1)^{\mathrm{th}}$ outer loop.
+By Theorem 4.1, we have
+$\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|^{2}|{\cal G}_{k-1}\right]\leq\frac{\Lambda_{0}^{(k)}}{(K+1)(K+2)}+\Lambda_{1}^{(k)}\epsilon_{k}^{2},$
+(D.1)
+where $\Lambda_{0}^{(k)}=\frac{4(L^{2}\eta_{0}\underline{\eta}+1)\left\|\mathbf{u}_{k-1}-\mathbf{u}^{*}\right\|^{2}}{\underline{\eta}^{2}}$ and $\Lambda_{1}^{(k)}=\frac{5\left(1+M\underline{\eta}\eta_{0}\right)}{M\underline{\eta}^{2}}$ .
+By the sharpness condition, we have
+$\displaystyle\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|^{2}\leq$
+$\displaystyle\frac{1}{\mu}\left\langle F(\mathbf{u}_{k})-F(\mathbf{u}^{*}),\mathbf{u}_{k}-\mathbf{u}^{*}\right\rangle$
+$\displaystyle\overset{(i)}{\leq}$
+$\displaystyle\frac{1}{\mu}\left\langle F(\mathbf{u}_{k}),\mathbf{u}_{k}-\mathbf{u}^{*}\right\rangle$
+$\displaystyle\overset{(ii)}{\leq}$
+$\displaystyle\frac{1}{\mu}\left\|F(\mathbf{u}_{k})\right\|\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|,$
+where $(i)$ is because $\mathbf{u}^{*}$ is a solution to (SVI), and we use Cauchy-Schwarz inequality for $(ii)$ .
+Taking expectation conditional on ${\cal G}_{k-1}$ on both sides, we have
+$\mathbb{E}\left[\left\|F(\mathbf{u}_{k})\right\|^{2}|{\cal G}_{k-1}\right]\geq\mathbb{E}\left[\mu^{2}\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|^{2}|{\cal G}_{k-1}\right],$
+which leads to
+$\mathbb{E}\left[\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|^{2}|{\cal G}_{k-1}\right]\leq\frac{1}{\mu^{2}}\left[\frac{\Lambda_{0}^{(k)}}{(K+1)(K+2)}+\Lambda_{1}^{(k)}\epsilon_{k}^{2}\right].$
+If we choose $K\geq\frac{4\sqrt{L^{2}\eta_{0}\underline{\eta}+1}}{\mu\underline{\eta}}$ , we have $\frac{\Lambda_{0}^{(k)}}{(K+1)(K+2)}\leq\frac{\mu^{2}\left\|\mathbf{u}_{k-1}-\mathbf{u}^{*}\right\|^{2}}{4}$ . On the other hand, by our choice of $\epsilon_{k}$ in Algorithm 3, we obtain
+$\Lambda_{1}^{(k)}\epsilon_{k}^{2}\leq\frac{5\left(1+M\underline{\eta}\eta_{0}\right)}{M\underline{\eta}^{2}}\frac{\mu^{2}\epsilon^{2}M\underline{\eta}^{2}}{20\left(1+M\underline{\eta}\eta_{0}\right)}\leq\frac{\mu^{2}\epsilon^{2}}{4}.$
+So we have
+$\mathbb{E}\left[\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|^{2}|{\cal G}_{k-1}\right]\leq\frac{\left\|\mathbf{u}_{k-1}-\mathbf{u}^{*}\right\|^{2}}{4}+\frac{\epsilon^{2}}{4}.$
+Taking expectation with respect to all the randomness on both sides, we obtain
+$\mathbb{E}\big[\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|^{2}\big]\leq\frac{\mathbb{E}\big[\left\|\mathbf{u}_{k-1}-\mathbf{u}^{*}\right\|^{2}\big]}{4}+\frac{\epsilon^{2}}{4}.$
+(D.2)
+Recursively using Inequality (D.2) till $k=0$ , we have
+$\mathbb{E}\big[\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|^{2}\big]\leq\frac{1}{4^{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\sum_{i=1}^{k}\frac{\epsilon^{2}}{4^{i}}\leq\frac{1}{4^{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\sum_{i=1}^{\infty}\frac{\epsilon^{2}}{4^{i}}\leq\frac{1}{4^{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{3}.$
+Hence, after $\Big\lceil\log\Big(\frac{\sqrt{6}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{2\epsilon}\Big)\Big\rceil$ outer loops, the Algorithm 3 can output a point $\mathbf{u}_{k}$ such that $\mathbb{E}\big[\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|^{2}\big]\leq\epsilon^{2}$ , as well as $\mathbb{E}\big[\left\|F(\mathbf{u}_{k})\right\|^{2}\big]\leq L^{2}\epsilon^{2}$ . More specifically, the total number of iterations such that the algorithm can return a point $\mathbf{u}_{k}$ such that $\mathbb{E}\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|^{2}\leq\epsilon^{2}$ will be
+$\Big\lceil\log\Big(\frac{\sqrt{6}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{2\epsilon}\Big)\Big\rceil\Big\lceil\frac{4\sqrt{L^{2}\eta_{0}\underline{\eta}+1}}{\mu\underline{\eta}}\Big\rceil=\mathcal{O}\left(\frac{L}{\mu}\log\frac{\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{\epsilon}\right).$
+Next we come to bound the expected number of the stochastic oracle queries for each call to Algorithm $\mathcal{A}$ . Denote $i$ -th iterate in $k$ -th call as $\mathbf{u}_{i}^{(k)}$ and $\mathbf{v}_{i}^{(k)}$ , and let $K=\Big\lceil\frac{4\sqrt{L^{2}\eta_{0}\underline{\eta}+1}}{\mu\underline{\eta}}\Big\rceil$ , then proceeding as in the proof of Corollary C.3, we obtain
+$\displaystyle\mathbb{E}\big[M_{k}|{\cal G}_{k-1}\big]=$
+$\displaystyle\mathbb{E}\Big[\sum_{i=0}^{K}m_{i}^{(k)}\Big|{\cal G}_{k-1}\Big]$
+(D.3)
+$\displaystyle\leq$
+$\displaystyle\frac{16\sigma^{2}}{\epsilon_{k}^{2}}+2+\sum_{i=1}^{K}\Big(\frac{8\sigma^{2}}{\epsilon_{k}^{2}}+\frac{16(1-p_{i})L^{2}\mathbb{E}\Big[\left\|\mathbf{v}_{i}^{(k)}-\mathbf{v}_{i-1}^{(k)}\right\|^{2}\Big|{\cal G}_{k-1}\Big]}{p_{i}^{2}\epsilon_{k}^{2}}+2\Big)$
+$\displaystyle=$
+$\displaystyle\frac{16\sigma^{2}}{\epsilon_{k}^{2}}+2(K+1)+\frac{8\sigma^{2}K}{\epsilon_{k}^{2}}+\sum_{i=1}^{K}\frac{16(1-p_{i})L^{2}\mathbb{E}\Big[\left\|\mathbf{v}_{i}^{(k)}-\mathbf{v}_{i-1}^{(k)}\right\|^{2}\Big|{\cal G}_{k-1}\Big]}{p_{i}^{2}\epsilon_{k}^{2}},$
+where $M_{k}$ is the total number of queries at the $k^{\mathrm{th}}$ call.
+Notice that $K=\Big\lceil\frac{4\sqrt{L^{2}\eta_{0}\underline{\eta}+1}}{\mu\underline{\eta}}\Big\rceil=\mathcal{O}\left(\frac{L}{\mu}\right)$ and $\epsilon_{k}^{2}=\frac{\mu^{2}\epsilon^{2}M\underline{\eta}^{2}}{20\left(1+M\underline{\eta}\eta_{0}\right)}=\mathcal{O}\left(\mu^{2}\epsilon^{2}\right)$ , then it remains to bound $\frac{\mathbb{E}\Big[\left\|\mathbf{v}_{i}^{(k)}-\mathbf{v}_{i-1}^{(k)}\right\|^{2}\Big]}{p_{i}^{2}}$ for $1\leq i\leq K$ . The proof of Lemma C.3 shows that for $i\geq 4$
+$\frac{\mathbb{E}\Big[\left\|\mathbf{v}_{i}^{(k)}-\mathbf{v}_{i-1}^{(k)}\right\|^{2}\Big|{\cal G}_{k-1}\Big]}{p_{i}^{2}}\leq 30\eta_{0}^{2}\Lambda_{0}^{(k)}+11\eta_{0}^{2}\left(\Lambda_{1}^{(k)}+2\right)\epsilon_{k}^{2}(i+1)^{2}.$
+On the other hand, for $1\leq i\leq 3$ , we have $\sum_{i=1}^{3}\frac{\mathbb{E}\big[\left\|\mathbf{v}_{i}^{(k)}-\mathbf{v}_{i-1}^{(k)}\right\|^{2}\big]}{p_{i}^{2}}=o(\frac{L^{2}\left\|\mathbf{u}_{k-1}-\mathbf{u}^{*}\right\|^{2}}{\epsilon})$ , we obtain
+$\displaystyle\sum_{i=1}^{K}\frac{16(1-p_{i})L^{2}\mathbb{E}\Big[\left\|\mathbf{v}_{i}^{(k)}-\mathbf{v}_{i-1}^{(k)}\right\|^{2}\Big|{\cal G}_{k-1}\Big]}{p_{i}^{2}\epsilon_{k}^{2}}=$
+$\displaystyle\mathcal{O}\Big(\frac{L^{3}\left\|\mathbf{u}_{k-1}-\mathbf{u}^{*}\right\|^{2}}{\mu^{3}\epsilon^{2}}\Big).$
+Combining last inequality with
+Inequality (D.3) and taking expectations on both sides, we obtain
+$\mathbb{E}[M_{k}]=\mathcal{O}\Big(\frac{\sigma^{2}(\mu+L)+L^{3}\mathbb{E}\big[\left\|\mathbf{u}_{k-1}-\mathbf{u}^{*}\right\|^{2}\big]}{\mu^{3}\epsilon^{2}}\Big).$
+Telescoping from $k=1$ to $N=\Big\lceil\log\Big(\frac{\sqrt{6}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|}{2\epsilon}\Big)\Big\rceil$ and noticing that
+$\mathbb{E}\big[\left\|\mathbf{u}_{k}-\mathbf{u}^{*}\right\|^{2}\big]\leq\frac{1}{4}\mathbb{E}\big[\left\|\mathbf{u}_{k-1}-\mathbf{u}^{*}\right\|^{2}\big]+\frac{\epsilon^{2}}{4}\leq\frac{1}{4^{k}}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}+\frac{\epsilon^{2}}{3},$
+we have
+$\sum_{k=1}^{N}\mathbb{E}\left\|\mathbf{u}_{k-1}-\mathbf{u}^{*}\right\|^{2}\leq\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}\sum_{k=1}^{\infty}\frac{1}{4^{k}}+\frac{N\epsilon^{2}}{3}\leq\frac{\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{3}+\frac{N\epsilon^{2}}{3}.$
+Hence, we finally arrive at
+$\displaystyle\mathbb{E}\Big[\sum_{k=1}^{N}M_{k}\Big]=$
+$\displaystyle\mathcal{O}\Big(\frac{\sigma^{2}(\mu+L)\log(\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|/\epsilon)+L^{3}\left\|\mathbf{u}_{0}-\mathbf{u}^{*}\right\|^{2}}{\mu^{3}\epsilon^{2}}\Big),$
+which completes the proof.
+∎
+Experimental support, please
+view the build logs
+for errors. Generated by
+L
+A
+T
+E
+xml
+.
+Instructions for reporting errors
+We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+methods listed below:
+Click the "Report Issue" (
+) button, located in the page header.
+Tip: You can select the relevant text first, to include it in your report.
+Our team has already identified the following issues. We appreciate your time reviewing and reporting rendering errors we
+may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+all.
+Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a list of packages that need conversion, and welcome developer contributions.
+We gratefully acknowledge support from
+our major funders,
+member institutions, ,
+and all contributors.
+About
+·
+Help
+·
+Contact
+·
+Subscribe
+·
+Copyright
+·
+Privacy
+·
+Accessibility
+·
+Operational Status (opens in new tab)
+Major funding support from

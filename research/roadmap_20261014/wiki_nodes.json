@@ -1,0 +1,14 @@
+{
+  "2206.09462": "paper:bot2022_fast_krasnoselskiimann_algorithm",
+  "2203.10947": "paper:bot2022_fast_optimistic_gradient",
+  "2406.02413": "paper:trandinh2024_variancereduced_fast_krasnoselkiimann",
+  "2512.13547": "paper:nguyentrung2025_class_accelerated_fixedpointbased",
+  "2508.16791": "paper:trandinh2025_new_accelerated_pastextragradient",
+  "2609.28543": "paper:yang2026_stochastic_inertial_krasnoselskiimann",
+  "2604.22581": "paper:cortild2026_stochastic_krasnoselskiimann_iterations",
+  "2403.12338": "paper:bravo2024_stochastic_halpern_iteration",
+  "2410.07870": "paper:hermant2024_gradient_correlation_key",
+  "2511.12665": "paper:salzo2025_iterates_fista_converge",
+  "2403.04860": "paper:attouch2024_stochastic_ravine_accelerated",
+  "2609.36033": "paper:yoon2026_dualanchor_acceleration_nearoptimal"
+}

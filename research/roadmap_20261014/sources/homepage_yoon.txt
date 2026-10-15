@@ -1,0 +1,51 @@
+CV - TaeHo Yoon
+Toggle navigation
+About
+CV
+News
+TaeHo Yoon
+Downloadable CV here.
+Academic Positions
+2026-Present
+Johns Hopkins University
+Assistant Research Scientist, Dept. of Applied Mathematics & Statistics
+2025-2026
+Johns Hopkins University
+Rufus Isaacs Postdoctoral Fellow, Dept. of Applied Mathematics & Statistics
+Co-worker: Nicolas Loizou, Benjamin Grimmer
+Education
+2018-2024
+Seoul National University
+Ph.D. in Mathematical Sciences
+Advisor: Ernest Ryu
+2014-2018
+Pohang University of Science and Technology
+B.S. in Mathematics
+Work Experiences
+May-Aug 2021
+AI Vertical Services, AWS
+Applied Scientist Intern
+Mentors: Youngsuk Park, Bernie Wang
+Selected Publications
+Direct Acceleration of Stochastic Root-Finding Without Variance Reduction and Regularization. T. Yoon and N. Loizou. NeurIPS, 2026.
+H-invariance theory: a complete characterization of minimax optimal fixed-point algorithms. T. Yoon, E. K. Ryu and B. Grimmer. Mathematical Programming, 2026.
+Multiplayer Federated Learning: Reaching Equilibrium with Less Communication. T. Yoon, S. Choudhury and N. Loizou, NeurIPS, 2025.
+Accelerated Minimax Algorithms Flock Together. T. Yoon and E. K. Ryu, SIAM Journal on Optimization, 2025.
+Optimal Acceleration for Minimax and Fixed-Point Problems is Not Unique. T. Yoon, J. Kim, J. J. Suh and E. K. Ryu, ICML, 2024.
+Spotlight paper: Top 335/9473=3.5% of papers.
+Censored Sampling of Diffusion Models Using 3 Minutes of Human Feedback. T. Yoon, K. Myoung, K. Lee, J. Cho, A. No and E. K. Ryu, NeurIPS, 2023.
+Diffusion Probabilistic Models Generalize when They Fail to Memorize. T. Yoon, J. Choi, S. Kwon and E. K. Ryu, ICML Workshop on Structured Probabilistic Inference & Generative Modeling, 2023.
+Robust Probabilistic Time Series Forecasting. T. Yoon, Y. Park, E. K. Ryu and Y. Wang, AISTATS, 2022.
+Accelerated Methods for Smooth Convex-Concave Minimax Problems with $\mathcal{O}(1/k^2)$ Rate on Squared Gradient Norm. T. Yoon and E. K. Ryu, ICML, 2021.
+Long presentation: Top 166/5513=3% of papers.
+Fellowships and Awards
+SPARC Best Doctoral Thesis Award in Natural Sciences, 2024.
+Youlchon AI Star Fellowship, 2022.
+Global Ph.D. Fellowship (GPF), 2019-2023.
+Program for Highly Dedicated Students (PHDS) at POSTECH, 2014-2018.
+Contact
+tyoon7@jh.edu
+6225 Smith Ave, Baltimore, MD
+SE204, Dept. of Applied Mathematics & Statistics
+Johns Hopkins University
+Theme by Phantom

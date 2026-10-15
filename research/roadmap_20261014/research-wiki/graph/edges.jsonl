@@ -1,0 +1,11 @@
+{"from": "paper:trandinh2024_variancereduced_fast_krasnoselkiimann", "to": "paper:bot2022_fast_krasnoselskiimann_algorithm", "type": "extends", "evidence": "VR-FKM采用Fast KM结构并加入VR；不声称所有噪声过程等价。", "added": "2026-10-14T13:52:54Z"}
+{"from": "paper:trandinh2025_new_accelerated_pastextragradient", "to": "paper:bot2022_fast_optimistic_gradient", "type": "inspired_by", "evidence": "VAPEG使用加速past-gradient机制；与Fast OGDA完全等价尚未核实。", "added": "2026-10-14T13:52:54Z"}
+{"from": "paper:nguyentrung2025_class_accelerated_fixedpointbased", "to": "paper:trandinh2024_variancereduced_fast_krasnoselkiimann", "type": "extends", "evidence": "AFP一般递推误差模型覆盖有限和之外的随机oracle。", "added": "2026-10-14T13:52:54Z"}
+{"from": "paper:yang2026_stochastic_inertial_krasnoselskiimann", "to": "paper:bot2022_fast_krasnoselskiimann_algorithm", "type": "supports", "evidence": "Appendix A Proposition 1给确定性特殊参数下等价，不是随机主定理的自动覆盖。", "added": "2026-10-14T13:52:54Z"}
+{"from": "paper:trandinh2024_variancereduced_fast_krasnoselkiimann", "to": "idea:001", "type": "invalidates", "evidence": "原文已明示a.s.残差小o与点极限，否定宽泛首次性。", "added": "2026-10-14T13:52:54Z"}
+{"from": "paper:nguyentrung2025_class_accelerated_fixedpointbased", "to": "idea:001", "type": "invalidates", "evidence": "原文已明示a.s.残差小o与点极限，否定宽泛首次性。", "added": "2026-10-14T13:52:54Z"}
+{"from": "paper:trandinh2025_new_accelerated_pastextragradient", "to": "idea:001", "type": "invalidates", "evidence": "原文已明示a.s.残差小o与点极限，否定宽泛首次性。", "added": "2026-10-14T13:52:54Z"}
+{"from": "paper:bot2022_fast_krasnoselskiimann_algorithm", "to": "gap:raw_equivalence", "type": "addresses_gap", "evidence": "提供覆盖判定所需原始递推；关系不代表判定已经完成。", "added": "2026-10-14T13:52:54Z"}
+{"from": "paper:nguyentrung2025_class_accelerated_fixedpointbased", "to": "gap:raw_equivalence", "type": "addresses_gap", "evidence": "提供覆盖判定所需原始递推；关系不代表判定已经完成。", "added": "2026-10-14T13:52:55Z"}
+{"from": "paper:trandinh2025_new_accelerated_pastextragradient", "to": "gap:raw_equivalence", "type": "addresses_gap", "evidence": "提供覆盖判定所需原始递推；关系不代表判定已经完成。", "added": "2026-10-14T13:52:55Z"}
+{"from": "paper:bot2022_fast_optimistic_gradient", "to": "gap:raw_equivalence", "type": "addresses_gap", "evidence": "提供覆盖判定所需原始递推；关系不代表判定已经完成。", "added": "2026-10-14T13:52:55Z"}

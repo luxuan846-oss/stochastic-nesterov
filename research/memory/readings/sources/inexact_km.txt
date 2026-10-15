@@ -1,0 +1,900 @@
+                                                   RATES OF CONVERGENCE FOR INEXACT KRASNOSEL’SKII-MANN
+                                                                ITERATIONS IN BANACH SPACES
+
+
+
+
+arXiv:1705.09340v2 [math.OC] 1 Jun 2017
+                                                                  MARIO BRAVO, ROBERTO COMINETTI, AND MATÍAS PAVEZ-SIGNÉ
+
+
+                                                  Abstract. We study the convergence of an inexact version of the classical Krasnosel’skii-Mann iteration
+                                                  for computing fixed points of nonexpansive maps. Our main result establishes a new metric bound for the
+                                                  fixed-point residuals, from which we derive their rate of convergence as well as the convergence of the iterates
+                                                  towards a fixed point. The results are applied to three variants of the basic iteration: infeasible iterations with
+                                                  approximate projections, the Ishikawa iteration, and diagonal Krasnosels’kii-Mann schemes. The results are
+                                                  also extended to continuous time in order to study the asymptotics of nonautonomous evolution equations
+                                                  governed by nonexpansive operators.
+
+
+
+
+                                                                                               1. Introduction
+                                            Let T : C → C be a nonexpansive map defined on a closed convex domain C in a Banach space (X, k · k).
+                                          The Krasnosel’skii-Mann iteration approximates a fixed point of T by the sequential averaging process
+                                          (km)                                        xn+1 = (1−αn+1 ) xn + αn+1 T xn ,
+                                          where x0 ∈ C is an initial guess and αn ∈ [0, 1] is a given sequence of scalars.
+                                             This iteration, introduced by Krasnosel’skii [17] and Mann [20], arises frequently in convex optimization
+                                          as many algorithms can be cast in this framework. This is the case of the gradient method for convex
+                                          functions with Lipschitz gradient [25], the proximal point method [21, 26], as well as different decomposition
+                                          methods such as the forward-backward splitting method [22, 23], the alternating direction method of
+                                          multipliers ADMM [13], the Douglas-Rachford splitting [12], and the Peaceman–Rachford splitting [24].
+                                          For a comprehensive survey of these methods and their numerous applications we refer to [4]. Note that
+                                          (km) also arises when discretizing the evolution equation u′ (t) + [I − T ]u = 0 (see e.g. [2, 6]), so that many
+                                          results for (km) admit natural extensions to continuous time.
+                                             A central issue when studying the convergence of the iterates xn towards a fixed point of T is to establish
+                                          the strong convergence of the residuals kxn − T xn k → 0, a property known as asymptotic regularity [8, 9].
+                                          For an historical account of results in this area we refer to [2, 3]. In the case of a bounded domain C, an
+                                          explicit estimate for the residual was conjectured in [2] and recently confirmed in [11], namely
+                                                                                                      diam(C)
+                                          (1)                                       kxn − T xn k ≤ p Pn              ,
+                                                                                                    π k=1 αk (1−αk )
+                                                              √
+                                                          P∞1/ π is known to be tight (see [5]). This inequality implies that asymptotic regularity
+                                          where the constant
+                                          holds as soon as k=1 αk (1−αk ) = ∞. The bound (1) can also be used to estimate the number of iterations
+
+                                             2010 Mathematics Subject Classification. Primary: 47H09, 47H10; Secondary: 65J08, 65K15, 60J10.
+                                             Key words and phrases. Nonexpansive maps, fixed point iterations, rates of convergence, evolution equations.
+                                             Acknowledgements. This work was partially supported by Núcleo Milenio Información y Coordinación en Redes ICM/FIC
+                                          RC130003. Mario Bravo was partially funded by FONDECYT 11151003. Roberto Cominetti and Matı́as Pavez-Signé gratefully
+                                          acknowledge the support provided by FONDECYT 1130564 and FONDECYT 1171501.
+                                                                                                          1
+2                               M. BRAVO, R. COMINETTI, AND M. PAVEZ-SIGNÉ
+
+required to attain any prescribed accuracy, as well as to establish the rate of convergence√of the residuals.
+For instance, if αn remains away√from 0 and 1 the bound yields kxn − T xn k = O(1/ n), whereas for
+αn = 1/n one gets an order O(1/ ln n).
+  When the operator values T x can only be computed up to some precision, one is naturally led to consider
+the inexact iteration
+(ikm)                           xn+1 = (1−αn+1 ) xn + αn+1 (T xn + en+1 ),
+where en+1 can be interpreted as an error in the evaluation of T xn , or as a perturbation of the iteration.
+Note that (ikm) requires xn ∈ C so that it assumes implicitly that the iterates remain in C.
+   This inexact iteration was used by Liu [19] to study the equation Sx = f , restated as a fixed point of
+T x = f + x − Sx, with S demicontinuous and strongly accretive on a uniformly    P smooth space. Liu proved
+the strong convergence of the iterates assuming that T xn remains bounded, k≥1 kek k < ∞, and αn → 0
+      P
+with k≥1 αk = ∞. Weak convergence of (ikm) was also established for T nonexpansive, first on Hilbert
+     P [10, Combettes] and thenPon uniformly convex spaces [16, Kim and Xu], provided that Fix(T ) 6= ∅
+spaces
+and k≥1 αk (1−αk ) = ∞ with k≥1 αk ken k < ∞. The rate of convergence of (ikm) was recently studied
+                                                                                      √
+in a Hilbert setting by Liang,
+                         P     Fadili and Peyré [18], proving that kxn −T xn k = O(1/ n) under the stronger
+summability condition k≥1 kkek k < ∞ and with αn bounded away from 0 and 1. The proof exploits the
+Hilbert structure and does not seem to carry over to general Banach spaces.
+
+1.1. Our contribution. The main result in this paper is an extension of the bound (1) which holds for
+the inexact iteration (ikm) in general normed spaces. From this extended bound we draw a number of
+consequences on the convergence of the iterates and the rate of convergence of the fixed point residuals, and
+we derive continuous time analogs for the asymptotics of evolution equations governed by nonexpansive
+operators.
+   In all what follows we denote ǫn ≥ ken k a bound for the errors, and we let
+                                           τn = nk=1 αk (1−αk ).
+                                                P
+(2)
+We also consider the function σ : [0, ∞) → R defined by
+                                                          √
+(3)                                       σ(y) = min{1, 1/ πy}.
+With these notations, our main result can be stated as follows.
+Theorem 1.1. Let (xn )n∈N be a sequence generated by (ikm) and assume that
+(h0 )          there exists κ ∈ [0, ∞) such that xn ∈ C and kT xn − x0 k ≤ κ for all n ∈ N.
+Then, for all n ∈ N we have
+                                                       n
+                                                       X
+(4)                        kxn − T xn k ≤ κ σ(τn ) +         2 αi ǫi σ(τn −τi ) + 2 ǫn+1 .
+                                                       i=1
+                                           P
+In particular, if τn → ∞ and ǫn → 0 with       k≥1 αk ǫk < ∞, then kxn − T xn k → 0.
+
+   Clearly, in the exact case with ǫn ≡ 0 the bound (4) yields (1). The proof of Theorem 1.1 is presented
+in Section §2 and uses probabilistic arguments by reducing the analysis to the study of an associated
+Markov reward process in Z2 . As a first consequence of this result, in §2.3 we explain how the property
+kxn − T xn k → 0 can be used to show that Fix(T ) 6= ∅ as well as the convergence of the iterates xn towards
+a fixed point.
+                                INEXACT KRASNOSEL’SKII-MANN ITERATIONS                                       3
+
+  The assumption (h0 ) above imposes two conditions: the iterates must remain in C and the images T xn
+are bounded. Some situations in which these conditions hold are discussed    Pin §2.4, including the case when
+T is defined on the whole space and either it has a bounded range, or k≥1 αk ǫk < ∞ and Fix(T ) 6= ∅.
+Note also that when C is bounded one can take κ = diam(C) so that it suffices to ensure that the iterates
+remain in C. Alternatively, in §4.1 we consider an iteration that uses approximate projections to deal with
+the case when xn falls outside C.
+  Section §3 exploits the bound (4) in order to establish several results on thePrate of convergence of
+                                                                                              a
+the residuals. Theorem 3.1 shows that if αn remains away from 0 and 1 and                k≥1 k kek k < ∞ then
+kxn − T xn k = O(1/nb ) with b = min{ 12 , a}. This extends the main result in [18] that covers only the
+case a = 1 and is restricted to Hilbert spaces. On the other hand, from known properties of the Gauss
+hypergeometric function 2 F1 (a, b; c; z), we obtain as a Corollary of Theorem 3.4 that when ken k = O(1/na )
+with αn bounded away from 0 and 1, the residual norm satisfies
+                                                                      1
+                                                
+                                                 O(1/na−1/2
+                                                           √ ) if 2 ≤ a < 1,
+                              kxn − T xn k =       O(log√n/ n) if a = 1,
+                                                   O(1/ n)         if a > 1.
+                                                
+
+Note that for a ≤ 1 the assumption ken k = O(1/na ) is very mild and allows for nonsummable errors.
+Similar rates are obtained for vanishing stepsizes of the form αn = 1/nc with c ≤ 1.
+  Section §4 explores three variants of the basic iteration (ikm). In §4.1 we deal with the case in which
+the iterates might fall outside C by using a suitable approximate projection of xn onto C. Then, in §4.2
+we analyze the Ishikawa iteration which can be seen as a special case of the inexact scheme (ikm). In §4.3
+we consider a diagonal version of (ikm) in which the operator T might change at each iteration.
+  The final Section §5 presents the extension of the results to continuous time, establishing the rate of
+convergence for the nonautonomous evolution equation
+                                      (
+                                        u′ (t) + (I − T )u(t) = f (t),
+(E)
+                                        u(0) = x0 .
+
+                                       2. Proof of Theorem 1.1
+  We begin by noting that xn − T xn = (xn − xn+1 )/αn+1 + en+1 so that
+                                                    kxn − xn+1 k
+(5)                                kxn − T xn k ≤                + ken+1 k.
+                                                       αn+1
+In order to bound the term kxn −xn+1 k we follow a similar approach as in [3, 11] by establishing a recursive
+bound for the differences kxm − xn k for all 0 ≤ m ≤ n. In what follows we let α0 = 1 and for 0 ≤ i ≤ n
+we denote
+                                           πin = αi nk=i+1 (1−αk )
+                                                     Q
+(6)
+so that ni=0 πin = 1. For i = n we use the standard convention nk=n+1 (1−αk ) = 1. The following is a
+         P                                                           Q
+slight variant of [11, Proposition 2], which itself extends a similar result by Baillon and Bruck [2, 3].
+Lemma 2.1. Let (xn )n∈N be defined inductively  by xn+1 = (1−αn+1 )xn +αn+1 yn with x0 ∈ X and yn ∈ X.
+Then, setting y−1 = x0 , we have xn = ni=0 πin yi−1 for all n ≥ 0. Moreover, for 0 ≤ m ≤ n it holds
+                                     P
+
+                                             m
+                                             X      n
+                                                    X
+(7)                              xm − xn =               πim πjn (yi−1 − yj−1 ).
+                                             i=0 j=m+1
+4                               M. BRAVO, R. COMINETTI, AND M. PAVEZ-SIGNÉ
+
+Proof. The equality xn = ni=0 πin yi−1
+                          P
+                                     P follows by a straightforward
+                                                                  Pinductive argument, while (7) follows
+from this equality and the identities ni=0 πin = 1 and πim − πin = nj=m+1 πim πjn for 0 ≤ i ≤ m ≤ n.  
+  We note that the sequence generated by (ikm) corresponds to yn = T xn + en+1 , from which we deduce
+the following recursive bound.
+Corollary 2.2. Let (xn )n∈N be generated by (ikm). Assume (h0 ) and let ǫn ≥ ken k. For each n ∈ N
+define inductively wm,n for −1 ≤ m ≤ n by setting w−1,n = κ and
+                               m
+                               X n
+                                 X
+(8)                   wm,n =               πim πjn (wi−1,j−1 + ǫi + ǫj )   for m = 0, . . . , n.
+                               i=0 j=m+1
+
+Then kxm − xn k ≤ wm,n for all 0 ≤ m ≤ n.
+Proof. The proof is by induction on n. The base case n = 0 being trivial, let us suppose that kxi −xj k ≤ wi,j
+holds for all i, j with 0 ≤ i ≤ j < n. Applying Lemma 2.1 with yn = T xn + en+1 and setting by convention
+T x−1 = y−1 = x0 and e0 = 0, we get the inequality
+                                      Xm  Xn
+                        kxm − xn k ≤           πim πjn (kT xi−1 − T xj−1 k + kei k + kej k).
+                                    i=0 j=m+1
+
+The terms with i = 0 can be bounded as
+                             kT x−1 − T xj−1 k = kx0 − T xj−1 k ≤ κ = w−1,j−1 ,
+while for the remaining terms the nonexpansivity of T and the induction hypothesis give kT xi−1 −T xj−1 k ≤
+kxi−1 − xj−1 k ≤ wi−1,j−1 . Hence
+                                        m
+                                        X      n
+                                               X
+                         kxm − xn k ≤                πim πjn (wi−1,j−1 + ǫi + ǫj ) = wm,n
+                                        i=0 j=m+1
+
+which completes the induction step.                                                                         
+2.1. Reduction to a Markov reward process. The main step in the proof of Theorem 1.1 relies on a
+probabilistic reinterpretation of wm,n in terms of a Markov reward process evolving in Z2 . The process is
+similar to the Markov chain used in [11], except that we add rewards to account for the presence of errors,
+which requires a finer analysis.
+   Namely, let m < n be positive integers and consider a race between a fox at position n that is trying
+to catch a hare located at position m. At each integer i ∈ N the fox jumps over a hurdle to reach the
+position i − 1. The jump succeeds with probability (1 − αi ) in which case the process repeats, otherwise
+the fox falls at i−1 where it gets a reward ǫi . The fox catches the hare if it jumps successfully down to
+m or below. Otherwise, the hare gets a chance to run towards the burrow located at −1 by following the
+same rules and with the same rewards. The process alternates until either the fox catches the hare, or the
+hare reaches the burrow. In the latter case the hare gets an additional reward κ.
+   This yields a Markov chain with state space S = {(m, n) : 0 ≤ m < n} ∪ {f, h} with f, h two absorbing
+states that represent respectively the cases in which the fox or the hare win the race (see Figure 1).
+Specifically, starting from a transient state (m, n) with 0 ≤ m < n, the process moves with probability
+πim πjn to a new state of the form (i−1, j−1) with 1 ≤ i ≤ m < j ≤ n, and otherwise it is absorbed in state
+                                                                 Pn
+f with probability m        n                                  m          n
+                     P
+                       j=0 πj and in state h with probability π0  j=m+1 πj .
+                                 INEXACT KRASNOSEL’SKII-MANN ITERATIONS                                         5
+
+
+
+                                                           (m, n)
+
+
+
+                                         h
+
+
+
+                                                             f
+
+
+
+
+                                        Figure 1. The state space S.
+
+When the process visits a transient state (i − 1, j − 1) the hare gets a reward ǫi and the fox gets a reward
+ǫj , which combined yield a total reward Ri−1,j−1 = ǫi + ǫj . If the process reaches state h the hare gets a
+reward κ and the fox gets nothing, whereas at the absorbing state f there is no reward. Then the total
+expected reward when the process starts at position (m, n) with 0 ≤ m ≤ n satisfies exactly the recursion
+(8) with boundary condition w−1,n = κ corresponding to the reward collected at the absorbing state h.
+This provides an alternative way to compute wn,n+1 and allows to establish the following bound.
+Proposition 2.3. Let wm,n be defined recursively by (8) with w−1,n = κ, where ǫn ≥ 0 and ǫ0 = 0. Then,
+for all n ∈ N we have
+                                                 n
+                           wn,n+1               X
+(9)                                ≤ κ σ(τn ) +     2αi ǫi σ(τn −τi ) + ǫn+1 .
+                            αn+1
+                                                     i=1
+
+Proof. Consider the process starting at state (n, n + 1). Let RiH denote the event in which the hare collects
+the reward at the site i − 1, so that the total expected reward of the hare can be expressed as
+                                                          Xn
+                                         H          H
+                                       T = κ P(R0 ) +        ǫi P(RiH ).
+                                                             i=1
+
+The event RiH occurs iff the process visits a state (i − 1, j − 1) for some j > i, that is to say, if the hare is
+not captured before the i-th hurdle and it fails this i-th jump. Let Fi and Hi denote independent Bernoulli
+variables representing the failure of the jump over the i-th hurdle for the fox and hare respectively, with
+P(Fi = 1) = P(Hi = 1) = αi . Denoting Si+1 the event that the hare is not captured before the (i+1)-th
+hurdle we have RiH = {Hi = 1} ∩ Si+1 so that P(RiH ) = αi P(Si+1 ). Now, the event Si+1 can be written as
+                         Si+1 = { n+1
+                                  P          Pn
+                                    k=j Fk >    k=j Hk for all j = i + 1, . . . , n + 1}
+which translates the fact that the hare is not captured provided that the fox falls more often than the hare.
+For j = n + 1 the condition above amounts to Fn+1 = 1 so that denoting Zk = Fk − Hk we can write
+                        Si+1 = {Fn+1 = 1} ∩ { nk=j Zk ≥ 0 for all j = i + 1, . . . , n}
+                                                P
+
+and we may use [11, Proposition 4] to get
+               P(Si+1 ) = αn+1 P( nk=j Zk ≥ 0 for all j = i + 1, . . . , n) ≤ αn+1 σ(τn −τi ).
+                                 P
+6                                M. BRAVO, R. COMINETTI, AND M. PAVEZ-SIGNÉ
+
+From this we obtain P(RiH ) ≤ αi αn+1 σ(τn −τi ) and, noting that α0 = 1, we get
+                                                         n
+                                            "                              #
+                                                        X
+                                 H
+(10)                           T ≤ αn+1 κ σ(τn ) +         αi ǫi σ(τn −τi ) .
+                                                              i=1
+
+  A similar argument can be used to bound the total reward collected by the fox. Indeed, denoting RjF
+the event in which the hare collects the reward at the site j − 1, the total expected reward of the fox is
+                                                       n+1
+                                                       X
+                                              TF =           ǫj P(RjF ).
+                                                       j=1
+
+In this case the event RjF      corresponds to the fact that the process visits a state (i − 1, j − 1) for some
+i ∈ {1, . . . , j − 1}. This requires that the fox fails the jump of the j-th hurdle, that the hare has not been
+captured, and that after the fox rests at j − 1 the hare falls before reaching the burrow. Ignoring the latter
+condition we get the inclusion
+                         RjF ⊆ {Fj = 1} ∩ { n+1
+                                             P            Pn
+                                                k=i Fk >     k=i Hk for all i = j, . . . , n + 1}.
+                            F
+For j = n + 1 this gives Rn+1                             F )≤α
+                                ⊆ {Fn+1 = 1} so that P(Rn+1         n+1 . Now, for j = 1, . . . , n the condition
+Pn+1         Pn
+  k=i Fk >     k=i Hk is superflous when i = j as it follows from the same condition for i = j + 1 and
+the fact that Fj = 1. Hence we have RjF ⊆ {Fj = 1} ∩ Sj+1 which yields as before the upper bound
+P(RjF ) ≤ αj αn+1 σ(τn −τj ). From these bounds we get
+                                                                         
+                                               n
+                                               X
+(11)                              T F ≤ αn+1     αj ǫj σ(τn −τj ) + ǫn+1  .
+                                                j=1
+
+Since wn,n+1 = T H + T F , combining (10) and (11) we readily get (9).                                             
+
+2.2. Proof of Theorem 1.1. Using (5) and Corollary 2.2 we get
+                                                 wn,n+1
+                                  kxn − T xn k ≤        + ǫn+1
+                                                  αn+1
+which
+P     combined with (9) yields (4). It remains to show that kxn − T xn k → 0 when τn → ∞, ǫn → 0, and
+   k≥1 k ǫk < ∞. Using (4) and considering a fixed m ∈ N, we can use the bound σ(τn − τi ) ≤ 1 for the
+      α
+terms i = m + 1, . . . , n to get
+                                                 m
+                                                 X                            n
+                                                                              X
+(12)               kxn − T xn k ≤ κ σ(τn ) +           2αi ǫi σ(τn −τi ) +           2αi ǫi + 2ǫn+1 .
+                                                 i=1                         i=m+1
+                                                                              P∞
+Since σ(τn − τi ) → 0 as n → ∞ we obtain lim supn→∞ kxn − T xn k ≤                i=m+1 2αi ǫi so that the conclusion
+follows by letting m → ∞.                                                                                          ✷
+
+2.3. Convergence of the iterates. Under some additional conditions, the fact that kxn − T xn k → 0
+implies the existence of fixed points and the convergence of the (ikm) iteration. The arguments are quite
+standard (see e.g. [14, Goebel and Kirk]) but for completeness we sketch the proof. We recall that X is
+said to have Opial’s property if for every weakly convergent sequence xn ⇀ x we have
+                                 lim inf kxn − xk < lim inf kxn − yk         ∀y 6= x.
+                                 n→∞                   n→∞
+                                 INEXACT KRASNOSEL’SKII-MANN ITERATIONS                                           7
+                                                                                            P
+Theorem 2.4. Let (xn )n∈N be generated by (ikm) and suppose that kxn−T xn k → 0 and             k≥1 αk kek k < ∞.
+a) If T (C) is relatively compact then xn converges strongly to a fixed point of T .
+b) If X is uniformly convex and xn remains bounded then Fix(T ) 6= ∅. Moreover, if X satisfies Opial’s
+property then xn converges weakly to a fixed point of T .
+                                                                         P
+Proof. From (13) we see that for Px ∈ Fix(T ) the sequence kxn − xk + k>n αk kek k decreases with n and
+hence it converges. Since the tail k>n αk kek k tends to 0 it follows that the limit ℓ(x) = limn→∞ kxn − xk
+is well defined.
+   Now, in case a) we may extract a strongly convergent subsequence T (xnk ) → x. Since kxn − T xn k → 0
+we also have xnk → x and therefore x ∈ Fix(T ). It follows that limn→∞ kxn − xk = limk→∞ kxnk − xk = 0
+so that xn → x in the strong sense.
+   In case b) we can extract a weakly convergent subsequence xnk ⇀ x and since I − T is demiclosed
+(see [7]) the assumption kxn − T xn k → 0 implies that x is a fixed point, hence Fix(T ) 6= ∅. Moreover,
+Opial’s property implies that xn has only one weak cluster point: if xn′k ⇀ y is another weakly convergent
+subsequence with y 6= x then
+
+                               ℓ(x) = lim inf kxnk − xk < lim inf kxnk − yk = ℓ(y)
+                                        k→∞                  k→∞
+                               ℓ(y) = lim inf kxn′k − yk < lim inf kxn′k − xk = ℓ(x)
+                                        k→∞                 k→∞
+
+
+which yields a contradiction and therefore xn ⇀ x.                                                             
+
+Remark 2.5. 1) The existence of fixed points when T (C) is relatively compact goes back to the original
+work of Krasnosel’skii in 1955, whereas for C bounded in a uniformly convex space this was proved in 1965
+independently by Browder, Göhde, and Kirk.
+                                       P
+2) Without the summability condition k≥1 αk kek k < ∞ the iterates might fail to converge as illustrated
+by the trivial example T x = x where xn = nk=1 αk ek .
+                                            P
+
+
+2.4. The assumption (h0 ). Theorem 1.1 is based on assumption (h0 ) which requires simultaneously that
+i) the iterates remain in C, and ii) kT xn − x0 k ≤ κ for some constant κ.
+   For a bounded domain C property ii) holds with κ = diam(C) so that one only needs to check i). This
+holds automatically for the exact iteration (km) and more generally when the errors en+1 are such that
+T xn + en+1 ∈ C. Note also that if X is a Hilbert space one could replace T by T̃ = T ◦ PC where PC is the
+projection onto the closed convex set C so that T̃ : X → C and (h0 ) holds with κ = diam(C). When X is
+not a Hilbert space the projection PC might not exist and, even if it does, it might fail to be nonexpansive.
+Moreover, even in a Hilbert setting the exact projection PC might be difficult to compute exactly. To deal
+with these cases, in §4.1 we will show how (ikm) can be adapted using approximate projections.
+   When T is defined on the whole space condition i) is trivial and one only has to check ii). The following
+result describes two simple situations where this holds.
+
+Proposition 2.6. Let T : X → X be a nonexpansive map.
+a) If T has a bounded range then (h0 ) holds with κ = supx∈X kT x − x0 k.
+b) If Fix(T ) 6= ∅ and the sum S = ∞
+                                  P
+                                     k=1 αk kek k is finite then (h0 ) holds with κ = 2 dist(x0 , Fix(T )) + S.
+8                                   M. BRAVO, R. COMINETTI, AND M. PAVEZ-SIGNÉ
+
+Proof. Property a) is self evident. In order to prove b) we note that for any given x ∈ Fix(T ) we have
+                         kxn − xk = k(1 − αn )xn−1 + αn (T xn−1 + en ) − xk
+(13)                              ≤ (1 − αn )kxn−1 − xk + αn kT xn−1 − T xk + αn ken k
+                                  ≤ kxn−1 − xk + αn ken k
+from which we get inductively
+                                                         Pn
+(14)                           kxn − xk ≤ kx0 − xk +       k=1 ǫk kek k ≤ kx0 − xk + S
+and then
+             kT xn − x0 k ≤ kT xn − xk + kx − x0 k ≤ kxn − xk + kx − x0 k ≤ 2kx0 − xk + S.
+The conclusion follows by taking the infimum over x ∈ Fix(T ).                                               
+
+Remark 2.7. From (14) we get xn ∈ B(x0 , κ) so in part b) of the previous Proposition it suffices T
+to be defined on a domain C that contains this ball.
+
+                                             3. Rates of convergence
+  In this section we use the bound (4) to estimate the rate of convergence of the fixed point residuals.
+                                             P
+Theorem 3.1. Assume (h0 ). Suppose that k≥1 kek k < ∞ and that αn is bounded away from 0 and 1.
+Then there exists a constant ν ≥ 0 such that
+                                                    ν
+                                    kxn − T xn k ≤ √ + i≥⌊ n ⌋ 2kei k.
+                                                        P
+(15)
+                                                     n        2
+                                                          P
+Moreover, if ϕ : [0, ∞) → [0, ∞) is nondecreasing and µ = k≥1 ϕ(k)kek k < ∞, then
+                                                             ν    2µ
+(16)                                         kxn − T xn k ≤ √ +           .
+                                                              n ϕ(⌊ n2 ⌋)
+                    P        a                                                  b                1
+In particular, if       k≥1 k kek k < ∞ for some a ≥ 0 then kxn − T xn k = O(1/n ) with b = min{ 2 , a}.
+                                                                              √ P            √
+Proof. Take β > 0 such that αn (1−αn ) ≥ β for all n ≥ 1 and define ν = (κ + 2 2 k≥1 kek k)/ πβ. Since
+σ(τn −τi ) ≤ 1/ πβ(n − i) and αi ≤ 1, the inequality (15) follows directly from (12) by taking m = ⌊ n2 ⌋,
+                p
+
+while (16) follows from this and the inequality
+                                         X            X
+(17)                               ϕ(m)       kek k ≤    ϕ(k)kek k ≤ µ.
+                                               k≥m         k≥m
+
+The last claim kxn − T xn k = O(1/nb ) follows from (16) by taking ϕ(k) = ka .                              
+                                                   P                                P
+Remark 3.2. Note that in (17) the tail µm = k≥m ϕ(k)kek k tends to 0 so that k≥m kek k = o(1/ϕ(m)).
+In particular, for a < 1/2 the last claim in the previous result can be strengthened to kxn −T xn k = o(1/na ).
+                                                                                   P
+   The previous result derives a rate of convergence from a control on the sum k≥1 ϕ(k)kek k < ∞. The
+next Lemma deals with the case where we control the errors ken k ≤ ǫn rather than their sum.
+                        p
+Lemma 3.3. Let η = 1 + 4/π. If ǫn ≤ (1−αn )f (τn ) with f : [0, ∞) → [0, ∞) nonincreasing, then
+                                      n                        Z τn
+                                     X                              f (s)
+(18)                                     2αi ǫi σ(τn −τi ) ≤ η     √        ds
+                                                                0    τn − s
+                                       i=1
+                                      INEXACT KRASNOSEL’SKII-MANN ITERATIONS                                    9
+
+Proof. For s ∈ [τi−1 , τi ] we have τn − s ≤ τn − τi−1 = τn − τi + αi (1 − αi ). Since τn − τi ≤ π1 σ(τn − τi )−2
+and αi (1−αi ) ≤ 41 ≤ 41 σ(τn −τi )−2 it follows that τn − s ≤ ( π1 + 41 ) σ(τn −τi )−2 . This, combined with the
+                                                             √
+monotonicity of f (·), yields 2f (τi )σ(τn −τi ) ≤ η f (s)/ τn −s so that (18) follows by integrating over the
+interval [τi−1 , τi ] and then summing for i = 1, . . . , n.                                                   
+Theorem 3.4. Assume (h0 ). Suppose that τn → ∞ and ken k = O((1−αn )/τna ).
+                                                   a−1/2
+a) If 21 ≤ a < 1 then kxn − T xn k = O(1/τn      ).
+                                          √
+b) If a = 1 then kxn − T xn k = O(log τn / τn ).
+                                     √
+c) If a > 1 then kxn − T xn k = O(1/ τn ).
+                                                                                                         √
+Proof. Let us consider the three terms in the bound (4). The first term is of order κ σ(τn ) = O(1/ τn )
+                                                                                     √
+                                           a ) so that for a ≥ 1/2 it is also O(1/ τ ). To estimate the sum
+while the third term is 2ken+1 k = O(1/τn+1                                             n
+in the middle term we note   that  ke  k ≤  (1 − α  )f (τ   ) with f (s) = K/(s + 1)a for some constant K ≥ 0.
+                         Rt          n            n       n
+Hence, denoting Ia (t) = 0 (s+1)1a √t−s ds and using Lemma 3.3 we get
+                                          n
+                                          X
+                                                2αi kei k σ(τn −τi ) ≤ η K Ia (τn ).
+                                          i=1
+                                         √
+                                           t
+                                                   √
+For a = 1 we have I1 (t) = 2 arcsinh
+                              √
+                                t+1
+                                       = O(log t/ t) which yields b). For a 6= 1 we may use the change of
+variables s = t (1−x) to express Ia (t) using the Gauss hypergeometric function 2 F1 (a, b; c; z), namely
+                                 √    Z 1                        √
+                                   t             1              2 t           1 3      t
+                      Ia (t) = (t+1)a           t     √
+                                                     a x
+                                                         dx = (t+1)a 2 F1 (a, 2 ; 2 ; t+1 ).
+                                       0 (1 − t+1 x)
+
+Now, for z ∼ 0 we have 2 F1 (a, b; c; z) ∼ 1, while setting d = a + b − c we have the following identity (see
+[1, page 559, equation 15.3.6]) which is valid when d is not an integer and | arg(z)| < π
+                                      −d Γ(c)Γ(d)                             Γ(c)Γ(−d)
+            2 F1 (a, b; c; 1−z) = z      Γ(a)Γ(b) 2 F1 (c−a, c−b; 1−d; z) + Γ(c−a)Γ(c−b) 2 F1 (a, b; d+1; z).
+            1
+Taking z = t+1 in this identity with b = 21 and c = 32 , it follows that for t large
+                                                                √
+                                                     1 √1         π Γ(1−a)     1
+                                           Ia (t) ∼ a−1  t
+                                                           +      Γ( 32 −a) ta−1/2
+                                                                                   .
+
+From this we deduce both a) and c), except when a ≥ 2 is an integer since in this case Γ(1−a) has a pole.
+However for a ≥ 2 the rate ken k = O((1−αn )/τna ) is stronger than the same condition with a ∈ (1, 2) so
+                                                    √
+that we still get the conclusion kxn − T xn k = O(1/ τn ).                                             
+Corollary 3.5. Assume (h0 ). Suppose that αn is bounded away from 0 and 1, and ken k = O(1/na ).
+a) If 21 ≤ a < 1 then kxn − T xn k = O(1/na−1/2 ).
+                                        √
+b) If a = 1 then kxn − T xn k = O(log n/ n).
+                                     √
+c) If a > 1 then kxn − T xn k = O(1/ n).
+Proof. Since αn is far from 0 and 1 we have τn = O(n) and the result follows directly from Theorem 3.4. 
+Remark 3.6. For 12 ≤ a ≤ 1 the condition ken k = O(1/na ) is very mild and allows for nonsummable
+errors. However, this only implies a rate for kxn − T xn k and not the convergence of the iterates which in
+general requires the errors to be summable (see Theorem 2.4 and Remark 2.5).
+10                              M. BRAVO, R. COMINETTI, AND M. PAVEZ-SIGNÉ
+
+ Theorem 3.4 also gives rates of convergence for vanishing stepsizes of the form αn = 1/nc with c ≤ 1.
+We record the case αn = 1/n which is often used.
+Corollary 3.7. Assume (h0 ) and αn = 1/n, and suppose that ken k = O(1/ log a n).
+a) If 12 ≤ a < 1 then kxn − T xn k = O(1/ log a−1/2 n).
+                                            √
+b) If a = 1 then kxn − T xn k = O(log log n/ log n).
+                                     √
+c) If a > 1 then kxn − T xn k = O(1/ log n).
+
+                                  4. Variants of the (ikm) iteration
+4.1. Inexact projections. Up to now we assumed (h0 ) which requires that the iterates xn remain in C.
+This is a nontrivial assumption that has to be checked independently. Alternatively one might use the
+metric projection PC : X → C, namely PC (x) = arg minz∈C kx − zk, and consider the iteration
+(IKMp )                        xn+1 = (1−αn+1 )xn + αn+1 (T ◦PC xn + en+1 ).
+As noted in §2.4, if PC is well defined and nonexpansive, which is the case when X is a Hilbert space, the
+results in the previous sections apply directly by considering the map T ◦PC instead of T . However, in
+more general spaces the projection might not exist and even if it exists it might fail to be nonexpansive.
+On the other hand, even in a Hilbert setting the projection might be hard to compute. To overcome these
+difficulties one may consider to perform an inexact projection by choosing a sequence γn ≥ 0 and starting
+from x0 ∈ C iterate as follows
+                            (
+                               take zn ∈ C with kzn − xn k ≤ d(xn , C) + γn and
+(IKMz )
+                               set xn+1 = (1−αn+1 )xn + αn+1 (T zn + en+1 ).
+In general, finding zn ∈ C as above requires a specific algorithm. Simple cases where this can be done are
+when C is a ball or the positive orthant in an Lp space with 1 ≤ p ≤ ∞. In these cases the projection
+might fail to be nonexpansive and might even be nonunique.
+                                                                                  P
+Theorem 4.1. Let the sequence (xn , zn ) be given by (IKMz ) with ken k → 0 and k≥1 (αk kek k+γk ) < ∞.
+               P
+Suppose that     k≥1 αk (1 − αk ) = ∞ and kx0 − T zn k ≤ κ for some κ ≥ 0. Then kxn − zn k → 0 and
+kzn − T zn k → 0.
+Proof. Let us denote δn = d(xn , C) + γn . Lemma A.1 in Appendix A shows that δn tends to 0 so that
+kxn − zn k ≤ δn → 0. On the other hand
+                                                                      kxn+1 − xn k
+(19)               kzn − T zn k ≤ kzn − xn k + kxn − T zn k ≤ δn +                 + ken+1 k
+                                                                         αn+1
+so that it remains to show that kxn+1 −xn k
+                                   αn+1     tends to 0. We proceed as before by establishing a recursive
+bound kxm − xn k ≤ wm,n . Taking yn = T zn + en+1 with y−1 = x0 and using Lemma 2.1 we get
+                                               m
+                                               X n
+                                                 X
+                                kxm − xn k ≤               πim πjm kyi−1 − yj−1 k.
+                                               i=0 j=m+1
+
+Set w−1,n = κ for all n ∈ N and denote ǫn = ken k + δn−1 with ǫ0 = 0. The terms with i = 0 in the previous
+sum can be bounded as
+                         ky−1 − yj−1 k ≤ kx0 − T zj−1 k + kej k ≤ w−1,j−1 + ǫ0 + ǫj .
+                                 INEXACT KRASNOSEL’SKII-MANN ITERATIONS                                      11
+
+On the other hand, since kzi − zj k ≤ kxi − xj k + δi + δj , the nonexpansivity of T implies that for j > i ≥ 1
+                kyi−1 − yj−1 k ≤ kT zi−1 − T zj−1 k + kei k + kej k ≤ kxi−1 − xj−1 k + ǫi + ǫj .
+Proceeding as in Corollary 2.2 we get kxm − xn k ≤ wm,n with wm,n defined recursively by (8), and then
+Proposition 2.3 yields
+                                                              n
+                   kxn+1 − xn k   wn,n+1              X
+(20)                            ≤        ≤ κ σ(τn ) +     2αi ǫi σ(τn −τi ) + ǫn+1 .
+                       αn+1        αn+1
+                                                      i=1
+                                      P
+Since Lemma A.1 shows that ǫn → 0 and k≥1 αk ǫk < ∞, by arguing as in the proof of Theorem 1.1 we
+deduce that kxn+1 −xn k
+               αn+1     converges to 0 as claimed.                                                           
+
+Corollary 4.2. Under the same conditions of Theorem 4.1 the following holds.
+a) If T (C) is relatively compact then xn converges strongly to a fixed point of T .
+b) If xn remains bounded and X is uniformly convex with Opial’s property, then xn converges weakly to a
+fixed point of T .
+                                                             P
+Proof. Let ǫn = ken k + δn−1 as in the previous proof so that k≥1 αk ǫk < ∞. For each x ∈ Fix(T ) a simple
+                                                                                      P
+computation yields kxn − xk ≤ kxn−1 − xk + αn ǫn so that the sequence kxn − xk + k>n αk ǫk decreases
+with n, and then kxn − xk converges. Since kzn − xn k → 0 it follows that kzn − xk converges as well. Then,
+since kzn − T zn k → 0, we may argue as in the proof of Theorem 2.4 to get the strong/weak convergence
+of zn , and hence the corresponding convergence of xn .                                                  
+Remark 4.3. The bound for δn in Lemma A.1, together with (19) and (20), provide an explicit estimate
+for kzn − T zn k from which one can study its rate of convergence using similar techniques as in Section §3.
+4.2. Ishikawa iteration. In [15] Ishikawa proposed an alternative method to approximate a fixed point
+of a nonexpansive T : C → C. Namely, given two sequences αn , βn ∈ (0, 1) and starting from x0 ∈ C, the
+Ishikawa process generates a sequence by the following two-stage iteration
+                                   (
+                                        yn = (1−βn+1 )xn + βn+1 T xn
+(I)
+                                     xn+1 = (1−αn+1 )xn + αn+1 T yn
+
+In this subsection we assume that C is bounded and we denote κ = diam(C).
+                                                                                   P
+Corollary 4.4. Let the sequence (xn ) be given by the iteration (I) with βn → 0 and k≥1 αk βk < ∞, and
+           P
+assume that k≥1 αk (1−αk ) = ∞. Then kxn − T xn k → 0 and the following estimate holds
+                                                    n
+                                          "                                     #
+                                                   X
+(21)                    kxn − T xn k ≤ κ σ(τn ) +       αi βi σ(τn −τi ) + 2βn+1 .
+                                                      i=1
+
+Proof. We observe that (I) can be written as an (ikm) iteration with errors given by en+1 = T yn − T xn .
+Since T yn ∈ C the iterates xn remain in C while by nonexpansivity we have
+                             ken+1 k ≤ kyn − xn k = βn+1 kxn − T xn k ≤ κ βn+1
+so the result follows directly from Theorem 1.1.                                                             
+12                              M. BRAVO, R. COMINETTI, AND M. PAVEZ-SIGNÉ
+
+Remark 4.5. Ishikawa proved in [15] that if C is a convex compact subset of a Hilbert       P space X, the
+iteration (I) converges strongly to a fixed point as soon as 0 ≤ αn ≤ βn ≤ 1 with βn → 0 and k≥1 αk βk = ∞.
+                                                                                       P
+Interestingly, Corollary 4.4 together with Theorem 2.4 implies the convergence when k≥1 αk βk < ∞ which
+is complementary to Ishikawa’s condition. Note also that we do not require αn ≤ βn . On the other hand,
+Ishikawa’s theorem holds for the larger class of Lipschitzian pseudo-contractive maps, whereas our result
+is restricted to nonexpansive maps but is valid in more general spaces and it yields the rate of convergence
+of the fixed-point residual as in §3.
+4.3. Diagonal KM iteration. Let Tn : C → C be a sequence of nonexpansive maps converging uniformly
+to T so that ρn = sup{kTn x−T xk : x ∈ C} tends to 0. Starting from x0 ∈ C consider the diagonal iteration
+(dkm)                              xn+1 = (1 − αn+1 )xn + αn+1 Tn+1 xn .
+                                                                               P
+Corollary 4.6. Let xn be a sequence generated by (dkm) with ρn → 0 and k≥1 αk ρk < ∞. Suppose
+     P
+that k≥1 αk (1−αk ) = ∞ and kx0 − T xn k ≤ κ for some κ ≥ 0. Then kxn − T xn k → 0 and the following
+estimate holds
+                                                  n
+                                                  X
+                        kxn − T xn k ≤ κ σ(τn ) +   2αi ρi σ(τn −τi ) + 2ρn+1 .
+                                                        i=1
+
+Proof. Note that (dkm) corresponds to an (ikm) iteration with errors given by en+1 = Tn+1 xn −T xn . Since
+Tn xn ∈ C the iterates remain in C, and ken k ≤ ρn . Hence the result follows again from Theorem 1.1. 
+Remark 4.7. The diagonal iteration (dkm) was introduced in [28, Zhao and Yang] in order to compute
+a solution for the split feasibility problem in Hilbert spaces. Weak convergence of (dkm) was established
+in [27, Xu] for uniformly convex spaces with a differentiable norm, under the same assumptions of Corol-
+lary 4.6. Our result shows that this also holds for uniformly convex spaces with Opial’s property, and
+moreover it yields rates of convergence for the residuals in the same way as in §3.
+
+                     5. Application to nonautonomous evolution equations
+  Let T : X → X be a nonexpansive map and f : [0, ∞) → X a continuous function. Let u : [0, ∞) → X
+be the unique solution of the evolution equation
+                                      (
+                                        u′ (t) + (I − T )u(t) = f (t),
+(E)
+                                        u(0) = x0 .
+In the autonomous case with
+              ′
+                           √ f (t) ≡ 0, Baillon and Bruck [3] used the Krasnosel’skii-Mann iteration to
+prove that ku (t)k = O(1/ t), assuming that T : C → C with C a bounded closed convex domain. In the
+nonautonomous case u(t) could leave the domain C so we assume that T is defined on the whole space.
+   In order to deal with the unboundedness of the domain, and inspired from Proposition 2.6, we consider
+a continuous scalar function ǫ(t) ≥ kf (t)k and we assume one of the following alternative conditions
+ (h′2 ) T has a bounded range, and then we let κ = sup{kT x − x0 k : x ∈ X}, or
+                                                     R∞
+ (h′′2 ) Fix(T ) 6= ∅ and ǫ(t) is decreasing with S = 0 ǫ(t) dt < ∞ , and we let κ = 2 dist(x0 , Fix(T )) + S.
+Under either one of these conditions we have the following analog of Theorem 1.1.
+Theorem 5.1. Let u(t) be the solution of (E) and assume (h′2 ) or (h′′2 ). Then
+                                                Z t
+(22)                        ku′ (t)k ≤ κ σ(t) +     2 ǫ(s)σ(t−s) ds + ǫ(t).
+                                                    0
+                                    INEXACT KRASNOSEL’SKII-MANN ITERATIONS                                        13
+                              R∞
+Moreover, if ǫ(t) → 0 and      0   ǫ(s) ds < ∞ then ku′ (t)k → 0 as t → ∞.
+Proof. Fix t > 0 and set λn = nt . Let us consider the sequence (xnk )k≥0 defined by xn0 = x0 and
+                                  xnk+1 − xnk
+                                               = −(I − T )xnk + f ((k+1)λn ).
+                                      λn
+It is well known that xnn → u(t) and (xnn+1 − xnn )/λn → u′ (t) as n → ∞. On the other hand, xnk corresponds
+to the k-th term of an (ikm) iteration with errors enk = f (kλn ) and constant stepsizes αk ≡ λn . We
+claim that (h0 ) holds with κ defined as in (h′2 ) or (h′′2 ). Indeed, in the case (h′2 ) this follows directly from
+Proposition 2.6 a), whereas in the case (h′′2 ) it follows from Proposition 2.6 b) and the estimate
+                                X∞              X∞                Z ∞
+                                     n n               n      n
+                                    λ kek k ≤        λ ǫ(kλ ) ≤       ǫ(s) ds = S.
+                                   k=1          k=1                   0
+                       Pk
+Hence, letting τkn =    i=1 αi (1−αi ) and invoking Proposition 2.3 we get
+                                                          n
+                       kxnn+1 − xnn k          n
+                                                         X
+                                                             t     t      n   n             t
+(23)
+                              λn
+                                      ≤ κ σ(τn ) + 2         n ǫ(i n ) σ(τn −τi ) + ǫ((n+1) n ).
+                                                         i=1
+        n        t
+Since τn = t(1−n ) → t as n → ∞ the first term κ σ(τnn ) converges to κ σ(t), while for the third term we have
+ǫ((n+1) nt ) → ǫ(t). Also τnn −τin = (1− nt )(t−i nt ) so that the middle term is a Riemann sum for the function
+hn (s) = 2ǫ(s)σ((1− nt )(t−s)). Since hn (s) converges uniformly for s ∈ [0, t] towards h(s) = 2ǫ(s)σ(t−s),
+                                                                Rt
+this Riemann sum converges as n → ∞ to the integral 0 2ǫ(s)σ(t−s)ds. Therefore by letting n → ∞ in
+(23) we obtain (22).
+   To prove the last claim ku′ (t)k → 0 we note that σ(t) → 0 for t → ∞ while ǫ(t) → 0 by assumption, so
+that it suffices to proveRthat 0 2ǫ(s)σ(t−s)ds tends to 0 as t → ∞. Denoting ht (s) = 2ǫ(s)σ(t−s)1[0,t] (s)
+                               Rt
+
+this integral is exactly R ht (s)ds. Now, the definition of σ(·) implies ht (s) → 0 pointwise as t → ∞, and
+since ht (s) ≤ 2ǫ(s), the conclusion follows from Lebesgue’s dominated convergence theorem.               
+  Clearly, from (22) we also get
+                                                           Z t
+                              ku(t) − T u(t)k ≤ κ σ(t) +         2 ǫ(s)σ(t−s) ds + 2ǫ(t)
+                                                     0
+                                                   R∞
+so that ku(t) − T u(t)k → 0 as soon as ǫ(t) → 0 and 0 ǫ(s) ds < ∞. As in the discrete setting, from this
+one can deduce that Fix(T ) 6= ∅ as well as the convergence of u(t) to a fixed point of T .
+                                                               R∞
+Theorem 5.2. Let u(t) be the solution of (E). Suppose that 0 ǫ(s) ds < ∞ and ku(t) − T u(t)k → 0.
+a) If T (C) is relatively compact then u(t) converges strongly to a fixed point of T .
+b) If X is uniformly convex and u(t) remains bounded then Fix(T ) 6= ∅. Moreover, if X satisfies Opial’s
+property then u(t) converges weakly to a fixed point of T .
+Proof. We claim that for all x    p∈ Fix(T ) the
+                                               R ∞limit ℓ(x) = limt→∞ ku(t) − xk exists. To prove this let
+θ(t) = 12 ku(t) − xk2 and g(t) = 2θ(t) + 1 + t ǫ(s) ds. In order to establish the existence of the limit ℓ(x)
+                                                                                            d
+it suffices to show that g(t) is decreasing. Let us prove that g ′ (t) ≤ 0, that is to say, dt
+                                                                                               p
+                                                                                                 2θ(t) + 1 ≤ ǫ(t).
+We recall that the duality mapping on X is the subdifferential J(x) = ∂ψ(x) of the convex function
+ψ(x) = 12 k · k2 . Choosing u∗ (t) ∈ J(u(t)−x), the subdifferential inequality gives
+                            1           2    ∗                 1        2
+                            2 ku(t) − xk + hu (t), v − u(t)i ≤ 2 kv − xk         (∀v ∈ X)
+14                               M. BRAVO, R. COMINETTI, AND M. PAVEZ-SIGNÉ
+
+so that taking v = u(t − h) with h > 0 we get
+                                  hu∗ (t), u(t − h) − u(t)i ≤ θ(t − h) − θ(t).
+Dividing by h and letting h ↓ 0 it follows that θ ′ (t) ≤ hu∗ (t), u′ (t)i. Then, using the equation (E) and the
+fact that x ∈ Fix(T ), the nonexpansivity of T gives
+                      θ ′ (t) ≤ hu∗ (t), (I − T )x − (I − T )u(t) + f (t)i
+                              = hu∗ (t), T u(t) − T xi − hu∗ (t), u(t) − xi + hu∗ (t), f (t)i
+                              ≤ ku∗ (t)kku(t) − xk − hu∗ (t), u(t) − xi + ku∗ (t)kkf (t)k.
+Now, from well known properties of the duality mapping we have hu∗ (t), u(t) − xi = ku(t) − xk2 and
+ku∗ (t)k = ku(t) − xk so that
+                        θ ′ (t) ≤ ku∗ (t)kkf (t)k = ku(t) − xkkf (t)k ≤ 2θ(t) + 1 ǫ(t)
+                                                                        p
+
+                         d
+                             p
+which proves our claim dt       2θ(t) + 1 ≤ ǫ(t). This implies the existence of ℓ(x) = limt→∞ ku(t) − xk, from
+which the rest of the proof follows the same pattern as the proof of Theorem 2.4.                            
+
+   The estimate (22) can also be used to derive the following continuous time analogs of the rates of
+convergence in Theorem 3.1 and Theorem 3.4.
+                                                                                      √     √
+Theorem 5.3. Let u(t) be the unique solution of (E). Assume (h′′2 ) and let ν = (κ + 2 2 S)/ π. Then,
+for all t ≥ 1 we have
+                                                      Z ∞
+                                                  ν
+(24)                                   ku′ (t)k ≤ √ +      4 ǫ(s) ds.
+                                                    t  t/2
+                                                           R∞
+Moreover, if ϕ : [0, ∞) → [0, ∞) is nondecreasing and µ = 0 ϕ(s)ǫ(s) ds < ∞, then
+                                                       ν     4µ
+(25)                                        ku′ (t)k ≤ √ +        .
+                                                         t ϕ(t/2)
+                     R∞ a                                           ′             b          1
+In particular, if     0 s ǫ(s) ds < ∞ for some a ≥ 0, then ku (t)k = O(1/t ) with b = min{ 2 , a}.
+                                                                                    Rt
+Proof. Let us fix t ≥ 1 and consider the bound (22). Splitting the integral 0 2ǫ(s)σ(t−s) ds into [0, 2t ] and
+[ 2t , t], and noting that σ(t − s) ≤ 2/πt on the first interval and σ(t − s) ≤ 1 on the second, we get
+                                     p
+                                                           Z t
+                                           ′         ν
+(26)                                  ku (t)k ≤ √ +             2 ǫ(s) ds + ǫ(t).
+                                                      πt    t/2
+                                                           Rt
+Since ǫ(·) is nonincreasing and t ≥ 1, we have ǫ(t) ≤ t/2 2 ǫ(s) ds which plugged into (26) yields (24). Now,
+since ϕ(·) is nondecreasing, (25) follows directly from (24) using the inequality
+                                             Z ∞           Z ∞
+                                     ϕ( 2t )     ǫ(s) ds ≤       ϕ(s)ǫ(s) ds ≤ µ,
+                                          t/2              t/2
+
+while the last claim ku′ (t)k = O(1/tb ) follows from (25) by taking ϕ(s) = sa .                                   
+Theorem 5.4. Let u(t) be the solution of         (E) and assume (h′2 ) or (h′′2 ), and ǫ(t) = O(1/ta ) with a ≥ 12 .
+a) If 12 ≤ a < 1 then ku′ (t)k = O(1/ta−1/2 ).
+                                    √
+b) If a = 1 then ku′ (t)k = O(log t/ t).
+                                 √
+c) If a > 1 then ku′ (t)k = O(1/ t).
+                                   INEXACT KRASNOSEL’SKII-MANN ITERATIONS                                      15
+                                                                                                  Rt      1√
+Proof. This follows from (22) and from the analysis of the asymptotics of the integral Ia (t) =    0 (s+1)a t−s ds
+established in the proof of Theorem 3.4.                                                                       
+
+                         Appendix A. Bound for approximate projections
+  The goal of this Appendix is to establish the next technical Lemma used in the proof of Theorem 4.1.
+Lemma A.1. Let (x   P                     (IKMz ), and denote δn = d(xn , C)P+ γn and ξn = ken k + γn /αn
+                     n , zn ) be given by P
+with δ0 = ξ0 = 0. If k≥1 αk = ∞ and k≥1 αk ξk < ∞, then δn → 0 and k≥1 αk δk−1 < ∞.
+Proof. Starting from the identity
+                      xn = (1 − αn )zn−1 + αn T zn−1 + (1 − αn )(xn−1 − zn−1 ) + αn en
+and since (1 − αn )zn−1 + αn T zn−1 ∈ C, we get
+                  dist(xn , C) ≤ k(1 − αn )(xn−1 − zn−1 ) + αn en k ≤ (1 − αn )δn−1 + αn ken k.
+It follows that δn ≤ (1 − αn )δn−1 + αn ξn so that letting ρn = nj=1 (1−αj ) with ρ0 = 1 we get
+                                                                  Q
+
+                                                  δn   δn−1   αn
+                                                     ≤      +    ξn .
+                                                  ρn   ρn−1   ρn
+Iterating this inequality we get ρδnn ≤ ni=0 αρii ξi which yields δn ≤ ni=0 αi ξi ρρni .
+                                       P                              P
+                                           R
+   This inequality can be written as δn ≤ N fn dµ with µ the finite measure on N defined by µ({i}) = αi ξi ,
+and fn : N → R given by fn (i) = ρρni for i ≤ n and fn (i) = 0 for i > n. Since fn (i) → 0 as n → ∞ and
+                                                                       R
+fn (i) ≤ 1, Lebesgue’s dominated convergenceP theorem implies that N fn dµ tends to zero so that δn → 0.
+   It remains to show that the sum S = k≥1 αk δk−1 is finite. Using the previous bound for δk−1 and
+exchanging the order of summation we get
+                             ∞          k−1              ∞        ∞
+                             X          X           ρk−1 X       X   Qk−1
+                        S≤         αk         αi ξi     =  αi ξi   αk j=i+1 (1−αj ).
+                                                     ρi
+                             k=1        i=0              i=0    k=i+1
+          k
+                     Qk−1
+The term qi+1 = αk      j=i+1 (1−αj ) in this last sum can be interpreted as a probability. Namely, suppose
+                                                                                    k
+that at every integer j we toss a coin that falls head with probability αj . Then, qi+1 is the probability that
+                                                                               P∞        k
+starting
+     P∞at position i + 1 the first head occurs exactly at position k. Hence k=i+1 qi+1 = 1 and therefore
+S ≤ i=0 αi ξi < ∞.                                                                                           
+
+                                                    References
+ [1] Abramowitz, M. and Stegun, I. (1964). Handbook of Mathematical Functions: with Formulas,
+     Graphs, and Mathematical Tables. Courier Corporation.
+ [2] Baillon, J. and Bruck, R. (1992). Optimal rates of asymptotic regularity for averaged nonexpan-
+     sive mappings. In Proceedings of the Second International Conference on Fixed Point Theory and
+     Applications (K.K. Tan, ed.). World Scientific Press, London, 27–66.      √
+ [3] Baillon, J. and Bruck, R. (1996). The rate of aymptotic regularity is O(1/ n). Lecture Notes in
+     Pure and Applied Mathematics, 178 51–81.
+ [4] Bauschke, H. and Combettes, P. (2011). Convex Analysis and Monotone Operator Theory in
+     Hilbert Spaces. Springer Verlag, New York.
+ [5] Bravo, M. and Cominetti, R. (2016). Sharp convergence rates for averaged nonexpansive maps.
+     Available at arxiv.org/abs/1606.05300.
+16                             M. BRAVO, R. COMINETTI, AND M. PAVEZ-SIGNÉ
+
+ [6] Brézis, H. (1973). Opérateurs Maximaux Monotones et Semi-groupes de Contractions dans les Es-
+     paces de Hilbert. North-Holland, Amsterdam.
+ [7] Browder, F. (1968). Semicontractive and semiaccretive nonlinear mappings in Banach spaces. Bull.
+     Amer. Math. Soc., 74 660–665.
+ [8] Browder, F. and Petryshyn, W. (1966). The solution by iteration of nonlinear functional equations
+     in Banach spaces. Bull. Amer. Math. Soc., 72 571–575.
+ [9] Browder, F. E. and Petryshyn, W. V. (1967). Construction of fixed points of nonlinear mappings
+     in Hilbert space. J. Math. Anal. Appl., 20 197–228.
+[10] Combettes, P. (2001). Quasi-Fejérian analysis of some optimization algorithms. Stud. Comput.
+     Math., 8 115–152.
+[11] Cominetti, R., Soto, J. and Vaisman, J. (2014). On the rate of convergence of Krasnosel’skiı̌-Mann
+     iterations and their connection with sums of Bernoullis. Israel J. Math., 199 757–772.
+[12] Douglas, J. and Rachford, H. (1956). On the numerical solution of heat conduction problems in
+     two and three space variables. Trans. Amer. Math. Soc., 82 421–439.
+[13] Gabay, D. and Mercier, B. (1976). A dual algorithm for the solution of nonlinear variational
+     problems via finite element approximation. Comput. Math. Appl., 2 17–40.
+[14] Goebel, K. and Kirk, W. (2001). Classical theory of nonexpansive mappings. In Handbook of
+     Metric Fixed Point Theory. Kluwer Academic Publishers, Dordrecht, 49–91.
+[15] Ishikawa, S. (1974). Fixed points by a new iteration method. Proc. Amer. Math. Soc., 44 147–150.
+[16] Kim, T. and Xu, H. (2007). Robustness of Mann’s algorithm for nonexpansive mappings. J. Math.
+     Anal. Appl., 327 1105 – 1115.
+[17] Krasnosel’skii, M. (1955). Two remarks on the method of successive approximations. Uspekhi Mat.
+     Nauk, 63 123–127.
+[18] Liang, J., Fadili, J. and Peyré, G. (2016). Convergence rates with inexact non-expansive operators.
+     Math. Prog. Ser. A, 159 1–32.
+[19] Liu, L. (1995). Ishikawa and Mann iterative process with errors for nonlinear strongly accretive
+     mappings in Banach spaces. J. Math. Anal. Appl., 194 114–125.
+[20] Mann, W. (1955). Mean value methods in iteration. Proc. Amer. Math. Soc., 4 506–510.
+[21] Martinet, B. (1970). Régularisation d’inéquations variationnelles par approximations successives.
+     Rev. Franc. Inform. Rech. Opér, 4 154–159.
+[22] Mercier, B. (1979). Lectures on Topics in Finite Element Solution of Elliptic Problems, vol. 63 of
+     Lectures on Mathematics and Physics. Tata Institute of Fundamental Research, Bombay.
+[23] Passty, G. (1979). Ergodic convergence to a zero of the sum of monotone operators in Hilbert space.
+     J. Math. Anal. Appl., 72 283–390.
+[24] Peaceman, D. and Rachford, H. (1955). The numerical solution of parabolic and elliptic equations.
+     J. Soc. Ind. Appl. Math., 3 28–41.
+[25] Polyak, B. (1963). Gradient methods for the minimisation of functionals. USSR Comput. Math.
+     Math. Phys., 3 864–878.
+[26] Rockafellar, R. (1976). Monotone operators and the proximal point algorithm. SIAM J. Control
+     Optim., 14 877–898.
+[27] Xu, H. (2006). A variable Krasnosel’skii-Mann algorithm and the multiple-set split feasibility problem.
+     Inverse Problems, 22 2021–2034.
+[28] Zhao, J. and Yang, Q. (2005). Several solution methods for the split feasibility problem. Inverse
+     Problems, 21 1791.
+                                 INEXACT KRASNOSEL’SKII-MANN ITERATIONS                                       17
+
+  (Mario Bravo) Departamento de Matemática y Ciencia de la Computación, Universidad de Santiago de Chile,
+Alameda Libertador Bernardo O’higgins 3363, Santiago, Chile. E-mail: mario.bravo.g@usach.cl
+
+  (Roberto Cominetti) Facultad de Ingenierı́a y Ciencias, Universidad Adolfo Ibáñez, Diagonal Las Torres 2640,
+Santiago, Chile. E-mail: roberto.cominetti@uai.cl
+
+  (Matı́as Pavez-Signé) Departamento de Ingenierı́a Matemática, Universidad de Chile, Beauchef 851, Santiago,
+Chile. E-mail: mpavez@dim.uchile.cl
+

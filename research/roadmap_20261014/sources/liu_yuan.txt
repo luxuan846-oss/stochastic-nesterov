@@ -1,0 +1,1315 @@
+Proceedings of Machine Learning Research vol 178:1–21, 2022               35th Annual Conference on Learning Theory
+
+
+
+
+  On Almost Sure Convergence Rates of Stochastic Gradient Methods
+Jun Liu                                                                               J . LIU @ UWATERLOO . CA
+Department of Applied Mathematics, University of Waterloo, Waterloo, Canada
+Ye Yuan                                                                                   YYE @ HUST. EDU . CN
+School of Artificial Intelligence and Automation & School of Mechanical Science and Engineering, Huazhong
+University of Science and Technology, Wuhan, China
+
+
+Editors: Po-Ling Loh and Maxim Raginsky
+
+
+                                                        Abstract
+     The vast majority of convergence rates analysis for stochastic gradient methods in the literature
+     focus on convergence in expectation, whereas trajectory-wise almost sure convergence is clearly
+     important to ensure that any instantiation of the stochastic algorithms would converge with prob-
+     ability one. Here we provide a unified almost sure convergence rates analysis for stochastic gra-
+     dient descent (SGD), stochastic heavy-ball (SHB), and stochastic Nesterov’s accelerated gradient
+     (SNAG) methods. We show, for the first time, that the almost sure convergence rates obtained for
+     these stochastic gradient methods on strongly convex functions, are arbitrarily close to their optimal
+     convergence rates possible. For non-convex objective functions, we not only show that a weighted
+     average of the squared gradient norms converges to zero almost surely, but also the last iterates of
+     the algorithms. We further provide last-iterate almost sure convergence rates analysis for stochastic
+     gradient methods on general convex smooth functions, in contrast with most existing results in the
+     literature that only provide convergence in expectation for a weighted average of the iterates.
+     Keywords: Stochastic gradient descent, stochastic heavy-ball, stochastic Nesterov’s accelerated
+     gradient, almost sure convergence rate
+
+
+1. Introduction
+Stochastic gradient methods (Robbins and Monro, 1951) have become the de facto standard methods
+for solving large-scale optimization problems in machine learning (Bottou et al., 2018). For this
+reason, investigating the fundamental theoretical properties of stochastic gradient methods is not
+only of theoretical interest, but also of practical relevance.
+    Stochastic gradient descent (SGD) (Robbins and Monro, 1951) and stochastic heavy-ball (SHB)
+(Polyak, 1964) are among the most popular stochastic gradient methods. SHB adds a momentum
+term to the iterations of SGD. This was known to accelerate the convergence of deterministic gra-
+dient descent methods (Polyak, 1964). Nesterov’s accelerated gradient (NAG) methods (Nesterov,
+1983) have similar but slightly different iterations from that of the heavy-ball (HB) method. They
+have been shown to accelerate gradient descents and achieve optimal convergence rates with ap-
+propriately chosen parameters in the deterministic settings (Nesterov, 2003, Chapter 2.2). In the
+stochastic settings, while practical gains of adding a momentum term have been observed (Leen
+and Orr, 1994; Sutskever et al., 2013), the convergence rates cannot be further improved due to the
+proven lower bounds in terms of oracle complexity (Agarwal et al., 2012). Nonetheless, understand-
+ing the convergence properties of stochastic gradient methods with or without momentum remains
+a topic of both theoretical and practical interest.
+    In this paper, we investigate almost sure convergence properties of stochastic gradient methods,
+including SGD, SHB, and stochastic Nesterov’s accelerated gradient (SNAG) methods, and present
+a unified analysis of these stochastic gradient methods on smooth objective functions.
+
+© 2022 J. Liu & Y. Yuan.
+                                             L IU Y UAN
+
+
+
+
+1.1. Related work
+The vast majority of the convergence rates analysis results for stochastic gradient methods in the lit-
+erature are obtained in terms of the expectation (see, e.g., SGD (Nemirovski et al., 2009; Moulines
+and Bach, 2011; Ghadimi and Lan, 2013), SHB (Yang et al., 2016; Orvieto et al., 2020; Yan et al.,
+2018; Mai and Johansson, 2020; Zhou et al., 2020), SNAG (Yan et al., 2018; Assran and Rabbat,
+2020; Laborde and Oberman, 2020)). Nonetheless, almost sure convergence properties are impor-
+tant, because they represent what happen to individual trajectories of the stochastic iterations, which
+are instantiations of the stochastic algorithms actually used in practice.
+    For this reason, almost sure convergence of stochastic gradient methods is of practical relevance.
+In fact, the early analysis of SGD (Robbins and Siegmund, 1971) did provide almost sure conver-
+gence guarantees. More recent work includes Bertsekas and Tsitsiklis (2000); Bottou (2003); Zhou
+et al. (2017); Nguyen et al. (2018, 2019); Orabona (2020a); Mertikopoulos et al. (2020). While de-
+terministic HB and NAG methods are well analyzed (Ghadimi et al., 2015; Nesterov, 2003; Wilson
+et al., 2021), almost sure convergence results for SHB and SNAG are scarce. Gadat et al. (2018)
+proved almost sure convergence of SHB to a minimizer for non-convex functions, under a uni-
+formly elliptic condition on the noise which helps the algorithm to get out of any unstable point. In
+Sebbouh et al. (2021), SHB (and SGD) was analyzed for convex (but not strongly convex or non-
+convex) objective functions. The authors not only proved almost sure convergence for iterations
+of SGD and SHB, they also established convergence rates that are close to optimal (subject to an
+ε-factor in the rate) for general convex functions. Almost sure convergence rates were analyzed for
+SGD under locally strongly convex objectives in Pelletier (1998); Godichon-Baggioni (2019). To
+the best knowledge of the authors, the results in Sebbouh et al. (2021) are the only ones that estab-
+lished almost sure convergence rates for SHB on general convex functions. We are not aware of
+any almost sure convergence rates analysis for SHB and SNAG on strongly convex or non-convex
+functions. The results of this paper aim to fill this theoretical gap.
+
+1.2. Contributions
+We summarize the main contributions of the paper in Table 1 relative to exiting results in the liter-
+ature. We only list results that provided almost sure convergence rates analysis for SGD, SHB, and
+SNAG. We emphasize the following results as the main contributions:
+
+    • For smooth and strongly convex functions, we establish almost sure convergence rates for
+      SGD, SHB and SNAG that are arbitrarily close to the optimal rates possible.
+
+    • For smooth but non-convex functions, we establish almost sure convergence rates of SHB and
+      SNAG for a weighted average (or the minimum) of the squared gradient norm. We also show
+      almost sure convergence of the last iterates of SHB and SNAG.
+
+    • For smooth and general convex functions, we provide almost sure convergence rates of the
+      last iterates of SGD, SHB, and SNAG.
+
+    In view of existing results Pelletier (1998); Godichon-Baggioni (2019), our analysis for almost
+sure convergence rates analysis of SGD on strongly convex functions appears to be more streamlined
+and unified for SGD, SHB, and SNAG. For analysis of SHB in the general convex case, our result
+is complementary to that in Sebbouh et al. (2021) because we allow β to be an arbitrarily fixed
+
+                                                  2
+         O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+
+parameter in (0, 1) (cf. the analysis of deterministic HB in Ghadimi et al. (2015)). This leads to a
+more unified analysis of SGD, SHB, and SNAG. In addition to the results listed in Table 1, we also
+obtained another set of results (Theorem 4) on almost sure convergence of the last iterates of SHB
+and SNAG on non-convex functions, which generalize Orabona (2020a) for SGD.
+
+    Algorithm           strongly convex              non-convex              general convex
+                        Pelletier (1998)         Sebbouh et al. (2021)    Sebbouh et al. (2021)
+       SGD         Godichon-Baggioni (2019)
+                           Theorem 1                   Theorem 1              Theorem 5
+                           Theorem 2                   Theorem 2          Sebbouh et al. (2021)
+       SHB
+                                                                              Theorem 5
+      SNAG                 Theorem 3                   Theorem 3              Theorem 5
+
+Table 1: Summary of the main results relative to existing results on almost sure convergence rates
+         of stochastic gradient methods.
+
+
+
+1.3. Problem statement and assumptions
+We are interested in solving the unconstrained minimization problem
+                                             min f (x),                                           (1)
+                                             x∈Rd
+
+where f : Rd → R, using stochastic gradient methods. For example, with a slight abuse of
+notation, f may arise from optimizing an expected risk of the form f (x) = E[f (x; ξ)], where ξ is
+a source ofPrandomness indicating a sample (or a set of samples), or an empirical risk of the form
+f (x) = n1 ni=1 fi (x; ξi ), where {ξi }ni=1 are realizations of ξ (Bottou et al., 2018). We make the
+following assumptions.
+
+Assumption 1 (L-smoothness) The continuously differentiable function f : Rd → R is bounded
+from below by f ∗ := inf x∈Rd f (x) ∈ R and its gradient ∇f is L-Lipschitz, i.e., k∇f (x) − ∇f (y)k ≤
+L kx − yk for all x, y ∈ Rd .
+
+A useful consequence of Assumption 1 (see, e.g., Nesterov (2003, Lemma 1.2.3)) is the following
+                                                     L
+                  f (y) ≤ f (x) + h∇f (x), y − xi +    ky − xk2 ,     ∀x, y ∈ Rd .                (2)
+                                                     2
+   In some settings, we also assume that f is strongly convex.
+Assumption 2 (µ-strongly convex) There exists a positive constant µ such that
+                                                    µ
+                  f (y) ≥ f (x) + h∇f (x), y − xi + ky − xk2 , ∀x, y ∈ Rd .
+                                                     2
+    Assumption 2 with µ = 0 will be referred to as general convexity. When f is convex (strongly
+or generally), we further assume that f has a minimizer, i.e., x∗ ∈ Rd such that f ∗ = f (x∗ ). A
+consequence of f being µ-strongly convex is that (see, e.g., Nesterov (2003, Theorem 2.1.10))
+                              1
+                                k∇f (x)k2 ≥ f (x) − f ∗ ,    ∀x ∈ Rd .                            (3)
+                             2µ
+
+                                                 3
+                                              L IU Y UAN
+
+
+
+
+In contrast, if f is generally convex and L-smooth, we have (see, e.g., Nesterov (2003, Theorem
+2.1.5))
+                               1
+                                  k∇f (x)k2 ≤ f (x) − f ∗ , ∀x ∈ Rd .                           (4)
+                              2L
+    Since we are interested in solving (1) using stochastic gradient methods, we assume at each
+x ∈ Rd , we have access to an unbiased estimator of the true gradient ∇f (x), denoted by ∇f (x; ξ).
+Assumption 3 (ABC condition) There exist nonnegative constants A, B, and C such that
+                E[k∇f (x; ξ)k2 ] ≤ A(f (x) − f ∗ ) + B k∇f (x)k2 + C,         ∀x ∈ Rd .              (5)
+Remark 1 The above assumption was proposed in Khaled and Richtárik (2020) as “the weakest
+assumption” for analysis of SGD in the non-convex setting. This assumption clearly includes the
+uniform bound E[k∇f (x; ξ)k2 ] ≤ σ 2 and bounded variance condition E[k∇f (x; ξ) − ∇f (x)k2 ] ≤
+σ 2 as special cases. The latter is because, by unbiasedness of ∇f (x; ξ), bounded variance is
+equivalent to E[k∇f (x; ξ)k2 ] ≤ k∇f (x)k2 + σ 2 . Furthermore, in the context of solving stochastic
+or empirical minimization problems using SGD, by assuming that each realization or individual loss
+function is L-smooth and convex and that the overall objective function f is strongly convex with a
+unique minimizer x∗ , the following bound can be derived (Nguyen et al., 2019): E[k∇f (x; ξ)k2 ] ≤
+4L(f (x) − f ∗ ) + σ 2 , where σ 2 = E[∇f (x∗ ; ξ)]. If the convexity condition on individual realization
+or loss function was dropped, a similar bound can still be shown (Nguyen et al., 2019) with 4L
+                  2
+replaced with 4L µ . Both of them are again special cases of the condition in Assumption 3. For these
+reasons, we shall use the seemingly most general condition in Assumption 3 throughout this paper.
+
+2. Lemmas on supermartingale convergence rates
+Our almost sure convergence rate analysis relies on the following classical supermartingale conver-
+gence theorem (Robbins and Siegmund, 1971).
+Proposition 1 Let {Xt }, {Yt }, and {Zt } be three sequences of random variables that are adapted
+to a filtration {Ft }. Let {γt } be a sequence of nonnegative real numbers such that Π∞
+                                                                                      t=1 (1 + γt ) <
+∞. Suppose that the following conditions hold:
+   1. Xt , Yt , and Zt are nonnegative for all t ≥ 1.
+  2. E[Yt+1 | Ft ] ≤ (1 + γt )Yt − Xt + Zt for all t ≥ 1.
+     P∞
+  3.   t=1 Zt < ∞ holds almost surely.
+     P∞
+Then t=1 Xt < ∞ almost surely and Yt converges almost surely.
+    The following lemma, as a corollary of Proposition 1, provides concrete estimates of almost
+sure convergence rates for sequences of random variables satisfying a supermartingale property.
+Lemma 1 If {Yt } is a sequence of nonnegative random variables satisfying
+                              E[Yt+1 | Ft ] ≤ (1 − c1 αt )Yt + c2 αt2 ,                           (6)
+                              1
+                                   for some θ ∈ (0, 12 ), and c1 and c2 are positive constants. Then,
+                                 
+for all t ≥ 1, where αt = Θ t1−θ
+for any ε ∈ (2θ, 1),                         
+                                            1
+                                Yt = o 1−ε , almost surely.
+                                          t
+
+                                                   4
+             O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+
+    The proof of Lemma 1 can be found in Appendix A. The following lemma, when used together
+with Proposition 1, is useful for almost sure convergence rate analysis in a slightly different setting
+than Lemma 1.
+
+Lemma 2 Let {Xt } a sequence of nonnegative real numbers and {αt } be a decreasing sequence
+of positive real numbers such that the following holds:
+                                     ∞                                 ∞
+                                     X                                 X        αt
+                                           αt Xt < ∞ and                      Pt−1      = ∞.
+                                     t=1                               t=1     i=1 αi
+
+Define wt = Pt2αt α , Y1 = X1 , and
+                  i=1   i
+
+
+                                       Yt+1 = (1 − wt )Yt + wt Xt ,                  t ≥ 1.                    (7)
+
+Then                                                !                                                  !
+                                            1                                                  1
+                            Yt = o     Pt−1             and           min Xi = o         Pt−1              .   (8)
+                                           i=1 αi                                             i=1 αi
+                                                                      1≤i≤t
+
+                                                                     
+Remark 2 A concrete convergence rate o           results from (8) if we choose αt = 1α+ε for
+                                                             1
+                                                              1
+                                                            t 2 −ε                      t2
+                                                                   1
+some α > 0 and ε ∈ (0, 12 ), because then we have t−1                −ε       αt          1
+                                                 P
+                                                        α
+                                                    i=1 i   = Θ(t  2    ), P t−1
+                                                                                 α
+                                                                                     = Θ( t ), and
+                                                                             i=1   i
+P     αt
+  t Pt−1 α = ∞.
+             i
+       i=1
+
+
+    The proof of Lemma 2 can be found in Appendix B.
+
+3. Almost sure convergence rate analysis for stochastic gradient methods
+In this section, we present a unified almost sure convergence rate analysis for SGD, SHB and SNAG.
+We primarily focus on two scenarios, namely the strongly convex and non-convex cases.
+
+3.1. Stochastic gradient descent
+The iteration of the SGD method is given by
+
+                                                xt+1 = xt − αt gt ,           t ≥ 1,                           (9)
+
+where gt := ∇f (xt ; ξt ) is the stochastic gradient at xt (with randomness ξt ) and αt is the step size.
+     Weshall prove that, for smooth and strongly convex objective functions, SGD can achieve
+     1
+o t1−ε    almost sure convergence rates for any ε ∈ (0, 1). To the best knowledge of the au-
+                                                  1
+thors, this is the first result showing the o t1−ε      almost sure convergence rate for SGD under
+the global strong convexity assumption and relaxed assumption on stochastic gradients (Khaled
+and Richtárik,
+           2020).
+                       For smooth and non-convex objective functions, the best iterates of SGD can
+achieve o 1 −ε almost sure convergence rates for any ε ∈ (0, 21 ). This result was already reported
+              1
+            t2
+in Sebbouh et al. (2021). For locally strongly convex functions, similar rates were obtained in Pel-
+letier (1998); Godichon-Baggioni (2019). Here we provide a somewhat more streamlined proof of
+both the strongly convex and non-convex cases, enabled by Lemmas 1 and 2. These rates match the
+lower bounds in Agarwal et al. (2012) (see also Nemirovskij and Yudin (1983)) to an ε-factor.
+
+                                                                  5
+                                                   L IU Y UAN
+
+
+
+
+Theorem 1 Consider the iterates of SGD (9).
+                                                     1
+                                                          for some θ ∈ (0, 12 ), then almost surely
+                                                        
+   1. If Assumptions 1, 2, and 3 hold and αt = Θ t1−θ
+                                                      
+                                          ∗        1
+                               f (xt ) − f = o 1−ε , ∀ε ∈ (2θ, 1).
+                                                 t
+
+   2. If Assumptions
+                P 1 and      3 hold and {αt } is a decreasing sequence of positive real numbers
+      satisfying ∞t=1 P  αt
+                        t−1
+                            α
+                               = ∞, then almost surely
+                           i=1   i
+                                                                                    !
+                                                                         1
+                                      min k∇f (xt )k2 = o          Pt−1                 .              (10)
+                                                                       i=1 αi
+                                     1≤i≤t−1
+
+                                            α
+      In particular, if we choose αt =     1       with α > 0 and ε ∈ (0, 21 ), then almost surely
+                                          t 2 +ε
+                                                                               
+                                                             2           1
+                                        min k∇f (xt )k = o              1           .                  (11)
+                                      1≤i≤t−1                          t 2 −ε
+Proof 1. We first consider the strongly convex case. By smoothness of f and (2), we have
+                                                                        Lαt2
+                          f (xt+1 ) ≤ f (xt ) − αt h∇f (xt ), gt i +         kgt k2 .
+                                                                         2
+Taking conditional expectation w.r.t. xt , denoted by Et [·] := E[·|xt ], and using (3) lead to
+                                                         Lαt2 h                                      i
+Et [f (xt+1 ) − f ∗ ] ≤ f (xt ) − f ∗ − αt k∇f (xt )k2 +       A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C
+                                                           2
+                            LAαt2                            LBαt2                      LCαt2
+                     = (1 +        )(f (xt ) − f ∗ ) − (αt −        ) k∇f (xt )k2 +
+                              2                                 2                          2
+                            LAαt2                               LBα   2                      LCαt2
+                     ≤ (1 +        )(f (xt ) − f ∗ ) − 2µ(αt −        t
+                                                                        )(f (xt ) − f ∗ ) +
+                              2                                   2                           2
+                                                                             LCα   2
+                     = (1 − 2µαt + (LA/2 + LBµ)αt2 )(f (xt ) − f ∗ ) +             t
+                                                                                2
+                                                     LCαt2
+                     ≤ (1 − µαt )(f (xt ) − f ∗ ) +        ,                                       (12)
+                                                       2
+provided that (LA/2 + LBµ)αt ≤ µ. The conclusion follows from Lemma 1.
+     2. For the non-convex case, by L-smoothness and as in (12), we obtain
+                                                               Lαt2 h                                      i
+ Et [f (xt+1 ) − f ∗ ] ≤ f (xt ) − f ∗ − αt k∇f (xt )k2 +            A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C
+                                                             2
+                                LAαt2                               LBαt2                   LCαt2
+                                                                           
+                       ≤ (1 +                         ∗
+                                        )(f (xt ) − f ) − αt −               k∇f (xt )k2 +
+                                  2                                   2                       2
+                                LAαt  2                      1                  LCαt   2
+                       ≤ (1 +           )(f (xt ) − f ∗ ) − αt k∇f (xt )k2 +             ,              (13)
+                                  2                          2                     2
+provided that LBαt ≤ 1. By Proposition 1, ∞                                2
+                                                      P
+                                                          t=1 αt k∇f (xt )k < ∞. The conclusions follow
+from Lemma 2 and Remark 2.
+
+
+                                                       6
+          O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+                                     1
+                                       
+Remark 3 We choose αt = Θ t1−θ           for θ → 0 to approach the optimal almost sure convergence
+rate achievable under Lemma 1. InPfact, any step size P       choice satisfying the classical condition
+                                          ∞                      ∞     2
+by Robbins and Siegmund (1971):           t=1 αt = ∞ and         t=1 αt < ∞ will lead to almost sure
+convergence under the supermartingale convergence theorem (Proposition 1). What is new here is
+                                                     1
+the analysis of almost sure convergence rate o t1−ε       for strongly convex objective functions using
+Lemma 1. By choosing θ → 0, we can make ε → 0. The conditions (LA/2 + LBµ)αt ≤ µ and
+LBαt ≤ 1 in the proof can be easily satisfied for all t ≥ 1, if we scale all αt ’s by a constant, or for
+all t sufficiently large due to the choice of αt . This difference is insignificant because in the latter
+case the analysis in the proof holds asymptotically and the same convergence rate follows.
+
+3.2. Stochastic heavy-ball method
+The iteration of the SHB method is given by
+
+                                    xt+1 = xt − αt gt + β(xt − xt−1 ),                                            (14)
+
+where gt := ∇f (xt ; ξt ) is the stochastic gradient at xt , αt is the step size, and β ∈ [0, 1). Clearly,
+if β = 0, SHB reduces to SGD.
+    Define
+                                              β
+                                z t = xt −        vt , vt = xt − xt−1 .                              (15)
+                                            1−β
+The iteration of SHB can be rewritten as
+                                           vt+1 = βvt − αt gt ,
+                                                        αt                                                        (16)
+                                           zt+1 = zt −         gt .
+                                                       1−β
+    To our best knowledge, the following theorem provides the first almost sure convergence rates
+for SHB under both strongly convex and non-convex assumptions.
+
+Theorem 2 Consider the iterates of SHB (14).
+                                                               1
+                                                                           for some θ ∈ (0, 12 ), then almost surely
+                                                                     
+   1. If Assumptions 1, 2, and 3 hold and αt = Θ             t1−θ
+                                                                  
+                                                             1
+                                    f (xt ) − f ∗ = o                  ,     ∀ε ∈ (2θ, 1).
+                                                            t1−ε
+
+   2. If Assumptions
+                P∞ 1 and  3 hold and {αt } is a decreasing sequence of positive real numbers
+                       αt
+      satisfying t=1 t−1 α = ∞, then almost surely
+                     P
+                          i=1   i
+
+                                                                                              !
+                                                             2                     1
+                                       min k∇f (xt )k = o                    Pt−1                 .
+                                                                                 i=1 αi
+                                     1≤i≤t−1
+
+                                             α
+      In particular, if we choose αt =       1      with α > 0 and ε ∈ [0, 21 ], then almost surely
+                                           t 2 +ε
+                                                                                         
+                                                                 2                 1
+                                         min k∇f (xt )k = o                       1           .
+                                       1≤i≤t−1                                   t 2 −ε
+
+                                                        7
+                                                    L IU Y UAN
+
+
+
+
+Proof We have
+
+                              kvt+1 k2 = β 2 kvt k2 − 2βαt hgt , vt i + αt2 kgt k2 .
+
+Taking conditional expectation w.r.t. xt , denoted by Et [·] := E[·|xt ], gives
+                                                        h                                     i
+  Et kvt+1 k2 = β 2 kvt k2 − 2βαt h∇f (xt ), vt i + αt2 A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C
+                               α2                      h                                     i
+     ≤ β 2 kvt k2 + ε1 kvt k2 + t k∇f (xt )k2 + αt2 A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C . (17)
+                               ε1
+By L-smoothness of f and (2), we have
+
+                                                 αt                      Lαt2
+                        f (zt+1 ) ≤ f (zt ) −       h∇f (zt ), gt i +           kgt k2 .
+                                                1−β                   2(1 − β)2
+
+Taking conditional expectation w.r.t. xt gives
+
+      Et f (zt+1 )
+                    αt                              Lαt2 h                     ∗                  2
+                                                                                                        i
+      ≤ f (zt ) −       h∇f (zt ), ∇f (xt )i +                  A(f (x t ) − f   ) + B k∇f (xt )k   + C
+                   1−β                           2(1 − β)2
+                    αt                      αt
+      = f (zt ) −        k∇f (zt )k2 −          h∇f (zt ), ∇f (xt ) − ∇f (zt )i
+                   1−β                   1−β
+                  Lαt2 h                  ∗                    2
+                                                                     i
+           +              A(f (x  t ) − f   ) + B k∇f (x  t )k   + C
+               2(1 − β)2
+                    αt                      αt                 Lβ
+      ≤ f (zt ) −        k∇f (zt )k2 +           k∇f (zt )k          kvt k
+                   1−β                   1−β                 1−β
+                  Lαt2 h                  ∗                    2
+                                                                     i
+           +              A(f (x  t ) − f   ) + B k∇f (x  t )k   + C
+               2(1 − β)2
+                    αt                                αt2 L2 β 2
+      ≤ f (zt ) −        k∇f (zt )k2 + ε2 kvt k2 +                  k∇f (zt )k2
+                   1−β                               ε2 (1 − β)4
+                  Lαt2 h                  ∗                    2
+                                                                     i
+           +              A(f (x  t ) − f   ) + B k∇f (x  t )k   + C   .                                  (18)
+               2(1 − β)2
+
+By L-smoothness of f again, we have
+
+                                         β                      Lβ 2
+       f (xt ) − f ∗ ≤ f (zt ) − f ∗ +     h∇f (zt ), vt i +              kvt k2
+                                       1−β                   2(1 − β)2
+                                       1                   β2                    Lβ 2
+                      ≤ f (zt ) − f ∗ + k∇f (zt )k2 +             kv t k2
+                                                                          +             kvt k2 ,         (19)
+                                       2               2(1 − β)2              2(1 − β)2
+
+and
+
+      k∇f (xt )k2 = k∇f (zt ) + ∇f (xt ) − ∇f (zt )k2 ≤ 2 k∇f (zt )k2 + 2 k∇f (xt ) − ∇f (zt )k2
+                                             L2 β 2
+                     ≤ 2 k∇f (zt )k2 + 2            2
+                                                      kvt k2 .                                           (20)
+                                           (1 − β)
+
+                                                         8
+          O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+
+Combining (17)–(20) yields
+      h                        i
+   Et f (zt+1 ) − f + kvt+1 k ≤ (1 + c1 αt2 )[f (zt ) − f ∗ ] + (β 2 + ε1 + ε2 + c2 αt2 ) kvt k2
+                   ∗         2
+
+                                                        
+                                         αt
+                                  −             − c3 αt k∇f (zt )k2 + c4 αt2 ,
+                                                       2
+                                      1−β
+
+where the constants c1 –c4 can be straightforwardly determined from (17)–(20). For any λ ∈ (β, 1),
+                                                                                     1
+we can choose ε1 > 0 and ε2 > 0 such that β 2 + ε1 + ε2 ≤ λ. For any c ∈ (0, 1−β        ), we can
+                  1                       1
+                     
+choose αt = Θ t1−θ , for some θ ∈ (0, 2 ), sufficiently small (by changing the constant) such that
+ αt        2
+1−β − c3 αt ≥ cαt for all t ≥ 1. The above inequality becomes
+             h                           i
+           Et f (zt+1 ) − f ∗ + kvt+1 k2
+                ≤ (1 + c1 αt2 )[f (zt ) − f ∗ ] + (λ + c2 αt2 ) kvt k2 − cαt k∇f (zt )k2 + c4 αt2 .   (21)
+
+   We now consider two different cases:
+   1. If f is µ-strongly convex, we can use k∇f (zt )k2 ≥ 2µ(f (zt ) − f ∗ ) to further obtain
+    h                          i
+  Et f (zt+1 ) − f ∗ + kvt+1 k2 ≤ (1 − 2cµαt + c1 αt2 )[f (zt ) − f ∗ ] + (λ + c2 αt2 ) kvt k2 + c4 αt2 .
+
+                       1
+                         
+By choosing αt = Θ t1−θ    sufficiently small, the inequality leads to
+              h                          i
+           Et f (zt+1 ) − f ∗ + kvt+1 k2 ≤ (1 − c5 αt )[f (zt ) − f ∗ + kvt k2 ] + c4 αt2 ,
+
+for some constant c5 > 0. It follows from Lemma 1 that
+                                                                            
+                                              ∗            2           1
+                                f (zt+1 ) − f + kvt+1 k = o
+                                                                      t1−ε
+
+for any ε ∈ (2θ, 1). The conclusion follows from (19) and (4).
+    2. If f is non-convex, by (20), inequality (21) leads to
+      h                         i                                         1
+  Et f (zt+1 ) − f ∗ + kvt+1 k2 ≤ (1 + c6 αt2 )[f (zt ) − f ∗ + kvt k2 ] − cαt k∇f (xt )k2 + c4 αt2 ,
+                                                                          2
+where c6 = max(c1 , c2 ), provided that αt is chosen sufficiently small. By Proposition 1, we have
+P ∞                2
+  t=1 αt k∇f (xt )k < ∞ almost surely. The conclusions follow from Lemma 2 and Remark 2.
+
+    The almost sure convergence rates achieved by SHB are consistent with the best convergence
+rates possible for strongly convex and non-convex objective functions using stochastic gradient
+methods (Agarwal et al., 2012) (see also Nemirovskij and Yudin (1983)) subject to an ε-factor.
+
+3.3. Stochastic Nesterov’s accelerated gradient
+The iteration of the SNAG method is given by
+
+                                     yt+1 = xt − αt gt ,
+                                                                                                      (22)
+                                     xt+1 = yt+1 + β(xt − xt−1 ),
+
+                                                     9
+                                                        L IU Y UAN
+
+
+
+
+where gt := ∇f (xt ; ξt ) is the stochastic gradient at xt , αt is the step size, and β ∈ [0, 1). Clearly,
+if β = 0, SNAG also reduces to SGD.
+    Define zt and vt as in (15). The iteration of SNAG can be rewritten as
+                                              vt+1 = βvt − βαt gt ,
+                                                           αt                                          (23)
+                                              zt+1 = zt −       gt .
+                                                          1−β
+Indeed, (23) is almost identical to (16) except for the extra β in the first equation for vt+1 .
+Theorem 3 Consider the iterates of SNAG (22).
+                                                     1
+                                                          for some θ ∈ (0, 12 ), then almost surely
+                                                        
+   1. If Assumptions 1, 2, and 3 hold and αt = Θ t1−θ
+                                                      
+                                          ∗        1
+                               f (xt ) − f = o 1−ε , ∀ε ∈ (2θ, 1).
+                                                 t
+
+   2. If Assumptions
+                P 1 and      3 hold and {αt } is a decreasing sequence of positive real numbers
+      satisfying ∞t=1 P  αt
+                        t−1
+                            α
+                               = ∞, then almost surely
+                              i=1   i
+                                                                                     !
+                                                                             1
+                                          min k∇f (xt )k2 = o           Pt−1             .
+                                                                            i=1 αi
+                                        1≤i≤t−1
+
+                                                 α
+       In particular, if we choose αt =         1 with α > 0 and ε ∈ [0, 21 ], then almost surely
+                                               t 2 +ε
+                                                                         
+                                                           2          1
+                                            min k∇f (xt )k = o 1            .
+                                          1≤i≤t−1                  t 2 −ε
+Proof The proof is similar to that for Theorem 2. Instead of (17), we obtain
+                                        αt2                                                    i
+                                                            h
+          2   2       2             2                 2    2               ∗              2
+Et kvt+1 k ≤ β kvt k + ε1 kvt k +           k∇f (xt )k + αt A(f (xt ) − f ) + B k∇f (xt )k + C .
+                                        ε1
+                                                                                            (24)
+The rest of the proof proceeds in the same way (with slightly different constants). We conclude the
+same convergence rates by Lemmas 1 and 2.
+
+    To our best knowledge, the above theorem provides the first result on almost sure convergence
+rates for SNAG under both strongly convex and non-convex assumptions. It is also evident from the
+above proofs that we provide a unified treatment the convergence analysis for SHB and SNAG.
+
+4. Last-iterate convergence analysis of stochastic gradient methods
+In the previous sections, we have established close-to-optimal almost sure convergence rates for
+popular stochastic gradient methods. These rates are proved for the last iterate1 f (xt ) − f ∗ . When
+strong convexity is absent, convergence (rates) analysis for stochastic gradient methods in terms
+of the last iterates seems more challenging, even for general convex objective functions. We shall
+address these issues in this section. Such results are practically relevant, because it is the last iterates
+of gradient descent methods that are being used in most practical situations.
+ 1. Similar rates can be easily obtained for kxt − x∗ k2 and k∇f (xt )k2 using strong convexity.
+
+
+                                                            10
+          O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+
+4.1. Last-iterate convergence analysis of SHB and SNAG for non-convex functions
+In the non-convex setting, the convergence analysis in the previous sections shows that a weighted
+average of the squared gradient norm k∇f (xi )k2 converges to zero almost surely, which also implies
+that the “best” iterate min1≤i≤t k∇f (xi )k2 converges to zero almost surely (cf. Lemma 2). It is both
+theoretically intriguing and practically relevant to know whether the last-iterate gradient ∇f (xt )
+converges almost surely. However, it is usually more challenging to analyze the convergence of
+the last iterate of SGD. An interesting discussion was made in Orabona (2020a), where the author
+simplified the long analysis in earlier work by Bertsekas and Tsitsiklis (2000) that proved the last-
+iterate k∇f (xt )k2 converges almost surely to zero for SGD. In this section, we extend this analysis
+and prove that the last-iterate gradients of SHB and SNAG both converge to zero almost surely.
+    We rely on the following lemma from Orabona (2020a), which can be seen as an extension of
+Alber et al. (1998, Proposition 2) and Mairal (2013, Lemma A.5).
+
+Lemma 3 (Orabona (2020a))PLet {bt } and {αt } be     Ptwo   nonnegative sequences and {wt } be a
+                                                        ∞
+sequence of vectors. Assume ∞       α b
+                                t=1 t t
+                                       p
+                                          <  ∞   and    t=1 t = ∞, where p ≥ 1. Furthermore,
+                                                            α                                 
+                                                               Pt+τ −1          Pt+τ −1
+assume that there exists some L > 0 such that |bt+τ − bt | ≤ L    i=t   α  b
+                                                                          i i +   i=t   α w
+                                                                                         i i    ,
+                      P∞
+where wt is such that t=1 αt wt converges. Then bt converges to 0.
+
+Theorem 4 Consider the iterates of SHB (14) and SNAG (22), respectively. Let Assumptions 1 and
+3 hold and the step size {αt } be a sequence of positive real numbers satisfying
+                                   ∞
+                                   X                       ∞
+                                                           X
+                                          αt = ∞,                αt2 < ∞.
+                                    t=1                    t=1
+
+Then we have ∇f (xt ) → 0 almost surely, as t → ∞, for both the iterates of SHB and SNAG.
+
+ProofPWe first prove that the last-iterate gradient of SHB converges. By (21) and Proposition 1, we
+have ∞                  2
+      t=1 αt k∇f (zt )k < ∞ almost surely. Furthermore, by L-smoothness of f , we have
+
+                                                                                                t+τ
+                                                                                                 X  −1
+    |k∇f (zt+τ )k − k∇f (zt )k| ≤ k∇f (zt+τ ) − ∇f (zt )k ≤ L kzt+τ − zt k = L                           αi gi
+                                                                                                 i=t
+                                          t+τ
+                                           X  −1
+                                 =L                αi ∇f (zi ) + αi (gi − ∇f (zi ))
+                                           i=t
+                                          t+τ −1                       t+τ −1
+                                                                                        !
+                                           X                            X
+                                 ≤L                αi k∇f (zi )k +              αi wi       ,
+                                            i=t                         i=t
+                                            P
+where wi = gi − ∇f (zi ) . To show that       t≥0 αt wt converges almost surely, we write
+
+                        αt wt = αt (gt − ∇f (xt )) + αt (∇f (xt ) − ∇f (zt )).
+
+   We make the following
+                     P claims that are proved in Appendix C.
+   Claim 1: Mt = ti=1 αi (gi − ∇f (xi )) is a martingale bounded in L2 and hence converges
+almost surely (Williams,
+                    P 1991, Theorem 12.1)).
+   Claim 2: Nt = ti=1 αi (∇f (xi ) − ∇f (zi )) converges almost surely.
+
+                                                      11
+                                             L IU Y UAN
+
+
+
+
+    By Claims 1 and 2, ∞
+                        P
+                          t=1 αt wt converges almost surely. Applying Lemma 3 with bt = k∇f (zt )k
+and p = 2 shows that ∇f (zt ) → 0 almost surely. We concludeP∞ that ∇f  (xt ) converges to 0 almost
+                                                                      2
+surely in view of (19) and that vt → 0 almost surely (since t=1 kvt k < ∞ almost surely).
+    The proof of convergence for SNAG is similar, following (24). We omitted the details here.
+
+
+4.2. Last-iterate convergence rates of SGD, SHB, SNAG for general convex functions
+We primarily focused on strongly convex and non-convex objective functions in the previous sec-
+tion. For functions that are generally convex, Sebbouh et al. (2021) proved almost sure convergence
+rates of SGD for a weighted average of the iterates. A natural question to ask is whether one can
+obtain some last-iterate almost sure convergence rates. Indeed, the vast majority of convergence
+analysis for stochastic gradient methods under general convexity assumption yields results in terms
+of a weighted average of the iterates. There is an interesting discussion in Orabona (2020b), where
+the author derived some last-iterate convergence rates in the context of non-asymptotic analysis for
+convergence in expectation (see also earlier work Zhang (2004); Shamir and Zhang (2013) with
+more restricted domains or learning rates). In this section, we provide results on almost sure last-
+iterate convergence rates for SGD, SHB, and SNAG. Compared with the results in Sebbouh et al.
+(2021) for SHB, we show that even without the iterate moving-average (IMA) parameter choices,
+the last iterates of SHB still converge to a minimizer, only assuming smoothness and convexity. We
+are not aware of any similar last-iterate almost sure convergence rates in the literature.
+    The proof of the following result can be found in Appendix D.
+Theorem 5 Consider the iterates of   SGD(9), SHB (14), and SNAG (22), respectively. Suppose
+that we choose the step size αt = Θ 21+ε for any ε ∈ (0, 13 ). Then we have x → x∗ for some x∗
+                                      t3                      
+such that f (x∗ ) = f almost surely and f (xt ) − f ∗ = O 11−ε .
+                     ∗
+                                                             t3
+Remark 4 While this appears     to the
+                                       first result on last-iterate almost sure convergence rates for
+                                    1
+SGD and SNAG, the rate O 1 −ε is not close to the lower bound obtained for convergence in
+                                  t3
+expectation (Agarwal et al., 2012). Note that most convergence rates for SGD on general con-
+vex function are derived for a weighted average of the iterates. An interesting observation was
+made
+    in   Orabona (2020b) and the author derived a non-asymptotic last-iterate convergence rate of
+O log(T√
+         T
+           )
+              in expectation. It is unclear at this point whether the idea in Orabona (2020b) can be
+extended to yield a close-to-optimal asymptotic almost sure convergence rate. It would be interest-
+ing to investigate whether the law of the iterated logarithm for martingales (Stout, 1970; de la Pena
+et al., 2004; Balsubramani, 2014) can help determine the sharpest convergence rates in this setting.
+
+5. Conclusions
+In this paper, we have provided a streamlined analysis of almost sure convergence rates for stochas-
+tic gradient methods, including SGD, SHB, and SNAG. The rates obtained for strongly convex func-
+tions are arbitrarily close to their corresponding optimal rates. For non-convex functions, the rates
+obtained for the best iterates are close to the optimal convergence rates in expectation for general
+convex functions (Agarwal et al., 2012). For general convex functions, we identified a gap between
+the last-iterate almost sure convergence rates obtained and the possible optimal rates. Whether it is
+possible and how to close this gap can be an interesting topic for future work.
+
+                                                 12
+         O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+
+Acknowledgments
+This work is partially supported by the NSERC Canada Research Chairs (CRC) program, an NSERC
+Discovery Grant, an Ontario Early Researcher Award (ERA), and the Jiangsu Industrial Technology
+Research Institute (JITRI) through a JITRI-Waterloo project.
+
+References
+Alekh Agarwal, Peter L Bartlett, Pradeep Ravikumar, and Martin J Wainwright. Information-
+  theoretic lower bounds on the oracle complexity of stochastic convex optimization. IEEE Trans-
+  actions on Information Theory, 58(5):3235–3249, 2012.
+
+Ya I Alber, Alfredo N. Iusem, and Mikhail V. Solodov. On the projected subgradient method for
+  nonsmooth convex optimization in a Hilbert space. Mathematical Programming, 81(1):23–35,
+  1998.
+
+Mahmoud Assran and Mike Rabbat. On the convergence of Nesterov’s accelerated gradient method
+ in stochastic settings. In International Conference on Machine Learning, pages 410–420. PMLR,
+ 2020.
+
+Akshay Balsubramani. Sharp finite-time iterated-logarithm martingale concentration.        arXiv
+  preprint arXiv:1405.2639, 2014.
+
+Dimitri P Bertsekas and John N Tsitsiklis. Gradient convergence in gradient methods with errors.
+  SIAM Journal on Optimization, 10(3):627–642, 2000.
+
+Léon Bottou. Stochastic learning. In Summer School on Machine Learning, pages 146–168.
+   Springer, 2003.
+
+Léon Bottou, Frank E Curtis, and Jorge Nocedal. Optimization methods for large-scale machine
+   learning. SIAM Review, 60(2):223–311, 2018.
+
+Victor H de la Pena, Michael J Klass, and Tze Leung Lai. Self-normalized processes: exponential
+  inequalities, moment bounds and iterated logarithm laws. Annals of Probability, pages 1902–
+  1933, 2004.
+
+Sébastien Gadat, Fabien Panloup, and Sofiane Saadane. Stochastic heavy ball. Electronic Journal
+   of Statistics, 12(1):461–529, 2018.
+
+Euhanna Ghadimi, Hamid Reza Feyzmahdavian, and Mikael Johansson. Global convergence of the
+  heavy-ball method for convex optimization. In 2015 European Control Conference (ECC), pages
+  310–315. IEEE, 2015.
+
+Saeed Ghadimi and Guanghui Lan. Stochastic first-and zeroth-order methods for nonconvex
+  stochastic programming. SIAM Journal on Optimization, 23(4):2341–2368, 2013.
+
+Antoine Godichon-Baggioni. Lp and almost sure rates of convergence of averaged stochastic gra-
+  dient algorithms: locally strongly convex objective. ESAIM: Probability and Statistics, 23:841–
+  873, 2019.
+
+                                               13
+                                           L IU Y UAN
+
+
+
+
+Ahmed Khaled and Peter Richtárik. Better theory for SGD in the nonconvex world. arXiv preprint
+  arXiv:2002.03329, 2020.
+
+Maxime Laborde and Adam Oberman. A Lyapunov analysis for accelerated gradient methods:
+ From deterministic to stochastic case. In International Conference on Artificial Intelligence and
+ Statistics, pages 602–612. PMLR, 2020.
+
+Todd K Leen and Genevieve B Orr. Optimal stochastic search and adaptive momentum. Advances
+  in Neural Information Processing Systems, pages 477–477, 1994.
+
+Vien Mai and Mikael Johansson. Convergence of a stochastic gradient method with momentum for
+  non-smooth non-convex optimization. In International Conference on Machine Learning, pages
+  6630–6639. PMLR, 2020.
+
+Julien Mairal. Stochastic majorization-minimization algorithms for large-scale optimization. arXiv
+  preprint arXiv:1306.4650, 2013.
+
+Panayotis Mertikopoulos, Nadav Hallak, Ali Kavis, and Volkan Cevher. On the almost sure conver-
+  gence of stochastic gradient descent in non-convex problems. arXiv preprint arXiv:2006.11144,
+  2020.
+
+Eric Moulines and Francis Bach. Non-asymptotic analysis of stochastic approximation algorithms
+  for machine learning. Advances in Neural Information Processing Systems, 24:451–459, 2011.
+
+Arkadi Nemirovski, Anatoli Juditsky, Guanghui Lan, and Alexander Shapiro. Robust stochastic
+  approximation approach to stochastic programming. SIAM Journal on optimization, 19(4):1574–
+  1609, 2009.
+
+Arkadij Semenovič Nemirovskij and David Borisovich Yudin. Problem Complexity and Method
+  Efficiency in Optimization. John Wiley & Sons, 1983.
+
+Yurii Nesterov. A method for solving the convex programming problem with convergence rate
+  O(1/k 2 ), volume 269. Doklady Akademii Nauk Sssr, 1983.
+
+Yurii Nesterov. Introductory Lectures on Convex Optimization: A Basic Course. Springer Science
+  & Business Media, 2003.
+
+Lam Nguyen, Phuong Ha Nguyen, Marten Dijk, Peter Richtárik, Katya Scheinberg, and Martin
+  Takác. SGD and Hogwild! convergence without the bounded gradients assumption. In Interna-
+  tional Conference on Machine Learning, pages 3750–3758. PMLR, 2018.
+
+Lam M Nguyen, Phuong Ha Nguyen, Peter Richtárik, Katya Scheinberg, Martin Takác, and Marten
+  van Dijk. New convergence aspects of stochastic gradient algorithms. Journal of Machine Learn-
+  ing Research, 20:176–1, 2019.
+
+Francesco   Orabona.        Almost   sure   convergence   of  SGD   on  smooth
+  nonconvex     functions.          Blogpost     on     http://parameterfree.
+  com,        available    at      https://parameterfree.com/2020/10/05/
+  almost-sure-convergence-of-sgd-on-smooth-non-convex-functions/,
+  2020a.
+
+                                               14
+         O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+
+Francesco Orabona. Last iterate of SGD converges (even in unbounded domains). Blogpost on
+  http://parameterfree.com, available at https://parameterfree.com/2020/
+  08/07/last-iterate-of-sgd-converges-even-in-unbounded-domains/,
+  2020b.
+
+Antonio Orvieto, Jonas Kohler, and Aurelien Lucchi. The role of memory in stochastic optimization.
+  In Uncertainty in Artificial Intelligence, pages 356–366. PMLR, 2020.
+
+Mariane Pelletier. On the almost sure asymptotic behaviour of stochastic algorithms. Stochastic
+ Processes and Their Applications, 78(2):217–244, 1998.
+
+Boris T Polyak. Some methods of speeding up the convergence of iteration methods. Ussr Compu-
+  tational Mathematics and Mathematical Physics, 4(5):1–17, 1964.
+
+Herbert Robbins and Sutton Monro. A stochastic approximation method. The Annals of Mathemat-
+  ical Statistics, pages 400–407, 1951.
+
+Herbert Robbins and David Siegmund. A convergence theorem for non negative almost super-
+  martingales and some applications. In Optimizing Methods in Statistics, pages 233–257. Elsevier,
+  1971.
+
+Othmane Sebbouh, Robert M Gower, and Aaron Defazio. Almost sure convergence rates for
+  stochastic gradient descent and stochastic heavy ball. In Conference on Learning Theory, pages
+  3935–3971. PMLR, 2021.
+
+Ohad Shamir and Tong Zhang. Stochastic gradient descent for non-smooth optimization: Conver-
+  gence results and optimal averaging schemes. In International Conference on Machine Learning,
+  pages 71–79. PMLR, 2013.
+
+William F Stout. A martingale analogue of Kolmogorov’s law of the iterated logarithm. Zeitschrift
+ für Wahrscheinlichkeitstheorie und verwandte Gebiete, 15(4):279–290, 1970.
+
+Ilya Sutskever, James Martens, George Dahl, and Geoffrey Hinton. On the importance of initializa-
+   tion and momentum in deep learning. In International Conference on Machine Learning, pages
+   1139–1147. PMLR, 2013.
+
+David Williams. Probability with Martingales. Cambridge University Press, 1991.
+
+Ashia C Wilson, Ben Recht, and Michael I Jordan. A Lyapunov analysis of accelerated methods in
+  optimization. Journal of Machine Learning Research, 22(113):1–34, 2021.
+
+Yan Yan, Tianbao Yang, Zhe Li, Qihang Lin, and Yi Yang. A unified analysis of stochastic mo-
+  mentum methods for deep learning. In Proceedings of the 27th International Joint Conference
+  on Artificial Intelligence, pages 2955–2961, 2018.
+
+Tianbao Yang, Qihang Lin, and Zhe Li. Unified convergence analysis of stochastic momentum
+  methods for convex and non-convex optimization. arXiv preprint arXiv:1604.03257, 2016.
+
+Tong Zhang. Solving large scale linear prediction problems using stochastic gradient descent algo-
+  rithms. In International Conference on Machine Learning, pages 919–926, 2004.
+
+                                               15
+                                          L IU Y UAN
+
+
+
+
+Beitong Zhou, Jun Liu, Weigao Sun, Ruijuan Chen, Claire J Tomlin, and Ye Yuan. pbsgd: Powered
+  stochastic gradient descent methods for accelerated non-convex optimization. In International
+  Joint Conferences on Artificial Intelligence, pages 3258–3266, 2020.
+
+Zhengyuan Zhou, Panayotis Mertikopoulos, Nicholas Bambos, Stephen Boyd, and Peter W Glynn.
+  Stochastic mirror descent in variationally coherent optimization problems. Advances in Neural
+  Information Processing Systems, 30:7040–7049, 2017.
+
+
+
+
+                                              16
+           O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+
+Appendix A. Proof of Lemma 1
+                                                                        η
+Proof By the choice of αt , there exists some η > 0 such that c1 αt ≥ t1−θ for all t ≥ 1. We shall
+make use of the elementary inequality
+
+                                         (t + 1)1−ε ≤ t1−ε + (1 − ε)t−ε ,                                         (25)
+
+which can be proved, for instance, as follows. Let g(x) = x1−ε . Then g 0 (x) = (1 − ε)x−ε is
+decreasing. By the mean value theorem,
+
+                             (t + 1)1−ε − t1−ε = g 0 (ξ) ≤ g 0 (t) = (1 − ε)t−ε ,
+
+where ξ ∈ (t, t + 1), which implies inequality (25). Multiplying (6) with (t + 1)1−ε and applying
+inequality (25) lead to
+
+       E[(t + 1)1−ε Yt+1 | Ft ] ≤ (t + 1)1−ε (1 − c1 αt )Yt + c2 (t + 1)1−ε αt2
+                                   1−ε             −ε
+                                                               η 
+                                ≤ t     + (1 − ε)t        1 − 1−θ Yt + c2 (t + 1)1−ε αt2
+                                                             t
+                                        1−ε              η  1−ε
+                                = 1+               1 − 1−θ t Yt + c2 (t + 1)1−ε αt2
+                                           t            t
+                                                                   
+                                        1−ε        η       η(1 − ε) 1−ε
+                                = 1+          − 1−θ −                 t Yt + c2 (t + 1)1−ε αt2 .
+                                          t      t           t2−θ
+                                                     η   η(1−ε)       η
+Clearly, as t → ∞, the dominating term in 1−ε  t − t1−θ − t2−θ is − t1−θ . Hence, there exists some
+T > 1 sufficiently large such that, for all t ≥ T ,
+                                                                  η
+                  E[(t + 1)1−ε Yt+1 | Ft ] ≤ t1−ε Yt −                   t1−ε Yt + c2 (t + 1)1−ε αt2 .
+                                                                 2t1−θ
+                              η                                             1
+With Ŷt = t1−ε Yt , Xt = 2t1−θ  t1−ε Yt , Zt = c2 (t + 1)1−ε αt2 = Θ t1+ε−2θ
+                                                                                
+                                                                                  , and γt = 0, the
+                      P∞1 are met for all t ≥T with Ŷt in place of 1−ε
+conditions of Proposition
+ 1−ε Y converges and
+                                                                     Yt . By Proposition 1, we have
+tP    t                  t=T X t < ∞  almost  surely. We must have t     Yt → 0 almost surely, since
+   ∞     η
+   t=T 2t1−θ = ∞.  The  conclusion follows.
+
+
+Appendix B. Proof of Lemma 2
+Proof Note that w1 = 2 and Y2 = Y1 . Since αt is monotonically decreasing, wt ∈ [0, 1] for
+t ≥ 2. It follows that, for each t ≥ 2, Yt is a weighted average of all numbers in {X1 , · · · , Xt−1 }.
+Furthermore, by (7) we have
+                                   t
+                                   X                t−1
+                                                    X
+                            Yt+1         α i = Yt         αi − αt Yt + 2αt Xt ,      t ≥ 1.                       (26)
+                                   i=1              i=1
+               Pt−1
+Let Ŷt = Yt i=1                                                                 P of Yt , −αt Yt in
+                    αi . Then conditions of Proposition 1 are met with Ŷt in place
+place of Yt , and 2α2 Xt in place of Zt . It follows from Proposition 1 that Yt+1 ti=1 αi converges2
+ 2. While no random sequences are involved here, Proposition 1 is still applicable with almost sure convergence replaced
+    by convergence. A direct proof is possible using the monotone convergence theorem for real numbers.
+
+
+                                                            17
+                                                         L IU Y UAN
+
+
+
+      P∞                             P∞          αt                   P∞
+and    t=1 αt Yt        < ∞. Since         t=1 Pt−1 αi      = ∞,         t=1 αt Yt      < ∞, and limt→∞ Pααt Yt t         =
+                                                   i=1                                                            t−1 α
+        Pt−1                                                                                                      i=1 i
+limt→∞Yt  i=1αi exists, we must this limit equal 0 by the limit comparison test for series. Hence
+         1
+Yt = o Pt−1 α . The other part of the conclusion follows by noting min1≤i≤t−1 Xi ≤ Yt , because
+              i=1   i
+Yt is a weighted average of {X1 , · · · , Xt−1 }.
+
+
+
+Appendix C. Proof of Theorem 4
+Proof of Claim 1: It is straightforward to verify by definition that it is a martingale. It is well known
+(see, e.g., (Williams, 1991, Theorem 12.1)) that Mt is bounded in L2 if and only if
+                                           ∞
+                                           X
+                                                 E[kMt − Mt−1 k2 ] < ∞.
+                                           t=1
+
+The latter is verified by
+      ∞
+      X                              ∞
+                                     X
+            E[kMt − Mt−1 k2 ] =            αt2 (E kgt k2 − E k∇f (xt )k2 )
+      t=1                            t=1
+                                     ∞
+                                     X           h                                             i
+                                                                  ∗                        2
+                                 ≤         αt2    A(E[f (xt )] − f ) + (B − 1) E k∇f (xt )k + C ,                     (27)
+                                     t=1
+
+where we used Assumption 3. Following the same argument as in the proof of Theorem 2, except
+that we take expectation
+                 P∞ on all the inequalities  involved,Pwe can show that E[f (xt )] − f ∗ converges
+as t → ∞ and t=1 αt E k∇f (xt )k < ∞. Since ∞
+                                      2                      2
+                                                        t=1 αt < ∞, we have αt P    → 0 as t →
+0. By comparing the series on the right-hand   side of (27) with convergent series ∞         2
+                                                                                        t=1 αt and
+P  ∞                  2                   P∞                   2
+   t=1 αt E k∇f (xt )k , we conclude that  t=1 E[kMt − Mt−1 k ] < ∞.
+Proof of Claim 2: By L-smoothness of f , we have
+
+                 t                                         t                                         t
+                 X                                         X             Lβ X
+                     kαi (∇f (xi ) − ∇f (zi ))k ≤     αi L kxi − zi k =             αi kvi k                          (28)
+                                                                        1−β
+                 i=1                              i=1                           i=1
+                                                         v        v
+                                                         u t      u t
+                                                   Lβ u    X uX
+                                                ≤        t      2
+                                                               αi t     kvi k2 .                                      (29)
+                                                  1−β
+                                                                      i=1             i=1
+
+                                                                        P∞                  2
+It follows that Nt converges almost surely, provided that                   t=1 kvt k           < ∞ almost surely. To show
+the latter, recall (21) as
+              h                          i
+            Et f (zt+1 ) − f ∗ + kvt+1 k2 ≤ (1 + c6 αt2 )[f (zt ) − f ∗ + kvt k2 ] − (1 − λ) kvt k2
+                                                         − cαt k∇f (zt )k2 + c4 αt2 ,                                 (30)
+                                                                  P∞              2
+where c6 = max(c1 , c2 ). Proposition 1 implies that                  t=1 kvt k       < ∞ almost surely.
+
+                                                             18
+           O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+
+Appendix D. Proof of Theorem 5
+Lemma 4 Suppose that Yt is a sequence of nonnegative random    variables that are adapted to a
+filtration {Ft }. Let {αt } be a sequence chosen as αt = Θ 2 +ε (for t ≥ 1), where ε ∈ (0, 13 ). If
+                                                            1
+                                                                             t3
+
+                                   E[Yt+1 | Ft ] ≤ (1 + c1 αt2 )Yt + c2 αt2 ,                                            (31)
+                                            P∞                                                                    
+                                                                                                            1
+for some constants c1 , c2 > 0 and               t=1 αt Yt < ∞ almost surely, then Yt = O                   1          almost
+                                                                                                          t 3 −ε
+surely.
+
+Proof Suppose that
+                                            η1                  η2
+                                            2      ≤ αt ≤       2      ,   ∀t ≥ 1,
+                                              +ε                  +ε
+                                       t    3               t   3
+
+                                                                                                  1
+with some positive constants η1 and η2 . Multiplying both sides of (31) by (1 + t) 3 −ε leads to
+            1                           1                                          1
+Et [(1 + t) 3 −ε Yt+1 | Ft ] ≤ (1 + t) 3 −ε (1 + c1 αt2 )Yt + c2 (1 + t) 3 −ε αt2
+                                                           
+                                  1
+                                    −ε      1          − 2
+                                                           −ε                                 1
+                             ≤ t3 +             −ε t 3          (1 + c1 αt2 )Yt + c2 (1 + t) 3 −ε αt2
+                                            3
+                                                                 
+                                         2 31 −ε           1           2                                  1
+                             = (1 + c1 αt )t       Yt +      − ε t− 3 −ε (1 + c1 αt2 )Yt + c2 (1 + t) 3 −ε αt2
+                                                           3
+                                                                                                                1
+                                                                                                c2 η22 (1 + t) 3 −ε
+                                                                              
+                                         2 31 −ε              2         1         − 32 −ε
+                             ≤ (1 + c1 αt )t       Yt + (c1 η2 + 1)       −ε t            Yt + 1+3ε         1
+                                                                        3                       t         t 3 −ε
+                                              1                       c4
+                             ≤ (1 + c1 αt2 )t 3 −ε Yt + c3 αt Yt + 1+3ε ,
+                                                                    t
+                                                                           √
+where we can take c3 = (c1 η22 + 1) 13 − ε /η1 and c4 = c2 η22 3 2. Recall that ∞
+                                                                                              P
+                                                                                                  t=1 αt Yt < ∞.
+                                    1
+                                      −ε                                                             c4
+Applying Proposition 1 with t 3 Yt in place of Yt , Xt = 0, and Zt = c3 αt Yt + t1+3ε                   , we have
+P∞                      1
+                          −ε
+   t=1 Zt < ∞ and t          Yt converges almost surely. The conclusion follows.
+                        3
+
+
+
+   With this lemma, we are ready to present the proof of Theorem 5.
+Proof 1) We show the proof for SGD first. By smoothness of f and (2), we have
+
+                                                                                  Lαt2
+                            f (xt+1 ) ≤ f (xt ) − αt h∇f (xt ), gt i +                 kgt k2 .
+                                                                                   2
+Taking conditional expectation w.r.t. xt , denoted by Et [·] := E[·|xt ], leads to
+
+                                                            Lαt2 h                                      i
+Et [f (xt+1 ) − f ∗ ] ≤ f (xt ) − f ∗ − αt k∇f (xt )k2 +          A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C
+                                                           2
+                               LAαt2                             LBαt2                   LCαt2
+                                                                        
+                      ≤ (1 +                         ∗
+                                       )(f (xt ) − f ) − αt −             k∇f (xt )k2 +
+                                 2                                 2                       2
+                               LAαt  2                    1                  LCαt   2
+                      ≤ (1 +           )(f (xt ) − f ∗ ) − αt k∇f (xt )k2 +           ,              (32)
+                                 2                        2                     2
+provided that LBαt ≤ 1.
+
+                                                            19
+                                             L IU Y UAN
+
+
+
+
+   Let x∗ be a minimizer, i.e., f (x∗ ) = f ∗ . We have
+
+
+                   kxt+1 − x∗ k2 = kxt − x∗ k2 − 2αt hgt , xt − x∗ i + αt2 kgt k2 .
+
+
+Take conditional expectation w.r.t. xt from both side. By convexity of f , we obtain
+
+    h             i
+  Et kxt+1 − x∗ k2 = kxt − x∗ k2 − 2αt h∇f (xt ), xt − x∗ i
+                             h                                      i
+                        + αt2 A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C
+                                                                         
+                                2                    ∗    1             2
+                    ≤ kxt − x∗ k − 2αt f (xt ) − f +         k∇f (xt )k
+                                                         2L
+                             h                                      i
+                        + αt2 A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C
+                                                                              
+                                                                    1
+                                2               2            ∗
+                    = kxt − x∗ k − (2αt − Aαt )(f (xt ) − f ) −       αt − Bαt k∇f (xt )k2
+                                                                             2
+                                                                    L
+                           + αt2 C
+                      ≤ kxt − x∗ k2 − αt (f (xt ) − f ∗ ) + αt2 C,                                 (33)
+
+
+provided that Aαt ≤ 1, in addition to LBαt ≤ 1.
+    By (32) and Proposition 1, ∞      αt k∇f (xt )k2 < ∞ almost surely and f (xt ) converges almost
+                               P
+                                  t=1 P
+surely. By (33) and PropositionP1, ∞                        ∗
+                                         t=1 αt (f (xt ) − f ) < ∞ almost surely and kxt+1 − x k
+                                                                                                   ∗
+
+converges almost surely. Since ∞                                                ∗
+                                    t=1 αt = ∞, we have f (xt ) converges to f almost surely. By
+                                        ∗
+almost sure convergence of kxt+1 − x k, {xt } almost surely has a convergent subsequence. The
+limit of this subsequence, denoted by x(ω) must satisfy f (x(ω)) = f ∗ . Hence x(ω) is also a
+minimizer. Since the choice of minimizer in (33) is arbitrary, we must have xt converges almost
+surely to some random variable. It follows that ∇f (xt ) exists almost andP
+                                                                          the limit must be 0 (either
+                                                                            ∞                2
+    P∞ the fact that the limit of xt is a minimizer almost surely or that t=1 αt k∇f (xt )k < ∞
+by using
+and t=1 αt = ∞).
+   We now derive a concrete convergence rate for f (xt ) − f ∗ . Let Yt = f (xt ) − f ∗ . By (32) (and
+dropping the term − 21 αt k∇f (xt )k2 ), (31) of Lemma 4 holds with c1 = LA                  LC
+                                                                             2 and c2 = 2 . The
+conclusion follows from that of Lemma 4.
+   2) We now prove the case for SHB. Recall (21) as
+
+          h                          i
+        Et f (zt+1 ) − f ∗ + kvt+1 k2 ≤ (1 + c6 αt2 )[f (zt ) − f ∗ + kvt k2 ] − (1 − λ) kvt k2
+                                             − cαt k∇f (zt )k2 + c4 αt2 ,                          (34)
+
+                                                                        P∞           2                 ∗
+where c6 = max(c
+              P 1 , c2 ) defined in2 (21). Proposition 1 implies that       t=1 kvt k < ∞, f (zt ) − f
+converges, and ∞
+               t=1 αt k∇f (zt )k < ∞, almost surely.
+
+
+                                                  20
+         O N A LMOST S URE C ONVERGENCE R ATES OF S TOCHASTIC G RADIENT M ETHODS
+
+
+
+
+   Similar to (33), by convexity of f and iterates of SHB in (16), we obtain
+  h             i                 2αt
+Et kzt+1 − x∗ k2 = kzt − x∗ k2 −       h∇f (xt ), zt − x∗ i
+                                 1−β
+                          h                                      i
+                     + αt2 A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C
+                                     2αt                           2αt
+                    = kzt − x∗ k2 −        h∇f (zt ), zt − x∗ i +       h∇f (zt ) − f (xt ), zt − x∗ i
+                                    1−β                           1−β
+                              h                                       i
+                        + αt2 A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C
+                                                                                β 2 L2
+                                                                        
+                                                           1
+                    ≤ kzt − x∗ k2 − 2αt f (zt ) − f ∗ +       k∇f (zt )k2 +              kvt k2
+                                                          2L                  (1 − β)4
+                                                h                                       i
+                        + αt2 kzt − x∗ k2 + αt2 A(f (xt ) − f ∗ ) + B k∇f (xt )k2 + C
+                    ≤ (1 + αt2 ) kzt − x∗ k2 − (2αt − c7 αt2 )(f (zt ) − f ∗ )
+                                          
+                             1
+                        −       αt − c8 αt2 k∇f (zt )k2 + c9 kvt k2 + αt2 C,                      (35)
+                            L
+
+where c7 , c8 , and c9 are some positive constants. The first inequality above follows from convexity
+of f , L-Lipschitzness of ∇f , and the elementary inequality 2ha, bi ≤ kak2 + kbk2 . The second
+inequality follows from (19). By (35), choosing αt sufficiently small leads to
+      h               i
+  Et kzt+1 − x∗ k2 ≤ (1 + αt2 ) kzt − x∗ k2 − αt (f (zt ) − f ∗ + kvt k2 ) + c10 kvt k2 + αt2 C, (36)
+                                                                            P∞
+where αt + c9 ≤ c10 . Since ∞                 2                                                 ∗
+                                  P
+                                     t=1 kvt k < ∞, Proposition 1 implies    t=1 αt (f (zt ) − f +
+     2                         2
+kvt k ) < ∞ and kzt − x∗ k converges almost surely. By a similar argument as in the proof for
+SGD, we have zt converges to a minimizer almost surely. To obtain a concrete convergence rate, let
+Yt = f (zt ) − f ∗ + kvt k2 . By the choice of αt and Lemma 4, we have
+                                                                       
+                                                                    1
+                               Yt = f (zt ) − f ∗ + kvt k2 = O     1      .
+                                                                 t 3 −ε
+From (19) and the fact that
+                                  k∇f (zt )k2 ≤ 2L(f (zt ) − f ∗ ),
+we obtain                                                      
+                                               ∗            1
+                                    f (xt ) − f = O    1     .
+                                                     t 3 −ε
+   3) The case for SNAG is very similar in view of (24) and omitted.
+
+
+
+
+                                                   21
+

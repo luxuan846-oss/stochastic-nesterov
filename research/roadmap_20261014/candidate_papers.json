@@ -1,0 +1,201 @@
+[
+  {
+    "id": "FastKM",
+    "arxiv_id": "2206.09462",
+    "doi": null,
+    "title": "Fast Krasnoselskii-Mann Algorithm with a Convergence Rate of the Fixed Point Iteration of o(1/k)"
+  },
+  {
+    "id": "FastOGDA",
+    "arxiv_id": "2203.10947",
+    "doi": null,
+    "title": "Fast Optimistic Gradient Descent Ascent (OGDA) Method in Continuous and Discrete Time"
+  },
+  {
+    "id": "VFKM",
+    "arxiv_id": "2406.02413",
+    "doi": null,
+    "title": "Variance-Reduced Fast Krasnoselskii-Mann Methods for Finite-Sum Root-Finding Problems"
+  },
+  {
+    "id": "AFP",
+    "arxiv_id": "2512.13547",
+    "doi": null,
+    "title": "A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles and Its Applications"
+  },
+  {
+    "id": "iKM",
+    "arxiv_id": "2609.28543",
+    "doi": null,
+    "title": "Stochastic Inertial Krasnosel'skii-Mann Iteration Achieves Near-Optimal Sample Complexity"
+  },
+  {
+    "id": "BC",
+    "arxiv_id": "2208.04193",
+    "doi": null,
+    "title": "Stochastic Fixed-Point Iterations for Nonexpansive Maps: Convergence and Error Bounds"
+  },
+  {
+    "id": "BContr",
+    "arxiv_id": "2403.12338",
+    "doi": null,
+    "title": "Stochastic Halpern iteration in normed spaces and applications to reinforcement learning"
+  },
+  {
+    "id": "Cortild",
+    "arxiv_id": "2604.22581",
+    "doi": null,
+    "title": "Stochastic Krasnoselskii-Mann Iterations: Convergence without Uniformly Bounded Variance"
+  },
+  {
+    "id": "Dual",
+    "arxiv_id": "2609.36033",
+    "doi": null,
+    "title": "Dual-Anchor Acceleration Is Near-Optimal for Stochastic Monotone Root-Finding"
+  },
+  {
+    "id": "Shehu",
+    "arxiv_id": "2610.00295",
+    "doi": null,
+    "title": "Adaptivity, Anchoring, and the Exact Oracle Complexity of Stochastic Fixed-Point Iterations"
+  },
+  {
+    "id": "Hermant",
+    "arxiv_id": "2410.07870",
+    "doi": null,
+    "title": "Gradient correlation is a key ingredient to accelerate SGD with momentum"
+  },
+  {
+    "id": "Salzo",
+    "arxiv_id": "2511.12665",
+    "doi": null,
+    "title": "The iterates of FISTA converge even under inexact computations and stochastic gradients"
+  },
+  {
+    "id": "Kim",
+    "arxiv_id": "2609.15257",
+    "doi": null,
+    "title": "Improving the Last-Iterate Guarantees of Anytime Algorithms for Stochastic Monotone Variational Inequalities"
+  },
+  {
+    "id": "CP",
+    "arxiv_id": "1404.7536",
+    "doi": null,
+    "title": "Stochastic Quasi-Fejer Block-Coordinate Fixed Point Iterations with Random Sweeping"
+  },
+  {
+    "id": "InexactKM",
+    "arxiv_id": "1705.09340",
+    "doi": null,
+    "title": "Rates of convergence for inexact Krasnoselskii-Mann iterations in Banach spaces"
+  },
+  {
+    "id": "Ravine",
+    "arxiv_id": "2403.04860",
+    "doi": null,
+    "title": "The stochastic Ravine accelerated gradient method with general extrapolation coefficients"
+  },
+  {
+    "id": "Sebbouh",
+    "arxiv_id": "2006.07867",
+    "doi": null,
+    "title": "Almost sure convergence rates for Stochastic Gradient Descent and Stochastic Heavy Ball"
+  },
+  {
+    "id": "Park",
+    "arxiv_id": "2201.11413",
+    "doi": null,
+    "title": "Exact Optimal Accelerated Complexity for Fixed-Point Iterations"
+  },
+  {
+    "id": "VRHalpern",
+    "arxiv_id": "2203.09436",
+    "doi": null,
+    "title": "Stochastic Halpern Iteration with Variance Reduction for Stochastic Monotone Inclusions"
+  },
+  {
+    "id": "GeneralizedFKM",
+    "arxiv_id": null,
+    "doi": "10.1093/imanum/drag042",
+    "title": "Fast Krasnoselskii-Mann method with overrelaxation and preconditioners"
+  },
+  {
+    "id": "GEAG",
+    "arxiv_id": null,
+    "doi": "10.1137/24M1703562",
+    "title": "Extragradient Method with Flexible Anchoring: Strong Convergence and Fast Residual Decay"
+  },
+  {
+    "id": "HeavyBall",
+    "arxiv_id": null,
+    "doi": "10.3934/dcds.2026035",
+    "title": "Long-time analysis of stochastic heavy ball dynamics for convex optimization and monotone equations"
+  },
+  {
+    "id": "Lieder",
+    "arxiv_id": null,
+    "doi": "10.1007/s11590-020-01617-9",
+    "title": "On the convergence rate of the Halpern-iteration"
+  },
+  {
+    "id": "LiuYuan",
+    "arxiv_id": "2202.04295",
+    "doi": null,
+    "title": "On Almost Sure Convergence Rates of Stochastic Gradient Methods"
+  },
+  {
+    "id": "VFOSA",
+    "arxiv_id": null,
+    "doi": null,
+    "title": "VFOSA: Variance-Reduced Fast Operator Splitting Algorithms for Generalized Equations"
+  },
+  {
+    "id": "EAG",
+    "arxiv_id": "2102.07922",
+    "doi": null,
+    "title": "Accelerated Algorithms for Smooth Convex-Concave Minimax Problems with O(1/k^2) Rate on Squared Gradient Norm"
+  },
+  {
+    "id": "Lee",
+    "arxiv_id": "2502.04477",
+    "doi": null,
+    "title": "Near-Optimal Sample Complexity for MDPs via Anchoring"
+  },
+  {
+    "id": "Foster",
+    "arxiv_id": "1902.04686",
+    "doi": null,
+    "title": "The Complexity of Making the Gradient Small in Stochastic Convex Optimization"
+  },
+  {
+    "id": "VFOG",
+    "arxiv_id": "2508.16791",
+    "doi": null,
+    "title": "New Accelerated Past-Extragradient Methods with Variance Reduction for Generalized Equations"
+  },
+  {
+    "id": "DirectDual",
+    "arxiv_id": "2608.12043",
+    "title": "Direct Acceleration of Stochastic Root-Finding Without Variance Reduction and Regularization"
+  },
+  {
+    "id": "HighProb",
+    "arxiv_id": "2607.09097",
+    "title": "Solving Stochastic Fixed-Point Equations with High Probability"
+  },
+  {
+    "id": "NormedOracle",
+    "arxiv_id": "2609.09524",
+    "title": "Oracle Complexity of Stochastic Fixed-Point Equations with Nonexpansive Maps"
+  },
+  {
+    "id": "CPII",
+    "arxiv_id": "1704.08083",
+    "title": "Stochastic Quasi-Fejer Block-Coordinate Fixed Point Iterations With Random Sweeping II: Mean-Square and Linear Convergence"
+  },
+  {
+    "id": "ContrerasOpt",
+    "arxiv_id": "2108.10969",
+    "title": "Optimal error bounds for nonexpansive fixed-point iterations in normed spaces"
+  }
+]

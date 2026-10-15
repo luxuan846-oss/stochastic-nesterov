@@ -1,0 +1,2615 @@
+                                          MATHEMATICS OF OPERATIONS RESEARCH
+                                          Vol. 00, No. 0, Xxxxx 0000, pp. 000–000
+                                                                                                                                              INFORMS
+                                                                                                                                        doi 10.1287/xxxx.0000.0000
+                                          issn 0364-765X | eissn 1526-5471 | 00 | 0000 | 0001                                                    © 0000 INFORMS
+
+
+
+                                               Authors are encouraged to submit new papers to INFORMS journals by means of
+                                               a style file template, which includes the journal title. However, use of a template
+                                               does not certify that the paper has been accepted for publication in the named jour-
+                                               nal. INFORMS journal templates are for the exclusive purpose of submitting to an
+                                               INFORMS journal and should not be used to distribute the papers in print or online
+                                               or to submit the papers to another publication.
+
+
+                                          Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods
+
+
+
+
+arXiv:2406.02413v4 [math.OC] 9 Sep 2026
+                                                 for Finite-Sum Root-Finding Problems
+                                                                                                Quoc Tran-Dinh
+                                                                              Department of Statistics and Operations Research
+                                                   The University of North Carolina at Chapel Hill (UNC), 318-Hanes Hall, Chapel Hill, NC 27599-3260, USA.
+                                                                                            quoctd@email.unc.edu
+
+
+                                                We develop a new class of fast Krasnosel’skiǐ-Mann methods with variance reduction to solve a finite-sum
+                                               cocoercive equation Gx = 0. Our algorithm is single-loop and leverages a new family of unbiased variance-
+                                               reduced estimators specifically designed for a wider class of root-finding algorithms. Our method achieves
+                                               both O(1/k2 ) and o(1/k2 ) last-iterate convergence rates in terms of E[∥Gxk ∥2 ], where k is the iteration
+                                               counter and E[·] is the total expectation. We also establish almost-sure o(1/k2 ) convergence rates and the
+                                               almost-sure convergence of iterates {xk } to a solution of Gx = 0. We instantiate our framework for two
+                                               prominent estimators: SVRG and     SAGA. By an appropriate choice of parameters, both variants attain an
+                                               oracle complexity of O n + n2/3 ϵ−1 to reach an ϵ-solution, where n denotes the number of summands in
+                                               the finite-sum operator G. Furthermore, under σ-strong quasi-monotonicity,       our method achieves a linear
+                                               convergence rate and an oracle complexity of O n + max{n, n2/3 κ} log( 1ϵ ) , where κ := L/σ. We extend our
+                                                                                                                            
+                                               approach to solve a class of finite-sum inclusions (possibly nonmonotone), demonstrating that our schemes
+                                               retain the same theoretical guarantees as in the equation setting. Finally, numerical experiments demonstrate
+                                               that our methods exhibit promising performance compared with state-of-the-art methods.
+                                               Key words : Variance reduction method; fast Krasnosel’skiǐ-Mann method; Nesterov’s accelerated method;
+                                                 finite-sum cocoercive equation; finite-sum inclusion.
+                                               MSC2000 subject classification : 90C25, 90C06, 90-08
+                                               OR/MS subject classification : Operations research; mathematical programming; game theory
+
+
+
+                                            1. Introduction. This paper develops and analyzes a new class of stochastic fast Kras-
+                                          nosel’skiǐ–Mann (KM) methods with variance reduction for approximating solutions of finite-
+                                          sum “cocoercive” equations, as well as their application to finite-sum composite inclusions.
+                                            1.1. Problem statement. Our first goal in this paper is to solve the following finite-sum
+                                          “cocoercive” equation using novel stochastic variance reduction methods:
+                                                                                                                 Pn
+                                                            Find x⋆ ∈ Rp such that: Gx⋆ = 0, where Gx := n1 i=1 Gi x.                  (CE)
+                                          Here, Gi : Rp → Rp are single-valued mappings for all i ∈ [n] := {1, · · · , n} and n ≥ 1. Following the
+                                          existing literature, such as [30], we call (CE) a root-finding problem.
+                                            Equation (CE) can be rewritten equivalently as the following fixed-point problem:
+                                                                                       Find x⋆ ∈ Rp such that: x⋆ = F x⋆ ,                                   (FP)
+                                          where F x := x − λGx for any given λ > 0. Note that when λ = L2 , G in (CE) is L1 -cocoercive (see
+                                                                                                                                           p
+                                          Assumption 1 below) if and only if F is nonexpansive, i.e., ∥F x − F y ∥ ≤ ∥x − y ∥ for all x, y ∈ R
+                                          [10, Proposition 4.11]. Since the two formulations are equivalent, methods for solving (FP) can be
+                                          applied to solve (CE) and vice versa. In this work, we focus on the root-finding problem (CE).
+                                            Throughout this paper, we make the following assumption on (CE).
+
+                                                                                                        1
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+2                                              Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+  Assumption 1. (a) Equation (CE) has a solution, i.e., zer(G) := {x⋆ ∈ Rp : Gx⋆ = 0} ̸= ∅.
+(b) The mappings Gi , i ∈ [n], satisfy the following “cocoercivity-type” condition: There exists L ∈
+   (0, +∞) such that for all x, y ∈ Rp , we have
+                      1
+                        Pn                               Pn
+                                                       1 1                    2
+                                                                                
+                      n    i=1 ⟨Gi x − Gi y, x − y ⟩ ≥ L n  i=1 ∥Gi x − Gi y ∥ ,                 (1)
+Note that (1) implies the L1 -cocoercivity of G, i.e., ⟨Gx − Gy, x − y ⟩ ≥ L1 ∥Gx − Gy ∥2 . Conversely, if
+G is L1 -cocoercive, then it may not satisfy (1). However, if every Gi is L1 -cocoercive for i ∈ [n], then
+G satisfies (1). Thus (1) is stronger than the L1 -cocoercivity of G but weaker than the L1 -cocoercivity
+of all the summands Gi .
+   Assumption 1(b) is not new. It can be viewed as a generalization of the L1 -average cocoercive
+property in finite-sum
+                 Pn       convex optimization when Gi = ∇fi , which is equivalent to the L-average
+               1
+smoothness: n i=1 ∥∇fi (x) − ∇fi (y)∥2 ≤ L2 ∥x − y ∥2 for all x, y ∈ Rp . This average smoothness
+condition has been widely used in optimization and is slightly different from the expected smooth-
+ness condition considered in [40, 58]. If we fix y := x⋆ ∈ zer(G), then (1) reduces to a special case
+of [58, Assumption 3.3] for the finite-sum setting.
+   1.2. Proposed method. The classical Krasnosel’skiǐ-Mann (KM) fixed-point iteration was
+independently developed by M. A. Krasnosel’skiǐ [54] and W. R. Mann [61] to approximately solve
+(FP) when F is nonexpansive. More specifically, it can be expressed as follows: Starting from an
+initial point x0 ∈ Rp , at each iteration k ≥ 0, it updates
+                                        xk+1 := (1 − αk )xk + αk F xk ,                                       (KM)
+where αk ∈ (0, 1) is a given averaging parameter (e.g., α = 21 ) satisfying appropriate conditions.
+   If we substitute F = I − L2 G into (KM) to solve (CE), we obtain xk+1 = xk − 2αLk Gxk , which
+can be viewed as a forward/gradient-type scheme, see, e.g., [34]. The best convergence rate for
+                               k      k 2                                  k 2
+           residual norm ∥x − F x ∥ in (KM) (or, equivalently, ∥Gx ∥ in the forward scheme)
+the squared                                                                                    
+is O 1/k , see, e.g., [26]. This rate is suboptimal and significantly slower than the O 1/k 2 rate,
+which was proven to be optimal in [67] for first-order methods to solve (CE) under Assumption 1.
+   To boost convergence rates of (KM), one can either apply Halpern’s fixed-point iteration, as in
+[32, 41, 57], or Nesterov’s acceleration, as in [8, 15, 77]. The authors in [15] proposed discretizing
+a second-order ordinary differential equation (ODE) associated with F , leading to the following
+scheme: Starting from x0 ∈ Rp , at each iteration k ≥ 0, it updates
+          xk+1 := (1 − sτ2k )xk + (1 − s)τk (xk − xk−1 ) + sτ2k F xk + sτk (F xk − F xk−1 ),                (FKM)
+                              r
+where s ∈ (0, 1] and τk := k+r   with r > 2 are given parameters. This scheme is called the fast KM
+iteration. Note that (FKM) is equivalent to Nesterov’s    accelerated  algorithm in [77] applied to F =
+I − L2 G. Both [77] and [15] proved faster O 1/k 2 and o 1/k 2 convergence rates for deterministic
+                                                                 
+
+fast KM methods compared to the non-accelerated scheme (KM).
+   Our method in this paper builds on deterministic Nesterov’s accelerated KM methods from our
+recent work [77] for the cocoercive equation (CE) and (FKM) from [15] for the fixed-point problem
+(FP). More specifically, the method in [77, Theorem 2] can be written in the following form after
+eliminating the iterate y k : Given x0 ∈ Rp , set x−1 := x0 , and at each iteration k ≥ 0, it updates
+                 xk+1 := xk + θk (xk − xk−1 ) − ηk S k ,     where     S k := Gxk − γk Gxk−1 ,                   (2)
+where θk ∈ (0, 1) is an inertial or a momentum parameter, ηk > 0 is a given stepsize, and γk ∈ (0, 1)
+is a given correction parameter.
+   Since we aim to solve large finite-sum instances of (CE) (i.e., when n ≫ 1), for which evaluat-
+ing S k exactly is often costly or even infeasible, we approximate S k using a stochastic unbiased
+estimator Sek with variance reduction.
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                              3
+
+   Our method. Having Sek , we propose the following method to solve (CE): Given x0 ∈ dom(G),
+we set x−1 := x0 and at each iteration k ≥ 0, we construct an unbiased variance-reduced estimator
+Sek of S k := Gxk − γk Gxk−1 and then update
+                                       xk+1 := xk + θk (xk − xk−1 ) − ηk Sek ,                            (VFKM)
+where θk ∈ (0, 1), ηk > 0, and γk ∈ (0, 1) are given, determined later, and Se0 := S 0 .
+  Our method (VFKM) uses three parameters θk , ηk , and γk . However, we do not explicitly specify
+their forms here or the construction of Sek to avoid repetition. Section 2 presents the construction
+of Sek . Sections 3 and 4 provide explicit update rules for θk , ηk , and γk , and then analyze the
+convergence of (VFKM) for two different cases, respectively: without strong quasi-monotonicity
+and with strong quasi-monotonicity.
+   1.3. Applications to finite-sum inclusions. Our second goal in this paper is to extend our
+method (VFKM) to solve the following finite-sum inclusion:
+                            Find u⋆ ∈ dom(Ψ) such that: 0 ∈ Ψu⋆ := Gu⋆ + T u⋆ ,                                 (NI)
+                  Pn                                                                                        p
+where Gu := n i=1 Gi u as in (CE) and each Gi is L1g -cocoercive for i ∈ [n], and T : Rp ⇒ 2R is a
+                1
+
+maximally ν-co-hypomonotone operator, i.e., there exists ν ≥ 0 such that ⟨x − y, u − v ⟩ ≥ −ν ∥x − y ∥2
+                                          p
+for all (u, x), (v, y) ∈ gra(T ), where 2R is the set of all subsets of Rp and gra(T ) is the graph of T
+(see Section 5 for more details). Note that the operator defining (NI) is not necessarily monotone
+as shown in Section 5.
+Special cases of (NI). If T is monotone, then problem (NI) becomes a classical monotone inclu-
+sion, which has been widely studied in the literature; see, e.g., [10, 73]. This formulation (NI) also
+covers the optimality conditions of finite-sum composite minimization and minimax optimization,
+as well as [mixed] variational inequality problems (VIPs), including Nash equilibrium models; see,
+e.g., [34]. We provide three examples below to illustrate the generality of (NI).
+  Example 1. Consider the following finite-sum composite minimization problem, which commonly
+arises in machine learning applications such as linear and logistic regression (see, e.g., [35]):
+                                                       Pn
+                         minp ϕ(u) := f (u) + g(u) ≡ n1 i=1 fi (u) + g(u) ,
+                             
+                         u∈R
+                                                                                                  (3)
+where fi : Rp → R is convex and differentiable and g is proper, closed, and possibly nonconvex. The
+optimality condition of (3) is 0 ∈ ∇f (u⋆ ) + ∂g(u⋆ ), which is a special case of (NI) with Gi u = ∇fi (u)
+and T u = ∂g(u), the “abstract” subdifferential of g (see [72]).
+  Example 2. We consider the following finite-sum minimax optimization model, which often arises
+in robust and distributionally robust optimization, two-person zero-sum games, adversarial train-
+ing, and generative adversarial networks; see, e.g., [37, 55, 59, 80]:
+                                                                      Pn
+                        L(x, y) := f (x) + Φ(x, y) − g(y) ≡ f (x) + n1 i=1 Φi (x, y) − g(y) ,
+                       
+            min
+              p
+                 maxp                                                                         (4)
+           x∈R 1 y∈R 2
+
+where f and g are proper, closed, and possibly nonconvex functions, and Φ is convex-concave and
+differentiable. Let u := [x, y] be a concatenation of x and y. Then, the optimality condition of (4)
+is a special case of (NI) with Gi u := [∇x Φi (x, y), −∇y Φi (x, y)] and T u := [∂f (x), ∂g(y)].
+  Example 3. We consider the following mixed variational inequality problem (MVIP), which has
+a number of applications in mechanics, traffic networks, and Nash equilibria; see, e.g., [34]:
+                         Find u⋆ ∈ Rp such that: ⟨Gu⋆ , u − u⋆ ⟩ + g(u) − g(u⋆ ) ≥ 0,                            (5)
+where G is given in (NI) and g is a proper, closed, and convex function. In particular, if g = δX , the
+indicator of a convex set X , then (5) reduces to the classical Stampacchia variational inequality
+(VIP), see [34]. Clearly, (5) is a special case of (NI) with T u = ∂g(u).
+Our approach for (NI). Our approach to solve (NI) consists of the following two steps:
+               Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+4                                               Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+    • Step 1: We reformulate (NI) as (CE) via a backward-forward splitting (BFS) equation, similar
+      to [30]. However, since T is co-hypomonotone, we need to establish the relationship between
+      (NI) and this equation and verify Condition (1).
+    • Step 2: We apply (VFKM) to find an approximate solution of the BFS equation and then
+      recover the corresponding approximate solution of (NI).
+   1.4. Our contribution. Our main theoretical contributions, together with the proposed
+method (VFKM), are as follows:
+(a) In Section 2, we introduce a new class of unbiased variance-reduced estimators Sek for S k in
+    (VFKM), as defined in Definition 1. Within this class, we construct two specific estimators: one
+    based on the loopless SVRG method from [45, 53] and the other leveraging the SAGA estimator
+    from [31]. However, any estimator satisfying Definition 1 can be used in our   method (VFKM).
+                                                                                2
+(b) In Section 3, we establish that our
+                                        method (VFKM)       achieves an O 1/k last-iterate conver-
+    gence rate for E ∥Gxk ∥2 and E ∥xk+1 − xk ∥2 under Assumption 1, where k is the iteration
+    counter. We further prove o 1/k 2 convergence rates for these metrics. Additionally, we estab-
+    lish an almost-sure o (1/k 2 ) convergence rate for ∥Gxk ∥2 and ∥xk+1 − xk ∥2 , along with the
+    almost-sure convergence of the iterate sequence {xk } to a solution of (CE).
+(c) In Subsection 3.4, we present two variants of (VFKM) using our SVRG and SAGA          estimators.
+                                                    2/3 −1
+                                                                                                  
+    We show that both variants require O(n + n ϵ ) evaluations of Gi to achieve E ∥Gxk ∥2 ≤ ϵ2
+    for a given tolerance ϵ > 0. This yields an n1/3 factor improvement over deterministic accelerated
+    methods and a 1/ϵ factor improvement over non-accelerated stochastic methods.
+(d) In Section 4, we establish a linear convergence rate for (VFKM) under an additional σ-strong
+    quasi-monotonicity on (CE). When using our SVRG and        SAGA estimators, the method attains
+                                                2/3        −1
+    an oracle complexity of O n + max{n, n κ} log(ϵ ) , improving over deterministic counter-
+    parts by a factor of n1/3 whenever κ ≥ O n1/3 , where κ := Lσ .
+(e) We apply our method (VFKM) to solve a class of finite-sum inclusions (NI), which may be
+    nonmonotone, and derive a new variant with the same theoretical convergence rates and oracle
+    complexity bounds as in Section 3.
+Comparison with prior works. We now briefly compare our contributions with existing works
+to highlight key differences.
+ • First, our unbiased variance-reduced estimator Sek , including SVRG and SAGA, is specifically
+    designed for S k , not for Gxk . This differs from existing works such as [2, 3, 12, 14, 30, 33, 39,
+    49]. Note that [2, 3, 14, 30] only consider specific SVRG and/or SAGA estimators to directly
+    approximate Gxk , while [12, 33, 39, 49] cover a wide class of estimators, possibly including
+    SVRG and SAGA as special instances. In Subsection 2.1 below, we will further compare our
+    class of estimators with these related works.
+ • Second, our method (VFKM) is single-loop and uses simple operations, making it easier to
+    implement than double-loop or catalyst-based algorithms in [48, 81].
+ • Third, our convergence rates and oracle complexity estimates rely on the metric E ∥Gxk ∥2 or
+                                                                                                   
+
+    ∥Gxk ∥2 , which can be viewed as a type of Fukushima’s regularized gap function [36] for (CE).
+    This metric differs from recent results, e.g., [2, 3], that use a Nesterov’s gap or restricted gap
+    function from [64]. Note that for (CE), the standard Auslender gap function is degenerate.
+ • Fourth, our method achieves an O (1/k)-factor improvement over non-accelerated methods in
+    [2, 3, 30]. Additionally, we also establish almost-sure o 1/k 2 convergence rates and show that
+    the iterate sequence {xk } converges almost surely to a solution of (CE). To the best of our
+    knowledge, this is the first result on stochastic accelerated methods for root-finding problems.
+ • Finally, our complexity matches the best-known results in convex optimization using SAGA
+    or SVRG, without requiring enhancements such as restarting or nested strategies as in, e.g.,
+    [4, 86]. This complexity is better than deterministic accelerated methods by a factor n1/3 .
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                     5
+
+   1.5. Related work. Both (CE) and (NI) are well-studied in the literature (e.g., [10, 16, 34,
+70, 73, 74]). We focus on the most recent works relevant to our methods.
+   Accelerated methods. Nesterov’s accelerated methods have been applied to solve both (CE) and
+(NI) in [42, 51] and [8], followed by [1, 5, 6, 8, 24, 42, 50, 60, 67, 77]. Unlike convex optimization,
+extending these methods to (CE) and (NI) faces a fundamental challenge in constructing a suitable
+Lyapunov function. In convex optimization, the objective function serves this purpose, but it is
+absent in (CE) and (NI). This necessitates a different approach for (CE) and (NI) (see, e.g., [8, 60]).
+Our approach leverages similar ideas from dynamical systems as in [8, 60].
+   Alternatively, Halpern’s fixed-point iteration [41] has recently been proven to achieve better
+convergence rates (see [32, 57, 75]), matching Nesterov’s schemes. Starting with the seminal work
+[82], which extended Halpern’s iteration to the extragradient method, many subsequent works have
+exploited this idea for other methods (e.g., [19, 20, 56, 67, 76, 77, 78]). Recently, [77] established a
+connection between Nesterov’s and Halpern’s accelerations for solving (CE) with different schemes.
+Nevertheless, all of these results are primarily developed for deterministic methods.
+   Stochastic approximation methods. Stochastic methods for both (CE) and (NI) and their special
+cases have been extensively studied, e.g., in [46, 52, 69]. Some methods exploit mirror-prox and
+averaging techniques such as [46, 52], while others rely on projection or extragradient-type schemes
+(e.g., [13, 27, 44, 47, 62, 69, 83]). Many algorithms use standard Robbins-Monro stochastic approx-
+imation with large or increasing batch sizes to reduce the variance. Other works generalize the
+analysis to a broader class of algorithms (e.g., [12, 38, 58]), covering both standard stochastic and
+variance reduction methods. However, their complexity is generally worse than that of methods
+based on control variate techniques as in our work.
+   Variance reduction methods. Control variate variance reduction techniques are widely used in
+optimization, leading to the development of various estimators, including SAGA [31], SVRG [45],
+SARAH [65], and Hybrid-SGD [79]. These estimators have been adopted in methods for solving
+(CE) and (NI). For instance, [29, 30] proposed a SAGA-type method for (CE) and (NI), under
+“star” cocoercivity and strong quasi-monotonicity — assumptions closely related to our work.
+Nevertheless, our focus is on accelerated methods that achieve improved convergence rates and
+complexity. Similarly, [2, 3] employed SVRG estimators for methods related to (NI), but these
+algorithms are non-accelerated. Other relevant works include [14, 21, 23, 43, 66, 84], some of which
+focused on minimax problems or bilinear matrix games. More recently, variance-reduced methods
+based on Halpern’s fixed-point iteration have been explored (e.g., [17, 18]), leveraging SARAH to
+achieve improved complexity. While this approach offers advantages in certain settings, our work
+takes a different path by focusing on Nesterov’s acceleration combined with variance reduction
+techniques. In addition, we prove new and stronger convergence results compared to these papers.
+   1.6. Notation. We work with a finite-dimensional space Rp equipped with the standard inner
+product ⟨·, ·⟩ and norm ∥ · ∥. For a single-valued or multivalued operator F on Rp , dom(F ) := {x ∈
+Rp : F x ̸= ∅} denotes its domain, gra(F ) := {(x, z) ∈ dom(F ) × Rp : z ∈ F x} denotes its graph, and
+JF x := {u ∈ dom(F ) : x ∈ u + F u} denotes its resolvent. For a symmetric matrix X, λmin (X) and
+λmax (X) stand for the smallest and largest eigenvalues of X, respectively.
+   We use Fk to denote the σ-algebra generated by all the randomness arising from the algorithm,
+including x0 , · · · , xk , up to the iteration k before constructing Sek . Ek [·] = E[· | Fk ] denotes the
+conditional expectation with respect to Fk , and E[·] is the total expectation. We also use O (·),
+o (·), and Ω(·) to characterize convergence rates and oracle complexity as usual.
+   1.7. Paper organization. The rest of this paper is organized as follows. Section 2 introduces
+a new class of unbiased variance-reduced estimators for S k . We also construct two instances, based
+on SVRG and SAGA, and prove their key properties. Section 3 establishes sublinear convergence
+rates and oracle complexity of (VFKM). Section 4 proves a linear convergence rate of (VFKM)
+under strong quasi-monotonicity. Section 5 derives a new variant to solve (NI) and proves its con-
+vergence. Section 6 presents numerical experiments. Technical proofs are deferred to the appendix.
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+6                                              Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+   2. Unbiased Variance-Reduced Estimators for S k . Most existing variance reduction
+methods in the literature directly construct an estimator for Gxk . In this paper, we depart from
+those methods and construct a class of estimators Sek for the intermediate quantity S k = Gxk −
+γk Gxk−1 defined in (VFKM).
+   2.1. A class of stochastic variance-reduced estimators for S k . We introduce the fol-
+lowing class of unbiased variance-reduced estimators for S k in (VFKM).
+   Definition 1. For given {γk }, {xk }, and S k in (VFKM), let Fk denote the σ-algebra containing
+all the information generated by the algorithm up to iteration k before constructing Sek . A stochastic
+estimator Sek of S k , constructed using fresh randomness conditionally on Fk , is called a variance-
+reduced unbiased estimator of S k if there exist ρ ∈ (0, 1), Θ > 0, Θ̂ ≥ 0, and a nonnegative random
+sequence {∆k } such that, for all k ≥ 1, almost surely:
+                  
+                  
+                     Ek [Sek − S k ]     = 0,
+                  
+                      Ek [∥Sek − S k ∥2 ] ≤ Ek [∆k ],                                               (6)
+                  
+                                               1−ρ                        Θ̂
+                   1 E [∆ ] ≤                          + Θ U +
+                  
+                      (1−γk )2   k   k      (1−γk−1 )2
+                                                      ∆  k−1    (1−γk )2   k   U ,
+                                                                               (1−γk−1 )2   k−1
+
+                 Pn
+where Uk := n1             k
+                  i=1 ∥Gi x − Gi x    ∥ , x−2 = x−1 = x0 , and γ−1 = γ0 ∈ [0, 1).
+                                   k−1 2
+
+
+Discussion. Let us further discuss Definition 1 and compare it with related existing works.
+ 1. The first condition in (6) shows that Sek is an unbiased estimator of S k . The second line of (6)
+    provides an upper bound on the variance of Sek , which depends on both the parameter γk in S k
+    and the random variable ∆k . The last condition in (6) establishes a “quasi-Fejér property” for
+    (1 − γk )−2 ∆k with contraction factor 1 − ρ and two vanishing terms Uk and Uk−1 . This condition
+    involves evaluations of Gi at three consecutive iterates xk−2 , xk−1 , and xk .
+ 2. Since Definition 1 defines a class of estimators Sek for S k = Gxk − γk Gxk−1 , rather than for
+    Gxk alone, it differs from the definitions in [12, 33, 39, 49], which are formulated for Gxk
+    or ∇f (xk ). More specifically, both [39] and [49] use the same definition of variance-reduced
+    unbiased estimators. While their definition has a similar pattern to (6), it involves quantities
+    different from S k and Uk in Definition 1. In fact, our Definition 1 does not reduce to a special
+    case of those in [39] and [49] when applied to finite-sum convex optimization. Along similar
+    lines, [33] introduced a class of estimators that covers both unbiased and biased estimators
+    to develop accelerated methods. Although it shares a similar pattern with (6), the quantities
+    involved also differ when specialized to convex optimization. The authors in [12] adopted the
+    definition in [39, 49] and extended it to VIPs, which is not the same as (6) since it measures
+    ∥Ge k − Gx⋆ ∥2 (where G e k is an estimator of Gxk ) instead of ∥Sek − S k ∥2 and uses different terms
+    on the right-hand sides of the corresponding inequalities.
+   In the following subsections, we will construct two estimators that satisfy Definition 1 using
+SVRG [45, 53] and SAGA [31], respectively. However, any other estimator satisfying Definition 1
+can be used in our method (VFKM).
+   2.2. The loopless SVRG estimator for S k . ConsiderP             an i.i.d. mini-batch Bk ⊆ [n] with a
+fixed size b := |Bk | (sampling with replacement). Let GBk x := 1b i∈Bk Gi x be a standard mini-batch
+estimator of Gx for a given x ∈ dom(G). Given {xk } from (VFKM), we define
+                                                        
+                          Sek :=(1 − γk ) Gwk − GBk wk + GBk xk − γk GBk xk−1 ,                         (7)
+
+where, for all k ≥ 1, the reference or snapshot point wk is updated as follows:
+                                      (
+                                  k
+                                         xk−1 with probability p
+                                w :=                                                                             (8)
+                                         wk−1 with probability 1 − p.
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                                 7
+
+Here, w0 := x0 , and the probability p ∈ (0, 1) is typically chosen to be small. Similar to [53], we call
+Sek in (7) a loopless SVRG estimator, but it is still different from those in [30, 45, 53].
+   Next, we state the following key property, whose proof is given in Appendix B.1.
+   Lemma 1. Let {xk } and S k = Gxk − γk Gxk−1 be defined in (VFKM), Sek be constructed by the
+loopless SVRG estimator (7), and wk be given in (8). Define
+                                1
+                                   Pn
+                         ∆k := nb             k
+                                     i=1 ∥Gi x − γk Gi x
+                                                         k−1
+                                                             − (1 − γk )Gi wk ∥2 .                   (9)
+Then, for all k ≥ 1, we have
+           
+           
+           
+              Ek [Sek − S k ]     = 0,
+           
+               Ek [∥Sek − S k ∥2 ] ≤ Ek [∆k ],                                                                      (10)
+                                                                                     2(2−3p+p2 )γk−1
+                                                                                                 2
+           
+                                                                              2
+            1 2 Ek [∆k ] ≤ 1 − p               1
+                                                              ∆k−1 + 4−6p+3p
+                                            
+                                                                              U +                      Uk−1 .
+           
+               (1−γ ) k                   2 (1−γ     k−1 )
+                                                          2          bp(1−γ )2 k
+                                                                           k           bp(1−γk−1 )2
+
+                                                                                                                2
+Consequently, the estimator Sek satisfies Definition 1 with ρ := p2 ∈ (0, 1), Θ := 4−6p+3p
+                                                                                      bp
+                                                                                           , Θ̂ :=
+2(2−3p+p2 )
+    bp
+            , and ∆k in (9).
+    2.3. The SAGA estimator for S k . At each iteration k ≥ 1, we first sample an i.i.d. mini-
+batch Bk ⊆ [n] of a fixed size b with replacement. Next, we sample a P         refresh mini-batch B̂k ⊆ [n]
+                                                                             1
+of size b without replacement and independent of Bk . Let GBk x := b i∈Bk Gi x be a mini-batch
+estimator of Gx for a given x ∈ dom(G) and G  b kB := 1 P           bk                 bk n         k
+                                                  k     b    i∈Bk Gi for given {Gi }i=1 . Given {x } and
+  k      k       k−1                                                                        k
+S = Gx − γk Gx        in (VFKM), we define the following SAGA estimator for S :
+                                 Pn b k 
+                    Sek := 1−γ                      k              k−1
+                                                                                          
+                               k
+                                      G i + G B   x   − γ k G B  x     − (1 − γ k )Gb kB ,            (11)
+                             n    i=1          k               k                        k
+
+                             b 0i := Gi x0 for i ∈ [n], and then, for k ≥ 1, is updated by
+      b ki is initialized at G
+where G
+                                                 ( k−1
+                                            k
+                                                   Gbi      if i ∈
+                                                                 / B̂k ,
+                                         Gb i :=                                                                    (12)
+                                                   Gi xk−1 if i ∈ B̂k .
+
+For this SAGA estimator, we need to store all n components G            b ki computed so far for i ∈ [n] in a
+table Tk := [G1 , G2 , · · · , Gn ]. At each iteration k, we will evaluate Gi xk−1 for i ∈ B̂k , and update
+              b k bk           b k
+
+the table Tk for all i ∈ B̂k . Hence, the SAGA estimator requires substantial memory to store Tk if
+n and p are both large.
+   The following lemma shows that the estimator constructed in (11) satisfies Definition 1. Its proof
+is deferred to Appendix B.2.
+   Lemma 2. Let {xk } and S k = Gxk − γk Gxk−1 be given in (VFKM) and Sek be constructed by
+the SAGA estimator (11). We define
+                                        1
+                                          Pn                                   b ki ∥2 .
+                               ∆k := nb              k
+                                            i=1 ∥Gi x − γk Gi x
+                                                               k−1
+                                                                   − (1 − γk )G                          (13)
+                                     2
+If we denote Θ := 2(n−b)(2n+b)+b
+                         nb2
+                                    and Θ̂ := 2(n−b)(2n+b)
+                                                   nb2
+                                                           , then for all k ≥ 1, we have
+             
+             
+              Ek [Sek − S k ]     = 0,
+             
+               Ek [∥Sek − S k ∥2 ] ≤ Ek [∆k ],                                                                      (14)
+             
+              1 E [∆ ] ≤ 1 − b 
+                                                 1                Θ
+                                                         ∆k−1 + (1−γ    U + (1−γΘ̂ )2 Uk−1 .
+                (1−γ )2 k k
+                               k          2n (1−γ     )2k−1           )2 k k              k−1
+
+                                                    b
+Consequently, Sek satisfies Definition 1 with ρ := 2n ∈ (0, 1), Θ and Θ̂ given above, and ∆k in (13).
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+8                                              Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+   3. Convergence and Complexity Analysis of (VFKM). In this section, we first establish
+sublinear convergence rates of (VFKM). Then, we prove its almost sure convergence rates and the
+almost sure convergence of {xk }. Finally, we estimate the complexity for two variants of (VFKM)
+using our SVRG and SAGA estimators, respectively.
+   3.1. Lyapunov function and descent lemma. The following lemma serves as a key step
+in proving the convergence of (VFKM), whose proof is given in Appendix C.1.
+  Lemma 3. Suppose that Condition (1) holds for (CE). Let {xk } be generated by (VFKM) using
+a stochastic estimator Sek of S k satisfying Definition 1 and the following parameters:
+
+                          θk := tkt−r−µ ,       γk := tkt−r−µ
+                                                          −µ
+                                                              ,       and     ηk := 2β(t
+                                                                                      t
+                                                                                         k −µ)
+                                                                                               ,                  (15)
+                                   k+1                    k                               k+1
+
+
+where β > 0, r > 0, and µ > 0 are given and tk ≥ r + µ for all k ≥ 0.
+  Consider the following Lyapunov function:
+                                                       
+          Ek := 4rβ(tk − µ) ⟨Gxk , xk − x⋆ ⟩ − β ∥Gxk ∥2 + ∥r(xk − x⋆ ) + tk+1 (xk+1 − xk )∥2
+                                            2         2           2               2                               (16)
+                   + µr∥xk − x⋆ ∥2 + 4β Θ̂(tρk −µ) Uk + 4β (1−ρ)(t
+                                                               ρ
+                                                                  k −µ)
+                                                                        ∆k ,
+              Pn
+where Uk := n1 i=1 ∥Gi xk − Gi xk−1 ∥2 .
+  Then, for all k ≥ 1, we have
+
+              Ek−1 − Ek [Ek ] ≥ Λk (tk − µ)2 Uk + µ(2tk − r − µ)∥xk − xk−1 ∥2
+                                                                                                                (17)
+                                  + 4rβ(tk−1 − tk + r) ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2 ,
+              h                   β(Θ+Θ̂) i
+where Λk := 4β (t(tk −r−µ)
+                      −µ)
+                           1
+                           L
+                             − β  − ρ        .
+                     k
+
+
+  3.2. Sublinear convergence rates of (VFKM).                           For simplicity of presentation, we define
+the following constants:
+         
+                                                                                      4β (ρ−[ρ+(r+1)(Θ+Θ̂)]Lβ )
+                       n                           o
+                                ρ              1
+         
+         
+         
+          β̄   := min   [ρ+(r+1)(Θ+Θ̂)]L
+                                          , (r+1)L
+                                                     ,                      Λ :=                Lρ(r+1)
+                                                                                                        ,
+         
+                                                                                    2      2 2
+                                                                            C1 := 4r (r−1)L β
+                                                                                               + 2r + ψ C0 ,      (18)
+                                                                                                       
+          C0 := r(1 + 3r + 8rL2 β 2 ),                                                r+2
+         
+          C := 4r2 L2 β 2 + ψ + 2(r+2)2 C + 4(r+2)2 C1 ,                                2
+         
+                                                                            C3 := (r+2) 2r
+                                                                                         (C1 +C2 )
+         
+              2                         r       0      r(r−2)                              2       ,
+               2
+where ψ := 4β (Θ+
+              ρΛ
+                  Θ̂)
+                      . For a given r > 2, we have Cs = O (1) for s ∈ {0, 1, 2, 3}.
+  Note that we can always fix r := 3 in our method without affecting the convergence results.
+However, we keep r as a free parameter to examine how it influences the practical performance of
+our method. For the constants in (18), only β̄ is used in our method (VFKM). The other constants
+ψ, Λ, and Ci for i = 0, 1, 2, 3 are used only in the theoretical convergence analysis in Theorem 1.
+  Now, we establish sublinear convergence rates and iteration complexity of (VFKM).
+  Theorem 1. Suppose that G in (CE) satisfies Assumption 1. Let {xk } be generated by our
+method (VFKM) to solve (CE) using a stochastic estimator Sek of S k satisfying Definition 1 with
+ρ ∈ (0, 1) and ∆0 = 0 almost surely. For β̄ given in (18), assume that r > 2 and β ∈ (0, β̄) are given,
+and θk , γk , and ηk are updated by
+                                   k                       k                          2β(k + r)
+                         θk :=         ,        γk :=         ,       and    ηk :=              .                 (19)
+                                 k+r+2                    k+r                         k+r+2
+Let Λ and Cs for s ∈ {0, 1, 2, 3} be given in (18). Then, the following statements hold.
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                        9
+
+(a) Summability bounds. The following bounds hold:
+               P∞                  k+1        
+                 k=0 (2k + r + 3)E ∥x   − xk ∥2 ≤ C0 ∥x0 − x⋆ ∥2 ,
+               P∞                                          2                                               (20)
+                                                 ≤ (r+2)          2C1
+                                     k 2
+                                                                      0
+                 k=0 (2k + r + 3)E ∥Gx ∥            2β 2 r 2
+                                                             C0 + r−2  ∥x − x⋆ ∥2 .
+(b) Big-O convergence rates. For any k ≥ 0, we have
+                                                 C2 ∥x0 − x⋆ ∥2
+                                E ∥xk+1 − xk ∥2 ≤                 ,
+                                                    (k + r + 2)2
+                                                                                                           (21)
+                                                      C3 ∥x0 − x⋆ ∥2
+                                E ∥Gxk ∥2         ≤ 2                       .
+                                                   β (k + r − 1)(k + r + 2)
+                                                          
+(c) Small-o convergence rates. The following o 1/k 2 rates also hold:
+                       lim k 2 E ∥xk+1 − xk ∥2 = 0 and lim k 2 E ∥Gxk ∥2 = 0.
+                                                                         
+                                                                                                           (22)
+                      k→∞                                  k→∞
+                                         1
+                                           
+For a given ϵ > 0, (VFKM) requires O ϵ iterations to achieve E[∥Gxk ∥2 ] ≤ ϵ2 .
+Discussion. Before proving Theorem 1, we make the following remarks on this result.      
+ 1. Theorem 1 establishes both O (1/k 2 ) and o (1/k 2 ) convergence rates for E ∥Gx  k 2
+                                                                                    ∥ . These rates
+    improve upon non-accelerated methods, e.g., [2, 3, 30], by a factor of O 1/k , but they require
+    Assumption 1, which may be stronger than the assumptions in [2, 3].
+ 2. Our method (VFKM) uses three parameters θk , γk , and ηk . Both γk and θk are given explicitly
+    and do not depend on any parameter of G or of (6) in Definition 1. Only ηk depends on β,
+    and thus β̄ defined in (18). Since our method covers a class of estimators in Definition 1, it is
+    natural that β̄ depends on L in Assumption 1, as well as ρ, Θ, and Θ̂ in Definition 1. However,
+    once the estimator Sek is specified, ρ, Θ, and Θ̂ are explicit, and thus β̄ depends only on L.
+ 3. The summability bounds in (20) are well-known for deterministic Nesterov acceleration methods
+    in convex optimization and monotone operators; see, e.g., [7]. Since ∆xk := xk+1 − xk can be
+    viewed as the “velocity” associated with the “state” xk , the first summability bound in (20)
+    describes the evolution of the corresponding “kinetic energy” over the iterations and shows that
+    the “total weighted kinetic energy” is finite. Likewise, viewing ∥Gxk ∥2 as a “force magnitude”,
+    the second summability bound in (20) tracks its evolution across iterations and shows that its
+    total weighted sum is finite.                                                              
+ 4. The limits in (22) indicate a faster o 1/k 2 convergence rate of E ∥xk+1 − xk ∥2 and E ∥Gxk ∥2 ,
+    respectively, in the regime k ≫ 1.
+While the O 1/k 2 convergence rates of the form (21) have been widely presented in variance
+reduction methods for convex optimization, the o 1/k 2 convergence rates remain largely elusive
+in stochastic variance reduction methods for both optimization and root-finding problems.
+  Proof of Theorem 1. For simplicity of our analysis, we choose µ := 1 and tk := k + r + µ =
+k + r + 1. Since tk = k + r + 1 and µ = 1, from (15), we get
+              θk := tkt−r−µ = k+r+2
+                                k
+                                    ,      γk := tkt−r−µ
+                                                     −µ
+                                                            k
+                                                         = k+r ,     and    ηk := 2β(t
+                                                                                    t
+                                                                                       k −µ)
+                                                                                             = 2β(k+r)
+                                                                                                k+r+2
+                                                                                                       ,
+                       k+1                          k                                 k+1
+
+which are the updates in (19).
+  Now, for clarity, we divide the proof into several steps as follows.
+Step 1. The first summability result in (20). Since β ∈ (0, β̄), tk = k + r + 1, and µ = 1, for k ≥ 1,
+the constant Λk in Lemma 3 is lower bounded by
+                          h                     β(Θ+Θ̂) i
+                 Λk := 4β (t(tk −r−µ)   1
+                                                                         − β − β(Θ+   Θ̂)
+                                                                 k 1                    
+                                          −  β  − ρ        = 4β k+r
+                                k −µ)   L                              L            ρ
+
+                                                         (                    )
+                            h                        i 4β ρ−[ρ+(r+1)(Θ+Θ̂)]Lβ
+                        4β    1     [ρ+(r+1)(Θ+Θ̂)]β
+                     ≥ r+1    L
+                                 −         ρ
+                                                      =        Lρ(r+1)
+                                                                                ≡ Λ,
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+10                                             Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+where Λ is defined by (18). Clearly, since β ∈ (0, β̄), we have Λk ≥ Λ > 0 for k ≥ 1.
+  Since β ≤ L1 , by Condition (1), we have ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2 ≥ 0. Substituting this
+inequality, the lower bound Λ of Λk , and tk − µ = k + r into (17), and noting that tk−1 − tk + r =
+r − 1 > 0 (since r > 2), we obtain
+                   Ek−1 − Ek [Ek ] ≥ Λ(k + r)2 Uk + (2k + r + 1)∥xk − xk−1 ∥2 ,                 ∀k ≥ 1.              (23)
+
+Taking the total expectation on both sides of this inequality, we get
+                    E[Ek−1 ] − E[Ek ] ≥ Λ(k + r)2 E[Uk ] + (2k + r + 1)E[∥xk − xk−1 ∥2 ].
+
+Summing
+      this inequality from k = 1 to K, and using (52) from Lemma 11 (from Appendix C.2),
+and E EK ≥ 0, then letting K → ∞, we can show that
+                          P∞                                             (52)
+                                                   k−1 2
+                                               k
+                           k=1 (2k + r + 1)E[∥x − x   ∥ ] ≤ E0 ≤ C0 ∥x0 − x⋆ ∥2 ,
+                                                                                                                     (24)
+                          P∞                                                 (52)
+                                      2                                1            C0
+                           k=1 (k + r) E[Uk ]                      ≤     E
+                                                                       Λ 0
+                                                                             ≤      Λ
+                                                                                       ∥x0 − x⋆ ∥2 .
+The first line of (24) is exactly the first summability bound in (20).
+Step 2. The second summability result in (20). For Wk defined by (53) and v k := xk+1 − xk + ηk Gxk ,
+taking the total expectation of (54) in Lemma 12, we get
+                                                                                                       2         2
+E[Wk ] ≤ E[Wk−1 ] − (r − 2)(k + r + 1)E[∥v k−1 ∥2 ] + 2(2k+r+1)
+                                                          r
+                                                                E[∥xk − xk−1 ∥2 ] + 4β (Θ+Θ̂)(k+r)
+                                                                                          ρ
+                                                                                                   E[Uk ].
+
+Utilizing (24), we can apply Lemma 5 to this inequality to prove that
+          limk→∞ E[Wk ] exists,
+          P∞                                          2
+                                    ∥ ] ≤ W0 + 2r + 4β (Θ+ Θ̂)
+                                 k−1 2
+                                                              
+             k=1 (k + r + 1)E[∥v                        ρΛ
+                                                                C0 ∥x0 − x⋆ ∥2 ≤ C1 ∥x0 − x⋆ ∥2 ,                    (25)
+          E[Wk ]                              ≤ C1 ∥x0 − x⋆ ∥2 ,
+                                                                                                           2 2
+where we have used W0 = (r − 1)(r +2)∥x1 − x0 +η0 Gx0 ∥2 ≤ (r − 1)(r +2)η02 ∥Gx0 ∥2 ≤ 4L βr+2
+                                                                                            (r−1)
+                                                                                                  ∥x0 −
+                    2 2                   2
+x⋆ ∥2 and C1 := 4L βr+2
+                      (r−1)
+                            + 2Cr 0 + 4β (Θ+
+                                           ρΛ
+                                             Θ̂)C0
+                                                     as in (18).
+   Now, by the choice of ηk = 2β(k+r)
+                                  k+r+2
+                                          from  (19),               2βr
+                                                        we get ηk ≥ r+2 . Applying this bound and Young’s
+                         k    k+1      k           k
+inequality, and using v = x         − x + ηk Gx , we have
+                                                   2
+                             2β 2 r 2      k 2   ηk
+                            (r+2)   2 ∥ Gx  ∥  ≤  2
+                                                     ∥Gxk ∥2 ≤ ∥v k ∥2 + ∥xk+1 − xk ∥2 .                             (26)
+
+Combining (26), the second bound of (25), and the first bound of (20), we obtain
+ 2β 2 r 2 PK                    k 2
+                                         PK                     k 2
+                                                                    PK
+(r+2)2     k=0 (2k + r + 3)E[∥Gx ∥ ] ≤ 2  k=0 (k + r + 2)E[∥v ∥ ] +  k=0 (2k + r + 3)E[∥x
+                                                                                         k+1
+                                                                                             − xk ∥2 ]
+                                                
+                                             2C1
+                                     ≤ C0 + r−2    ∥x0 − x⋆ ∥2 .
+
+Taking the limit of this inequality as K → ∞, we prove the second line of (20).
+                                                               
+Step 3. The Big-O and small-o rates of E ∥xk+1 − xk +ηk Gxk ∥2 . Since (k +r − 1)(k +r +2)∥xk+1 −
+xk + ηk Gxk ∥2 ≤ Wk , the last line of (25) implies that
+                                                         C1
+                                                 
+                        E ∥xk+1 − xk + ηk Gxk ∥2 ≤ (k+r−1)(k+r+2) ∥x0 − x⋆ ∥2 .              (27)
+
+From (55) of Lemma 12 and the second line of (24), we can show that
+                          P∞           2         (Θ+Θ̂)C0
+                            k=1 (k + r) E[∆k ] ≤    ρΛ
+                                                          ∥x0 − x⋆ ∥2 .
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                           11
+
+This summability bound shows that limk→∞ (k + r)2 E[∆k ] = 0. Moreover, from the second line of
+(24), we also have limk→∞ (k + r)2 E[Uk ] = 0. Combining these limits and the definition (53) of Wk
+and the existence of limk→∞ E[Wk ] from (25), we have
+
+                                   lim (k + r − 1)(k + r + 2)E[∥v k ∥2 ] exists.
+                                   k→∞
+
+
+Applying Lemma 6 to this limit and using the second line of (25), we conclude that
+                                                                    
+                   lim (k + r − 1)(k + r + 2)E ∥xk+1 − xk + ηk Gxk ∥2 = 0.
+                          k→∞
+                                                         
+This also implies that limk→∞ k 2 E ∥xk+1 − xk + ηk Gxk ∥2 = 0.
+                                                        
+Step 4. The Big-O and small-o rates of E ∥xk+1 − xk ∥2 . For Zk defined by (57), taking the total
+expectation on both sides of (58) from Lemma 13, we get
+                                                                               2             2
+                  E[Zk ] ≤ E[Zk−1 ] + 4rβ 2 (2k + r + 3)E[∥Gxk ∥2 ] + 4β (Θ+Θ̂)(k+r)
+                                                                            ρ
+                                                                                     E[Uk ].                  (28)
+                                                                                     2 2 2
+Summing this inequality from k = 1 to K, and using ∥x1 − x0 ∥2 ≤ 4r(r+2)
+                                                                     L β    0   ⋆ 2
+                                                                        2 ∥x − x ∥ , the second
+
+line of (20), and the second line of (24), we get
+                                       2           4β 2 (Θ+Θ̂)C0  0
+           E[ZK ] ≤ 4r2 L2 β 2 + 2(r+2)       2C1
+                   
+                                    r
+                                         C0 + r−2  +      ρΛ
+                                                                   ∥x − x⋆ ∥2 = C2 ∥x0 − x⋆ ∥2 ,
+                               2           4β 2 (Θ+Θ̂)C0
+where C2 := 4r2 L2 β 2 + 2(r+2)
+                            r
+                                      2C1
+                                 C0 + r−2  +      ρΛ
+                                                          as defined in (18). Since (k + r + 2)2 ∥xk+1 −
+                                                                                                 0   ⋆ 2
+                                                                               2 ∥x −x ∥
+xk ∥2 ≤ Zk due to (57), the last inequality implies that E[∥xk+1 − xk ∥2 ] ≤ C(k+r+2)  2 , proving the
+first bound of (21).
+   Utilizing the second summability bound of (20) and the second line of (24), we can apply
+Lemma 5 to (28) to conclude that limk→∞ E[Zk ] exists. Since limk→∞ (k + r)2 E[∆k ] = 0 and
+limk→∞ (k + r)2 E[Uk ] = 0 as proven above, using these limits and the definition (57) of Zk , we
+conclude that limk→∞ (k + r + 2)2 E[∥xk+1 − x k ∥2 ] exists. Applying
+                                                                      Lemma 6 to this limit and using
+the first line of (20), we obtain limk→∞ k 2 E ∥xk+1 − xk ∥2 = 0. This proves the first limit of (22).
+                                                      
+Step 5. The Big-O and small-o rates of E ∥Gxk ∥2 . Combining (26), (27), the first bound of (21),
+and noting that k + r − 1 ≤ k + r + 2, we can show that
+                       2
+                         C1 ∥x0 −x⋆ ∥2 (r+2)2 C2 ∥x0 −x⋆ ∥2               2
+                                                                                                      C3 ∥x0 −x⋆ ∥2
+E ∥Gxk ∥2 ≤ 2β(r+2)                                         ≤ 2β 2 r(r+2)   (C1 +C2 )
+                                                                                      0   ⋆ 2
+               2 r 2 (k+r−1)(k+r+2) +    2β 2 r 2 (k+r+2)2           2 (k+r−1)(k+r+2) ∥x − x ∥ = β 2 (k+r−1)(k+r+2) ,
+
+
+                    2
+where C3 := (r+2) 2r
+                   (C1 +C2 )
+                     2       as in (18). This proves the second line of (21).                   
+  Alternatively,
+                the   second  limit in (22) follows from combining (26), the limit limk→∞ k 2 E ∥xk+1 −
+xk + ηk Gxk ∥2 = 0, and the first limit of (22). Finally, the final iteration complexity statement is a
+direct consequence of line 2 in (21).                                                                  □
+  3.3. Almost-sure convergence analysis.                    Our next step is to prove the almost-sure conver-
+gence of (VFKM) as in the following theorem.
+  Theorem 2. Under the same conditions and parameters as in Theorem 1, {xk } generated by
+(VFKM) satisfies the following almost-sure limits:
+
+                    lim k 2 ∥xk+1 − xk ∥2 = 0     and     lim k 2 ∥Gxk ∥2 = 0      almost surely.             (29)
+                   k→∞                                    k→∞
+
+
+Moreover, {xk } converges almost surely to a zer(G)-valued random variable x⋆ (i.e., x⋆ ∈ zer(G)).
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+12                                             Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+  Proof. First, since zer(G)    ̸= ∅ by Assumption 1, we fix x⋆ ∈ zer(G). Then, Ek in (16) depends
+                               n
+on such an x⋆ . For Uk = n1 i=1 ∥Gi xk − Gi xk−1 ∥2 , we can rewrite (23) as
+                             P
+                                                                              
+                     Ek [Ek ] ≤ Ek−1 − Λ(k + r)2 Uk + (2k + r + 1)∥xk − xk−1 ∥2 .             (30)
+
+Next, applying the Supermartingale Theorem, i.e. Lemma 7, to (30) with Xk := Ek−1 , αk := 0,
+Vk := Λ(k + r)2 Uk + (2k + r + 1)∥xk − xk−1 ∥2 , and Rk := 0, we get
+                         limk→∞ Ek exists almost surely,
+                         P∞                   k   k−1 2
+                            k=1 (2k + r + 1)∥x − x    ∥ < +∞ almost surely,                                     (31)
+                         P∞            2
+                            k=1 (k + r) Uk < +∞    almost surely.
+Indeed, Ek−1 is Fk -measurable and Ek [Xk+1 ] = Ek [Ek ], so Lemma 7 applies with the above shifted
+indexing.
+   Now, to prove the limits (29), we follow the same arguments from Step 3 to Step 5 in the proof
+of Theorem 1 but without taking the total expectation and repeatedly applying Lemma 7 with the
+corresponding shifted sequences. We skip their detailed derivations to avoid repetition. The only
+additional point requiring justification is Step 3, where we need to prove limk→∞ (k + r)2 ∆k = 0
+                                                                    r2
+almost surely. Indeed, from the last line of (6) and (1 − γk )2 = (k+r) 2 , we have
+
+
+  (k + r)2 Ek [∆k ] ≤ (k + r − 1)2 ∆k−1 − ρ(k + r − 1)2 ∆k−1 + Θ(k + r)2 Uk + Θ̂(k + r − 1)2 Uk−1 . (32)
+      P∞
+Since k=1 (k + r)2 Uk < +∞ almost surely due to (31), applying Lemma 7 to (32) with Xk :=
+(k+r −1)2 ∆k−1 , αk := 0, Vk := ρ(k+r −1)2 ∆k−1 , and Rk := Θ(k+r)2 Uk + Θ̂(k + r − 1)2 Uk−1 , we get
+                                               P∞
+            limk→∞ (k + r)2 ∆k exists and                        2
+                                                  k=1 (k + r − 1) ∆k−1 < +∞ almost surely.          (33)
+
+The last summability bound also implies that limk→∞ (k + r)2 ∆k = 0 almost surely.
+  Finally, we prove that {xk } converges almost surely to a zer(G)-valued random variable. Indeed,
+we first substitute tk = k + r + 1 and µ = 1 into Ek from (16) to rewrite it as follows:
+                                              
+ Ek = 4rβ(k + r) ⟨Gxk , xk − x⋆ ⟩ − β ∥Gxk ∥2 + (r2 + r)∥xk − x⋆ ∥2 + (k + r + 2)2 ∥xk+1 − xk ∥2
+                                                  2                    2                         (34)
+        + 2r(k + r + 2)⟨xk+1 − xk , xk − x⋆ ⟩ + 4βρ Θ̂ (k + r)2 Uk + 4β (1−ρ)
+                                                                         ρ
+                                                                              (k + r)2
+                                                                                       ∆k .
+
+Next, since limk→∞ Ek exists almost surely from (31), and Ek ≥ r∥xk − x⋆ ∥2 due to (16), there exists
+an almost surely finite random variable M0 > 0 such that ∥xk − x⋆ ∥ ≤ M0 almost surely for all
+k ≥ 0. Using this fact and the Cauchy-Schwarz inequality, one can easily show that
+                    (k + r)|⟨Gxk , xk − x⋆ ⟩|              ≤ M0 (k + r)∥Gxk ∥,
+                    (k + r + 2)|⟨xk+1 − xk , xk − x⋆ ⟩| ≤ M0 (k + r + 2)∥xk+1 − xk ∥.
+Combining these inequalities and the limits in (29), almost surely, we get
+                              limk→∞ (k + r)|⟨Gxk , xk − x⋆ ⟩|                = 0,
+                              limk→∞ (k + r + 2)|⟨xk+1 − xk , xk − x⋆ ⟩| = 0.
+Now, we have limk→∞ (k + r)2 ∆k = 0 from (33). Similarly, the last line of (31) also implies that
+limk→∞ (k + r)2 Uk = 0 almost surely.
+   Collecting all the limits proven above, (29), and the existence of limk→∞ Ek from (31), we can
+show from (34) that, for each fixed x⋆ ∈ zer(G), limk→∞ ∥xk − x⋆ ∥2 exists almost surely.
+   To make this conclusion hold simultaneously for all x⋆ ∈ zer(G), we use a standard separabil-
+ity argument. Since G is continuous by Condition (1), zer(G) is closed and hence separable in
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                         13
+
+the finite-dimensional space. Let {x⋆j }j≥1 be a countable dense subset of zer(G). For each j ≥ 1,
+the preceding argument shows that limk→∞ ∥xk − x⋆j ∥ exists almost surely. Taking the countable
+intersection of these probability-one events, we obtain a common probability-one event on which
+limk→∞ ∥xk − x⋆j ∥ exists for every j ≥ 1. Since {x⋆j }j≥1 is dense in zer(G), for any x⋆ ∈ zer(G),
+choose a subsequence {x⋆jℓ }ℓ≥1 such that x⋆jℓ → x⋆ as ℓ → ∞. Then, by the triangle inequality, we
+get ∥xk − x⋆ ∥ − ∥xk − x⋆jℓ ∥ ≤ ∥x⋆ − x⋆jℓ ∥. Letting ℓ → ∞, we conclude that limk→∞ ∥xk − x⋆ ∥ exists
+almost surely for every x⋆ ∈ zer(G) on the same probability-one event.
+   Finally, since G is cocoercive by Condition (1), it is continuous. Moreover, we have
+limk→∞ ∥Gxk ∥ = 0 almost surely by (29) and {xk } is bounded almost surely. Combining these facts
+and the existence of the almost sure limit limk→∞ ∥xk − x⋆ ∥2 for every x⋆ ∈ zer(G) on a common
+probability-one event, we can apply Lemma 8 in the appendix to show that {xk } converges to a
+zer(G)-valued random variable almost surely.                                                        □
+                                                        2
+                                                          
+Discussion. The expression (29) shows an o 1/k almost-sure convergence rate for both the
+“kinetic energy term” ∥xk+1 − xk ∥2 and the “force magnitude” term ∥Gxk ∥2 . The almost-sure
+convergence of the iterates {xk } has been established for non-accelerated stochastic and random-
+ized methods, see, e.g., [25, 30]. However, since our method is an accelerated variance reduction
+framework, to the best of our knowledge, the results in Theorem 2 are new to the literature.
+   3.4. Complexity analysis for the loopless SVRG and SAGA variants. Let us spe-
+cialize Theorem 1 to analyze the expected oracle complexity of (VFKM) using (7) and (11). The
+proofs of the following results are deferred to Appendix C.3.
+  Corollary 1. Let {xk } be generated by (VFKM) to solve (CE) using the loopless SVRG
+estimator (7) and the same parameters as in Theorem 1 with r := 3 such that 1 ≤bp2 ≤ 32.
+                                                                       bp2                   1     1
+                                                                                                     
+Then, under the same conditions as in Theorem 1, if we choose β := 2L(bp 2 +64) , then β ∈ 130L , 6L .
+Moreover, we have
+
+                               C2 ∥x0 − x⋆ ∥2
+          E[∥xk+1 − xk ∥2 ] ≤                                     and      lim k 2 E[∥xk+1 − xk ∥2 ] = 0,
+                                (k + r + 2)2                               k→∞
+                                                                                                             (35)
+                  k 2               C3 ∥x0 − x⋆ ∥2                               2        k 2
+          E[∥Gx ∥ ]           ≤ 2                                 and      lim k E[∥Gx ∥ ]            = 0,
+                               β (k + r − 1)(k + r + 2)                    k→∞
+
+
+where C2 ≤ 2360 and C3 ≤ 3353 are explicitly given     in (18).
+                                             1
+                                                                    
+  For a given ϵ > 0, if we choose p = O n1/3        and b = O n2/3 , then (VFKM) requires O n +
+n2/3 LR0
+         
+    ϵ
+           evaluations of Gi to achieve E[∥Gxk ∥2 ] ≤ ϵ2 , where R0 := ∥x0 − x⋆ ∥.
+  Corollary 2. Let {xk } be generated by (VFKM) to solve (CE) using the SAGA estimator
+(11) and the same parameters as in Theorem 1 with r := 3 such that 1 ≤ b ≤ min{n,      4n2/3 }. Then,
+                                                                   3
+                                                                                          1           1
+                                                                                                       
+under the same conditions as in Theorem 1, if we choose β := 2L(b3b+64n2 ) , then β ∈ 2L(1+64n 2 ) , 4L .
+Moreover, we have
+
+                               C2 ∥x0 − x⋆ ∥2
+          E[∥xk+1 − xk ∥2 ] ≤                                     and      lim k 2 E[∥xk+1 − xk ∥2 ] = 0,
+                                (k + r + 2)2                               k→∞
+                                                                                                             (36)
+                  k 2               C3 ∥x0 − x⋆ ∥2                               2        k 2
+          E[∥Gx ∥ ]           ≤ 2                                 and      lim k E[∥Gx ∥ ]            = 0,
+                               β (k + r − 1)(k + r + 2)                    k→∞
+
+
+where C2 ≤ 2559 and C3 ≤ 3636 are explicitly given in (18).
+                                                                            2/3
+   For a given ϵ > 0, if we choose b = O n2/3 , then (VFKM) requires O n + n ϵLR0 evaluations
+                                                                                
+
+of Gi to achieve E[∥Gxk ∥2 ] ≤ ϵ2 , where R0 := ∥x0 − x⋆ ∥.
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+14                                             Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+   Both C2 and C3 in Corollaries 1 and 2 can be refined to obtain smaller upper bounds. Never-
+theless, we do not try to numerically optimize them here. Corollaries 1 and 2 show that both the
+                                                                     2/3
+SVRG and SAGA variants have an oracle complexity of O n + n ϵLR0 under appropriate choices
+                                                                            
+
+of the mini-batch size b and probability p. This complexity is better than deterministic accelerated
+methods by a factor of n1/3 and non-accelerated variance reduction methods such as [2, 3, 30] by a
+factor of 1ϵ . As suggested by our theory, one can choose β ∈ [ 6L
+                                                                 1    1
+                                                                   , 4L ] when implementing (VFKM).
+
+   4. Linear Convergence under Strong Quasi-monotonicity. In this section, we establish
+a linear convergence rate and estimate the oracle complexity of (VFKM) under Assumption 1 and
+the following additional assumption:
+  Assumption 2. G in (CE) is σ-strongly quasi-monotone, i.e., there exist x⋆ ∈ zer(G) and σ > 0
+such that ⟨Gx, x − x⋆ ⟩ ≥ σ ∥x − x⋆ ∥2 for all x ∈ dom(G).
+If G is strongly monotone with a strong monotonicity modulus σ > 0, then it satisfies Assumption 2.
+However, the converse is not true in general. For example, if we consider G : R → R such that
+Gx = x + sin(x), then it is straightforward to verify that x⋆ = 0 ∈ zer(G) and G is σ-strongly quasi-
+monotone with σ := 1 − π1 > 0, but it is not strongly monotone. Hence, this assumption is weaker
+than the strong monotonicity of G. Note that we do not require each summand Gi to be strongly
+monotone. Assumption 2 is not new. It has been used in [68] and recently in [30, 58].
+    4.1. Linear convergence and iteration complexity. For simplicity of presentation, we
+first define the following constants:
+
+            κ := Lσ , Γ := ρ + 2(Θ + Θ̂), M := 2(2Γ − 1)κ, and N := 3Γκ + 2(1 − 2ρ).                              (37)
+
+Suppose that N 2 + 12ρM ≥ 0 and 2ρ < 1. Then, we define
+                                     n                                         o
+                                              3ρ
+                         β̄ := σ1 min 35 , 2(1−2ρ)    1
+                                                   , 2κ , √ 6ρ                     > 0.                           (38)
+                                                             N+    N 2 +12ρM
+
+Theorem 3 states a linear convergence result for (VFKM) under Assumption 2.
+  Theorem 3. Suppose that G in (CE) satisfies Condition (1) and Assumption 2 such that
+     2
+N + 12ρM ≥ 0 and 2ρ < 1 for given constants defined in (37). Let β̄ be defined by (38). Let {xk } be
+generated by (VFKM) to solve (CE) using a stochastic estimator Sek for S k satisfying Definition 1
+and the following fixed parameters:
+
+                         θk = θ := 31 ,   γk = γ := 21 ,   and    ηk = η := β ∈ (0, β̄),                          (39)
+                 2βσ
+Then, with ω := 3+4βσ ∈ (0, 1/2) we have
+                                    
+                        E ∥xk − x⋆ ∥2 ≤ 4(1 + 2L2 β 2 )(1 − ω)k ∥x0 − x⋆ ∥2 .                                      (40)
+                                                                                          3
+                                                                                                log(ϵ−1 ) iterations to
+                                                                                                        
+Consequently, for a given tolerance ϵ > 0, (VFKM) requires k = O 2 + 2βσ
+                                               
+achieve an ϵ-solution xk such that E ∥xk − x⋆ ∥2 ≤ ϵ2 .
+  Proof. We first choose r := 1 and s := 3 in Lemma 14 from the appendix. Then, the update rule
+                                   2rβσ
+(60) reduces to (39), and ω := 2r+1+2βσ(s−1) = 2βσ ∈ (0, 1/2).
+                                          1 3+4βσ2(Θ+Θ̂)  
+  Next, α in Lemma 14 becomes α = 8β L − 1 + ρ−ω β . Therefore, if
+                                               Θ̂)−ω
+                               1
+                              κβσ
+                                     1
+                                  = Lβ ≥ ρ+2(Θ+
+                                             ρ−ω
+                                                     = Γ−ω
+                                                       ρ−ω
+                                                           = 3Γ+2(2Γ−1)βσ
+                                                             3ρ−2(1−2ρ)βσ
+                                                                          ,
+
+then α ≥ 0, where κ := Lσ and Γ := ρ + 2(Θ + Θ̂) are defined in (37). The above condition holds if
+2(2Γ − 1)κβ 2 σ 2 + [3Γκ + 2(1 − 2ρ)]βσ − 3ρ ≤ 0. Using M := 2(2Γ − 1)κ and N := 3Γκ + 2(1 − 2ρ)
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                        15
+
+from (37), this inequality becomes M (βσ)2 + N βσ − 3ρ ≤ 0. Solving this inequality in βσ, we get
+βσ ≤    √ 6ρ       , provided that N 2 + 12ρM ≥ 0. Combining this condition, β ≤ 2L  1    1
+                                                                                       = 2κσ , and
+       N+   2
+            N +12ρM
+(59), we can show that 0 < β ≤ β̄ as in (39) for β̄ defined by (38).
+                           1
+  Now, since α ≥ 0 and 2L     − β ≥ 0, it follows from (62) that Ek [Ek ] ≤ (1 − ω)Ek−1 . Taking the total
+expectation on both sides of this inequality and applying induction, we have E[Ek ] ≤ (1 − ω)k E[E0 ].
+Similar to Lemma 11, we can show that E0 ≤ 4(1 + 2L2 β 2 )∥x0 − x⋆ ∥2 . Alternatively, from (61) and
+r = 1, we also have Ek ≥ ∥xk − x⋆ ∥2 . Therefore, combining these three results, we get (40).
+  Finally, for a given ϵ > 0, to achieve E[∥xk − x⋆ ∥2 ] ≤ ϵ2 , we impose (1 − ω)k C0 ∥x0 − x⋆ ∥2 ≤ ϵ2 , where
+                                                                                                       0    ⋆ 2
+C0 := 4(1+2L2 β 2 ). Since − log(1 − ω) ≥ ω = 3+4βσ  2βσ
+                                                         , the last condition leads to k ≥ ω1 log C0 ∥x ϵ2−x ∥ .
+                                      3
+                                           log( 1ϵ ) to complete our proof.
+                                                   
+Thus, we can choose k := O 2 + 2βσ                                                                             □
+  Remark 1. If we ignore the dependence on n, then the worst-case iteration complexity stated
+in Theorem 3 is O κ log( 1ϵ ) , where κ := Lσ can be viewed as the condition number of G. By the
+lower bound
+       √    in [85],
+                 this complexity is optimal up to a constant factor. This result is different from
+              1
+the O κ log( ϵ ) complexity known in convex optimization.
+   4.2. Oracle complexity. Theorem 3 only states a linear convergence rate and iteration com-
+plexity in terms of E[∥xk − x⋆ ∥2 ] for (VFKM), but does not specify its oracle complexity. We
+now specialize Theorem 3 to our SVRG and SAGA estimators to obtain the following complexity
+bounds in expectation, see Appendix D for the proof.
+   Corollary 3. Under the same conditions and parameters as in Theorem 3, the following
+statements hold:                                                                              
+(a) Ifwe use    the SVRG     estimator ek in (7) for (VFKM), then by choosing b = O n2/3 , p =
+                                        S
+            
+          1
+              , and β = β̄2 in (38), (VFKM) requires O n + max{n, n2/3 κ} log( 1ϵ ) evaluations of Gi
+                                                                                   
+    O n1/3
+    to attain E[∥xk − x⋆ ∥2 ] ≤ ϵ2 .                                                           
+(b) If we use the SAGA estimator Sek in (11) for (VFKM), then by choosing b = O n2/3 and
+    β = β̄2 in (38), (VFKM) requires O n + max{n, n2/3 κ} log( 1ϵ ) evaluations of Gi to achieve
+                                                                   
+    E[∥xk − x⋆ ∥2 ] ≤ ϵ2 .
+  The oracle complexity stated in Corollary 3 is better than the deterministic counterparts by a
+factor of n1/3 whenever κ = Ω(n1/3 ), similar to the result in [30], but our method is different.
+  5. Application to Finite-Sum Inclusions. We now apply (VFKM) to solve (NI) using a
+BFS operator [9, 30]. We recall it here for convenience:
+                            Find u⋆ ∈ dom(Ψ) such that: 0 ∈ Ψu⋆ := Gu⋆ + T u⋆ .                            (NI)
+We require the following assumption for (NI):
+  Assumption 3. zer(Ψ) := {u⋆ : 0 ∈ Ψu⋆ } ̸= ∅, each Gi is L1g -cocoercive for i ∈ [n] with Lg > 0,
+and T is maximally ν-co-hypomonotone such that ν ≥ 0 and Lg ν < 1.
+   We recall from [11] that T is ν-co-hypomonotone if there exists ν ≥ 0 such that ⟨x − y, u − v ⟩ ≥
+−ν ∥x − y ∥2 for all (u, x), (v, y) ∈ gra(T ). If ν = 0, then T becomes monotone. We say that T is
+maximally ν-co-hypomonotone if gra(T ) is not properly contained in the graph of any other ν-co-
+hypomonotone operator.
+   Note that under Assumption 3, Ψ in (NI) is not necessarily monotone. For example, we take
+n = 1 and Gu = G1 u := Gu + g for a symmetric positive semidefinite matrix G in Rp×p and a given
+g ∈ Rp . Then, we can view G = ∇f as the gradient of a convex quadratic and Lg -smooth function
+f (u) := 12 uT Gu + gT u with Lg := λmax (G). It is well-known that G is L1g -cocoercive (see [63]).
+   Now, we take T u := Tu + r for a given symmetric and invertible matrix T in Rp×p and a given
+r ∈ Rp such that λmin (T−1 ) < 0. Then, we have ⟨T u − T v, u − v ⟩ ≥ λmin (T−1 )∥T u − T v ∥2 for all
+u, v ∈ Rp , showing that T is ν-co-hypomonotone with ν := −λmin (T−1 ) > 0. However, Ψ = G + T is
+not necessarily monotone since G + T is not necessarily positive semidefinite.
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+16                                             Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+  5.1. Variance-reduced fast BFS method. Given λ > 0, and G and T in (NI), we define
+the following backward-forward splitting (BFS) operators:
+                                                                              Pn
+              Gi,λ x := Gi (JλT x) + λ1 (x − JλT x) for i ∈ [n] and Gλ x := n1 i=1 Gi,λ x. (41)
+Given Gλ in (41), we consider the following BFS equation:
+                                Find x⋆ ∈ dom(Gλ ) such that: Gλ x⋆ = 0.                                        (42)
+The following lemma establishes the relation between (NI), (CE), and (42). Its proof is given in
+Appendix A.2.
+   Lemma 4. Assume that Assumption 3 holds for (NI). Let Gi,λ and Gλ be defined by (41) for
+i ∈ [n]. Then, the following statements hold.
+(a) zer(G + T ) = JλT (zer(Gλ )), i.e., x⋆ solves (42) iff u⋆ := JλT x⋆ solves (NI).
+(b) If λ ≥ 2ν, then ∥JλT x − JλT y ∥ ≤ ∥x − y ∥ for all x, y ∈ dom(JλT ), i.e. the resolvent JλT is
+    nonexpansive.
+                                                                                         4(1−Lg ν)
+(c) If L2g 1 − 1 − Lg ν < λ < L2g 1 + 1 − Lg ν , then Gi,λ is L1 -cocoercive with L := λ(4−Lg λ)−4ν
+              p                          p         
+                                                                                                    >
+    0. Consequently, Gλ satisfies Condition (1) with the same constant L.
+   Since Gλ satisfies Condition (1) as in (CE) by Lemma 4(c), we can apply (VFKM) to solve (42).
+Hence, our proposed method for solving (NI) is presented as follows.
+  • Starting from x0 ∈ dom(Gλ ), we set x−1 := x0 and compute u−1 := JλT x−1 .
+  • At each iteration k ≥ 0, we perform the following steps:
+(1) Compute uk := JλT xk .
+(2) Construct an estimator Seuk of Suk := Guk − γk Guk−1 satisfying Definition 1.
+(3) Update                   (
+                               Seλk := Seuk + λ1 (xk − uk ) − γλk (xk−1 − uk−1 ),
+                                                                                            (43)
+                               xk+1 := xk + θk (xk − xk−1 ) − ηk Seλk .
+From (41) and (43), it follows that Seλk constructed by (43) is also an unbiased variance-reduced
+estimator of Sλk := Gλ xk − γk Gλ xk−1 satisfying Definition 1.
+   5.2. Convergence analysis. Let us define a forward-backward splitting (FBS) residual of
+(NI) as Fλ u := λ1 (u − JλT (u − λGu)). Then, it is well-known [10, Proposition 26] that Fλ u⋆ = 0 iff
+0 ∈ Gu⋆ + T u⋆ . Therefore, if E[∥Fλ uk ∥2 ] ≤ ϵ2 , then we say that uk is an ϵ-solution of (NI). Now, we
+can prove the following convergence result for (43).
+  Theorem 4. Suppose that Assumption 3 holds for (NI). Let {(xk , uk )} be generated by (43)
+                                                                                                   4(1−Lg ν)
+and uk := JλT xk to solve (NI) using the same parameters as in Theorem 1 but with L := λ(4−Lg λ)−4ν
+                                    √
+                                2(1+ 1−Lg ν)
+for any λ such that 2ν ≤ λ <         Lg
+                                              .
+  Then the corresponding conclusions of Theorem 1 and Theorem 2 still hold, with G replaced by
+Gλ , for ∥xk+1 − xk ∥2 , ∥uk+1 − uk ∥2 , ∥Gλ xk ∥2 , and ∥Fλ uk ∥2 , where Fλ u := λ1 (u − JλT (u − λGu)) is
+the FBS residual of (NI).
+   Proof. First, by Lemma 4(a), we have zer(G + T ) = JλT (zer(Gλ )). Hence, solving (NI) is equiv-
+alent to solving Gλ x⋆ = 0 in (42).
+                                                                    4(1−Lg ν)
+Second, by Lemma 4(c), Gλ satisfies Condition (1) with L := λ(4−Lg λ)−4ν      > 0.
+Third, if we apply (VFKM) to solve (42), then it can be expressed as (43).
+Fourth, the conclusions of Theorem 1 and Theorem 2 for ∥xk+1 − xk ∥2 and ∥Gλ xk ∥2 continue to
+hold both in expectation and almost surely.
+Fifth, since ∥uk+1 − uk ∥2 = ∥JλT xk+1 − JλT xk ∥2 ≤ ∥xk+1 − xk ∥2 by Lemma 4(b), the conclusions for
+∥xk+1 − xk ∥2 imply the same conclusions for ∥uk+1 − uk ∥2 .
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                                      17
+
+  Finally, from (41), we have λGλ xk = λGuk + xk − uk , or equivalently, xk − λGλ xk = uk − λGuk .
+This leads to JλT xk − JλT (xk − λGλ xk ) = uk − JλT (uk − λGuk ). Hence, ∥Fλ uk ∥ = ∥λ−1 (uk − JλT (uk −
+λGuk ))∥ = λ−1 ∥JλT xk − JλT (xk − λGλ xk )∥ ≤ ∥Gλ xk ∥. We conclude that the conclusions of Theorem 1
+and Theorem 2 still hold for ∥Fλ uk ∥2 .                                                                □
+
+  6. Numerical Experiments. We evaluate our algorithms on two numerical experiments and
+compare them with existing methods. All algorithms were implemented in Python and run on a
+MacBook Pro with a 2.8 GHz quad-core Intel Core i7 processor and 16 GB of memory.
+  6.1. Minimax optimization model. We consider the following general convex-concave min-
+imax optimization problem involving quadratic objective functions:
+                                n                      Pn                    o
+                                                     1
+                      min
+                        p1
+                           max
+                             p2
+                                 L (z, ξ) := f (z) + n  i=1 H i (z, ξ) − g(ξ) ,       (44)
+                             z∈R    ξ∈R
+
+where Hi (z, ξ) := 21 z T Ai z + z T Li ξ − 21 ξ T Bi ξ + b⊤        ⊤
+                                                             i z − ci ξ, Ai ∈ R
+                                                                                     p1 ×p1
+                                                                                            and Bi ∈ Rp2 ×p2 are symmetric
+                                                 p1 ×p2           p1            p2
+positive semidefinite matrices, Li ∈ R                   , bi ∈ R , ci ∈ R , and f = δ∆p1 and g = δ∆p2 are the
+indicator functions of the standard simplices in Rp1 and Rp2 , respectively. Let us first define x :=
+[z, ξ] ∈ Rp , where p := p1 + p2 . Next, we define
+                                                                                                     
+                                     Ai Li z                bi        Ai z + Li ξ + bi                        ∂f
+           Gi x = Gi x + gi :=                         +        =                                and T :=         .
+                                    −LTi Bi ξ               ci      −LTi z + Bi ξ + ci                        ∂g
+                                                  p         p                                                  1
+                                                                                                                 Pn
+Then, Gi is an affine mapping
+                           Pn          from    R     to PnR   , but  G i   is nonsymmetric.        Let Gx  :=  n    i=1 Gi x =
+                         1                           1
+Gx + g, where G := n i=1 Gi and g := n i=1 gi . Then, the optimality condition of (44) becomes
+0 ∈ Gx + T x as in (NI).
+    6.2. Numerical experiments. We now describe our experiment setup and results in detail.
+    Data generation and experiment setup. We generate Ai = Qi Di QTi for a given orthonormal matrix
+Qi and a diagonal matrix Di , whose diagonal entries Dij are generated from a standard normal
+distribution and clipped as max{Dij , 0}. The matrix Bi is generated in the same way, while Li ,
+bi , and ci are generated from a standard normal distribution. We generate the data so that the
+finite-sum G satisfies Condition (1).
+    We perform two sets of experiments: Experiment 1 consists of 10 problem instances with p = 100
+(p1 = 67 and p2 = 33) and n = 5000, while Experiment 2 consists of 10 problem instances with
+p = 200 (p1 = 133 and p2 = 67) and n = 10000. We then report the mean over the 10 problem
+                               k                                                k
+instances in terms of ∥Gx        ∥
+                            ∥Gx0 ∥
+                                    for (CE) and in terms of ∥G               λx ∥
+                                                                           ∥Gλ x0 ∥
+                                                                                      for (NI) due to Theorem 4, where
+x0 := 1 ∈ Rp , the vector of all ones, is the initial point and λ := L1 in (41).
+    Competitors. We implement two variants of (VFKM) to solve (44): VFKM-Svrg – a loopless
+SVRG variant using (7) and VFKM-Saga – a SAGA variant using (11). We also compare our
+methods with two deterministic optimistic gradient methods: OG – the non-accelerated OG in [28]
+and AOG – the accelerated OG in [77], RF-Saga – the variance-reduced root-finding method in
+[30], VrFRBS – the variance-reduced FRBS in [2], and VrEG – the variance-reduced extragradient
+method in [3]. These are all recently developed methods.
+                                                                                             1
+    Parameter selection. For OG and AOG, we set their stepsize η := 2L                         , where L is the cocoercivity
+                                                                        0.15        1
+constant of G. For our VFKM-Svrg, we choose β := L ≈ 6L , and for our VFKM-Saga, we set
+       1
+β := 4L   and choose Bk = B̂k . We also choose a mini-batch size of b := ⌊0.5n2/3 ⌋, and a probability
+        1
+p := n1/3 for VFKM-Svrg as suggested        √
+                                                   by our theory. We select r = 20 so that r > 2. For VrFRBS,
+                                  5×0.99(1− 1−p)
+we choose its stepsize τ :=              2L
+                                                       (five times its theoretical stepsize), and for RF-Saga, we
+                         1                                               1
+set its stepsize √λ := 4L  , which is larger than the value 8L               used in [30, Example 2.3], and for VrEG,
+              0.99 1−α                                                                                                      1
+we let τ :=       L
+                        for α := 1 − p as suggested by the corresponding theory. We also use p := n1/3
+in both algorithms, which is the same as ours, though their theory suggests smaller values of p.
+                                                 Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+18                                                                                Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+We also select the same mini-batch size b := ⌊0.5n2/3 ⌋ in these algorithms. Note that if n = 5000,
+then b = 150 and p = 0.062, but if n = 10000, then b = 239 and p = 0.0479.
+  Results for the unconstrained case. In this test, we set f = g = 0 (i.e., without constraints) so that
+our model 0 ∈ Gx + T x reduces to Gx = 0 as (CE). We test 7 algorithms in two sets of experiments:
+Experiments 1 and 2 described above. Figure 1 reports the results of these experiments after 100
+epochs. Here, the number of epochs denotes the number of passes over all components Gi .
+
+                                                  Experiment 1: n = 5000 and p = 100                                                       Experiment 2: n = 10000 and p = 200
+
+
+
+
+Relative operator norm kGxk k/kGx0 k                                                         Relative operator norm kGxk k/kGx0 k
+                                   10−1                                                                                         10−1
+
+                                   10−3                                                                                         10−3
+                                        −5
+                                   10                                                                                           10−5
+                                                 OG                                                                                        OG
+                                   10−7                                                                                         10−7
+                                                 AOG                                                                                       AOG
+                                   10−9          RF-Saga                                                                        10−9       RF-Saga
+                            10         −11       VrFRBS                                                                                    VrFRBS
+                                                                                                                         10−11
+                                                 VrEG                                                                                      VrEG
+                            10−13                                                                                        10−13
+                                                 VFKM-Svrg                                                                                 VFKM-Svrg
+                                       −15
+                            10                   VFKM-Saga                                                               10−15             VFKM-Saga
+
+                                             0      20       40       60        80     100                                             0     20        40       60       80      100
+                                                          Number of epochs                                                                          Number of epochs
+
+Figure 1. Performance of the seven algorithms for (44) in two experiments (averaged over 10 problem instances).
+
+   Figure 1 shows that our VFKM-Svrg and VFKM-Saga outperform their competitors down to a
+relative residual of approximately 10−15 . Since SAGA variants do not require full batch evaluations
+of G at reference points as in SVRG schemes, they often need fewer epochs than SVRG. However,
+as a trade-off, SAGA must store all Gi xk for i ∈ [n]. This is also the case in our methods, where
+VFKM-Saga performs better than VFKM-Svrg in terms of epochs, but requires more memory to
+store its estimator.
+   RF-Saga works quite well in this case and exhibits approximately linear convergence in these
+experiments. AOG performs well during the early epochs but is still worse than our methods and
+RF-Saga at the end. VrEG performs similarly to OG, while VrFRBS seems to have the worst
+performance in this test.
+   Note that, although we did not tune the parameters in these experiments, in Experiment 2, we
+can see that η ≈ 0.4032 for VrEG, which is larger than β ≈ 0.2783 in our methods. For VrFRBS,
+we have η ≈ 0.1113, which is five times the recommended stepsize. If we increase it to η ≈ 0.4, then
+VrFRBS occasionally diverges.
+   Results for the constrained case. Finally, we test two variants of our method (43) to solve (NI)
+and compare them with the other methods as in the first test. We test them with two sets of
+experiments as before and choose f = δ∆p1 and g = δ∆p2 defined above. The results are reported in
+Figure 2 after 100 epochs.
+   From Figure 2, we still see that both VFKM-Svrg and VFKM-Saga perform well and outperform
+the competing methods. Our VFKM-Saga still works best in this test. However, RF-Saga now
+performs similarly to both VrEG and OG. AOG still works well and behaves similarly to the first
+test. VrFRBS performs better than in the first test. Note that the stepsize we choose for RF-Saga
+        1
+is η = 4L , the same as VFKM-Saga and larger than 0.15 L
+                                                          in VFKM-Svrg.
+
+   Acknowledgments This work was partially supported by NSF RTG grant DMS-2134107
+and ONR grant N00014-23-1-2588. We are also grateful to the two anonymous reviewers for their
+invaluable comments and suggestions, which helped improve our paper.
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                                                                                                        19
+
+                                                     Experiment 1: n = 5000 and p = 100                                                              Experiment 2: n = 10000 and p = 200
+
+
+
+
+ Relative operator norm kGλ xk k/kGλ x0 k                                                       Relative operator norm kGλ xk k/kGλ x0 k
+                                        10−1                                                                                           10−1
+
+                                        10−3                                                                                           10−3
+
+                                        10−5        OG                                                                                 10−5          OG
+                                        10−7        AOG                                                                                10   −7       AOG
+                                                    RF-Saga                                                                                          RF-Saga
+                                        10−9        VrFRBS                                                                             10−9          VrFRBS
+                                10−11
+                                                    VrEG                                                                                             VrEG
+                                                                                                                               10−11
+                                                    VFKM-Svrg                                                                                        VFKM-Svrg
+                                10−13               VFKM-Saga                                                                  10−13                 VFKM-Saga
+
+                                               0       20       40       60        80     100                                                    0     20        40       60       80      100
+                                                             Number of epochs                                                                                 Number of epochs
+
+Figure 2. Performance of the seven algorithms for (44) in two experiments (averaged over 10 problem instances).
+
+
+  Appendix A: Preliminary Results. We first recall several technical results used in the
+paper and then provide the proof of Lemma 4.
+  A.1. Technical lemmas. We recall some known results used in this paper.
+
+PLemma    5 ([10], Lemma 5.31). Let {ξk }, {ζk }, and {εk } be nonnegative sequences such that
+ ∞
+ k=0 εk < +∞. In addition, for all k ≥ 0, we assume that
+
+                                      ξk+1 ≤ ξk − ζk + εk .
+                                            P∞
+Then, we conclude that limk→∞ ξk exists and k=0 ζk < +∞.
+
+PLemma    6 ([22]). Let {ξk } be nonnegative and s ≥ 0 such that limk→∞ k s+1 ξk exists and
+ ∞    s                                         s+1
+ k=0 k ξk < +∞. Then, we conclude that limk→∞ k     ξk = 0.
+    Lemma 7 (Supermartingale theorem, [71]). Let {Xk }, {αk }, {Vk } and {Rk } be sequences
+of nonnegative integrable
+                     P∞ random variables
+                                      P∞on some arbitrary probability space and adapted to the
+filtration {Fk } with k=0 αk < +∞ and k=0 Rk < +∞ almost surely, and
+
+                 E[Xk+1 | Fk ] ≤ (1 + αk )Xk − Vk + Rk , ∀k ≥ 0 almost surely.
+                                          P∞
+Then, {Xk } converges almost surely and k=0 Vk < +∞ almost surely.
+  The following lemma is Proposition 4.1 of [30]. It was proven for a demiclosed mapping G, but
+we recall it here for the case where G is continuous in a finite-dimensional space.
+  Lemma 8 (Proposition 4.1 of [30]). Suppose that G in (CE) is continuous. Let {xk } be a
+sequence of random vectors such that for all x⋆ ∈ zer(G), the sequence {∥xk − x⋆ ∥2 } converges
+almost surely to a nonnegative random variable. In addition, assume that {∥Gxk ∥} also almost
+surely converges to zero. Then, {xk } converges almost surely to a zer(G)-valued random variable.
+
+  A.2. Proof of Lemma 4. (a) The statement (a) was proven in [9, 30].
+  (b) Let AλT x := λ1 (x − JλT x) be the Moreau-Yosida approximation of λT . First, as shown in [11],
+AλT is (λ − ν)-cocoercive, provided that λ > ν. Next, since JλT x = x − λAλT x and JλT y = y − λAλT y,
+by the (λ − ν)-cocoercivity of AλT , we have
+                                                   ∥JλT x − JλT y ∥2 = ∥x − y ∥2 − 2λ⟨AλT x − AλT y, x − y ⟩ + λ2 ∥AλT x − AλT y ∥2
+                                                                      ≤ ∥x − y ∥2 − λ λ − 2ν)∥AλT x − AλT y ∥2 .
+
+Thus if λ ≥ 2ν, then ∥JλT x − JλT y ∥ ≤ ∥x − y ∥, implying that JλT is nonexpansive.
+               Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+20                                              Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+  (c) We denote u := JλT x and v := JλT y for given x, y ∈ dom(JλT ), where λ > ν. Note that u and
+v are well-defined due to Assumption 3, see [11]. Then, we have AλT x = λ1 (x − JλT x) = λ1 (x − u).
+  Now, fix any i ∈ [n]. From (41), we have AλT x = Gi,λ x − Gi u. Since AλT is (λ − ν)-cocoercive and
+AλT x = Gi,λ x − Gi u, we can show that
+            ⟨Gi,λ x − Gi,λ y − (Gi u − Gi v), x − y ⟩ ≥ (λ − ν)∥Gi,λ x − Gi,λ y − (Gi u − Gi v)∥2 .
+Using again u − λGi u = x − λGi,λ x from (41), the last inequality leads to
+       ⟨Gi,λ x − Gi,λ y, x − y ⟩ ≥ (λ − ν)∥Gi,λ x − Gi,λ y ∥2 − (λ − 2ν)⟨Gi,λ x − Gi,λ y, Gi u − Gi v ⟩
+                                    + (λ − ν)∥Gi u − Gi v ∥2 + ⟨Gi u − Gi v, x − y − λ(Gi,λ x − Gi,λ y)⟩
+                                 = (λ − ν)∥Gi,λ x − Gi,λ y ∥2 − (λ − 2ν)⟨Gi,λ x − Gi,λ y, Gi u − Gi v ⟩
+                                    + ⟨Gi u − Gi v, u − v ⟩ − ν ∥Gi u − Gi v ∥2 .
+Utilizing Lg ⟨Gi u − Gi v, u − v ⟩ ≥ ∥Gi u − Gi v ∥2 from the L1g -cocoercivity of Gi in Assumption 3, we
+can derive that
+   Te[1] := ⟨Gi,λ x − Gi,λ y, x − y ⟩
+          ≥ (λ − ν)∥Gi,λ x − Gi,λ y ∥2 + L1g − ν ∥Gi u − Gi v ∥2 − (λ − 2ν)⟨Gi,λ x − Gi,λ y, Gi u − Gi v ⟩
+                                                
+
+            4(1−Lg ν)(λ−ν)−(λ−2ν)2 Lg                      (1−L ν)             (λ−2ν)L
+        =            4(1−Lg ν)
+                                      ∥Gi,λ x − Gi,λ y ∥2 + Lgg ∥Gi u − Gi v − 2(1−Lg ν)g      Gi,λ x − Gi,λ y)∥2
+            4λ−4ν−Lg λ2
+        ≥     4(1−Lg ν)
+                        ∥Gi,λ x − Gi,λ y ∥2 .
+                                                                                                  √
+                                                       4(1−Lg ν)                              2(1− 1−Lg ν)
+This proves that Gi,λ is L1 -cocoercive with L := λ(4−Lg λ)−4ν      . Note that the condition              <
+         √                                                                                         Lg
+     2(1+ 1−Lg ν)                                                        n
+                  guarantees that L > 0. Finally, since Gλ = n1 i=1 Gi,λ , it follows immediately that
+                                                                       P
+λ<        Lg
+Gλ satisfies Condition (1).                                                                                □
+   Appendix B: Proof of Technical Results in Section 2. This appendix provides the proof
+of Lemma 1 and Lemma 2 in Section 2. For convenience, let Fk be the σ-algebra generated by all
+randomness of (VFKM) before sampling ik and Bk . We also overload the notation Ek [·] := E[· | Fk ].
+   B.1. Proof of Lemma 1. For simplicity of presentation, let ik be a Bernoulli random variable
+reflecting the switching rule (8). Let Ei [·] and EBk [·] be the conditional expectations over i and Bk ,
+respectively, conditioned on σ(Fk , ik ).
+   By the construction of GBk in (7), we have EBk [GBk wk ] = Gwk , EBk [GBk xk ] = Gxk , and
+EBk [GBk xk−1 ] = Gxk−1 . Utilizing these relations, from (7), we can show that EBk [Sek ] = S k . Taking
+the conditional expectation w.r.t. Fk and using the tower property yields the first line of (10).     k
+   Next, define Xik := Gi xk − γk Gi xk−1     − (1− γk )G      k
+                                                            i w for all i ∈ [n]. Then, we have Ei Xi       =
+                                                            n
+Gxk − γk Gxk−1 − (1 − γk )Gwk and Ei ∥Xik ∥2 = n1 j=1 ∥Gj xk − γk Gj xk−1 − (1 − γk )Gj wk ∥2 for all
+                                                       P
+i ∈ [n]. Therefore, we can show that
+                                  (7)
+             EBk [∥Sek − S k ∥2 ] = EBk ∥ 1b i∈Bk Xik − [Gxk − γk Gxk−1 − (1 − γk )Gwk ]∥2
+                                          P                                                   
+
+                                  = EBk ∥ 1b i∈Bk Xik − Ei [Xik ] ∥2
+                                          P                           
+
+                                  ○1
+                                  = b12 i∈Bk Ei [∥Xik − Ei [Xik ]∥2 ]
+                                        P
+
+                                  ○2
+                                  = b12 i∈Bk Ei [∥Xik ∥2 ] − b12 i∈Bk ∥Ei [Xik ]∥2
+                                        P                         P
+
+                                      1
+                                        Pn
+                                  = nb             k
+                                          j=1 ∥Gj x − γk Gj x
+                                                                k−1
+                                                                     − (1 − γk )Gj wk ∥2
+                                     − 1b ∥Gxk − γk Gxk−1 − (1 − γk )Gwk ∥2
+                                     1
+                                        Pn
+                                   ≤ nb             k
+                                           i=1 ∥Gi x − γk Gi x
+                                                              k−1
+                                                                  − (1 − γk )Gi wk ∥2 .
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                            21
+
+Here, 1○ holds since the b component indices in Bk are sampled independently with replacement,
+and hence the corresponding sampled vectors Xikk,j , j ∈ [b], are conditionally i.i.d., and ○
+                                                                                            2 holds due
+          k        k 2          k 2          k 2
+to Ei [∥Xi − E[Xi ]∥ ] = Ei [∥Xi ∥ ] − ∥Ei [Xi ]∥ . Taking the conditional expectation Ek [·] on both
+sides of the last relation and using the definition (9) of ∆k , we obtain the second line of (10).
+   Now, from (9) and (8), for any c > 0, by Young’s inequality, we can show that
+
+
+                   (9)
+                     1
+                             Pn
+         Eik [∆k ] = nb                      k
+                               i=1 Eik [∥Gi x − γk Gi x
+                                                       k−1
+                                                           − (1 − γk )Gi wk ∥2 ]
+                   (8) 1−p Pn
+                   = nb               k
+                             i=1 ∥Gi x − γk Gi x
+                                                k−1
+                                                    − (1 − γk )Gi wk−1 ∥2
+                          p   n         k        k−1
+                                                     − (1 − γk )Gi xk−1 ∥2
+                            P
+                       + nb   i=1 ∥Gi x − γk Gi x
+                   ○
+                   1
+                                 (1−γk )2 Pn
+                   ≤ (1+c)(1−p)
+                         nb     (1−γk−1 )2  i=1 ∥Gi x
+                                                      k−1
+                                                          − γk−1 Gi xk−2 − (1 − γk−1 )Gi wk−1 ∥2
+                                   Pn                            1−γk
+                     + (1+c)(1−p)
+                            cnb
+                                               k
+                                      i=1 ∥Gi x − γk Gi x
+                                                          k−1
+                                                              − 1−γ    (Gi xk−1 − γk−1 Gi xk−2 )∥2
+                                                                   k−1
+                        p Pn            k       k−1 2
+                     + nb     i=1 ∥Gi x − Gi x     ∥
+                   ○
+                   2
+                                     (1−γk )2
+                                                                           Pn
+                                                      1
+                                                          p + 2(1+c)(1−p)
+                                                                                     k      k−1 2
+                   ≤ (1 + c)(1 − p) (1−γ    )2
+                                               ∆k−1 + nb
+                                               k−1                 c         i=1 ∥Gi x − Gi x   ∥
+                                         2
+                             2(1+c)(1−p)γk−1 (1−γk )2   Pn
+                         +        nbc(1−γk−1 )2          i=1 ∥Gi x
+                                                                     k−1
+                                                                           − Gi xk−2 ∥2 .
+
+
+                                                                             p
+Here, we have used Young’s inequality for both 1     ○. If we choose c := 2(1−p) , then (1 + c)(1 −
+                                               ○ and 2
+                                        2                                          2
+p) = 1 − p2 , (1+c)(1−p)
+                   c
+                         = 2−3p+p
+                              p
+                                  , and 2(1+c)(1−p)
+                                             c
+                                                    + p = 4−6p+3p
+                                                              p
+                                                                  . Hence, we obtain from the last
+inequality that
+
+                                      (1−γ )2                2 Pn
+                   Eik [∆k ] ≤ 1 − p2 (1−γ k
+                                             )2
+                                                ∆k−1 + 4−6p+3p
+                                                          nbp
+                                                                          k
+                                                                 i=1 ∥Gi x − Gi x
+                                                                                 k−1 2
+                                                                                    ∥
+                                                 k−1
+
+                                     2(2−3p+p2 )γk−1
+                                                 2
+                                                     (1−γk )2 Pn
+                                   +      nbp(1−γk−1 )2        i=1 ∥Gi x
+                                                                        k−1
+                                                                            − Gi xk−2 ∥2 .
+
+
+Since ∆k depends on the fresh randomness only through ik , we have Eik [∆k | Fk ] = Ek [∆k ]. Dividing
+the preceding inequality by (1 − γk )2 yields the last inequality of (10).
+                                      2                    2
+  Finally, if we denote Θ := 4−6p+3p
+                                 bp
+                                        and Θ̂ := 2(2−3p+p
+                                                        bp
+                                                             )
+                                                               , then since γk−1 ∈ [0, 1), we can easily
+show that Se generated by (7) satisfies Definition 1 with ρ := p2 .
+             k
+                                                                                                      □
+
+    B.2. Proof of Lemma 2. For simplicity of presentation, let Ei [·] denote the expectation over
+a uniformly sampled index i ∈ [n], conditioned on Fk and Bbk , let EBk [·] denote the expectation over
+Bk , conditioned on Fk and Bbk , and let EBbk [·] denote the expectation over Bbk , conditioned on Fk .
+   First, conditioned on Fk and Bbk , the table {G   b ki }ni=1 is fixed. Since Bk is sampled independently
+of Bk , we have EBk [GBk x ] = Gx , EBk [GBk x ] = Gxk−1 , and EBk [G
+     b                         k      k          k−1                              b kB ] = 1 Pn G b ki . Using these
+                                                                                      k    n  i=1
+relations and (11), we can easily show that EBk [Sek ] = S k . Taking Ek [·] on both sides of this relation
+and using the tower property, we prove the first line of (14).
+   Next, we define Xik := Gi xk − γk Gi xk−1 − (1  − γ k )G  b ki for all i ∈ [n]. Then, conditioned on Fk and
+                                             1−γ   n      b kj and Ei [∥Xik ∥2 ] = 1 Pn ∥Gj xk − γk Gj xk−1 −
+Bbk , we have Ei [Xik ] = Gxk − γk Gxk−1 − n k j=1 G
+                                                 P
+                                                                                      n   j=1
+(1 − γk )Gb kj ∥2 . Therefore, we can derive
+               Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+22                                              Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+                                                                                  Pn b k 2
+             EBk [∥Sek − S k ∥2 ] = EBk [∥ 1b i∈Bk Xik − (Gxk − γk Gxk−1 ) + 1−γ
+                                             P
+                                                                                   j=1 Gj ∥ ]
+                                                                                k
+                                                                              n
+                                           1          k       k   2
+                                             P
+                                  = EBk [∥ b i∈Bk (Xi − Ei [Xi ])∥ ]
+                                    ○
+                                    1 1
+                                    = b Ei [∥Xik − Ei [Xik ]∥2 ]
+                                    ○
+                                    2 1
+                                    = b Ei [∥Xik ∥2 ] − 1b ∥Ei [Xik ]∥2
+                                       1
+                                         Pn            k              k−1            b kj ∥2
+                                    = nb     j=1 ∥Gj x − γk Gj x          − (1 − γk )G
+                                                                           Pn b k 2
+                                      − 1b ∥Gxk − γk Gxk−1 − 1−γ       n
+                                                                         k
+                                                                             j=1 Gj ∥
+                                       1
+                                         P   n         k             k−1             b ki ∥2 .
+                                    ≤ nb     i=1 ∥Gi x − γk Gi x         − (1 − γk )G
+
+      ○ holds since the b component indices in Bk are sampled independently with replacement,
+Here, 1
+and hence the corresponding sampled vectors are conditionally i.i.d., while ○       2 follows from the
+variance identity
+                          Ei [∥Xik − Ei [Xik ]∥2 ] = Ei [∥Xik ∥2 ] − ∥Ei [Xik ]∥2 .
+Taking the conditional expectation Ek [·] and using (13) yields the second line of (14).
+  Now, from (13) and (12), for any c > 0, we can show that
+                   (13)   1
+                               Pn
+        EBbk [∆k ] =                 b [∥Gi x
+                                                k                           b ki ∥2 ]
+                                                    − γk Gi xk−1 − (1 − γk )G
+                          nb    i=1 EBk
+                   (12)        1 Pn
+                      1 − nb nb                  k            k−1             b k−1  ∥2
+                   =                  i=1 ∥Gi x − γk Gi x         − (1 − γk )G   i
+                            1
+                              Pn
+                     + nb nb                 k
+                                  i=1 ∥Gi x − γk Gi x
+                                                         k−1
+                                                              − (1 − γk )Gi xk−1 ∥2
+                   ○
+                   1               2          Pn
+                   ≤ (1+c)(1−γ  k)
+                     nb(1−γk−1 )2
+                                     1 − nb       i=1 ∥Gi x
+                                                             k−1
+                                                                 − γk−1 Gi xk−2 − (1 − γk−1 )G  b k−1
+                                                                                                  i   ∥2
+                                       Pn                                 1−γk
+                     + 1+c
+                         cnb
+                               1 − nb                 k
+                                           i=1 ∥Gi x − γk Gi x
+                                                                  k−1
+                                                                       − 1−γ       (Gi xk−1 − γk−1 Gi xk−2 )∥2
+                                                                             k−1
+                             Pn
+                     + n12 i=1 ∥Gi xk − Gi xk−1 ∥2
+                   ○
+                   2               2                                             Pn
+                   ≤ (1+c)(1−γ  k)                                    b 2(1+c)
+                                           b
+                                                       1                                   k       k−1 2
+                       (1−γk−1 ) 2   1 −   n
+                                               ∆k−1  +   n 2  +  1 −  n   cnb        i=1 ∥Gi x − Gi x    ∥
+                                 2           2
+                         2(1+c)γk−1 (1−γk )            Pn
+                     + cnb(1−γ          )2
+                                               1 − nb      i=1 ∥Gi x
+                                                                     k−1
+                                                                          − Gi xk−2 ∥2 ,
+                                       k−1
+
+
+where ○1 and 2○ follow from Young’s inequality, and EBb [·] is the expectation associated with the
+                                                                  k
+update rule (12). In particular, since Bbk is sampled uniformly without replacement with |Bbk | = b,
+                                                               b                                     b2
+we have P(i ∈ Bbk | Fk ) = nb for i ∈ [n]. If we choose c := 2n  , then (1 − nb )(1 + c) = 1 − 2n
+                                                                                                b
+                                                                                                  − 2n          b
+                                                                                                       2 ≤ 1 − 2n .
+Hence, we can upper bound the last inequality as follows:
+                                     (1−γ )2                          2 Pn
+            EBbk [∆k ] ≤ 1 − 2n   b
+                                     (1−γ
+                                           k
+                                              )2
+                                                 ∆k−1 + 2(n−b)(b+2n)+b
+                                                              n2 b 2
+                                                                                      k
+                                                                           i=1 ∥Gi x − Gi x
+                                                                                              k−1 2
+                                                                                                  ∥
+                                             k−1
+                                                2
+                                 2(n−b)(b+2n)γk−1  (1−γk )2 Pn
+                               +      n2 b2 (1−γk−1 )2       i=1 ∥Gi x
+                                                                      k−1
+                                                                          − Gi xk−2 ∥2 .
+
+Since ∆k depends on the fresh randomness at iteration k only through Bbk , we have EBbk [∆k ] =
+Ek [∆k ]. Therefore, dividing the preceding inequality by (1 − γk )2 and noting that γk−1
+                                                                                      2
+                                                                                          ≤ 1, we get
+                                                       2
+                                         2(n−b)(b+2n)+b            2(n−b)(b+2n)
+the last inequality of (14), where Θ :=        nb2
+                                                         and Θ̂ :=     nb2
+                                                                                .
+                                                      k
+   Finally, using (14), one can easily check that S generated by (11) satisfies Definition 1 with
+                                                     e
+      b
+ρ := 2n  ∈ (0, 1).                                                                                 □
+  Appendix C: Proof of Theoretical Results for (VFKM) in Section 3.                                        We prove
+Lemma 3 and provide technical lemmas for proving Theorems 1 and 2.
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                           23
+
+   C.1. Proof of Lemma 3.              Fix x⋆ ∈ zer(G). We first introduce the following functions:
+
+                          Qk := ∥r(xk − x⋆ ) + tk+1 (xk+1 − xk )∥2 + µr∥xk − x⋆ ∥2 ,
+                                                                                                             (45)
+                          Lk := 4rβ(tk − µ) ⟨Gxk , xk − x⋆ ⟩ − β ∥Gxk ∥2 + Qk .
+Then, we can split the proof of Lemma 3 into two steps in Lemma 9 and Lemma 10.
+  Lemma 9.        Let us choose parameters tk , θk , γk , ηk , and β such that
+
+               tk − r − tk+1 θk − µ = 0, (1 − γk )tk+1 θk − rγk = 0, and 2β(tk − µ) = ηk tk+1 .                (46)
+
+Then, for Qk defined by (45) and ek := Sek − S k , we have
+                                                                             
+    Qk−1 − Ek Qk = (tk − r)2 − t2k+1 θk2 + µr ∥xk − xk−1 ∥2 − ηk2 t2k+1 Ek ∥ek ∥2
+                                                               
+                       + 2rηk tk+1 ⟨Gxk , xk − x⋆ ⟩ − β ∥Gxk ∥2
+                                                                                                             (47)
+                       − 2rγk ηk tk+1 ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2
+                             + 2ηk t2k+1 θk ⟨Gxk − Gxk−1 , xk − xk−1 ⟩ − γk ηk2 t2k+1 ∥Gxk − Gxk−1 ∥2 .
+  Proof. First, a direct expansion gives
+             T[1] := ∥r(xk−1 − x⋆ ) + tk (xk − xk−1 )∥2 = ∥r(xk − x⋆ ) + (tk − r)(xk − xk−1 )∥2
+                   = r2 ∥xk − x⋆ ∥2 + (tk − r)2 ∥xk − xk−1 ∥2 + 2r(tk − r)⟨xk − xk−1 , xk − x⋆ ⟩.
+
+Alternatively, using (VFKM), we can expand
+
+           T[2] := ∥r(xk − x⋆ ) + tk+1 (xk+1 − xk )∥2
+               (VFKM)
+                 = ∥r(xk − x⋆ ) + tk+1 θk (xk − xk−1 ) − ηk tk+1 Sek ∥2
+                 = r2 ∥xk − x⋆ ∥2 + t2k+1 θk2 ∥xk − xk−1 ∥2 + ηk2 t2k+1 ∥Sek ∥2 − 2rηk tk+1 ⟨Sek , xk − x⋆ ⟩
+                      + 2rtk+1 θk ⟨xk − xk−1 , xk − x⋆ ⟩ − 2ηk t2k+1 θk ⟨Sek , xk − xk−1 ⟩.
+Moreover, for any µ > 0, we also have
+
+              µr∥xk−1 − x⋆ ∥2 − µr∥xk − x⋆ ∥2 = µr∥xk − xk−1 ∥2 − 2µr⟨xk − x⋆ , xk − xk−1 ⟩.
+
+Combining the three last expressions, and using Qk from (45), we get
+                                                    
+               Qk−1 − Qk = (tk − r)2 − t2k+1 θk2 + µr ∥xk − xk−1 ∥2 − ηk2 t2k+1 ∥Sek ∥2
+                                     + 2r(tk − r − tk+1 θk − µ)⟨xk − xk−1 , xk − x⋆ ⟩
+                                     + 2rηk tk+1 ⟨Sek , xk − x⋆ ⟩ + 2ηk t2k+1 θk ⟨Sek , xk − xk−1 ⟩.
+
+Since Qk−1 , xk−1 , and xk are Fk -measurable, taking the conditional expectation Ek [·] on both sides
+of this expression, we obtain
+                                                      
+           Qk−1 − Ek [Qk ] = (tk − r)2 − t2k+1 θk2 + µr ∥xk − xk−1 ∥2 − ηk2 t2k+1 Ek [∥Sek ∥2 ]
+                                  + 2r(tk − r − tk+1 θk − µ)⟨xk − xk−1 , xk − x⋆ ⟩                             (48)
+                                                                                                   
+                                  + 2rηk tk+1 Ek ⟨Sek , xk − x⋆ ⟩ + 2ηk t2k+1 θk Ek ⟨Sek , xk − xk−1 ⟩ .
+
+Since S k = Gxk − γk Gxk−1 and ek = Sek − S k , we have Sek = S k + ek and Ek [ek ] = 0 as Sek is an
+unbiased estimator of S k stated in (6). Therefore, we can show that
+               Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+24                                              Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+                            
+          Ek ⟨Sek , xk − x⋆ ⟩ = ⟨S k , xk − x⋆ ⟩ + ⟨Ek [ek ], xk − x⋆ ⟩ = ⟨S k , xk − x⋆ ⟩
+                               = ⟨Gxk , xk − x⋆ ⟩ − γk ⟨Gxk−1 , xk − x⋆ ⟩
+                               = ⟨Gxk , xk − x⋆ ⟩ − γk ⟨Gxk−1 , xk−1 − x⋆ ⟩ − γk ⟨Gxk−1 , xk − xk−1 ⟩.
+Similarly, we can also derive that
+                               
+           Ek ⟨Sek , xk − xk−1 ⟩ = ⟨S k , xk − xk−1 ⟩ + ⟨Ek [ek ], xk − xk−1 ⟩ = ⟨S k , xk − xk−1 ⟩
+                                    = ⟨Gxk − Gxk−1 , xk − xk−1 ⟩ + (1 − γk )⟨Gxk−1 , xk − xk−1 ⟩.
+Again,
+   k since
+             Sek is an unbiased
+                                   estimator of S k as
+                                                        stated
+                                                                                 k    ek S k , we have
+                                                                             ke 2 = S −
+                                                              kin2 (6), and
+        2                 k 2       k 2
+Ek ∥S ∥ = Ek ∥S + e ∥ = ∥S ∥ + 2Ek ⟨e , S ⟩ + Ek ∥e ∥ = Ek ∥e ∥ + ∥S k ∥2 . Therefore,
+     e                k                          k   k
+
+we can easily show that
+                                                                                 
+                 Ek ∥Sek ∥2 = ∥S k ∥2 + Ek ∥ek ∥2 = ∥Gxk − γk Gxk−1 ∥2 + Ek ∥ek ∥2
+                                                                                       
+                             = ∥Gxk ∥2 − 2γk ⟨Gxk , Gxk−1 ⟩ + γk2 ∥Gxk−1 ∥2 + Ek ∥ek ∥2
+                               = (1 − γk )∥Gxk ∥2 − γk (1 − γk )∥Gxk−1 ∥2
+                                                                   
+                                 + γk ∥Gxk − Gxk−1 ∥2 + Ek ∥ek ∥2 .
+Substituting the last three expressions into (48), we can derive that
+                                                                                 
+        Qk−1 − Ek Qk = (tk − r)2 − t2k+1 θk2 + µr ∥xk − xk−1 ∥2 − ηk2 t2k+1 Ek ∥ek ∥2
+                                                                   
+                           + 2rηk tk+1 ⟨Gxk , xk − x⋆ ⟩ − β ∥Gxk ∥2
+                                                                            
+                           − 2rγk ηk tk+1 ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2
+                               + 2ηk t2k+1 θk ⟨Gxk − Gxk−1 , xk − xk−1 ⟩ − γk ηk2 t2k+1 ∥Gxk − Gxk−1 ∥2
+                                                (1−γk )ηk tk+1 
+                               + 2rηk tk+1 β −         2r
+                                                                 ∥Gxk ∥2
+                                                   (1−γk )ηk tk+1
+                               − 2rγk ηk tk+1 β −         2r
+                                                                   ]∥Gxk−1 ∥2
+                               + 2r(tk − r − tk+1 θk − µ)⟨xk − xk−1 , xk − x⋆ ⟩
+                                                               
+                               + 2ηk tk+1 (1 − γk )tk+1 θk − rγk ⟨Gxk−1 , xk − xk−1 ⟩.
+Under the conditions in (46), we have tk − r − tk+1 θk − µ = 0, (1 − γk )tk+1 θk − rγk = 0, and
+(1−γk )ηk tk+1      η t          η t
+               = 2(t k k+1     = 2(tk k+1  = β. Substituting these identities into the above expression, the
+      2r            k+1 θk +r)       k −µ)
+last four terms vanish. Thus, we obtain (47).                                                             □
+     Lemma 10.  If tk , θk , γk , and ηk are updated as in (15), then we have
+                                                                                   
+             Lk−1 − Ek Lk ≥ µ(2tk − r − µ)∥xk − xk−1 ∥2 − 4β 2 (tk − µ)2 Ek ∥ek ∥2
+                                                                                          
+                                   + 4rβ(tk−1 − tk + r) ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2                       (49)
+                                   + 4β(tk − µ)(tk − r − µ) L1 − β Uk ,
+                                                                  
+                                            Pn
+where Lk is defined by (45) and Uk := n1 i=1 ∥Gi xk − Gi xk−1 ∥2 .
+   Proof. A direct calculation shows that the update rules in (15) guarantee the three conditions
+in (46). Utilizing θk , γk , and ηk from (15) we can rewrite (47) as follows:
+                                                                                      
+                Qk−1 − Ek Qk = µ(2tk − r − µ)∥xk − xk−1 ∥2 − 4β 2 (tk − µ)2 Ek ∥ek ∥2
+                                                                               
+                                     + 4rβ(tk − µ) ⟨Gxk , xk − x⋆ ⟩ − β ∥Gxk ∥2
+                                                                                         
+                                     − 4rβ(tk − r − µ) ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2
+                                      + 4β(tk − µ)(tk − r − µ)⟨Gxk − Gxk−1 , xk − xk−1 ⟩
+                                      − 4β 2 (tk − µ)(tk − r − µ)∥Gxk − Gxk−1 ∥2 .
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                      25
+
+Rearranging the last expression, and then using Lk from (45), we can show that
+                                                                               
+            Lk−1 − Ek Lk = µ(2tk − r − µ)∥xk − xk−1 ∥2 − 4β 2 (tk − µ)2 Ek ∥ek ∥2
+                                                                                      
+                               + 4rβ(tk−1 − tk + r) ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2
+                                      + 4β(tk − µ)(tk − r − µ)⟨Gxk − Gxk−1 , xk − xk−1 ⟩
+                                      − 4β 2 (tk − µ)(tk − r − µ)∥Gxk − Gxk−1 ∥2 .
+
+By Condition (1) and Jensen’s inequality in 1
+                                            ○, we have
+
+                                                     (1)      Pn
+                                                   1
+                     ⟨Gxk − Gxk−1 , xk − xk−1 ⟩ ≥ nL                        k
+                                                                   i=1 ∥Gi x − Gi x   ∥ = L1 Uk ,
+                                                                                   k−1 2
+                                                                                                          (50)
+                                                     ○
+                                                     1            Pn
+                     −∥Gx − Gxk      k−1 2
+                                        ∥            ≥     − n1    i=1 ∥Gi x
+                                                                               k        k−1 2
+                                                                                   − Gi x   ∥ = −Uk .
+
+Applying (50), we can lower bound the last estimate to obtain (49).                                         □
+                                                                                                2
+  Proof of Lemma 3. First, since γk = tkt−r−µ        , we have (1 − γk )2 = (t r−µ)2 . From (6), ρ ∈ (0, 1),
+                                                k −µ                          k
+and the definitions of ek := Sek − S k and Uk , we can show that
+
+               Ek [∥ek ∥2 ]      ≤ Ek [∆k ],
+               (tk − µ) Ek [∆k ] ≤ 1−ρ
+                                                                            
+                        2
+                                    ρ
+                                        (tk−1 − µ)2 ∆k−1 − (tk − µ)2 Ek [∆k ]                             (51)
+                                                                                           2
+                                                                                      k −µ)
+                                   + ρ1 Θ̂(tk−1 − µ)2 Uk−1 − Θ̂(tk − µ)2 Uk + (Θ+Θ̂)(t
+                                                                           
+                                                                                    ρ
+                                                                                             Uk .
+
+Substituting the two inequalities in (51) into (49), we obtain
+
+                Lk−1 − Ek [Lk ] ≥ µ(2tk − r − µ)∥xk − xk−1 ∥2
+                                                                                         
+                                  + 4rβ(tk−1 − tk + r) ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2
+                                                 h                 β(Θ+Θ̂) i
+                                  + 4β(tk − µ)2 (t(tk −r−µ) 1
+                                                              − β  − ρ        Uk
+                                                      k −µ) L
+                                       2
+                                  − 4β (1−ρ)
+                                                                                  
+                                         ρ
+                                              (tk−1 − µ)2 ∆k−1 − (tk − µ)2 Ek [∆k ]
+                                       2
+                                  − 4βρ Θ̂(tk−1 − µ)2 Uk−1 − Θ̂(tk − µ)2 Uk .
+                                                                            
+
+Rearranging this inequality, and using Ek from (16), we obtain (17).           □
+   C.2. Technical lemmas for proving Theorems 1 and 2. We need the following two
+technical lemmas to prove Theorem 1 and Theorem 2.
+  Lemma 11.         Under the same conditions and parameters as in Theorem 1, Ek defined by (16)
+satisfies                                             
+                              E0 ≤ r 1 + 3r + 8rL2 β 2 ∥x0 − x⋆ ∥2 = C0 ∥x0 − x⋆ ∥2 ,                     (52)
+where C0 := r(1 + 3r + 8rL2 β 2 ) as defined in (18).
+                                         2rβ
+   Proof. Since x−1 = x0 , U0 = 0, η0 = r+2  , γ0 = 0, ∆0 = 0, t1 = r + 2, and Se0 = S 0 = Gx0 , (16)
+leads to
+                                            
+         E0 = 4r2 β ⟨Gx0 , x0 −x⋆ ⟩−β ∥Gx0 ∥2 + ∥r(x0 − x⋆) + (r+2)(x1 −x0 )∥2 + r∥x0 − x⋆ ∥2 .
+
+From (VFKM), x−1 = x0 , and Se0 = (1 − γ0 )Gx0 , we also have x1 − x0 = θ0 (x0 − x−1 ) − η0 Se0 =
+  2rβ
+− r+2 Gx0 . By Young’s inequality and ∥Gx0 ∥2 = ∥Gx0 − Gx⋆ ∥2 ≤ L2 ∥x0 − x⋆ ∥2 (by the L-Lipschitz
+continuity of G derived from (1) and Gx⋆ = 0), we have
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+26                                             Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+                  ∥r(x0 − x⋆ ) + (r + 2)(x1 − x0 )∥2 ≤ 2r2 ∥x0 − x⋆ ∥2 + 2(r + 2)2 ∥x1 − x0 ∥2
+                                                         = 2r2 ∥x0 − x⋆ ∥2 + 8r2 β 2 ∥Gx0 ∥2
+                                                                           
+                                                         ≤ 2r2 1 + 4L2 β 2 ∥x0 − x⋆ ∥2 .
+By Young’s inequality, we also have
+                                                      1                            1
+          ⟨Gx0 , x0 − x⋆ ⟩ − β ∥Gx0 ∥2 ≤ β ∥Gx0 ∥2 + 4β ∥x0 − x⋆ ∥2 − β ∥Gx0 ∥2 = 4β ∥x0 − x⋆ ∥2 .
+Combining the last three expressions, we can show that
+                                              
+                      E0 ≤ r 1 + 3r + 8rL2 β 2 ∥x0 − x⋆ ∥2 = C0 ∥x0 − x⋆ ∥2 ,
+where C0 := r(1 + 3r + 8rL2 β 2 ) is defined in (18). This proves (52).                                           □
+     Lemma 12.      Under the same conditions and parameters as in Theorem 1, let
+                                                                                 2               2   2   2
+           Wk := (k+r −1)(k+r+2)∥xk+1−xk +ηk Gxk ∥2 + 4β (1−ρ)(k+r)
+                                                                  ρ
+                                                                      ∆k + 4β Θ̂(k+r)
+                                                                                ρ
+                                                                                      Uk ,                      (53)
+              Pn
+where Uk := n1 i=1 ∥Gi xk − Gi xk−1 ∥2 . Then, for all k ≥ 1, we have
+                      Ek [Wk ] ≤ Wk−1 − (r − 2)(k + r + 1)∥xk − xk−1 + ηk−1 Gxk−1 ∥2
+                                                                         2                   2                  (54)
+                                   + 2(2k+r+1)
+                                         r
+                                               ∥xk − xk−1 ∥2 + 4β (Θ+Θ̂)(k+r)
+                                                                     ρ
+                                                                              Uk .
+Moreover, we also have
+                              P∞            2         (Θ+Θ̂) P∞          2
+                                 k=1 (k + r) E[∆k ] ≤   ρ     k=1 (k + r) E[Uk ].
+                                                                                                                (55)
+
+  Proof. Since Sek = S k + ek = Gxk − γk Gxk−1 + ek for ek := Sek − S k , we obtain from (VFKM)
+that xk+1 = xk + θk (xk − xk−1 ) − ηk Gxk + ηk γk Gxk−1 − ηk ek . If we denote v k := xk+1 − xk + ηk Gxk
+and sk := ηηk γk , then this expression is equivalent to
+            k−1
+
+                                                           k −sk
+                               v k = sk v k−1 + (1 − sk ) θ1−s   (xk − xk−1 ) − ηk ek .
+                                                                k
+
+                                                  (k+r+1)k                                        (θk −sk )2
+Leveraging (19), we can easily check that sk = (k+r−1)(k+r+2) ∈ (0, 1) and                          1−sk
+                                                                                                             =
+             4k2                                                                 2       k              k 2
+[rk+(r−1)(r+2)](k+r−1)(k+r+2)
+                              . Utilizing these expressions, the convexity of ∥·∥ , Ek [e ] = 0, Ek [∥e ∥ ] ≤
+Ek [∆k ], and ηk from (15), we can derive that
+                                                            k −sk
+                     Ek [∥v k ∥2 ] = ∥sk v k−1 + (1 − sk ) θ1−s   (xk − xk−1 )∥2 + ηk2 Ek [∥ek ∥2 ]
+                                                                k
+                                                         −sk )2
+                                 ≤ sk ∥v   k−1 2
+                                              ∥    + (θk1−s     ∥xk − xk−1 ∥2 + ηk2 Ek [∆k ]
+                                                           k
+                                                                     2               2
+                                      (k+r+1)k
+                                 = (k+r−1)(k+r+2) ∥v k−1 ∥2 + 4β (k+r)
+                                                                       E [∆k ]
+                                                              (k+r+2)2 k
+                                                          2
+                                                   4k
+                                    + [rk+(r−1)(r+2)](k+r−1)(k+r+2) ∥xk − xk−1 ∥2
+                                                                             2           2
+                                      (k+r+1)k                   4β (k+r)
+                                 ≤ (k+r−1)(k+r+2) ∥v k−1 ∥2 + (k+r−1)(k+r+2) Ek [∆k ]
+                                         2(2k+r+1)
+                                    + r(k+r−1)(k+r+2) ∥xk − xk−1 ∥2 .
+
+Here, we have used k + r − 1 ≤ k + r + 2 and 4rk 2 ≤ 2(2k + r + 1)[rk + (r − 1)(r + 2)] in the last
+inequality. Multiplying this inequality by (k + r − 1)(k + r + 2), we obtain
+                  (k + r − 1)(k + r + 2) Ek [∥v k ∥2 ] ≤ (k + r − 2)(k + r + 1)∥v k−1 ∥2
+                                            − (r − 2)(k + r + 1)∥v k−1 ∥2 + 4β 2 (k + r)2 Ek [∆k ]
+                                            + 2(2k+r+1)
+                                                  r
+                                                        ∥xk − xk−1 ∥2 .
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                             27
+                                                                                                      Pn
+Next, recalling (51) from the proof of Lemma 3 with tk − µ = k + r and Uk = n1                                     k
+                                                                                                          i=1 ∥Gi x −
+Gi xk−1 ∥2 , we get
+                (k + r)2 Ek [∆k ] ≤ (1−ρ)
+                                                                                
+                                      ρ
+                                           (k + r − 1)2 ∆k−1 − (k + r)2 Ek [∆k ]
+                                                                                       2                         (56)
+                                    + Θ̂ρ (k + r − 1)2 Uk−1 − (k + r)2 Uk + (Θ+Θ̂)(k+r)
+                                                                        
+                                                                                   ρ
+                                                                                         Uk .
+Combining (56) and the last inequality, and using Wk from (53), we obtain (54).
+  Finally, taking the total expectation on both sides of (56), and summing the result from k = 1
+to K, and noting that ∆0 = 0 and U0 = 0, we get
+                PK                     (1−ρ)r 2 ∆0       2             PK
+                             2
+                  k=1 (k + r) E[∆k ] ≤       ρ
+                                                   + Θ̂rρ U0 + (Θ+ρ Θ̂) k=1 (k + r)2 E[Uk ]
+                                               PK
+                                     = (Θ+ρ Θ̂) k=1 (k + r)2 E[Uk ].
+Letting K → ∞, we obtain (55).                                                                                     □
+  Lemma 13.         Under the same conditions and parameters as in Theorem 1, let
+                                                               2           2         2        2
+                    Zk := (k + r + 2)2 ∥xk+1 − xk ∥2 + 4β (1−ρ)(k+r)
+                                                             ρ
+                                                                     ∆k + 4β Θ̂(k+r)
+                                                                               ρ
+                                                                                     Uk ,                        (57)
+                 Pn
+where Uk := n1               k
+                    i=1 ∥Gi x − Gi x
+                                    k−1 2
+                                       ∥ . Then, we have
+                                                                               2          2
+                       Ek [Zk ] ≤ Zk−1 + 4rβ 2 (2k + r + 3)∥Gxk ∥2 + 4β (Θ+Θ̂)(k+r)
+                                                                           ρ
+                                                                                    Uk .                         (58)
+
+   Proof. Since xk+1 − xk = θk (xk − xk−1 ) − ηk (Gxk − γk Gxk−1 ) − ηk ek from (VFKM) with ek =
+Sek − S k and Ek [ek ] = 0, we can derive that
+                  Ek [∥xk+1 − xk ∥2 ] = θk2 ∥xk − xk−1 ∥2 − 2θk ηk ⟨Gxk − γk Gxk−1 , xk − xk−1 ⟩
+                                          + ηk2 ∥Gxk − γk Gxk−1 ∥2 + ηk2 Ek [∥ek ∥2 ]
+                                       = θk2 ∥xk − xk−1 ∥2 − 2θk ηk γk ⟨Gxk − Gxk−1 , xk − xk−1 ⟩
+                                          − 2θk ηk (1 − γk )⟨Gxk , xk − xk−1 ⟩
+                                          + ηk2 ∥Gxk − γk Gxk−1 ∥2 + ηk2 Ek [∥ek ∥2 ].
+By Young’s inequality in ○
+                         1 , Condition (1), and the definition of Uk , we have
+
+                                                     ○
+                                                     1
+                                                                1
+                     −2⟨Gxk , xk − xk−1 ⟩       ≤ 2β ∥Gxk ∥2 + 2β ∥xk − xk−1 ∥2 ,
+                                                (1)   Pn
+                                                    1
+                     ⟨Gxk − Gxk−1 , xk − xk−1 ⟩ ≥ nL            k
+                                                       i=1 ∥Gi x − Gi x    ∥ = L1 Uk .
+                                                                        k−1 2
+
+
+Moreover, by Young’s inequality again in 1
+                                         ○, we also have
+
+           ∥Gxk − γk Gxk−1 ∥2 = (1 − γk )∥Gxk ∥2 − γk (1 − γk )∥Gxk−1 ∥2 + γk ∥Gxk − Gxk−1 ∥2
+                                  ○
+                                  1
+                                  ≤ (1 − γk )∥Gxk ∥2 − γk (1 − γk )∥Gxk−1 ∥2 + γk Uk .
+Combining the last four expressions, and then using Ek [∥ek ∥2 ] ≤ Ek [∆k ], we get
+                                           (1−γk )
+          Ek [∥xk+1 − xk ∥2 ] ≤ θk2 + θk ηk2β
+                                                   k
+                                                    ∥x − xk−1 ∥2
+                                      + ηk (1 − γk )(2βθk + ηk )∥Gxk ∥2 − γk (1 − γk )ηk2 ∥Gxk−1 ∥2
+                                      − γk ηk 2θLk − ηk Uk + ηk2 Ek [∆k ].
+                                                       
+
+                                                                     (1−γk )
+Next, from the update rule (19), we can easily check that θk2 + θk ηk2β         k(k+r)
+                                                                             = (k+r+2) 2 , ηk (1 − γk )(2βθk +
+       4β 2 r(2k+r)                  4β 2 rk         2θk              2k          (k+r)Lβ           2k
+                               2
+                                                                                           
+ηk ) = (k+r+2)2 , γk (1 − γk )ηk = (k+r+2)2 > 0, and L − ηk = (k+r+2)L 1 −           k
+                                                                                             ≥ (k+r+2)L    1−
+               Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+28                                              Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+         
+(r + 1)Lβ > 0 due to 0 < β < β̄ in (18). Using these relations and dropping the term with Uk , we
+can derive from the last inequality that
+                                                                 2                       2        2
+                                  k(k+r)
+           Ek [∥xk+1 − xk ∥2 ] ≤ (k+r+2)     k
+                                         2 ∥x − x   ∥ + 4β(k+r+2)
+                                                 k−1 2      r(2k+r)   k 2  4β (k+r)
+                                                                 2 ∥Gx ∥ + (k+r+2)2 Ek [∆k ].
+
+
+
+Multiplying this inequality by (k + r + 2)2 and noting that k(k + r) ≤ (k + r + 1)2 and 2k + r ≤
+2k + r + 3, one can further derive
+
+             (k + r + 2)2 Ek [∥xk+1 − xk ∥2 ] ≤ (k + r + 1)2 ∥xk − xk−1 ∥2 + 4β 2 (k + r)2 Ek [∆k ]
+                                                  + 4rβ 2 (2k + r + 3)∥Gxk ∥2 .
+
+Combining this inequality and (56), and using the definition (57) of Zk , we get (58).                             □
+
+     C.3. Proof of Corollaries 1 and 2.             We now prove Corollaries 1 and 2.
+  Proof of Corollary 1. Since 4 − 6p + 3p2 ≤ 4 and 2 − 3p + p2 ≤ 2, by Lemma 1, Sek constructed
+by (7) still satisfies Definition 1 with ρ = p2 , Θ := bp
+                                                        4              4
+                                                          , and Θ̂ := bp . Hence, with r := 3, we can show
+                                       2                             2
+                      ρ              bp                           bp
+that β := β̄2 = 2L[ρ+4(Θ+ Θ̂)]
+                               = 2L(bp                    β                                     2
+                                       2 +64) , and Λ = 2L = 4L2 (bp2 +64) . Suppose that 1 ≤ bp ≤ 32. Then,
+                                        2
+            1           1
+                          and ψ = 4β (Θ+      Θ̂)     64     2
+                                                                
+we have 130L   ≤ β ≤ 6L                   ρΛ
+                                                  = 64+bp2 ∈ 3,1 .
+  Using the bounds of β and ψ, and r := 3, we can show from (18) that
+                                                                             2 2
+                                                                 C1 := 72L5 β +       2
+                                                                                             
+           C0 := 3(10 + 24L2 β 2 ) ≤ 32,                                              3
+                                                                                        +ψ       C0 ≤ 53.8,
+           C2 := 36L2 β 2 + 50 + ψ C0 + 100C                     C3 := 25(C18
+                                                                           1 +C2 )
+                                    
+                            3             3
+                                            1
+                                              ≤ 2360,                              ≤ 3353.
+
+Therefore, we obtain (35) from (21) and (22).
+                                               2
+   Finally, since C3 = O (1) and β = O bpL , from (35), to guarantee E ∥Gxk ∥2 ≤ ϵ2 , we can impose
+                                                                                  
+  C3 L2 R2
+             ≤ ϵ2 , where R0 := ∥x0 − x⋆ ∥. This leads to k = O LR
+                                                                     
+         0
+b2 p4 (k+2)2
+                                                                   0
+                                                                bp2
+                                                                   ϵ
+                                                                       . Hence, the expected number of
+                                                         LR0 n   1
+                                                                                                     
+evaluations of Gi is E[TGi ] = n+(pn+3b)k = O n+ ϵ bp + p2 . Clearly, if we choose b = O n2/3
+                                                     2/3
+                1
+                      , then we get E[TGi ] = O n + n ϵLR0 .
+                                                          
+and p = O n1/3                                                                                      □
+  Proof of Corollary 2. Since 2(n − b)(2n + b) + b2 ≤ 4n2 and 2(n − b)(2n + b) ≤ 4n2 , by
+Lemma 2, Sek constructed by (11) still satisfies Definition 1 with ρ = 2n          b
+                                                                                      , Θ := 4n
+                                                                                              b2
+                                                                                                 , and Θ̂ := 4nb2
+                                                                                                                   .
+                                                                           3
+Hence, for r := 3, we can show that β := β̄2 = 2L[ρ+4(Θ+  ρ
+                                                                     =   3
+                                                                          b
+                                                                               2 .   If 1 ≤ b ≤   min { n, 4n2/3
+                                                                                                                 } ,
+                   1            1                β          b3
+                                                                   2L(b 1+64n ) 1 
+                                                                Θ̂)]
+then we have 2L(1+64n2 ) ≤ β ≤ 4L and Λ := 2L = O L2 n2 ∈ 4L2 (1+64n2 ) , 4L2 . Hence, it is easy to
+                              2
+                                            64n2
+check that Lβ ≤ 14 and ψ := 4β (Θ+ Θ̂)
+                                                       1 
+                                ρΛ
+                                       = (64n 2 +b3 ) ∈ 2 , 1 .
+  Using the bounds of β and ψ, and r := 3 we can show from (18) that
+                                                                             2 2
+                                                                 C1 := 72L5 β +       2
+                                                                                             
+           C0 := 3(10 + 24L2 β 2 ) ≤ 34.5,                                            3
+                                                                                        +ψ       C0 ≤ 58.4,
+                                                                          25(C1 +C2 )
+           C2 := 36L2 β 2 + 50 + ψ C0 + 100C
+                                    
+                            3              3
+                                             1
+                                               ≤ 2559,           C3 :=        18
+                                                                                      ≤ 3636.
+
+Thus we obtain (36) from (21) and (22).       
+                                            b3
+                                                                                 k 2
+                                                                                      
+  Finally, since C3 = O (1) and β = O Ln      2 , from (36), to guarantee E ∥Gx ∥       ≤ ϵ2 , we can
+        C L2 R20n
+                  4
+                      2                       n2 LR0
+                                                     
+impose b36 (k+2) 2 ≤ ϵ . This leads to k = O    b3 ϵ
+                                                       . Hence, the expected number of evaluations of
+                                  n2 LR0
+                                                                          
+Gi is E[TGi ] = n + 2bk = O n + b2 ϵ . Clearly, if we choose b = O n2/3 , then we obtain E[TGi ] =
+        2/3
+O n + n ϵLR0 .
+                
+                                                                                                    □
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                            29
+
+  Appendix D: Proof of Theoretical Results for (VFKM) in Section 4.                                  First, we prove
+the following key lemma.
+  Lemma 14. Suppose that G in (CE) satisfies Condition (1) and Assumption 2. Given s, r,
+and β such that s − 1 > r > (s − 1)ρ and 4rs2 > 2(s − 1)(2s − r − 1), and
+                          0 < βσ ≤ 4rs(2r+1)(2s−r−1)
+                                      2 −2(s−1)(2s−r−1)      and                  (2r+1)ρ
+                                                                       0 < βσ < 2[r−ρ(s−1)] .                  (59)
+Let {xk } be generated by (VFKM) to solve (CE) using an estimator Sek for S k satisfying Definition 1
+and the following fixed parameters:
+                       θk = θ := s−r−1
+                                   s
+                                       ,     γk = γ := s−r−1
+                                                        s−1
+                                                             ,      and     ηk = η := 2β(s−1)
+                                                                                         s
+                                                                                              .                (60)
+             2rβσ
+For ω := 2r+1+2βσ(s−1) , consider the following Lyapunov function:
+                                                        
+            Ek := 4rβ(s − 1) ⟨Gxk , xk − x⋆ ⟩ − β ∥Gxk ∥2 + ∥r(xk − x⋆ ) + s(xk+1 − xk )∥2
+                                             2           2         2        2                                  (61)
+                      + r∥xk − x⋆ ∥2 + 4β (1−ρ)(s−1)
+                                            ρ−ω
+                                                     ∆k + 4β Θ̂(s−1)
+                                                             ρ−ω
+                                                                     Uk ,
+                 Pn
+where Uk := n1               k
+                    i=1 ∥Gi x − Gi x
+                                    k−1 2
+                                       ∥ . Then, for all k ≥ 1, we have
+                                             4βr 2 (2r+1)    1
+                                                                
+                 Ek Ek ≤ (1 − ω)Ek−1 − 2r+1+2βσ(s−1)        2L
+                                                               − β ∥Gxk−1 ∥2 − αUk ,                           (62)
+                               h                        i
+                                          (s−1)(Θ+Θ̂)
+where α := 4β(s − 1)(s − r − 1) L1 − 1 + (s−r−1)(ρ−ω)     β .
+  Proof. For given x⋆ ∈ zer(G), s > 0, r > 0, and β > 0, we introduce the following function:
+                                                              
+                  Lk := 4rβ(s − 1) ⟨Gxk , xk − x⋆ ⟩ − β ∥Gxk ∥2 + r∥xk − x⋆ ∥2
+                                                                                                               (63)
+                                + ∥r(xk − x⋆ ) + s(xk+1 − xk )∥2 .
+Then, by using (VFKM) with θk = θ := s−r−1s
+                                             , γk = γ := s−r−1
+                                                           s−1
+                                                                , and ηk = η := 2β(s−1)
+                                                                                   s
+                                                                                        from (60),
+with a similar proof as in Lemma 3, we can show that
+                                                                          
+                 Lk−1 − Ek Lk = (2s − r − 1)∥xk − xk−1 ∥2 − s2 η 2 Ek ∥ek ∥2
+                                                                            
+                                 + 4βr2 ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2
+                                                                                              (64)
+                                 + 4β(s − 1)(s − r − 1)⟨Gxk − Gxk−1 , xk − xk−1 ⟩
+                                          − 4β 2 (s − 1)(s − r − 1)∥Gxk − Gxk−1 ∥2 .
+Combining the L1 -cocoercivity of G from Condition (1), Gx⋆ = 0, and Assumption 2, we have
+                                                  1
+                                                        
+            ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2 ≥ 2L − β ∥Gxk−1 ∥2 + σ2 ∥xk−1 − x⋆ ∥2 .
+From this inequality and Young’s inequality, for any c ∈ [0, 1], we can show that
+                                                             
+             T[1] := 4βr2 ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2
+                   ≥ (1−c)r
+                                                                         
+                       s−1
+                            4rβ(s − 1) ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2
+                                 1
+                                      
+                      + 4cβr2 2L   − β ∥Gxk−1 ∥2 + 2cβσr2 ∥xk−1 − x⋆ ∥2
+                   ≥ (1−c)r
+                                                                         
+                       s−1
+                            4rβ(s − 1) ⟨Gxk−1 , xk−1 − x⋆ ⟩ − β ∥Gxk−1 ∥2
+                      + (1−c)r
+                                                                                 
+                          s−1
+                                ∥r(xk−1 − x⋆ ) + s(xk − xk−1 )∥2 + r∥xk−1 − x⋆ ∥2
+                                 1
+                                   − β ∥Gxk−1 ∥2 + r2 2cβσ − (1−c)(2r+1)
+                                                                          k−1
+                      + 4cβr2 2L                                    s−1
+                                                                            ∥x     − x⋆ ∥2
+                                2
+                          − 2rss−1
+                                (1−c)
+                                      ∥xk − xk−1 ∥2
+                      (63) (1−c)r                               2
+                                           1
+                                             − β ∥Gxk−1 ∥2 − 2rss−1
+                                                                  (1−c)
+                                                
+                       = s−1 Lk−1 + 4cβr2 2L                            ∥xk − xk−1 ∥2
+                          + r2 2cβσ − (1−c)(2r+1)
+                                                  k−1
+                                          s−1
+                                                   ∥x   − x⋆ ∥2 .
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+30                                             Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+On the other hand, from Condition (1) and Jensen’s inequality in 1
+                                                                 ○, we also have
+
+                                                  (1)    Pn
+                                                1
+                  ⟨Gxk − Gxk−1 , xk − xk−1 ⟩ ≥ Ln                    k
+                                                            i=1 ∥Gi x − Gi x   ∥ = L1 Uk ,
+                                                                            k−1 2
+
+                                                  ○
+                                                  1        Pn
+                  −∥Gxk − Gxk−1 ∥2                ≥ − n1              k
+                                                             i=1 ∥Gi x − Gi x
+                                                                              k−1 2
+                                                                                 ∥ = −Uk .
+
+Substituting T[1] and the last two inequalities into (64), we obtain
+                                                           2
+          Lk−1 − Ek Lk ≥ (1−c)r     Lk−1 + 2s − r − 1 − 2rss−1
+                                                             (1−c)
+                                                                 k
+                               s−1
+                                                                    ∥x − xk−1 ∥2
+                             + r2 2cβσ − (1−c)(2r+1)
+                                                     k−1                              
+                                              s−1
+                                                      ∥x      − x⋆ ∥2 − s2 η 2 Ek ∥ek ∥2
+                             + 4β(s − 1)(s − r − 1) L1 − β Uk + 4cβr2 2L     1
+                                                                                  
+                                                                                − β ∥Gxk−1 ∥2 .
+We now impose the following two conditions:
+
+           (s − 1)(2s − r − 1) − 2rs2 (1 − c) ≥ 0,       and    2cβσ(s − 1) − (1 − c)(2r + 1) ≥ 0.              (65)
+                               2r+1
+Clearly, if we choose c := 2r+1+2βσ(s−1) , then the second condition of (65) holds with equality, while
+the first one becomes
+                                        βσ ≤ 4rs(2r+1)(2s−r−1)
+                                                 2 −2(s−1)(2s−r−1) ,
+
+provided that 2rs2 − (s − 1)(2s − r − 1) > 0. This is the first condition of (59).
+  Under the condition (59), if we denote ω := (1−c)r
+                                                   s−1
+                                                             2rβσ
+                                                       = 2r+1+2βσ(s−1) , then the last inequality reduces
+to the following inequality:
+            (1 − ω)Lk−1 − Ek Lk ≥ 4β(s − 1)(s − r − 1) L1 − β Uk − 4β 2 (s − 1)2 Ek ∥ek ∥2
+                                                                                           
+
+                                          4βr 2 (2r+1)   1
+                                                                                                    (66)
+                                     + 2r+1+2βσ(s−1)    2L
+                                                           − β ∥Gxk−1 ∥2 .
+
+Next, from the second condition of (59), we have 0 < ω < ρ. Then, from (6), using γk = γ > 0 and
+ρ ∈ (0, 1), we can show that
+                              
+            Ek [∥ek ∥2 ] ≤ Ek ∆k ,
+         (
+
+                           1−ρ                            Θ̂
+                                                              (1 − ω)Uk−1 − Uk + (1−ω)Θ+Θ̂
+                                                                           
+            Ek [∆k ] ≤ ρ−ω      (1 − ω)∆k−1 − Ek [∆k ] + ρ−ω                        ρ−ω
+                                                                                           Uk .
+
+Substituting these inequalities into (66) and noting that (1 − ω)Θ + Θ̂ ≤ Θ + Θ̂, we get
+                                        4βr 2 (2r+1)      1
+                                                                
+            (1 − ω)Lk−1 − Ek [Lk ] ≥ 2r+1+2βσ(s−1)       2L
+                                                             − β ∥Gxk−1 ∥2
+                                           2       2
+                                      − 4β (s−1)     (1−ρ)
+                                                                                 
+                                                ρ−ω
+                                                            (1 − ω)∆k−1 − Ek [∆k ]
+                                           2       2 
+                                      − 4β (s−1)     Θ̂
+                                                                         
+                                              ρ−ω
+                                                        (1 − ω)Uk−1 − Uk
+                                                                  h                      i
+                                                                             (s−1)(Θ+Θ̂)
+                                      + 4β(s − 1)(s − r − 1) L1 − 1 + (s−r−1)(ρ−ω)        β Uk .
+
+Rearranging this inequality, and using Ek from (61) and ω ∈ (0, 1), we obtain (62).                               □
+     Proof of Corollary 3.     Since β := 12 β̄ with β̄ defined by (38), we have
+                                                                   √          
+                         1        3                      2(1−2ρ) N + N 2 +12ρM
+                         ω
+                           = 2 + 2βσ = 2 + max 5, 6κ, ρ ,             2ρ
+                                                                                 .                              (67)
+
+                            1
+For SVRG in (7) with p = n1/3  and b = ⌊n2/3 ⌋, we have ρ = p2 = Θ(n−1/3 ) and Γ ≤ p2 + bp
+                                                                                        16
+                                                                                           =
+    −1/3                                         −1/3
+                                                                              
+O n √ . Hence, N = 3Γκ + 2(1 −√  2ρ) = O 1 + κn       √and M = 2(2Γ − 1)κ = O κ . If M ≤ 0,
+then N 2 + 12ρM ≤ N ; otherwise, N 2 + 12ρM ≤ N + 12ρM . In both cases, we can show that
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                     31
+                        √                        q                      √
+                   N+       N 2 +12ρM                3M+                                  
+                             2ρ
+                                        ≤ Nρ +        ρ
+                                                         =O   κ + n1/3 + κn1/3 = O κ + n1/3 ,
+
+where M+ := max {M, 0}. Using this bound in (67) and noting that k ≥ O ω1 log( 1ϵ ) , we get k =
+                                                                                          
+
+O (κ + n1/3 ) log( 1ϵ ) . The expected total oracle complexity of (VFKM) is
+
+                E[TGi ] = n + (np + 3b)k ≤ n + 4n2/3 k = O n + max{n, n2/3 κ} log( 1ϵ ) .
+                                                                                       
+
+                                                         = Θ(n−1/3 ) and Γ = ρ+2(Θ+ Θ̂) = O n−1/3 .
+                                                                                                 
+For SAGA in (11) with b = ⌊n2/3 ⌋, we also have ρ = 2n b
+
+Hence, the remainder of the proof is analogous to the SVRG case, and we omit it here.            □
+
+References
+[1] Adly S, Attouch H (2021) First-order inertial algorithms involving dry friction damping. Math. Program.
+    1–41.
+ [2] Alacaoglu A, Böhm A, Malitsky Y (2023) Beyond the golden ratio for variational inequality algorithms.
+     J. Mach. Learn. Res 24(172):1–33.
+ [3] Alacaoglu A, Malitsky Y (2022) Stochastic variance reduction for variational inequality methods. Con-
+     ference on Learning Theory, 778–816 (PMLR).
+ [4] Allen-Zhu Z, Yuan Y (2016) Improved SVRG for Non-strongly Convex or Sum of Nonconvex Objectives.
+     ICML, 1080–1089.
+ [5] Attouch H, Cabot A (2020) Convergence of a relaxed inertial proximal algorithm for maximally mono-
+     tone operators. Math. Program. 184(1):243–287.
+ [6] Attouch H, Fadili J (2022) From the Ravine method to the Nesterov method and vice versa: A dynamical
+     system perspective. SIAM J. Optim. 32(3):2074–2101.
+ [7] Attouch H, Peypouquet J (2016) The rate of convergence of Nesterov’s accelerated forward-backward
+     method is actually faster than O(1/k 2 ). SIAM J. Optim. 26(3):1824–1834.
+ [8] Attouch H, Peypouquet J (2019) Convergence of inertial dynamics and proximal algorithms governed
+     by maximally monotone operators. Math. Program. 174(1-2):391–432.
+ [9] Attouch H, Peypouquet J, Redont P (2018) Backward–forward algorithms for structured monotone
+     inclusions in Hilbert spaces. J. Math. Anal. Appl. 457(2):1095–1117.
+[10] Bauschke HH, Combettes P (2017) Convex Analysis and Monotone Operators Theory in Hilbert Spaces
+     (Springer-Verlag), 2nd edition.
+[11] Bauschke HH, Moursi WM, Wang X (2021) Generalized monotone operators and their averaged resol-
+     vents. Math. Program. 189(Series B):55–74.
+[12] Beznosikov A, Gorbunov E, Berard H, Loizou N (2023) Stochastic gradient descent-ascent: Unified
+     theory and new efficient methods. International Conference on Artificial Intelligence and Statistics,
+     172–235 (PMLR).
+[13] Bohm A, Sedlmayer M, Csetnek RE, Bot RI (2022) Two steps at a time—Taking GAN training in
+     stride with Tseng’s method. SIAM J. Math. Data Sci. 4(2):750–771.
+[14] Bot RI, Mertikopoulos P, Staudigl M, Vuong PT (2019) Forward-backward-forward methods with vari-
+     ance reduction for stochastic variational inequalities. arXiv preprint arXiv:1902.03355 .
+[15] Bot RI, Nguyen DK (2023) Fast Krasnoselśkii-Mann algorithm with a convergence rate of the fixed
+     point iteration of o(1/k). SIAM J. Numer. Anal. 61(6):2813–2843.
+[16] Burachik RS, Iusem A (2008) Set-Valued Mappings and Enlargements of Monotone Operators (New
+     York: Springer).
+[17] Cai X, Alacaoglu A, Diakonikolas J (2024) Variance reduced Halpern iteration for finite-sum monotone
+     inclusions. The 12th International Conference on Learning Representations (ICLR), 1–33.
+[18] Cai X, Song C, Guzmán C, Diakonikolas J (2022) A stochastic Halpern iteration with variance reduc-
+     tion for stochastic monotone inclusion problems. Proceedings of the 12th International Conference on
+     Learning Representations (ICLR 2022), URL https://openreview.net/forum?id=BRZos-8TpCf.
+               Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+32                                              Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+[19] Cai Y, Oikonomou A, Zheng W (2022) Accelerated algorithms for monotone inclusions and constrained
+     nonconvex-nonconcave min-max optimization. OPT 2022: Optimization for Machine Learning (NeurIPS
+     2022 Workshop) .
+[20] Cai Y, Zheng W (2023) Accelerated Single-Call Methods for Constrained Min-Max Optimization. The
+     11th International Conference on Learning Representations, ICLR 2023 (The Eleventh International
+     Conference on Learning Representations, ICLR 2023).
+[21] Carmon Y, Jin Y, Sidford A, Tian K (2019) Variance reduction for matrix games. Advances in Neural
+     Information Processing Systems 32.
+[22] Chambolle A, Dossal C (2015) On the convergence of the iterates of the “Fast iterative shrink-
+     age/thresholding algorithm”. J. Optim. Theory Appl. 166(3):968–982.
+[23] Chavdarova T, Gidel G, Fleuret F, Lacoste-Julien S (2019) Reducing noise in gan training with variance
+     reduced extragradient. Advances in Neural Information Processing Systems 32:393–403.
+[24] Chen Y, Lan G, Ouyang Y (2017) Accelerated schemes for a class of variational inequalities. Math.
+     Program. 165(1):113–149.
+[25] Combettes PL, Pesquet JC (2015) Stochastic quasi-Fejér block-coordinate fixed point iterations with
+     random sweeping. SIAM J. Optim. 25(2):1221–1248.
+[26] Cominetti R, Soto JA, Vaisman J (2014) On the rate of convergence of Krasnosel’skiı̆–Mann iterations
+     and their connection with sums of Bernoullis. Israel Journal of Mathematics 199:757–772, URL http:
+     //dx.doi.org/10.1007/s11856-013-0045-4.
+[27] Cui S, Shanbhag U (2021) On the analysis of variance-reduced and randomized projection variants
+     of single projection schemes for monotone stochastic variational inequality problems. Set-Valued and
+     Variational Analysis 29(2):453–499.
+[28] Daskalakis C, Ilyas A, Syrgkanis V, Zeng H (2018) Training GANs with Optimism. International Con-
+     ference on Learning Representations (ICLR 2018), 1–9.
+[29] Davis D (2016) SMART: The stochastic monotone aggregated root-finding algorithm. arXiv preprint
+     arXiv:1601.00698 .
+[30] Davis D (2022) Variance reduction for root-finding problems. Math. Program. 1–36.
+[31] Defazio A, Bach F, Lacoste-Julien S (2014) SAGA: A fast incremental gradient method with support for
+     non-strongly convex composite objectives. Advances in Neural Information Processing Systems (NIPS),
+     1646–1654.
+[32] Diakonikolas J (2020) Halpern iteration for near-optimal and parameter-free monotone inclusion and
+     strong solutions to variational inequalities. Conference on Learning Theory, 1428–1451 (PMLR).
+[33] Driggs D, Ehrhardt MJ, Schönlieb CB (2020) Accelerating variance-reduced stochastic gradient meth-
+     ods. Math. Program. (online first):1–45.
+[34] Facchinei F, Pang JS (2003) Finite-dimensional variational inequalities and complementarity problems,
+     volume 1-2 (Springer-Verlag).
+[35] Friedman J, Hastie T, Tibshirani R (2001) The elements of statistical learning, volume 1 (Springer-
+     Verlag, New York).
+[36] Fukushima M (1992) Equivalent differentiable optimization problems and descent methods for asym-
+     metric variational inequality problems. Math. Program. 53:99–110.
+[37] Goodfellow I, Pouget-Abadie J, Mirza M, Xu B, Warde-Farley D, Ozair S, Courville A, Bengio Y (2014)
+     Generative adversarial nets. Advances in neural information processing systems, 2672–2680.
+[38] Gorbunov E, Berard H, Gidel G, Loizou N (2022) Stochastic extragradient: General analysis and
+     improved rates. International Conference on Artificial Intelligence and Statistics, 7865–7901 (PMLR).
+[39] Gorbunov E, Hanzely F, Richt P (2020) A unified theory of SGD: Variance reduction, sampling, quanti-
+     zation and coordinate descent. International Conference on Artificial Intelligence and Statistics, 680–690
+     (PMLR).
+[40] Gower RM, Loizou N, Qian X, Sailanbayev A, Shulgin E, Richtárik P (2019) SGD: General analysis
+     and improved rates. International conference on machine learning, 5200–5209 (PMLR).
+Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS                                      33
+
+[41] Halpern B (1967) Fixed points of nonexpanding maps. Bull. Am. Math. Soc. 73(6):957–961.
+[42] He Y, Monteiro RD (2016) An accelerated HPE-type algorithm for a class of composite convex-concave
+     saddle-point problems. SIAM J. Optim. 26(1):29–56.
+[43] Huang K, Wang N, Zhang S (2026) An Accelerated Variance Reduced Extra-Point Approach to Finite-
+     Sum VI and Optimization. SIAM J. Optim. 36(2):1154–1181.
+[44] Iusem AN, Jofré A, Oliveira RI, Thompson P (2017) Extragradient method with variance reduction for
+     stochastic variational inequalities. SIAM J. Optim. 27(2):686–724.
+[45] Johnson R, Zhang T (2013) Accelerating stochastic gradient descent using predictive variance reduction.
+     NIPS, 315–323.
+[46] Juditsky A, Nemirovski A, Tauvel C (2011) Solving variational inequalities with stochastic mirror-prox
+     algorithm. Stochastic Systems 1(1):17–58.
+[47] Kannan A, Shanbhag UV (2019) Optimal stochastic extragradient schemes for pseudomonotone stochas-
+     tic variational inequality problems and their variants. Comput. Optim. Appl. 74(3):779–820.
+[48] Khalafi M, Boob D (2023) Accelerated primal-dual methods for convex-strongly-concave saddle point
+     problems. International Conference on Machine Learning, 16250–16270 (PMLR).
+[49] Khaled A, Sebbouh O, Loizou N, Gower RM, Richtárik P (2023) Unified analysis of stochastic gradient
+     methods for composite convex and smooth optimization. J. Optim. Theory Appl. 199(2):499–540.
+[50] Kim D (2021) Accelerated proximal point method for maximally monotone operators. Math. Program.
+     190:57–87.
+[51] Kolossoski O, Monteiro RD (2017) An accelerated non-Euclidean hybrid proximal extragradient-type
+     algorithm for convex–concave saddle-point problems. Optim. Meth. Soft. 32(6):1244–1272.
+[52] Kotsalis G, Lan G, Li T (2022) Simple and optimal methods for stochastic variational inequalities-I:
+     operator extrapolation. SIAM J. Optim. 32(3):2041–2073.
+[53] Kovalev D, Horvath S, Richtarik P (2020) Don’t jump through hoops and remove those loops: SVRG
+     and Katyusha are better without the outer loop. Algorithmic Learning Theory, 451–467 (PMLR).
+[54] Krasnosel’skiǐ MA (1955) Two remarks on the method of successive approximations. Uspekhi Matem-
+     aticheskikh Nauk 10(1):123–127, in Russian.
+[55] Kuhn D, Shafiee S, Wiesemann W (2025) Distributionally robust optimization. Acta Numerica 34:579–
+     804.
+[56] Lee S, Kim D (2021) Fast extra gradient methods for smooth structured nonconvex-nonconcave minimax
+     problems. Thirty-fifth Conference on Neural Information Processing Systems (NeurIPs2021) 1–10.
+[57] Lieder F (2021) On the convergence rate of the Halpern-iteration. Optim. Letters 15(2):405–418.
+[58] Loizou N, Berard H, Gidel G, Mitliagkas I, Lacoste-Julien S (2021) Stochastic gradient descent-ascent
+     and consensus optimization for smooth games: Convergence analysis under expected co-coercivity.
+     Advances in Neural Information Processing Systems 34:19095–19108.
+[59] Madry A, Makelov A, Schmidt L, Tsipras D, Vladu A (2018) Towards deep learning models resistant
+     to adversarial attacks. International Conference on Learning Representations.
+[60] Maingé PE (2021) Accelerated proximal algorithms with a correction term for monotone inclusions.
+     Applied Mathematics & Optimization 84(2):2027–2061.
+[61] Mann WR (1953) Mean value methods in iteration. Proc. Amer. Math. Soc. 4(3):506–510.
+[62] Mishchenko K, Kovalev D, Shulgin E, Richtárik P, Malitsky Y (2020) Revisiting stochastic extragradient.
+     International Conference on Artificial Intelligence and Statistics, 4573–4582 (PMLR).
+[63] Nesterov Y (2004) Introductory lectures on convex optimization: A basic course, volume 87 of Applied
+     Optimization (Kluwer Academic Publishers).
+[64] Nesterov Y (2007) Dual extrapolation and its applications to solving variational inequalities and related
+     problems. Math. Program. 109(2–3):319–344.
+              Quoc Tran-Dinh: Variance-Reduced Fast Krasnosel’skiǐ-Mann Methods for Finite-Sum Root-Finding Problems
+34                                             Mathematics of Operations Research 00(0), pp. 000–000, © 0000 INFORMS
+
+
+[65] Nguyen LM, Liu J, Scheinberg K, Takáč M (2017) SARAH: A novel method for machine learning prob-
+     lems using stochastic recursive gradient. Proceedings of the 34th International Conference on Machine
+     Learning, 2613–2621.
+[66] Palaniappan B, Bach F (2016) Stochastic variance reduction methods for saddle-point problems.
+     Advances in Neural Information Processing Systems, 1416–1424.
+[67] Park J, Ryu EK (2022) Exact optimal accelerated complexity for fixed-point iterations. International
+     Conference on Machine Learning, 17420–17457 (PMLR).
+[68] Peng Z, Xu Y, Yan M, Yin W (2016) ARock: an algorithmic framework for asynchronous parallel
+     coordinate updates. SIAM J. Scientific Comput. 38(5):2851–2879.
+[69] Pethick T, Fercoq O, Latafat P, Patrinos P, Cevher V (2023) Solving stochastic weak Minty varia-
+     tional inequalities without increasing batch size. Proceedings of International Conference on Learning
+     Representations (ICLR), 1–34.
+[70] Phelps RR (2009) Convex functions, monotone operators and differentiability, volume 1364 (Springer).
+[71] Robbins H, Siegmund D (1971) A convergence theorem for non negative almost supermartingales and
+     some applications. Optimizing methods in statistics, 233–257 (Elsevier).
+[72] Rockafellar R, Wets R (2004) Variational Analysis, volume 317 (Springer).
+[73] Ryu E, Yin W (2022) Large-scale convex optimization: Algorithms & analyses via monotone operators
+     (Cambridge University Press).
+[74] Ryu EK, Boyd S (2016) Primer on monotone operator methods. Appl. Comput. Math 15(1):3–43.
+[75] Sabach S, Shtern S (2017) A first order method for solving convex bilevel optimization problems. SIAM
+     J. Optim. 27(2):640–660.
+[76] Tran-Dinh Q (2024) Extragradient-Type Methods with O(1/k)-Convergence Rates for Co-
+     Hypomonotone Inclusions. J. Global Optim. 89(1):197–221.
+[77] Tran-Dinh Q (2024) From Halpern’s fixed-point iterations to Nesterov’s accelerated interpretations for
+     root-finding problems. Comput. Optim. Appl. 87(1):181–218.
+[78] Tran-Dinh Q, Luo Y (2021) Halpern-type accelerated and splitting algorithms for monotone inclusions.
+     arXiv preprint arXiv:2110.08150 .
+[79] Tran-Dinh Q, Pham NH, Phan DT, Nguyen LM (2022) A hybrid stochastic optimization framework for
+     stochastic composite nonconvex optimization. Math. Program. 191:1005–1071.
+[80] von Neumann J (1928) Zur Theorie der Gesellshaftsspiele. Mathematische Annalen 295–320.
+[81] Yang J, Zhang S, Kiyavash N, He N (2020) A catalyst framework for minimax optimization. Advances
+     in Neural Information Processing Systems 33.
+[82] Yoon T, Ryu EK (2021) Accelerated algorithms for smooth convex-concave minimax problems with
+     O(1/k 2 ) rate on squared gradient norm. International Conference on Machine Learning, 12098–12109
+     (PMLR).
+[83] Yousefian F, Nedić A, Shanbhag UV (2018) On stochastic mirror-prox algorithms for stochastic cartesian
+     variational inequalities: Randomized block coordinate and optimal averaging schemes. Set-Valued and
+     Variational Analysis 26:789–819.
+[84] Yu Y, Lin T, Mazumdar EV, Jordan M (2022) Fast distributionally robust learning with variance-
+     reduced min-max optimization. International Conference on Artificial Intelligence and Statistics, 1219–
+     1250 (PMLR).
+[85] Zhang J, Hong M, Zhang S (2022) On lower iteration complexity bounds for the convex-concave saddle
+     point problems. Math. Program. 194(1):901–935.
+[86] Zhou D, Xu P, Gu Q (2018) Stochastic nested variance reduction for nonconvex optimization. Proceedings
+     of the 32nd International Conference on Neural Information Processing Systems, 3925–3936 (Curran
+     Associates Inc.).
+

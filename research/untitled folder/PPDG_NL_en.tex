@@ -1,0 +1,377 @@
+\documentclass[11pt]{article}
+
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\allowdisplaybreaks
+\numberwithin{equation}{section}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\argmin}{\mathop{\rm arg\,min}}
+
+\title{Preconditioned Primal-Dual Gradient Method for Nonconvex Nonlinear Composite Optimization}
+\author{Luxuan Li}
+\date{November 29, 2024}
+
+\begin{document}
+\maketitle
+
+\section{Algorithm}
+
+When updating $x$, linearize the constraint $g(x)$ at $x^k$; when updating $y$, linearize the constraint $g(x)$ at $x^{k+1}$. Extrapolation is performed on the primal variable:
+
+\begin{align*}
+x^{k+1}
+&=\argmin_x\left\{
+\left\langle \nabla f(x^k),x-x^k\right\rangle
++\left\langle y^k,g(x^k)+J(x^k)(x-x^k)\right\rangle
++\frac{1}{2\tau}\|x-x^k\|^2
+\right\}\\
+&=\argmin_x\left\{
+\left\langle \nabla f(x^k)+J(x^k)^T y^k,x-x^k\right\rangle
++\frac{1}{2\tau}\|x-x^k\|^2
+\right\},\\
+\widetilde{x}^{k+1}&=2x^{k+1}-x^k,\\
+y^{k+1}
+&=\argmin_y\left\{
+h^*(y)-\left\langle g(x^{k+1})+J(x^{k+1})(\widetilde{x}^{k+1}-x^{k+1}),y\right\rangle
++\frac{1}{2}\|y-y^k\|_{M_k}^2
+\right\}\\
+&=\argmin_y\left\{
+h^*(y)-\left\langle g^{k+1}(\widetilde{x}^{k+1}),y\right\rangle
++\frac{1}{2}\|y-y^k\|_{M_k}^2
+\right\},
+\end{align*}
+where
+\[
+M_k=\tau J(x^k)J(x^k)^T.
+\]
+
+\subsection{Preliminaries}
+
+\paragraph{Notations}
+\[
+\|A\|=\|A\|_F,\qquad \|a\|=\|a\|_2.
+\]
+
+\paragraph{Some useful properties}
+
+\begin{enumerate}
+\item For infinitely continuously differentiable functions, for every $i=1,2,\ldots,m$, $g_i(x)$ is $L^0_{g_i}$-Lipschitz continuous:
+\[
+\|\nabla g_i(x)\|\le L^0_{g_i};
+\]
+the gradient $\nabla g_i(x)$ is $L_{g_i}$-Lipschitz continuous:
+\[
+H_{g_i}(x)\preceq L_{g_i}I,
+\qquad \lambda_{\max}(H_{g_i}(x))\le L_{g_i},
+\qquad \forall x\in\mathcal X.
+\]
+
+\item The nonlinear mapping $g(x):\R^n\to\R^m=(g_1(x),\ldots,g_m(x))^T$ is $L_g^0$-Lipschitz continuous, where
+\[
+L_g^0:=\sum_{i=1}^m L_{g_i}^0,
+\qquad
+\|g(x)-g(x')\|\le L_g^0\|x-x'\|.
+\]
+Moreover, the Jacobian $J(x)$ is bounded for every $x\in\mathcal X$:
+\begin{align*}
+\|J(x)\|
+&=\sqrt{\sum_{i=1}^m\|\nabla g_i(x)\|^2}
+\le \sqrt{\sum_{i=1}^m(L_{g_i}^0)^2}
+\le \sum_{i=1}^mL_{g_i}^0=L_g^0.
+\end{align*}
+\emph{(Definition of $\|A\|_F$ and its relation to other norms.)}
+
+The analysis below uses the tighter upper bound
+\[
+\|J(x)\|\le \sqrt{\sum_{i=1}^m(L_{g_i}^0)^2}=:M_g^0.
+\]
+\end{enumerate}
+
+\paragraph{Optimality conditions of the algorithm updates}
+
+\begin{enumerate}
+\item Optimality condition for the $x$ update:
+\[
+x^{k+1}=x^k-\tau\left(\nabla f(x^k)+(\nabla J(x^k))^T y^k\right).
+\]
+
+\item Extrapolation on $x$:
+\[
+\widetilde{x}^{k+1}=2x^{k+1}-x^k,
+\qquad
+\widetilde{x}^{k}=2x^{k}-x^{k-1}.
+\]
+
+\item Optimality condition for the $y$ update:
+\[
+g^{k+1}=-M_k\left(y^{k+1}-y^k\right)+g(\widetilde{x}^{k+1}),
+\qquad
+g^{k+1}\in\partial h^*(y^{k+1}).
+\]
+\end{enumerate}
+
+\section{Convergence Analysis}
+
+\subsection*{Lemma 1 (dual boundedness)}
+
+\paragraph{Proof.}
+\begin{align*}
+\frac{\delta}{2}\|J(x^k)^T(y^{k+1}-y^k)\|^2
+&=\frac{\delta}{2}\| (J(x^k)-J(x^{k+1}))^Ty^{k+1}
++J(x^{k+1})^Ty^{k+1}-J(x^k)^Ty^k\|^2\\
+&\le \delta\|(y^{k+1})^T(J(x^{k+1})-J(x^k))\|^2
++\delta\|J(x^{k+1})^Ty^{k+1}-J(x^k)^Ty^k\|^2\\
+&\le \delta\sum_{i=1}^m\|y^{k+1}\|^2
+\|\nabla g_i(x^{k+1})-\nabla g_i(x^k)\|^2\\
+&\quad+\delta\left\|-\nabla f(x^{k+1})
++\frac{x^{k+1}-x^{k+2}}{\tau}
++\nabla f(x^k)+\frac{x^{k+1}-x^k}{\tau}\right\|^2\\
+&\quad\left(x^{k+2}-x^{k+1}=-\tau\left(\nabla f(x^{k+1})+J(x^{k+1})^Ty^{k+1}\right)\right)\\
+&\le \delta M^2\left(\sum_{i=1}^mL_{g_i}^2\right)\|x^{k+1}-x^k\|^2
++2\delta\left(\frac{1}{\tau}+L_f\right)^2\|x^{k+1}-x^k\|^2
++\frac{2\delta}{\tau^2}\|x^{k+2}-x^{k+1}\|^2\\
+&\le \left(\delta M^2\sum_{i=1}^mL_{g_i}^2
++2\delta\left(\frac{1}{\tau}+L_f\right)^2\right)\|x^{k+1}-x^k\|^2
+\\
+&\quad+\frac{2\delta}{\tau^2}\|x^{k+2}-x^{k+1}\|^2. \tag{2.1}
+\end{align*}
+
+\subsection*{Lemma 2 (sufficient descent)}
+
+\paragraph{Proof.}
+First, by the iteration formula of the algorithm with extrapolation on the primal variable and the convexity of $h^*$,
+\begin{align*}
+L(x^{k+1},y^{k+1})-L(x^k,y^k)
+&\le -\left(\frac{1}{\tau}-\frac{L_f}{2}\right)\|x^{k+1}-x^k\|^2\\
+&\quad+\langle y^{k+1},g(x^{k+1})\rangle-\langle y^k,g^k(x^{k+1})\rangle
++\langle g^k,y^k-y^{k+1}\rangle. \tag{2.2}
+\end{align*}
+
+For the second term on the right-hand side of (2.2), combine it with the last term by introducing $y^{k+1}-y^k$. Equation (2.2) is equivalently written as
+\begin{align*}
+L(x^{k+1},y^{k+1})-L(x^k,y^k)
+&\le -\left(\frac{1}{\tau}-\frac{L}{2}\right)\|x^{k+1}-x^k\|^2\\
+&\quad+\langle y^{k+1}-y^k,g(x^{k+1})-g^k\rangle
++\langle y^k,g(x^{k+1})-g^k(x^{k+1})\rangle. \tag{2.3}
+\end{align*}
+
+For the second term on the right-hand side of (2.3), using the optimality condition of the $y^k$ update,
+\[
+0\in\partial h^*(y^k)-g^k(\widetilde{x}^k)+\frac{1}{\sigma}(y^k-y^{k-1}),
+\qquad g^k\in\partial h^*(y^k),
+\]
+we have
+\begin{align*}
+\langle y^{k+1}-y^k,g(x^{k+1})-g^k\rangle
+&=\langle y^{k+1}-y^k,g(x^{k+1})-g^k(\widetilde{x}^k)\rangle
++\frac{1}{\sigma}\langle y^{k+1}-y^k,y^k-y^{k-1}\rangle\\
+&=\langle y^{k+1}-y^k,g(x^{k+1})-g^k(x^{k+1})\rangle\\
+&\quad+\left\langle y^{k+1}-y^k,
+g^k(x^{k+1})-g^k(\widetilde{x}^k)+\frac{1}{\sigma}(y^k-y^{k-1})\right\rangle. \tag{2.4}
+\end{align*}
+
+Substituting (2.4) into (2.3) gives
+\begin{align*}
+L(x^{k+1},y^{k+1})-L(x^k,y^k)
+&\le -\left(\frac{1}{\tau}-\frac{L}{2}\right)\|x^{k+1}-x^k\|^2
++\langle y^{k+1},g(x^{k+1})-g^k(x^{k+1})\rangle\\
+&\quad+\left\langle y^{k+1}-y^k,
+g^k(x^{k+1})-g^k(\widetilde{x}^k)+\frac{1}{\sigma}(y^k-y^{k-1})\right\rangle. \tag{2.5}
+\end{align*}
+
+We now bound the terms in (2.5).
+
+For the second term on the right-hand side of (2.5),
+\begin{align*}
+\langle y^{k+1},g(x^{k+1})-g^k(x^{k+1})\rangle
+&\le \|y^{k+1}\|\,\|g(x^{k+1})-g^k(x^{k+1})\|\\
+&\le M\|g(x^{k+1})-g^k(x^{k+1})\|\qquad(\|y^k\|\le M)\\
+&\le M\sum_{i=1}^m\left|g_i(x^{k+1})-g_i^k(x^{k+1})\right|\\
+&\le \frac{ML_g^0}{2}\|x^k-x^{k+1}\|^2. \tag{2.6}
+\end{align*}
+
+Using the iteration formula, the last term on the right-hand side of (2.5) can be equivalently transformed as follows:
+\begin{align*}
+&\left\langle y^{k+1}-y^k,
+g^k(x^{k+1})-g^k(\widetilde{x}^k)+\frac{1}{\sigma}(y^k-y^{k-1})\right\rangle\\
+&=\left\langle y^{k+1}-y^k,
+J(x^k)\left[(x^{k+1}-x^k)-(x^k-x^{k-1})\right]
++\frac{1}{\sigma}(y^k-y^{k-1})\right\rangle\\
+&\qquad\left(g^k(z)=g(x^k)+J(x^k)(z-x^k),\quad \widetilde{x}^k=2x^k-x^{k-1}\right)\\
+&=\left\langle y^{k+1}-y^k,
+\tau J(x^k)\left(\nabla f(x^{k-1})-\nabla f(x^k)+J(x^{k-1})^Ty^{k-1}-J(x^k)^Ty^k\right)
++\frac{1}{\sigma}(y^k-y^{k-1})\right\rangle\\
+&\qquad\left(x^k-x^{k-1}=-\tau\left(\nabla f(x^{k-1})+J(x^{k-1})^Ty^{k-1}\right)\right)\\
+&=\left\langle J(x^k)^T(y^{k+1}-y^k),\nabla f(x^{k-1})-\nabla f(x^k)\right\rangle\\
+&\quad+\left\langle y^{k+1}-y^k,
+\left(\frac{1}{\sigma}I-\tau J(x^k)J(x^k)^T\right)(y^k-y^{k-1})\right\rangle\\
+&\quad+\left\langle y^{k+1}-y^k,
+\tau J(x^k)\left(J(x^{k-1})-J(x^k)\right)^Ty^{k-1}\right\rangle. \tag{2.7}
+\end{align*}
+
+For the middle term in (2.7), if we set $\frac{1}{\sigma}I=\frac{1}{\sigma_k}I=M_k$, then this term vanishes. We continue to bound (2.7). Since we do not want $y^k$ and $y^{k+1}$ to appear, we combine the remaining two terms in (2.7) again:
+\begin{align*}
+&\left\langle y^{k+1}-y^k,
+g^k(x^{k+1})-g^k(\widetilde{x}^k)+M_k(y^k-y^{k-1})\right\rangle\\
+&=\left\langle J(x^k)^T(y^{k+1}-y^k),
+\nabla f(x^{k-1})-\nabla f(x^k)
++\tau J(x^k)\left(J(x^{k-1})-J(x^k)\right)^Ty^{k-1}\right\rangle\\
+&\le \frac{\delta}{2}\|J(x^k)^T(y^{k+1}-y^k)\|^2
++\frac{1}{2\delta}\left\|\nabla f(x^{k-1})-\nabla f(x^k)
++\tau J(x^k)\left(J(x^{k-1})-J(x^k)\right)^Ty^{k-1}\right\|^2\\
+&\qquad\left(\langle a,b\rangle\le\frac{\delta}{2}\|a\|^2+\frac{1}{2\delta}\|b\|^2\right). \tag{2.8}
+\end{align*}
+
+For the second term in (2.8),
+\begin{align*}
+&\frac{1}{2\delta}\left\|\nabla f(x^{k-1})-\nabla f(x^k)
++\tau J(x^k)\left(J(x^{k-1})-J(x^k)\right)^Ty^{k-1}\right\|^2 \tag{2.9}\\
+&\le \frac{1}{\delta}\|\nabla f(x^k)-\nabla f(x^{k-1})\|^2
++\frac{\tau^2}{\delta}\|J(x^k)\left(J(x^{k-1})-J(x^k)\right)^Ty^{k-1}\|^2\\
+&\le \frac{L_f^2}{\delta}\|x^k-x^{k-1}\|^2
++\frac{\tau^2}{\delta}\left\|\sum_{i=1}^m(y^{k-1})^T\left(J(x^{k-1})-J(x^k)\right)(J(x^k))^T\right\|^2\\
+&\le \frac{L_f^2}{\delta}\|x^k-x^{k-1}\|^2
++\frac{\tau^2}{\delta}\sum_{i=1}^m
+\left\|(y^{k-1})^T(\nabla g_i(x^{k-1})-\nabla g_i(x^k))(\nabla g_i(x^k))^T\right\|^2\\
+&\le \frac{L_f^2}{\delta}\|x^k-x^{k-1}\|^2
++\frac{\tau^2}{\delta}\sum_{i=1}^m\|y^{k-1}\|^2\|\nabla g_i(x^k)\|^2
+\|\nabla g_i(x^{k-1})-\nabla g_i(x^k)\|^2\\
+&\le \frac{L_f^2+\sum_{i=1}^m(\tau M L_{g_i}^0L_{g_i})^2}{\delta}\|x^k-x^{k-1}\|^2. \tag{2.10}
+\end{align*}
+
+For the first term in (2.8),
+\begin{align*}
+\frac{\delta}{2}\|J(x^k)^T(y^{k+1}-y^k)\|^2
+&=\frac{\delta}{2}\| (J(x^k)-J(x^{k+1}))^Ty^{k+1}
++J(x^{k+1})^Ty^{k+1}-J(x^k)^Ty^k\|^2\\
+&\le \delta\|(y^{k+1})^T(J(x^{k+1})-J(x^k))\|^2
++\delta\|J(x^{k+1})^Ty^{k+1}-J(x^k)^Ty^k\|^2\\
+&\le \delta\sum_{i=1}^m\|y^{k+1}\|^2
+\|\nabla g_i(x^{k+1})-\nabla g_i(x^k)\|^2\\
+&\quad+\delta\left\|-\nabla f(x^{k+1})+\frac{x^{k+1}-x^{k+2}}{\tau}
++\nabla f(x^k)+\frac{x^{k+1}-x^k}{\tau}\right\|^2\\
+&\qquad\left(x^{k+2}-x^{k+1}=-\tau\left(\nabla f(x^{k+1})+J(x^{k+1})^Ty^{k+1}\right)\right)\\
+&\le \delta M^2\left(\sum_{i=1}^mL_{g_i}^2\right)\|x^{k+1}-x^k\|^2
++2\delta\left(\frac{1}{\tau}+L_f\right)^2\|x^{k+1}-x^k\|^2
++\frac{2\delta}{\tau^2}\|x^{k+2}-x^{k+1}\|^2\\
+&\le \left(\delta M^2\sum_{i=1}^mL_{g_i}^2
++2\delta\left(\frac{1}{\tau}+L_f\right)^2\right)\|x^{k+1}-x^k\|^2
++\frac{2\delta}{\tau^2}\|x^{k+2}-x^{k+1}\|^2. \tag{2.11}
+\end{align*}
+
+Combining the above inequalities, we obtain
+\begin{align*}
+L(x^{k+1},y^{k+1})-L(x^k,y^k)
+&\le -\left(\frac{1}{\tau}-\frac{L}{2}\right)\|x^{k+1}-x^k\|^2
++\langle y^{k+1}-y^k,g(x^{k+1})-g(\widetilde{x}^k)\rangle\\
+&\quad+\frac{1}{\sigma}\langle y^{k+1}-y^k,y^k-y^{k-1}\rangle\\
+&\quad+\langle y^k,g(x^{k+1})-g^k(x^{k+1})\rangle\\
+&\qquad\left(\text{convexity of $h^*$, the $y^k$ update, and the $x^{k+1}$ update}\right),
+\end{align*}
+where
+\[
+g(\widetilde{x}^k)=g(2x^k-x^{k-1}),
+\qquad
+g^k(x^{k+1})=g(x^k)+J(x^k)(x^{k+1}-x^k).
+\]
+
+For the second term on the left-hand side of the inequality,
+\begin{align*}
+\langle y^{k+1}-y^k,g(x^{k+1})-g(\widetilde{x}^k)\rangle
+&\le \frac{\delta}{2}\|y^{k+1}-y^k\|^2
++\frac{1}{2\delta}\|g(x^{k+1})-g(\widetilde{x}^k)\|^2\\
+&\le \frac{\delta}{2}\|y^{k+1}-y^k\|^2
++\frac{L}{2\delta}\|x^{k+1}-x^k+x^{k-1}-x^k\|^2\\
+&\qquad\left(g_i(u)\text{ is $L_{g_i}$-Lipschitz continuous}\right)\\
+&\le \frac{\delta}{2}\|y^{k+1}-y^k\|^2
++\frac{L\tau^2}{2\delta}\|\nabla f(x^{k-1})-\nabla f(x^k)
++J(x^{k-1})^Ty^{k-1}-J(x^k)^Ty^k\|^2\\
+&\le \frac{\delta}{2}\|y^{k+1}-y^k\|^2
++\frac{LL_f^2\tau^2}{\delta}\|x^{k-1}-x^k\|^2
++\textcolor{red}{\frac{L\tau^2}{\delta}\|J(x^{k-1})^Ty^{k-1}-J(x^k)^Ty^k\|^2}\\
+&\qquad\left(f(x)\text{ is $L_f$-smooth}\right).
+\end{align*}
+
+Here, $x^{k+1}=x^k-\tau(\nabla f(x^k)+J(x^k)^Ty^k)$, using the $x^k$ update.
+
+For the red part above, can we impose an assumption on the Jacobian analogous to the linear case $(Ax)$, so that this part can be bounded by $c\|y^k-y^{k-1}\|^2$?
+
+For the fourth term on the left-hand side of the inequality, combining the above discussion with the one-side accuracy assumption from the weakly convex paper discussed earlier,
+\begin{align*}
+\langle y^k,g(x^{k+1})-g^k(x^{k+1})\rangle
+&\le M\|g(x^{k+1})-g^k(x^{k+1})\|\qquad(\|y^k\|\le M)\\
+&\le \frac{M\mu}{2}\|x^k-x^{k+1}\|^2\\
+\end{align*}
+
+Here, $g_i(u)$ is infinitely continuously differentiable and $L$-smooth under the bounded-sequence assumption; the Hessian can be bounded.
+
+For the third term, it cannot be canceled as in the linear-constraint case. Consider the following bound:
+\[
+\frac{1}{\sigma}\langle y^{k+1}-y^k,y^k-y^{k-1}\rangle
+\le \frac{1}{2\sigma}\left(\|y^k-y^{k+1}\|^2+\|y^k-y^{k-1}\|^2\right).
+\]
+
+\[
+L(x,y)=f(x)+\langle y,g(x)\rangle-h^*(y). \tag{2.12}
+\]
+
+\subsection*{Lemma 3 (subgradient boundedness)}
+
+Define
+\[
+\kappa_1=\frac{14}{\tau^2},
+\]
+\[
+\kappa_2=3\left(L_f^2+\frac{1}{\tau^2}+4M^2\sum_{i=1}^mL_{g_i}^2+4\left(\frac{1}{\tau}+L_f\right)^2\right),
+\]
+\[
+\kappa_3=2(M_g^0)^2\left(1+\tau^2\left(M^2\sum_{i=1}^mL_{g_i}^2+2\left(\frac{1}{\tau}+L_f\right)^2\right)\right),
+\qquad
+\kappa=\max\{\kappa_1,\kappa_2+\kappa_3\},
+\]
+and $u^k=\{x^k,x^{k-1}\}$. Then,
+\begin{align*}
+\dist(0,\partial L(x^k,y^k))
+&\le \kappa_1\|x^{k+1}-x^k\|^2
++(\kappa_2+\kappa_3)\|x^k-x^{k-1}\|^2 \tag{2.13}\\
+&\le \kappa\|u^{k+1}-u^k\|^2. \tag{2.14}
+\end{align*}
+
+\[
+0\in\partial L(x^k,y^k),
+\]
+\[
+d_x^k=\nabla_xL(x^k)+J(x^k)^Ty^k,
+\qquad
+\partial L(x^k)\ni d_y^k=g(x^k)-g_y^k,
+\quad\text{where }g^k\in\partial h^*(y^k).
+\]
+
+For the first part, according to the optimality condition of the $x^k$ update,
+\begin{align*}
+\|d_1^k\|^2
+&=\|(\nabla f(x^k)-\nabla f(x^{k-1}))+ (\nabla f(x^{k-1})+J(x^{k-1})^Ty^{k-1})
++(J(x^k)^Ty^k-J(x^{k-1})^Ty^{k-1})\|^2 \tag{2.15}\\
+&\le 3\left(\|\nabla f(x^k)-\nabla f(x^{k-1})\|^2
++\|\nabla f(x^{k-1})+J(x^{k-1})^Ty^{k-1}\|^2
++\|J(x^k)^Ty^k-J(x^{k-1})^Ty^{k-1}\|^2\right)\\
+&\le 3\left(L_f^2+\frac{1}{\tau^2}\right)\|x^k-x^{k-1}\|^2
++3\|J(x^k)^Ty^k-J(x^{k-1})^Ty^k+J(x^{k-1})^Ty^k-J(x^{k-1})^Ty^{k-1}\|^2\\
+&\le 3\left(L_f^2+\frac{1}{\tau^2}\right)\|x^k-x^{k-1}\|^2
++6\|(J(x^k)-J(x^{k-1}))^Ty^k\|^2
++6\|J(x^{k-1})^T(y^k-y^{k-1})\|^2\\
+&\le 3\left(L_f^2+\frac{1}{\tau^2}+2M^2\sum_{i=1}^mL_{g_i}^2\right)\|x^k-x^{k-1}\|^2 \tag{2.16}\\
+&\quad+6\left(M^2\sum_{i=1}^mL_{g_i}^2+2\left(\frac{1}{\tau}+L_f\right)^2\right)\|x^k-x^{k-1}\|^2
++\frac{12}{\tau^2}\|x^{k+1}-x^k\|^2\\
+&=\frac{12}{\tau^2}\|x^{k+1}-x^k\|^2
++3\left(L_f^2+\frac{1}{\tau^2}+4M^2\sum_{i=1}^mL_{g_i}^2+4\left(\frac{1}{\tau}+L_f\right)^2\right)\|x^k-x^{k-1}\|^2.
+\end{align*}
+
+The inequality (2.16) follows from Lemma 1, the Lipschitz continuity of $J(x^k)$, and norm compatibility. The second part: according to $y$
+
+\end{document}

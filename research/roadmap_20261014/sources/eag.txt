@@ -1,0 +1,665 @@
+                         Autoencoding Under Normalization Constraints
+
+
+                                Sangwoong Yoon 1 Yung-Kyun Noh 2 3 Frank C. Park 1 4
+
+
+                         Abstract
+     Likelihood is a standard estimate for outlier de-
+     tection. The specific role of the normalization
+     constraint is to ensure that the out-of-distribution
+     (OOD) regime has a small likelihood when sam-
+     ples are learned using maximum likelihood. Be-
+     cause autoencoders do not possess such a pro-
+     cess of normalization, they often fail to recognize
+     outliers even when they are obviously OOD. We
+     propose the Normalized Autoencoder (NAE), a                  Figure 1. Examples of reconstructed outliers. The last two rows
+                                                                  show the reconstructions from a conventional autoencoder (AE)
+     normalized probabilistic model constructed from
+                                                                  and NAE. Both autoencoders are trained on MNIST, and other
+     an autoencoder. The probability density of NAE
+                                                                  inputs are outliers. The architecture of the two autoencoders is
+     is defined using the reconstruction error of an              identical. Successful detection of an outlier is highlighted with blue
+     autoencoder, which is differently defined in the             solid rectangles, while detection failures due to the reconstruction
+     conventional energy-based model. In our model,               of outliers are denoted with an orange dotted rectangle. Note that
+     normalization is enforced by suppressing the re-             AE is not the identity mapping, as it fails to reconstruct the shirt.
+     construction of negative samples, significantly im-
+     proving the outlier detection performance. Our               outliers consistently across a wide range of experimental
+     experimental results confirm the efficacy of NAE,            settings (Lyudchik, 2016; Tong et al., 2019; Zong et al.,
+     both in detecting outliers and in generating in-             2018; Gong et al., 2019). We name this phenomenon outlier
+     distribution samples.                                        reconstruction. Figure 1 shows examples of some outliers
+                                                                  reconstructed by an autoencoder trained with MNIST data;
+                                                                  the autoencoder is able to reconstruct a wide range of OOD
+1. Introduction                                                   inputs, including constant black pixels, Omniglot charac-
+                                                                  ters, and fragments of MNIST digits. The early works on
+An autoencoder (Rumelhart et al., 1986) is a neural network
+                                                                  regularized autoencoders (Vincent et al., 2008; Rifai et al.,
+trained to reconstruct samples from a training data distri-
+                                                                  2011; Ng et al., 2011) focus for the most part on preventing
+bution. Since in principle the quality of reconstruction is
+                                                                  the autoencoder from turning into the identity mapping that
+expected to be poor for inputs that deviate significantly from
+                                                                  reconstructs every input. Nonetheless, outlier reconstruc-
+the training data, autoencoders are widely used in outlier
+                                                                  tion can still occur even when the autoencoder is not the
+detection (Japkowicz et al., 1995), in which an input with a
+                                                                  identity as shown by the non-identity autoencoder in Figure
+large reconstruction error is classified as out-of-distribution
+                                                                  1. Not surprisingly, outlier reconstruction is a leading cause
+(OOD). Autoencoders for outlier detection have been ap-
+                                                                  of autoencoder’s detection failure.
+plied in domains ranging from video surveillance (Zhao
+et al., 2017) to medical diagnosis (Lu & Xu, 2018).               On the other hand, in a normalized probabilistic model, it
+                                                                  is known that maximum likelihood learning suppresses the
+However, autoencoders have been known to reconstruct
+                                                                  assignment of probability mass in OOD regions in order to
+    1
+      Department of Mechanical Engineering, Seoul National        keep the model normalized. Thus, the likelihood is widely
+University, Seoul, Republic of Korea 2 Department of Com-         used as a predictor for outlier detection (Bishop, 1994).
+puter Science, Hanyang University, Seoul, Republic of Korea       Meanwhile, an autoencoder is not a probabilistic model
+3
+  Korea Institute of Advanced Studies, Seoul, Republic of Ko-
+rea 4 Saige Research, Seoul, Republic of Korea. Correspondence    of the data and does not have a suppression mechanism
+to: Yung-Kyun Noh <nohyung@hanyang.ac.kr>, Frank C. Park          corresponding to the normalization in other probabilistic
+<fcp@snu.ac.kr>.                                                  models. As a result, the reconstruction of outliers are not
+                                                                  inhibited during training of an autoencoder.
+Proceedings of the 38 th International Conference on Machine
+Learning, PMLR 139, 2021. Copyright 2021 by the author(s).        This paper formulates an autoencoder as a normalized prob-
+                                       Autoencoding Under Normalization Constraints
+
+abilistic model to introduce a mechanism for preventing          2. Background
+outlier reconstruction. In our formulation, which we call the
+Normalized Autoencoder (NAE), the reconstruction error           2.1. Autoencoders
+is re-interpreted as an energy function, i.e., the unnormal-     Autoencoders are neural networks trained to reconstruct
+ized negative log-density, and defines a probabilistic model     an input datum x ∈ X ⊂ RDx . For an input x, the qual-
+from an autoencoder. During maximum likelihood learning          ity of its reconstruction is measured in reconstruction error
+of NAE, outlier reconstruction is naturally suppressed by        lθ (x), where θ denotes parameters in an autoencoder. The
+enforcing the normalization constraint, and the resulting au-    loss function of an autoencoder LAE for training is the ex-
+toencoder is significantly less prone to reconstruct outliers,   pected reconstruction error of training data. Gradient de-
+as shown in Figure 1.                                            scent training is performed via computing the gradient of L
+In each training iteration of NAE, samples generated from        with respect to model parameters θ:
+the model is used to update the normalization constraint
+                                                                                   LAE = Ex∼p(x) [lθ (x)],                  (1)
+which is implicitly computed as in other energy-based mod-
+els. Since running a Markov Chain Monte Carlo (MCMC)                            ∇θ LAE = Ex∼p(x) [∇θ lθ (x)],               (2)
+sampler until convergence every iteration is computation-
+ally infeasible, an approximate sampling strategy has to         where ∇θ is the gradient operator with respect to θ and p(x)
+be employed. We observe that training with popular sam-          denotes the data density.
+pling strategies such as Contrastive Divergence (CD; Hinton      Architecture An autoencoder consists of two submodules,
+(2002)) and Persistent CD (PCD; Tieleman (2008)) may             an encoder and a decoder. An encoder fe (x) : RDx → RDz
+often produce poor density estimates. Instead, we propose        maps an input x to a corresponding latent representation
+on-manifold initialization (OMI), a method of initializing       vector z ∈ Z ⊂ RDz , and a decoder fd (z) : RDz → RDx
+an MCMC chain on manifold defined by the decoder of an           maps a latent vector z back to the input space. Then, the
+autoencoder. OMI selects high-model-density initial states       reconstruction error lθ (x) is given as:
+by leveraging the assumption that points on the decoder
+manifold typically have small reconstruction error, i.e. high                    lθ (x) = dist(x, fd (fe (x))),             (3)
+model density. With OMI, NAE can accurately recover the
+data density and thus become an effective outlier detector.      where dist(·, ·) is a distance-like function measuring
+                                                                 the deviation between an input x and a reconstruction
+Intriguingly, although technically a normalized probabilis-      fd (fe (x)). A typical choice is the squared L2 distance,
+tic model, the variational autoencoder (VAE; Kingma &            i.e., dist(x1 , x2 ) = ||x1 − x2 ||22 . Other possible choices
+Welling (2014)) also reconstructs outliers and assigns a spu-    include L1 distance, dist(x1 , x2 ) = |x1 − x2 |, and the
+riously high likelihood on OOD data (Nalisnick et al., 2019;     structural similarity (SSIM; Wang et al. (2004); Bergmann
+Xiao et al., 2020) for reasons that are as-yet unclear.          et al. (2018)).
+Our main contributions can be summarized as follows:             Note that the reconstruction error (Eq. (3)) is not a like-
+• We propose NAE, a novel generative model constructed           lihood of a datum, and therefore the minimization of the
+  from an autoencoder;                                           reconstruction error does not correspond to the maximiza-
+• We propose OMI, a sampling strategy tailored for NAE;          tion of the likelihood. Without modification, an autoencoder
+• We empirically show that NAE is highly effective for           per se is not a probabilistic model.
+  outlier detection and can perform other generative tasks.      Outlier Detection A datum is an outlier or called OOD if
+Section 2 provides brief background on autoencoders and          it lies in the ρ-sublevel set of a data density {x|p(x) ≤ ρ}
+energy-based models. NAE is described in Section 3, and          (Steinwart et al., 2005). We particularly focus on ρ = 0,
+OMI is described in Section 4. Related works are re-             where an outlier is defined as an input from the outside of
+viewed in Section 5. Section 6 presents experimental re-         the data distribution’s support. Most of the OOD examples
+sults. Section 7 provide discussions and conclude the pa-        which attract the attention of the research community are
+per. Our source code and pre-trained models are publicly         in fact out-of-support samples. For example, SVHN and
+available online at https://github.com/swyoon/                   CIFAR-10 are out-of-support to each other, as confirmed
+normalized-autoencoders.                                         by a supervised classifier perfectly discriminating the two
+                                                                 datasets. Note that the support-based definition provides
+                                                                 invariant characterization of outliers, as no invertible trans-
+                                                                 form defined on the data space alters whether a sample is in-
+                                                                 or out-of-support. Meanwhile, for ρ 6= 0, the characteriza-
+                                                                 tion of outliers are not invariant to the choice of coordinates
+                                                                 Lan & Dinh (2020).
+                                        Autoencoding Under Normalization Constraints
+
+In the autoencoder-based outlier detection (Japkowicz et al.,
+1995), an input is classified as OOD if its reconstruction
+error lθ (x) is greater than a threshold τ : lθ (x) > τ . The
+outlier reconstruction indicates that there exists an input x∗
+with p(x∗ ) ≤ ρ, but lθ (x∗ ) < τ . Appendix includes the
+detailed investigation on outlier reconstruction.
+
+2.2. Energy-based Models                                          Figure 2. An illustration of the energy gradients in Eq. (7). The
+                                                                  red and blue shades represent the model and the data density,
+Unlike autoencoders, energy-based models (EBMs) are               respectively. The gradient update following Eq. (7) increases the
+valid models for a normalized probability distribution. The       energy of samples from pθ (x) (the red dots) and decreases the
+EBM represents a probability distribution through the un-         energy of training data (the blue crosses).
+normalized negative log probability, also called the energy
+function Eθ (x). Here, θ denotes the model parameters.            starting point x0 is drawn from a noise distribution p0 (x),
+                                                                  typically a Gaussian or uniform distribution. Starting from
+For a continuous input x ∈ X ⊂ RDx , Eθ (x) defines the           x0 , a Markov chain evolves as follows:
+model density function pθ (x) through Gibbs distribution:
+                                                                            xt+1 = xt + λx ∇x log pθ (xt ) + σx t ,           (8)
+                       1
+              pθ (x) =    exp(−Eθ (x)/T ),                 (4)
+                       Ωθ                                         where t ∼ N (0, I). λx and σx are the step size and
+                                                                  the noise parameters, respectively. A theoretically moti-
+where T ∈ R+ is called the temperature and is often ignored       vated choice is 2λx = σx2 , but the parameters are often
+by setting T = 1. Ωθ is the normalization constant and is         tweaked separately for better performance (Du & Mordatch,
+defined as:                                                       2019; Grathwohl et al., 2020; Nijkamp et al., 2019). As
+                 Z                                                ∇x log pθ (x) = −∇x E(x)/T , tweaking the step size can
+            Ωθ =    exp(−Eθ (x)/T )dx < ∞.              (5)       be seen as adjusting the temperature T .
+                    X
+                                                                  To ensure the convergence of the chain, either Metropolis-
+The computation of Ωθ is usually difficult for high-              Hastings rejection (Roberts et al., 1996) or annealing of
+dimensional x. However, maximum likelihood learning               the noise parameter to zero (Welling & Teh, 2011) may be
+can still be performed without the explicit evaluation of Ωθ .    employed, but often omitted in practice.
+The gradient of negative log likelihood of data is given as
+follows (Younes, 1999):                                           We discuss specific strategies to evaluate the second term in
+                                                                  Eq. (7) in Section 4. For a comprehensive review on various
+    Ex∼p(x) [−∇θ log pθ (x)]                                      strategies for training an EBM, readers may refer to Song &
+  =Ex∼p(x) [∇θ Eθ (x)]/T + ∇θ log Ωθ                       (6)    Kingma (2021).
+                                                   0
+  =Ex∼p(x) [∇θ Eθ (x)]/T − Ex0 ∼pθ (x) [∇θ Eθ (x )]/T (7)
+                                                                  3. Normalized Autoencoders
+∇θ log Ωθ in Eq. (6) is evaluated from the energy gradients
+                                                                  3.1. Definition
+of samples x0 generated from the model in Eq. (7). The
+samples from pθ (x) are often called ”negative” samples.          We propose Normalized Autoencoder (NAE), a normal-
+The derivation of Eq. (7) is provided in Appendix.                ized probabilistic model defined from an autoencoder. The
+In Eq. (7), the first term decreases the energy of the training   probability density of NAE pθ (x) is defined as a Gibbs
+data, or “positive” samples, while the second term increases      distribution (Eq. (4)) the energy of which is defined as the
+the energy of the generated samples, or “negative” samples.       reconstruction error of an autoencoder:
+The training converges when pθ (x) becomes identical to                                  Eθ (x) = lθ (x).                      (9)
+p(x), as the two gradient terms cancel out. In practice, the
+two expectations in Eq. (7) are approximated with a mini-         Thus, the model density of NAE is given as
+batch of samples during each iteration. Figure 2 visualizes                                 1
+the gradients in Eq. (7).                                                        pθ (x) =      exp(−lθ (x)/T ),               (10)
+                                                                                            Ωθ
+Langevin Monte Carlo (LMC) The negative samples are
+                                                                  where Ωθ is defined as in Eq. (5). Due to the normalization
+generated using MCMC. LMC (Parisi (1981); Grenander
+                                                                  constant, pθ (x) is a properly normalized probability density.
+& Miller (1994)) is a simple yet effective MCMC method
+used in recent work on deep EBMs (Du & Mordatch, 2019;            As a probabilistic model, NAE is trained to maximize the
+Grathwohl et al., 2020; Nijkamp et al., 2019). In LMC, a          likelihood of data. The loss function to be minimized is the
+                                        Autoencoding Under Normalization Constraints
+
+negative log-likelihood of data:
+  Ex∼p(x) [− log pθ (x)] = Ex∼p(x) [lθ (x)]/T + log Ωθ .
+                                                     (11)
+The gradient for the negative log-likelihood is evaluated as
+in conventional EBMs (Eq. (7)).
+  Ex∼p(x) [−∇θ log pθ (x)]
+  = Ex∼p(x) [∇θ lθ (x)]/T − Ex0 ∼pθ (x) [∇θ l(x0 )]/T. (12)
+Therefore, each gradient step decreases the reconstruction
+error of training data x, while increasing the reconstruction     Figure 3. Density estimates and negative samples from NAEs
+error of negative samples x0 generated from pθ (x).               trained by various approximate sampling methods. The gener-
+                                                                  ated samples (blue dots) are visualized along with the true density,
+3.2. Remarks                                                      a 2D mixture of 8 Gaussians. The data density is depicted in Figure
+                                                                  5. CD: The learned density has a spurious mode, marked by an ar-
+Normalization as Regularization In NAE, enforcement               row. The black crosses denote training data. PCD without restart:
+of normalization can be viewed as a regularizer for the           The highly correlated samples result in an oscillating density es-
+reconstruction loss (1). A typical formulation for a regu-        timate. PCD with restart: Despite the good quality of sampling,
+larized autoencoder is given as L = LAE + Lreg , where            the density is poorly estimated. On-manifold: Both density esti-
+                                                                  mation and sample generation are performed well. More details
+Lreg is a regularizer. By setting the loss function of NAE as
+                                                                  are specified in Section 4.1 and Section 6.2.
+L = T Ex∼p(x) [− log pθ (x)], we have L = LAE + T log Ωθ .
+Therefore, the normalization constant contributes as a regu-
+larizer: Lreg = T log Ωθ .                                        Sample Generation Samples from pθ (x) are generated
+                                                                  through MCMC. Unlike VAE, the forward pass of a de-
+Suppression of Outlier Reconstruction During the train-           coder should not be considered as sample generation.
+ing of NAE, the reconstruction of an outlier is inhibited by
+enforcing the normalization constraint. Given a successful
+sampling process, the negative samples should cover all high      4. On-Manifold Initialization
+density regions of pθ (x). A sample from a high density re-       The main challenge in the training of NAE through Eq. (12)
+gion of pθ (x) has a low lθ (x) by definition (Eq. (9)). Hence,   is that each iteration requires negative sample generation
+if there exist a reconstructable outlier, which has high pθ (x)   using MCMC, which is computationally expensive. In this
+due to low lθ (x), it will appear as a negative sample from       section, we first discuss the failure modes of popular approx-
+MCMC. As the gradient update given in Eq. (12) increases          imate sampling strategies for EBMs, namely Contrastive
+the reconstruction error of negative samples, the reconstruc-     Divergence (CD; Hinton (2002)) and Persistent CD (PCD;
+tion quality of a reconstructable outlier will be degraded. As    Tieleman (2008)). We argue that the method on how the
+a result, the reconstruction error of NAE becomes a more          initial state of MCMC is chosen have incurred such failure
+informative predictor that discriminates outliers from inliers    modes. Then, we propose on-manifold initialization, an ap-
+than that of a conventional autoencoder.                          proximate sampling strategy effective in training the NAE.
+Outlier Detection with Likelihood NAE bridges the two             On-manifold initialization provides a better initial state for
+popular outlier detection criteria, namely, the reconstruction    MCMC by leveraging the structure of an autoencoder.
+error (Japkowicz et al., 1995) and the likelihood (Bishop,        There exist other training methods for EBMs which do
+1994). The reconstruction error criterion classifies an in-       not rely on MCMC, for example denoising score matching
+put with a large reconstruction error as OOD lθ (x) > τ ,         (Vincent, 2011) or noise contrastive estimation (Gutmann &
+whereas the likelihood criterion predicts an input as an          Hyvärinen, 2010), and they may also be applicable to NAE.
+outlier if the log-likelihood is smaller than the threshold       We leave application of such methods on NAE as future
+log pθ (x) < τ 0 . These two criteria are equivalent in           work.
+NAE for appropriately set τ and τ 0 , as the reconstruc-
+tion error and the log-likelihood has a linear relationship:
+                                                                  4.1. Failure Modes of CD and PCD
+log pθ (x) = −lθ (x) − log Ωθ . Note that the two criteria
+rarely coincide in other models, for example, denoising au-       Failure Mode of CD CD, often called CD-k, draws a nega-
+toencoders (DAE, Vincent et al. (2008)), VAE (Kingma &            tive sample by first initializing a Markov chain of MCMC
+Welling, 2014)), and DSEBMs (Zhao et al., 2016), caus-            at a training data point, then proceeding k steps of MCMC
+ing confusion on which of the decision rules should be            transitions. The strength of CD is that the number of steps k
+employed for outlier detection.                                   can be radically smaller, e.g., k = 1, than the usual number
+                                        Autoencoding Under Normalization Constraints
+
+of steps required in a convergent MCMC run, significantly
+reducing the amount of computation.
+However, when k is small, CD-k is not able to suppress a
+spuriously high mode in the model density pθ (x) located far
+from the data distribution p(x), because negative samples
+are only generated in the vicinity of training data. Figure 3
+shows an instance of a spurious mode in the model density.
+Negative samples (blue dots) are close to training data (black    Figure 4. An illustration of the on-manifold initialization. The one-
+crosses) so that they do not reach for the density mode in        dimensional latent space Z and the two-dimensional input space
+                                                                  X are shown. The red star is the on-manifold initialized state. The
+the middle. As a result, the mode is not suppressed. Such a
+                                                                  cross denotes a negative sample obtained at the end of the whole
+spurious mode will result in outlier detection failures and,      process.
+in case of NAE, reconstructed outliers. The possibility of
+accidentally assigning high density in the unvisited area was
+acknowledged in the original article (Section 3 of Hinton         4.2. On-manifold Initialization
+(2002)). Spurious modes are also observed in DAE, where
+a corrupted datum is located only in the neighborhood of          We propose on-manifold initialization (OMI), a novel
+a training data point (Alain & Bengio, 2014). Increasing k        MCMC initialization strategy which eventually leads to
+will decrease the chance of have spurious modes, but the          a significantly better density estimate. We aim to initialize a
+computational advantage of CD will be lost when k is large.       MCMC chain from a high-density region of pθ (x) instead
+                                                                  of p0 (x) or p(x). While finding a high-density region given
+Failure Mode of PCD An initial state of MCMC in PCD               an energy function is difficult in general, it is possible for
+is given as the negative sample generated from MCMC               NAE’s distribution, since we can exploit the structure of an
+in the previous training iteration. PCD was originally im-        autoencoder. For a sufficiently well-trained autoencoder, a
+plemented using fully persistent MCMC (Tieleman, 2008).           point with high pθ (x), i.e., a small reconstruction error, will
+However, without a restart, MCMC chains in a mini-batch           lie near the decoder manifold, which we define as:
+may become highly correlated to each other. When pθ (x) is
+multi-modal, the correlated chains yield degenerate negative                       M = {x|x = fd (z), z ∈ Z}.                    (13)
+samples which only cover a subset of density modes as in
+Figure 3. The degenerate samples make the density estimate        In on-manifold initialization, we initialize MCMC from a
+oscillatory, slowing the convergence of the model.                point in the decoder manifold x0 ∈ M.
+The degeneracy between chains can be mitigated by ran-            Not all points in M have high pθ (x). To find points with
+domly resetting the initial state to a sample from the noise      high pθ (x), we run a preliminary MCMC named as latent
+distribution p0 (x) with a small probability (typically 5%)       chain in the latent space Z. The latent chain generates a
+(Du & Mordatch, 2019; Grathwohl et al., 2020). However,           sample from on-manifold density qθ (z) defined from on-
+learning with PCD still fails to yield an accurate density        manifold energy Hθ (z).
+estimate (Figure 3). This failure mode can be explained by
+                                                                                           1
+the study of Nijkamp et al. (2019): When a short MCMC                             qθ (z) =     exp(−Hθ (z)/Tz ),          (14)
+chain initialized from p0 (x) is used in training, an EBM                                 Ψθ
+simply learns a flow that maps p0 (x) to p(x), and the energy                   Hθ (z) =Eθ (fd (z)),                      (15)
+no longer models the data density. Using a restart drives an                     R
+EBM to become such a flow, as restarted chains are short          where Ψθ = exp(−Hθ (z)/Tz )dz is the normalization
+and start from p0 (x).                                            constant and Tz is the temperature. A latent vector x with a
+                                                                  small Hθ (z) will result in a small Eθ (x) when it is mapped
+In summary, CD initializes MCMC from the data distribu-           to the input space by x = fd (z). Thus, Hθ (z) guides the
+tion pθ (x), and PCD initializes MCMC from a noise distri-        latent chain to find z which produce x0 ∈ M which has a
+bution p0 (x). The convergence of MCMC is independent of          small energy, i.e., a small reconstruction error.
+its initialization in theory, but the initialization method can
+be crucial in practice, as shown in Figure 3. When pθ (x),        Similarly to Eq. (8), we use LMC to run the latent chain.
+from which we want to sample, deviates significantly from         An initial state z0 is drawn from a noise distribution defined
+pθ (x) or p0 (x), these initialization methods may lead to        on the latent space. Then the state propagates as:
+a poor density estimate and a suboptimal performance in
+                                                                              zt+1 = zt + λz ∇z log qθ (zt ) + σz t ,           (16)
+outlier detection.
+                                                                  where λz and σz are the step size and the noise parameters
+                                                                  as in Eq. (8). A sample replay buffer (Du & Mordatch,
+                                        Autoencoding Under Normalization Constraints
+
+2019) is applicable in the latent chain. Figure 4 illustrates
+negative sample generation process using the on-manifold
+initialization. We also write the process as an algorithm in
+Appendix.
+
+5. Related Work
+Autoencoders There have been several attempts to formu-
+late a probabilistic model from an autoencoder. VAE uses a
+latent variable model by introducing a prior distribution p(z).
+However, the prior may deviate from the actual distribution
+                                                                  Figure 5. Estimating 8 Gaussians using various autoencoders. The
+of data in Z, which may cause problems. GPND (Pidhorskyi
+                                                                  density of an autoencoder (AE) is computed from Eq. (10). AE
+et al., 2018) models probability density by factorizing into      gives a significant amount of probability to low-data-density area.
+on- and off-manifold components but still requires a prior        VAE also assigns some probability mass in between Gaussians.
+distribution. M-flow (Brehmer & Cranmer, 2020) only de-           Meanwhile, the density estimate from NAE agrees well with the
+fines a probability density on the decoder manifold and does      data distribution.
+not assign a likelihood to off-manifold data. DAE models
+a density by learning the gradient of log-density (Alain &        reconstruction error following Eq. (2), before the main train-
+Bengio, 2014).                                                    ing. By providing a good initialization for network weights
+MemAE (Gong et al., 2019) is a rare example that directly         and the decoder manifold, pre-training greatly reduces the
+tackles the outlier reconstruction problem. MemAE em-             number of NAE training iterations (Eq. (12)) required un-
+ploys a memory module that memorizes training data to             til convergence. Pre-training is not always necessary: In
+prevent outlier reconstruction, but in this case, the recon-      our experiments, we observe that NAE can be trained suc-
+struction error for an inlier can be large because the model’s    cessfully without pre-training for synthetic data. However,
+generalization ability is also limited.                           pre-training was essential to obtain decent results for larger
+                                                                  scale data, such as MNIST and CIFAR-10.
+Design of Energy Functions Specifying the class of Eθ (x)
+not only has computational consequences but alters the in-        Latent Space Structure Two configurations for the latent
+ductive bias that an EBM encodes. Feed-forward convolu-           space is used in experiments: the unbounded real space RDz
+tional networks are used in Xie et al. (2016), Du & Mor-          and the surface of a hypersphere SDz −1 . When Z = RDz ,
+datch (2019) and Grathwohl et al. (2020) and are shown to         a linear layer is used as the output of an encoder. q0 (z)
+effectively model the distribution of images. The energy          is set as N (0, I). The squared norm of the latent vectors
+can also be modeled in an auto-regressive manner (Nash &          are added to the loss function as a regularizer so that z’s
+Durkan, 2019; Meng et al., 2020). Auto-regressive energy          concentrate near the origin (Ghosh et al., 2020).
+functions are very flexible and thus are capable of model-        For the hyperspherical space Z = SDz −1 (Davidson et al.,
+ing high-frequency patterns in data. VAEBM (Xiao et al.,          2018; Xu & Durrett, 2018; Zhao et al., 2019), the output of
+2021) combines VAE and a feed-forward EBM to model                an encoder is projected to the surface of a unit ball through
+complicated data distribution.                                    the division by its norm: z ← z/||z||. In Langevin dynam-
+The reconstruction error of an autoencoder is used as a           ics, a sample is projected to SDz −1 at the end of each step.
+discriminator in EBGAN (Zhao et al., 2016). Although              q0 (z) is set to a uniform distribution on SDz −1 .
+the reconstruction error was called “energy” in EBGAN,            The hyperspherical latent space has a few advantages over
+the formulation is clearly different from NAE. EBGAN              RDz . First, it is impossible to draw uniformly random sam-
+does not utilize Gibbs distribution formulation (Eq. (4))         ples, because RDz is not compact. Second, for large Dz , it
+to model a distribution, and samples are generated from a         is difficult to draw samples near the origin, because of its ex-
+separate generator network. In DSEBM (Zhao et al., 2016),         ponentially decreasing volume. However, we believe more
+the difference between an input and its reconstruction is         works needs to be done to completely understand the effect
+interpreted as the gradient of log-density.                       of hyperspherical geometry on the latent representation.
+                                                                  Regularizing Negative Sample Energy As introduced in
+6. Experiments                                                    Du & Mordatch (2019), we regularize the energy of nega-
+6.1. Technicalities for NAE Training                              tive samples to prevent its divergence. We add the average
+                                                                  squared energy of negative samples   in a mini-batch to the
+Pre-training as a Conventional Autoencoder NAE can be                                           PB
+                                                                  loss function: L = LNAE + α i=1 E(x0i )2 /B for the batch
+pre-trained as a conventional autoencoder by minimizing the       size B and the hyperparameter α. We set α = 1.
+                                               Autoencoding Under Normalization Constraints
+
+
+Table 1. MNIST hold-out class detection AUC scores. The values in parentheses denote the standard error of mean after 10 training runs.
+      H OLD - OUT: 0           1           2          3          4          5          6           7          8          9          AVG
+
+      NAE-OMI .989 (.002) .919 (.013) .992 (.001) .949 (.004) .949 (.005) .978 (.003) .938 (.004) .975 (.024) .929 (.004) .934 (.005) .955
+      NAE-CD .799         .098        .878        .769        .656        .806        .874        .537        .876        .500        .679
+      NAE-PCD .745        .114        .879        .754        .690        .813        .872        .509        .902        .544        .682
+      AE      .819        .131        .843        .734        .661        .755        .844        .542        .902        .537        .677
+      DAE     .769        .124        .872        .935        .884        .793        .865        .533        .910        .625        .731
+      VAE(R)  .954        .391        .978        .910        .860        .939        .916        .774        .946        .721        .839
+      VAE(L)  .967        .326        .976        .906        .798        .927        .928        .751        .935        .614        .813
+      WAE     .817        .145        .975        .950        .751        .942        .853        .912        .907        .799        .805
+      GLOW    .803        .014        .624        .625        .364        .561        .583        .326        .721        .426        .505
+      PXCNN++ .757        .030        .663        .663        .483        .642        .596        .307        .810        .497        .545
+      IGEBM   .926        .401        .642        .644        .664        .752        .851        .572        .747        .522        .672
+      DAGMM .386          .304        .407        .435        .444        .429        .446        .349        .609        .420        .423
+
+6.2. 2D Density Estimation                                                 from the datasets used in test phase to tune model hyper-
+                                                                           pamraeters. Additional details on model implementation
+We demonstrate the density estimation capability of NAE
+                                                                           and datasets can be found in the supplementary material.
+with a two-dimensional mixture of 8 Gaussians. First,
+we benchmark negative sample generation strategies for                     The identical networks architectures are used for all
+NAE, including CD, PCD with and without restart, and on-                   autoencoder-based methods. The reconstruction error is
+manifold initialization. The results are shown in Figure 3                 used as the decision function, except for VAE. For deep
+and discussed in Section 4.1 in detail.                                    generative models, PixelCNN++ (PXCNN++, Salimans
+                                                                           et al. (2017)), Glow (Kingma & Dhariwal, 2018) and a
+Second, we compare NAE trained with the on-manifold ini-
+                                                                           feed-forward EBM (IGEBM, Du & Mordatch (2019)), we
+tialization to a conventional autoencoder and VAE (Figure
+                                                                           use the negative log-likelihood (i.e., the energy) as the de-
+5). An autoencoder assigns high densities on regions be-
+                                                                           cision function. For VAE, we show two results from using
+tween Gaussian modes, meaning that an autoencoder gives
+                                                                           the reconstruction error (R) or the negative log-likelihood
+a small reconstruction error from a points from the region.
+                                                                           (L) as decision functions.
+For the overcomplete case (Dz = 3 > Dx ), an autoencoder
+almost becomes the identity map, and its reconstruction                    MNIST Hold-Out Class Detection One class from
+error is not an informative predictor for an outlier. VAE and              MNIST is set as the outlier class and the rest as the inlier
+NAE learn a non-identity function under the overcomplete                   class. Then, the procedure is repeated for all ten classes in
+setting, showing the effectiveness of their regularizers.                  MNIST. ConstantGray dataset is used for model selection.
+In the experiments, the identical network architecture is                  This problem is not as easy as it seems, as confirmed in
+used, and the temperature is optimized by gradient descent.                the very low performance of various algorithms in Table
+In on-manifold initialization, temperature values are shared               1. When a class is held out from MNIST, the remaining
+by the main MCMC and the latent chain. When perform-                       9 classes may contain a set of visual features sufficient to
+ing MCMC in X , Metropolis-Hastings rejection is applied                   reconstruct the hold-out class, i.e., the outlier reconstruction
+to ensure the detailed balance but is not applied in the la-               occurs. The outlier reconstruction is particularly severe for
+tent chain. For visualization, the normalization constants                 the digit 1, 4, 7 and 9, possibly because their shape can be
+for an autoencoder and NAE are computed by numerically                     reconstructed from the recombination of other digits. For
+integrating over the domain, [−4, 4]2 .                                    example, overlapping 4 and 7 produces a shape similar to
+                                                                           9. Interestingly, most of the other baseline algorithms also
+6.3. Outlier Detection                                                     show poor performance when 1, 4, 7 or 9 are held out as the
+                                                                           outlier. NAE shows the highest AUC score for all classes
+Experimental Setting We empirically demonstrate the ef-                    and effectively suppresses the reconstruction of the outlier
+fectiveness of NAE as an outlier detector. In outlier detec-               class (Figure 6).
+tion tasks, an outlier detector is trained only using inlier
+data and then asked to discriminate outliers from inliers                  We also compare CD and PCD along with OMI in training
+during test phase. Given an input, a detector is assumed to                NAEs. Using CD and PCD show poor outlier detection
+produce a scalar decision function which indicates the out-                performance, although given the identical set of MCMC
+lierness of the input. We measure the detection performance                parameters.
+in AUC, i.e., the area under the receiver operating character-             Out-of-Distribution Detection The samples from differ-
+istic curve. Following the protocol of Ren et al. (2019) and               ent datasets are used as the outlier class. We test two in-
+Hendrycks et al. (2019), we use an OOD dataset different                   lier datasets, CIFAR-10 or ImageNet 32×32 (ImageNet32).
+                                           Autoencoding Under Normalization Constraints
+
+         Table 2. OOD detection performance in AUC.
+  In: CIFAR-10 ConstantGray FMNIST SVHN CelebA Noise
+     NAE              .963         .819     .920    .887     1.0
+      AE              .006         .650     .175    .655     1.0
+     DAE              .001         .671     .175    .669     1.0
+    VAE(R)            .002         .700     .191    .662     1.0
+    VAE(L)            .002         .767     .185    .684     1.0
+     WAE              .000         .649     .168    .652     1.0
+    GLOW              .384         .222     .260    .419     1.0
+   PXCNN++            .000         .013     .074    .639     1.0
+    IGEBM             .192         .216     .371    .477     1.0
+ In: ImageNet32 ConstantGray FMNIST SVHN CelebA Noise
+      NAE              .966         .994     .985    .949    1.0
+       AE              .005         .915     .102    .325    1.0
+      DAE              .069         .991     .102    .426    1.0
+     VAE(R)            .030         .936     .132    .501    1.0
+     VAE(L)            .028         .950     .132    .545    1.0       Figure 7. Sampling with NAEs trained on MNIST and CelebA
+      WAE              .069         .991     .081    .364    1.0       64×64. (z0 ) The random initialization of the latent chain. We
+     GLOW              .413         .856     .169    .479    1.0
+                                                                       visualize fd (z0 ). (OMI) Images after OMI. (Samples) Samples
+    PXCNN++            .000         .004     .027    .238    1.0
+                                                                       obtained after MCMC starting from OMI. OMI images and Sam-
+                                                                       ples corresponds to the red start and the green cross in Figure 4,
+                                                                       respectively.
+
+
+                                                                       which specialize in sampling, but the generated samples are
+                                                                       indeed visually sensible.
+
+                                                                       7. Discussion and Conclusion
+Figure 6. Reconstruction examples in MNIST hold-out class de-          Comparison to Other EBMs NAE uses Gibbs distribu-
+tection. Data and their reconstructions are shown for four difficult   tion to define a density function as in other EBMs (Eq. 4).
+hold-out settings (1, 4, 7 and 9). Digit 2 is shown as an inlier       The main difference between NAE and other EBMs is the
+example. The bottom two rows depict the reconstructions from           choice of an energy function. However, this difference re-
+four autoencoders (AE) and four NAEs trained on each setting.          sults in significant theoretical and practical consequences.
+AEs reconstruct the outlier class well, while NAEs selectively         First, we naturally incorporate the manifold hypothesis, i.e.
+reconstruct only inliers.                                              the assumption that high-dimensional data lie on a low-
+Zero-padded 32×32 MNIST images are used for model                      dimensional manifold, into a model. Second, the energy
+selection. Results are shown in Table 2.                               function of NAE can be pre-trained as a conventional au-
+                                                                       toencoder. Third, more effective sampling can be performed
+It is known that constant images and SVHN images are                   by using OMI, leading to a more accurate density estimate.
+particularly difficult outliers for generative models trained
+on a set of images with rich visual features (Nalisnick et al.,        Likelihood-based Outlier Detection and Inductive Bias
+2019; Serrà et al., 2020). However, NAE detect such difficult         The likelihood is considered as a poor decision function for
+outliers successfully. All models are able to discriminate             outlier detection, after the failures of likelihood-based deep
+noise outliers, indicating that their poor performance is not          generative models such as VAE, PixelCNN++, and Glow
+from the failure of training.                                          (Nalisnick et al., 2019; Hendrycks et al., 2019). Those gen-
+                                                                       erative models fail to detect obvious outlier images which
+                                                                       typically have low complexity. However, we believe that the
+6.4. Sample Generation
+                                                                       failures should not be attributed to the use of the likelihood.
+Samples are generated from NAE using MCMC with OMI.                    There are likelihood-based models, particularly EBMs (Du
+Figure 7 shows the samples from NAEs trained on MNIST                  & Mordatch, 2019; Grathwohl et al., 2020), including NAE,
+and on CelebA 64×64. The random initial states of the                  that show better outlier detection performance than VAE,
+latent chain (z0 ) map to unrecognizable images. After                 PixelCNN++ and Glow. Instead, inductive bias of a gen-
+the latent chain, OMI produces somewhat realistic images.              erative model is likely to be responsible for the failure of
+MCMC on X refines the OMI images. Although quantita-                   detecting low-complexity outliers. It is reported that the
+tive image (in Appendix) quality metric for samples gener-             likelihoods of the failed models are negatively correlated to
+ated from NAE is not on a par with that of generative models           the complexity of images (Serrà et al., 2020). Meanwhile,
+                                        Autoencoding Under Normalization Constraints
+
+                                                                  the reconstruction error as an energy function. Our interpre-
+                                                                  tation leads to a novel class of probabilistic autoencoders,
+                                                                  which shows impressive OOD detection performance and
+                                                                  bridges EBMs and autoencoders.
+
+                                                                  Acknowledgements
+                                                                  S. Yoon and F.C. Park were supported in part by the
+                                                                  SNU Artificial Intelligence Institute (AIIS), NRF Grant
+                                                                  2016R1A5A1938472 (SRRC), the SNU BK21+ Program in
+                                                                  Mechanical Engineering, and SNU-IAMD. Y.-K. Noh was
+                                                                  partly supported by NRF/MSIT (No. 2018R1A5A7059549,
+                                                                  2021M3E5D2A01019545), IITP/MSIT Artificial Intelli-
+                                                                  gence Graduate School Program for Hanyang University
+                                                                  (2020-0-01373), and Hanyang University (HY-2019).
+
+                                                                  References
+      Figure 8. Sampling with randomly initialized NAE.           Alain, G. and Bengio, Y. What regularized auto-encoders
+                                                                    learn from the data-generating distribution. The Journal
+the reconstruction of low-complexity images are explicitly
+                                                                    of Machine Learning Research, 15(1):3563–3593, 2014.
+suppressed in NAE training, as the simple images tend to
+lie on the decoder manifold.                                      Bergmann, P., Löwe, S., Fauser, M., Sattlegger, D., and
+OMI in Early Stage of Training Sampling with OMI gen-               Steger, C. Improving unsupervised defect segmentation
+erates samples with high model density pθ (x) even in the           by applying structural similarity to autoencoders. arXiv
+early stage of training. In fact, the early stage is where the      preprint arXiv:1807.02011, 2018.
+advantage of OMI over CD is salient, because pθ (x) differs
+                                                                  Bishop, C. M. Novelty detection and neural network valida-
+from p(x) significantly. Figure 8 visualizes samples gener-
+                                                                    tion. IEE Proceedings-Vision, Image and Signal process-
+ated via CD and OMI from a randomly initialized NAE and
+                                                                    ing, 141(4):217–222, 1994.
+shows that CD fails to draw samples from pθ (x).
+OMI draws high-model-density proposals because it is de-          Bourlard, H. and Kamp, Y. Auto-association by multilayer
+signed to exploit the assumption that well-reconstructed            perceptrons and singular value decomposition. Biological
+points lie on the decoder manifold. We find that this as-           cybernetics, 59(4-5):291–294, 1988.
+sumption holds well for all experimental settings used in
+the paper.                                                        Brehmer, J. and Cranmer, K. Flows for simultaneous man-
+                                                                    ifold learning and density estimation. arXiv preprint
+Analytic Solution for Linear Case Linear NAEs reduce to             arXiv:2003.13913, 2020.
+Gaussian distributions. Consider fe (x) = W x and fd (z) =
+W > z with W ∈ RDz ×Dx . Given the squared L2 distance            Davidson, T. R., Falorsi, L., De Cao, N., Kipf, T., and Tom-
+reconstruction error, the density of NAE is written as:             czak, J. M. Hyperspherical variational auto-encoders.
+                                                                    In 34th Conference on Uncertainty in Artificial Intelli-
+             pθ (x) = exp(−x> Σ−1 x/2)/Ωθ ,               (17)      gence 2018, UAI 2018, pp. 856–865. Association For
+                                                                    Uncertainty in Artificial Intelligence (AUAI), 2018.
+where Σ−1 = 2(I − W > W )2 /T . When the determinant
+of I − W > W is non-zero, pθ (x) becomes a well-defined           Du, Y. and Mordatch, I. Implicit generation and modeling
+Gaussian. Under certain conditions (see Appendix), the             with energy based models. In Wallach, H., Larochelle, H.,
+maximum likelihood estimate of Σ becomes the empirical              Beygelzimer, A., d Alche-Buc, F., Fox, E., and Garnett, R.
+covariance of data, as in a usual Gaussian distribution.           (eds.), Advances in Neural Information Processing Sys-
+It is interesting to note that a linear VAE also reduces into a     tems 32, pp. 3608–3618. Curran Associates, Inc., 2019.
+Gaussian, as it is equivalent to probabilistic PCA(Kingma
+                                                                  Ghosh, P., Sajjadi, M. S. M., Vergari, A., Black, M., and
+& Welling, 2014). On the other hand, a linear autoencoder
+                                                                    Scholkopf, B. From variational to deterministic au-
+is equivalent to PCA (Bourlard & Kamp, 1988), which is
+                                                                    toencoders. In International Conference on Learning
+not a generative model.
+                                                                   Representations, 2020. URL https://openreview.
+Conclusion We have introduced a novel interpretation of             net/forum?id=S1g7tpEYDS.
+                                       Autoencoding Under Normalization Constraints
+
+Gong, D., Liu, L., Le, V., Saha, B., Mansour, M. R.,            Meng, C., Yu, L., Song, Y., Song, J., and Ermon,
+ Venkatesh, S., and Hengel, A. v. d. Memorizing nor-             S. Autoregressive score matching. arXiv preprint
+  mality to detect anomaly: Memory-augmented deep au-            arXiv:2010.12810, 2020.
+  toencoder for unsupervised anomaly detection. In IEEE
+ International Conference on Computer Vision (ICCV),            Nalisnick, E., Matsukawa, A., Teh, Y. W., Gorur, D., and
+  2019.                                                           Lakshminarayanan, B. Do deep generative models know
+                                                                  what they don’t know? In International Conference
+Grathwohl, W., Wang, K.-C., Jacobsen, J.-H., Duvenaud, D.,        on Learning Representations, 2019. URL https://
+  Norouzi, M., and Swersky, K. Your classifier is secretly        openreview.net/forum?id=H1xwNhCcYm.
+  an energy based model and you should treat it like one. In
+  International Conference on Learning Representations,         Nash, C. and Durkan, C. Autoregressive energy machines.
+  2020. URL https://openreview.net/forum?                         In International Conference on Machine Learning, pp.
+  id=Hkxzx0NtDB.                                                 1735–1744. PMLR, 2019.
+Grenander, U. and Miller, M. I. Representations of knowl-       Ng, A. et al. Sparse autoencoder. CS294A Lecture notes,
+  edge in complex systems. Journal of the Royal Statisti-         2011.
+  cal Society: Series B (Methodological), 56(4):549–581,
+  1994.                                                         Nijkamp, E., Hill, M., Zhu, S.-C., and Wu, Y. N. Learning
+                                                                  non-convergent non-persistent short-run mcmc toward
+Gutmann, M. and Hyvärinen, A. Noise-contrastive esti-            energy-based model. In Wallach, H., Larochelle, H.,
+  mation: A new estimation principle for unnormalized             Beygelzimer, A., d'Alché-Buc, F., Fox, E., and Garnett,
+  statistical models. In Proceedings of the Thirteenth Inter-     R. (eds.), Advances in Neural Information Processing
+  national Conference on Artificial Intelligence and Statis-      Systems, volume 32, pp. 5232–5242. Curran Asso-
+  tics, pp. 297–304, 2010.                                        ciates, Inc., 2019. URL https://proceedings.
+Hendrycks, D., Mazeika, M., and Dietterich, T. Deep               neurips.cc/paper/2019/file/
+  anomaly detection with outlier exposure.     In In-             2bc8ae25856bc2a6a1333d1331a3b7a6-Paper.
+  ternational Conference on Learning Representations,             pdf.
+  2019. URL https://openreview.net/forum?
+                                                                Parisi, G. Correlation functions and computer simulations.
+  id=HyxCxhRcY7.
+                                                                  Nuclear Physics B, 180(3):378–384, 1981.
+Hinton, G. E. Training products of experts by minimizing
+  contrastive divergence. Neural computation, 14(8):1771–       Pidhorskyi, S., Almohsen, R., and Doretto, G. Generative
+  1800, 2002.                                                     probabilistic novelty detection with adversarial autoen-
+                                                                  coders. In Advances in neural information processing
+Japkowicz, N., Myers, C., Gluck, M., et al. A novelty             systems, pp. 6822–6833, 2018.
+  detection approach to classification. In Proceedings of the
+  International Joint Conference on Artificial Intelligence,    Ren, J., Liu, P. J., Fertig, E., Snoek, J., Poplin, R., Depristo,
+  volume 1, pp. 518–523, 1995.                                    M., Dillon, J., and Lakshminarayanan, B. Likelihood ra-
+                                                                  tios for out-of-distribution detection. In Advances in Neu-
+Kingma, D. P. and Dhariwal, P. Glow: Generative flow              ral Information Processing Systems, pp. 14680–14691,
+  with invertible 1x1 convolutions. In Advances in Neural         2019.
+  Information Processing Systems, pp. 10215–10224, 2018.
+                                                                Rifai, S., Vincent, P., Muller, X., Glorot, X., and Bengio,
+Kingma, D. P. and Welling, M. Auto-encoding variational           Y. Contractive auto-encoders: explicit invariance dur-
+  bayes. International Conference on Learning Represen-           ing feature extraction. In Proceedings of the 28th In-
+  tations (ICLR), 2014.                                           ternational Conference on International Conference on
+Lan, C. L. and Dinh, L. Perfect density models can-               Machine Learning, pp. 833–840, 2011.
+  not guarantee anomaly detection.   arXiv preprint
+                                                                Roberts, G. O., Tweedie, R. L., et al. Exponential conver-
+  arXiv:2012.03808, 2020.
+                                                                  gence of langevin distributions and their discrete approxi-
+Lu, Y. and Xu, P. Anomaly detection for skin disease              mations. Bernoulli, 2(4):341–363, 1996.
+  images using variational autoencoder. arXiv preprint
+  arXiv:1807.01349, 2018.                                       Rumelhart, D. E., Hinton, G. E., and Williams, R. J. Learn-
+                                                                  ing Internal Representations by Error Propagation, pp.
+Lyudchik, O. Outlier detection using autoencoders. Techni-        318–362. MIT Press, Cambridge, MA, USA, 1986. ISBN
+  cal report, 2016.                                               026268053X.
+                                       Autoencoding Under Normalization Constraints
+
+Salimans, T., Karpathy, A., Chen, X., and Kingma, D. P.           Xiao, Z., Kreis, K., Kautz, J., and Vahdat, A. {VAEBM}: A
+  Pixelcnn++: Improving the pixelcnn with discretized lo-           symbiosis between variational autoencoders and energy-
+  gistic mixture likelihood and other modifications. arXiv          based models. In International Conference on Learning
+  preprint arXiv:1701.05517, 2017.                                  Representations, 2021. URL https://openreview.
+                                                                    net/forum?id=5m3SEczOV8L.
+Serrà, J., Álvarez, D., Gómez, V., Slizovskaia, O., Núñez,
+  J. F., and Luque, J. Input complexity and out-of-               Xie, J., Lu, Y., Zhu, S.-C., and Wu, Y. A theory of gener-
+  distribution detection with likelihood-based generative           ative convnet. In International Conference on Machine
+  models. In International Conference on Learning Rep-              Learning, pp. 2635–2644. PMLR, 2016.
+  resentations, 2020. URL https://openreview.
+  net/forum?id=SyxIWpVYvr.                                        Xu, J. and Durrett, G. Spherical latent spaces for stable
+                                                                   variational autoencoders. In Proceedings of the 2018
+Song, Y. and Kingma, D. P. How to train your energy-based          Conference on Empirical Methods in Natural Language
+  models. arXiv preprint arXiv:2101.03288, 2021.                   Processing, pp. 4503–4513, 2018.
+Steinwart, I., Hush, D., and Scovel, C. A classification          Younes, L. On the convergence of markovian stochas-
+  framework for anomaly detection. Journal of Machine               tic algorithms with rapidly decreasing ergodicity rates.
+  Learning Research, 6(Feb):211–232, 2005.                          Stochastics: An International Journal of Probability and
+                                                                    Stochastic Processes, 65(3-4):177–228, 1999.
+Tieleman, T. Training restricted boltzmann machines using
+  approximations to the likelihood gradient. In Proceedings       Zhao, D., Zhu, J., and Zhang, B. Latent variables on spheres
+  of the 25th international conference on Machine learning,         for autoencoders in high dimensions. arXiv, pp. arXiv–
+  pp. 1064–1071, 2008.                                              1912, 2019.
+Tong, A., Yousefzadeh, R., Wolf, G., and Krishnaswamy,            Zhao, J., Mathieu, M., and LeCun, Y.          Energy-
+  S. Fixing bias in reconstruction-based anomaly de-                based generative adversarial network. arXiv preprint
+  tection with lipschitz discriminators. arXiv preprint             arXiv:1609.03126, 2016.
+  arXiv:1905.10710, 2019.
+                                                                  Zhao, Y., Deng, B., Shen, C., Liu, Y., Lu, H., and Hua,
+Vincent, P. A connection between score matching and de-             X.-S. Spatio-temporal autoencoder for video anomaly
+  noising autoencoders. Neural computation, 23(7):1661–             detection. In Proceedings of the 25th ACM international
+  1674, 2011.                                                       conference on Multimedia, pp. 1933–1941, 2017.
+Vincent, P., Larochelle, H., Bengio, Y., and Manzagol, P.-A.      Zong, B., Song, Q., Min, M. R., Cheng, W., Lumezanu,
+  Extracting and composing robust features with denoising           C., Cho, D., and Chen, H. Deep autoencoding gaussian
+  autoencoders. In Proceedings of the 25th international            mixture model for unsupervised anomaly detection. In
+  conference on Machine learning, pp. 1096–1103, 2008.              International Conference on Learning Representations,
+                                                                    2018. URL https://openreview.net/forum?
+Wang, Z., Bovik, A. C., Sheikh, H. R., and Simoncelli, E. P.
+                                                                    id=BJJLHbb0-.
+ Image quality assessment: from error visibility to struc-
+ tural similarity. IEEE transactions on image processing,
+ 13(4):600–612, 2004.
+Welling, M. and Teh, Y. W. Bayesian learning via stochastic
+ gradient langevin dynamics. In Proceedings of the 28th
+ international conference on machine learning (ICML-11),
+ pp. 681–688, 2011.
+Xiao, Z., Yan, Q., and Amit, Y. Likelihood regret:
+  An out-of-distribution detection score for varia-
+  tional auto-encoder.   In Larochelle, H., Ranzato,
+  M., Hadsell, R., Balcan, M. F., and Lin, H. (eds.),
+  Advances in Neural Information Processing Systems,
+  volume 33, pp. 20685–20696. Curran Associates,
+  Inc., 2020.       URL https://proceedings.
+  neurips.cc/paper/2020/file/
+  eddea82ad2755b24c4e168c5fc2ebd40-Paper.
+  pdf.
+

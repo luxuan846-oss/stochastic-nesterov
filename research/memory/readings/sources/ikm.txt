@@ -1,0 +1,1863 @@
+                                                           Stochastic Inertial Krasnosel’skii–Mann Iteration
+                                                              Achieves Near-Optimal Sample Complexity
+                                                                  Tong Yang∗,†                       Tao Jiang†                 Yuejie Chi‡
+                                                                CMU & Meta FAIR                      Meta FAIR                Yale University
+
+                                                                             Ashok Cutkosky§                                  Lin Xiao†
+
+
+
+
+arXiv:2609.28543v1 [stat.ML] 22 Sep 2026
+                                                                      Meta FAIR & Boston University                          Meta FAIR
+
+
+                                                                                            September 25, 2026
+
+
+                                                                                                    Abstract
+                                                      We analyze a simple stochastic inertial Krasnosel’skii–Mann (iKM) method for finding a fixed point
+                                                  of a nonexpansive operator in a real Hilbert space. Our method is obtained simply by adding two inertial
+                                                  extrapolations to stochastic KM [Bravo and Cominetti, 2024], and it retains one call to a possibly biased
+                                                  stochastic oracle per update and achieves sharp rates in both the stochastic and deterministic regimes.
+                                                  Specifically, with our proposed parameter schedule, we prove the following last-iterate fixed-point residual
+                                                  bound:                                                            
+                                                                                           1    σ log K   BK log K
+                                                                                       O     + √        +              ,
+                                                                                           K        K         K
+                                                  where K is√the horizon, σ is the noise level and BK is the accumulated root-mean-square bias. When
+                                                  BK = O( K), this yields e     O(ϵ−2 ) sample complexity that matches, up to a logarithmic factor, the
+                                                  stochastic-oracle lower bound given under the unbiased subclass of our model [Foster et al., 2019, The-
+                                                  orem 2]. It also improves the best-known O(ϵ−4 ) random-iterate guarantee for stochastic KM [Bravo
+                                                  and Cominetti, 2024, Corollary 5.4]. To our knowledge, this is the first single-loop method for general
+                                                  nonexpansive fixed-point problems to attain this near-optimal sample complexity without variance re-
+                                                  duction or batching. When the oracle is exact, the same method attains the worst-case-optimal O(K −1 )
+                                                  last-iterate residual rate [Park and Ryu, 2022, Theorem 4.6], improving the O(K −1/2 ) rate of classical
+                                                  KM [Cominetti et al., 2014; Bravo and Cominetti, 2018].
+
+
+                                           1      Introduction
+                                           We consider a stochastic fixed-point problem for a nonexpansive operator T : H → H in a real Hilbert space.
+                                           Assuming that its fixed-point set Fix T := {x ∈ H : T x = x} is nonempty, the goal is to find an approximate
+                                           solution of
+                                                                                            T p⋆ = p⋆ ,
+                                           with accuracy measured by the fixed-point residual. Such nonexpansive fixed-point equations provide a
+                                           common formulation for convex feasibility, optimization, and equilibrium problems expressed as monotone
+                                           inclusions [Bauschke and Combettes, 2017; Cortild and Cartis, 2026]. For example, in optimization, T can
+                                           be the update map of a first-order or operator-splitting method, so its fixed points can encode solutions,
+                                           zeros, or stationary points of the underlying problem. The fixed-point residual – which is used to measure
+                                               ∗ Department of Electrical and Computer Engineering, Carnegie Mellon University; email: tongyang@andrew.cmu.edu.
+                                               † Fundamental AI Research (FAIR), Meta Superintelligence Labs; emails: {taojiang,linx}@meta.com.
+                                               ‡ Department of Statistics and Data Science, Yale University; email: yuejie.chi@yale.edu.
+                                               § Fundamental AI Research (FAIR), Meta Superintelligence Labs;    Department of Electrical and Computer Engineering,
+                                           Boston University; email: ashok@cutkosky.com.
+
+
+                                                                                                         1
+the final accuracy – then specializes to a familiar feasibility, stationarity, or equilibrium measure in these
+applications.
+    In many modern applications dealing with large-scale or expectation-based settings, the exact evaluation
+of applying the operator T may be unavailable or prohibitively costly, so sampling and approximate com-
+putation naturally produce noisy and potentially biased responses [Bravo and Cominetti, 2024; Cui et al.,
+2019]. Consequently, we focus on the stochastic case where the operator T is not available exactly: at each
+query, the algorithm receives a noisy and possibly biased response. Given a target precision ϵ > 0, we study
+how many such oracle responses are needed to make the last-iterate residual at most ϵ.
+    Perhaps the most common approach to stochastic fixed-point iterations are obtained by replacing the
+exact operator evaluations in classical deterministic schemes with stochastic oracle responses. These include
+the Krasnosel’skii–Mann (KM) iteration [Mann, 1953; Krasnosel’skii, 1955] with update
+
+                                        xk+1 = (1 − λk )xk + λk T xk ,                                     (1)
+
+the anchored iteration of Halpern [1967] with update
+
+                                        xk+1 = (1 − λk )x0 + λk T xk ,                                     (2)
+
+and their accelerated variants [Maingé, 2008; Dong et al., 2018; Boţ and Nguyen, 2023; Park and Ryu,
+2022]. Some of these schemes attain the optimal rate [Contreras and Cominetti, 2023; Park and Ryu,
+2022] under the deterministic setting, see Section 1.2 for details. However, under stochastic evaluations,
+existing results for general nonexpansive maps reveal a simplicity–complexity gap: simple methods have
+substantially suboptimal sample complexity, whereas near-optimal guarantees require stronger assumptions
+or more sophisticated algorithms. We next elaborate on this trade-off more quantitatively, as follows. To
+begin, let us record a useful lower bound for the stochastic fixed-point problem studied here: given a target
+precision ϵ, Foster et al. [2019, Theorem 2] established that at least Ω(ϵ−2 ) samples are needed, regardless
+of algorithms in use.
+   • Substantially sub-optimal rates for simple single-loop algorithms. For stochastic KM itera-
+     tion, Bravo and Cominetti [2024, Theorem 4.1 and Corollary 5.4] obtained sample-complexity bounds
+     of O(ϵ−6 ) and O(ϵ−4 ) for the expected residual of the last iterate and a weighted random iterate,
+     respectively. Cortild and Cartis [2026, Corollary 2.10] also obtained the O(ϵ−4 ) rate for one-sample
+     stochastic KM. For stochastic Halpern iteration, Bravo and Contreras [2026, Corollary 3.5] and Pischke
+     and Powell [2026, Section 5 and Example 5.1] gave last-iterate sample-complexity bounds of O(ϵ  e −5 ),
+     using minibatches of size e
+                               O(ϵ ). Under cocoercivity in expectation, S-Dual-OHM [Yoon and Loizou,
+                                  −4
+
+     2026] achieved a sample complexity of O(ϵ−3 ) using minibatches of size O(ϵ−2 ). None of these methods
+     achieve the optimal order O(ϵ
+                                e −2 ) of sample complexity.
+
+   • Sophisticated algorithm designs to accelerate convergence. For general fixed-point equations,
+     VR-GHAL [Diakonikolas, 2026, Algorithm 3 and Corollary 3] reached O(ϵ   e −2 ) complexity under sam-
+     plewise nonexpansiveness, but required an array of techniques including recursive variance reduction,
+     same-seed difference queries, nested epochs, and large refresh batches. Nguyen-Trung and Tran-Dinh
+     [2025, Section 4.2 and Corollary 2] used growing minibatches and has suboptimal sample complexity.
+     Under related cocoercive assumptions, the recursively variance-reduced Halpern methods of Cai et al.
+     [2022] attained O(ϵ−3 ) complexity in the general regime.
+
+   This simplicity–complexity gap motivates the following question:
+            Can a simple single-loop method attain near-optimal sample complexity for general
+                              nonexpansive stochastic fixed-point problems?
+
+   Inspired by the general inertial Krasnosel’skii–Mann (iKM) iteration introduced by Dong et al. [2018,
+Section 3.2, Eq. (18), p. 181], we study its one-sample stochastic counterpart, and with carefully chosen
+parameter schedule, provide a positive answer to the above question.
+
+
+
+
+                                                       2
+1.1    Our contributions
+We analyze a simple stochastic inertial Krasnosel’skii–Mann (iKM) method, which adds two inertial extrap-
+olations to stochastic KM as follows:
+                                 yk = xk + αk (xk − xk−1 ),
+                                zk = xk + βk (xk − xk−1 ),
+                              xk+1 = (1 − λk )yk + λk Tbk (zk ),    k = 1, . . . , K.
+
+Here, αk ≥ 0 and βk ≥ 0 are the two inertial extrapolation coefficients associated with yk and zk , respectively,
+λk ∈ (0, 1] is the relaxation parameter, and Tbk is a noisy, and possibly biased, evaluation of the fixed-point
+operator T . This algorithm is simple with a single-loop structure, making it highly implementable in practice.
+In particular, each update retains exactly one stochastic oracle call, consistent with stochastic KM.
+   With carefully designed schedule, we establish simultaneous fixed-point-residual bounds for the last iterate
+xK and the two corresponding inertial extrapolations yK , zK of iKM on the order of
+                                                                    
+                                           1     σ log K    BK log K
+                                       O      + √         +             ,
+                                           K         K          K
+
+where K is the horizon, σ is the noise level and BK is the accumulated root-mean-square bias.
+   • Near-optimal
+       √              stochastic sample complexity. When the accumulated bias BK is controlled by
+     O( K), iKM has e   O(ϵ−2 ) sample complexity, matching the lower bound in [Foster et al., 2019, Theo-
+     rem 2] for unbiased oracles up to one logarithmic factor, and significantly improving the best-known rate
+     O(ϵ−4 ) of stochastic KM, which holds for a weaker random-iterate convergence [Bravo and Cominetti,
+     2024, Corollary 5.4].
+
+   • Optimal deterministic specialization. In the special case where the oracle is exact, namely Tbk = T
+     for all k with σ = 0 and BK = 0, iKM attains a faster O(K −1 ) last-iterate rate, which is worst-case
+     optimal for deterministic nonexpansive fixed-point methods [Park and Ryu, 2022, Theorem 4.6], and
+     strictly improves the sharp Θ(K −1/2 ) order of classical KM [Davis and Yin, 2016].
+    To the best of our knowledge, our work provides the first single-loop method for general nonexpansive
+fixed-point problems to attain the near-optimal sample complexity for the stochastic setting, without so-
+phisticated algorithmic operations such as variance reduction or batching. The same algorithm also achieves
+optimality in the deterministic setting, therefore smoothly interpolating both regimes.
+
+1.2    Related work
+
+Classical deterministic fixed-point methods. Under exact evaluations, the classical KM iteration
+has a sharp O(K −1/2 ) worst-case last-iterate residual rate for general nonexpansive operators [Cominetti
+et al., 2014; Bravo and Cominetti, 2018]. The anchored Halpern iteration can attain the faster O(K −1 )
+rate, with tight guarantees in Hilbert and general normed spaces [Lieder, 2021; Contreras and Cominetti,
+2023]; this order is worst-case optimal in the deterministic fixed-point oracle model [Park and Ryu, 2022,
+Theorem 4.6]. Related refinements include rates for operator-splitting schemes [Davis and Yin, 2016] and, in
+finite dimensions, continuous families of methods with the same exact optimal guarantee [Yoon et al., 2024].
+These results assume exact evaluations and do not quantify the effect of stochastic oracle errors.
+Inertial and accelerated KM methods. We consider the two-extrapolation general iKM iteration orig-
+inated from Dong et al. [2018, Section 3.2, Eq. (18), p. 181], which recovers the earlier common-extrapolation
+scheme of Maingé [2008] when its two extrapolation coefficients are equal. Prior work establishes determin-
+istic convergence for common- and two-extrapolation variants [Cui et al., 2019; Maulén et al., 2024; Cortild
+and Peypouquet, 2025]. Besides, Boţ and Nguyen [2023]; Boţ et al. [2026] propose Fast KM - an accelerated
+version of KM with optimal O(K −1 ) deterministic last-iterate rate. Appendix A shows that the Fast-KM
+iteration can be seen as deterministic iKM under a particular hyperparameter choice. These analyses concern
+exact evaluations or summable perturbations and do not account for stochastic-oracle complexity.
+
+
+                                                        3
+Stochastic fixed-point methods. Existing direct stochastic KM and Halpern guarantees fall short of
+near-optimal sample complexity: available one-sample KM bounds are O(ϵ−4 ) or worse [Bravo and Cominetti,
+2024; Cortild and Cartis, 2026], while minibatched analyses rely on growing batches [Iiduka, 2026; Bravo
+and Contreras, 2026; Pischke and Powell, 2026]. Near-optimal rates instead require additional structure or
+machinery. VR-GHAL [Diakonikolas, 2026, Algorithm 3 and Corollary 3] reaches e      O(ϵ−2 ) under sample-wise
+nonexpansiveness using recursive variance reduction, which requires a stronger stochastic oracle supporting
+same-seed difference queries. The restarted variance-reduced Halpern method of Cai et al. [2022] achieves
+O(ϵ−2 log(1/ϵ)) only under an additional sharpness-type error bound, while variance-reduction-free S-Dual-
+OHM [Yoon and Loizou, 2026] reaches O(ϵ    e −2 ) only under the stronger assumption that the residual operator
+I − T is strongly monotone. The stochastic AFP method of Nguyen-Trung and Tran-Dinh [2025, Section 4.2
+and Corollary 2] is single-loop but uses polynomially growing minibatches. A particularly relevant comparison
+is the RAIN algorithm of Chen and Luo [2024], developed for stochastic minimax problems. After translating
+to our setting, RAIN achieves O(log3 (1/ϵ)/ϵ2 ) oracle complexity instead of our O(log2 (1/ϵ)/ϵ2 ) rate. RAIN
+employs a recursive regularization scheme similar to SGD3 [Allen-Zhu, 2018] (augmented with an extra
+oracle call per iteration, inheriting both the log3 term and also a double-loop structure), while we take a
+different single-loop, single-oracle call path based on iKM. Our method also accommodates general unknown
+bias, does not require the distance D = dist(x1 , Fix T ) as an algorithmic input, and obtains a last-iterate
+guarantee. To our best knowledge, no prior method combines one response per iteration, a single loop, and
+near-optimal sample complexity for a general nonexpansive map under the stochastic oracle model considered
+here.
+Notation. Let H be a real Hilbert space with inner product ⟨·, ·⟩, induced norm ∥·∥, and identity operator I.
+The symbols E[·] and E[ · | F ] denote expectation and conditional expectation with respect to a σ-algebra
+F, respectively; “a.s.” means almost surely. For real-valued functions f and g, we write f = O(g) if |f | ≤ Cg
+eventually for some constant C > 0, and f = Ω(g) if f ≥ cg eventually for some constant c > 0. We write
+f = Θ(g) if both f = O(g) and f = Ω(g), and f = o(g) if |f |/g → 0. Finally, f = O(g)
+                                                                                   e    means that f = O(g)
+up to multiplicative factors that are polynomial in the logarithms of the relevant asymptotic variables.
+
+
+2     Stochastic iKM under Nonexpansiveness
+2.1    The stochastic iKM algorithm
+Let T : H → H be nonexpansive, namely
+                                    ∥T x − T y∥ ≤ ∥x − y∥ ,        ∀x, y ∈ H.                                (3)
+We also assume its set of fixed points is non-empty, i.e.
+                                       Fix T := {x ∈ H : T x = x} ̸= ∅.
+Fix a horizon K ≥ 2. Let the initial points x0 , x1 ∈ H be arbitrary and deterministic. The stochastic iKM
+scheme forms two inertial extrapolations and performs the oracle-based updates
+                                 yk = xk + αk (xk − xk−1 ),
+                                zk = xk + βk (xk − xk−1 ),                                                   (4)
+                              xk+1 = (1 − λk )yk + λk Tbk (zk ),     k = 1, . . . , K.
+Here, αk ≥ 0 and βk ≥ 0 are the two inertial extrapolation coefficients associated with yk and zk , respectively,
+while λk ∈ (0, 1] is the relaxation parameter. Moreover, Tbk is a noisy realization of Tbk , evaluated by calling
+some oracle model.
+Special case: deterministic iKM. When the oracle is exact, so that bk = ξk = 0 almost surely and
+Tbk (zk ) = T zk for every 1 ≤ k ≤ K, (4) reduces to the deterministic finite-horizon iKM scheme
+                                  yk = xk + αk (xk − xk−1 ),
+                                  zk = xk + βk (xk − xk−1 ),                                                 (5)
+                                xk+1 = (1 − λk )yk + λk T zk ,      k = 1, . . . , K.
+
+                                                        4
+The two-extrapolation form is the general inertial Mann iteration of Dong et al. [2018]. Setting αk = βk
+makes yk = zk and recovers the common-extrapolation iKM scheme of Maingé [2008].
+
+2.2    Stochastic oracle model and schedule
+
+Stochastic oracle model.        We model the stochastic oracle response in (4) as for every k:
+
+                                              Tbk (zk ) = T zk + bk + ξk ,                                  (6)
+
+where bk is a predictable, possibly history-dependent bias and ξk is conditionally centered stochastic noise.
+   Consider a probability space equipped with a filtration (Fk )K  k=1 , where Fk ⊆ Fk+1 . For 1 ≤ k ≤ K − 1,
+Fk contains all information available immediately before the oracle call for update k. All H-valued random
+variables are understood to be strongly measurable. For each 1 ≤ k ≤ K − 1, the algorithmic quantities
+xk−1 , xk , yk , zk and the bias bk are Fk -measurable, while ξk (and hence Tbk (zk )) is Fk+1 -measurable. We
+make the following assumption regarding the bias and noise variance.
+
+   • Bias. The accumulated root-mean-square bias is defined as
+                                                          K−1
+                                                          X                1/2
+                                                                        2
+                                                 BK :=           E ∥bk ∥                                    (7)
+                                                          k=1
+                       √
+      and bounded by O( K).
+   • Variance. The noise ξk satisfies for some finite constant σ ≥ 0:
+                                                           2
+                           E[ξk | Fk ] = 0,         E[∥ξk ∥ | Fk ] ≤ σ 2      a.s.,       1 ≤ k ≤ K.        (8)
+
+
+Softplus-parameterized iKM schedule. For K ≥ 2, we propose an iKM parameter schedule with one
+tuning parameter a satisfying
+                                          K log 2
+                                   0<a≤           − 1.                                    (9)
+                                           log K
+Define the auxiliary softplus sequence (ωk )K
+                                            k=0 by
+                                                             
+                           ωk = ωk (a) := log 1 + K a−(a+1)k/K ,                   0 ≤ k ≤ K,              (10)
+
+For 1 ≤ k ≤ K, define
+                                                 
+                                           ωk−1                                           3rk
+                    rk = rk (a) := 2            −1 ,           uk = uk (a) :=                          .   (11)
+                                            ωk                                     2(1 + rk )(2 + rk )
+
+Set the iKM parameters as follows:
+                                                4
+                        β1 = 0,        βk =           ,    2 ≤ k ≤ K,
+                                              3rk−1
+                                                                                                           (12)
+                                 Krk ωk−1                        uk − λk
+                        λk =                uk ,          αk =           βk ,          1 ≤ k ≤ K.
+                               4(1 + 1/a)ω0                      1 − λk
+
+    While the schedule may seem abstract at a first glance, the following lemma characterizes the properties
+of the proposed iKM schedule, whose proof is deferred in Appendix B.2.
+Lemma 1 (Properties of the proposed iKM schedule). For K ≥ 2 and a satisfying (9), the parameters in
+(12) satisfy
+              βk > 0 (2 ≤ k ≤ K),       0 < λk < 1,     0 ≤ αk < 1 (1 ≤ k ≤ K).                 (13)
+In addition,
+
+
+                                                           5
+ (a) α1 = 0 and αk = Θ(1) for 2 ≤ k ≤ K.
+ (b) β2 > · · · > βK , with
+                                                                                                            
+                                        K        1                                                    K
+                               β2 = Θ       a+          ,                           βK = Θ                           .                  (14)
+                                       1+a     log K                                             (1 + a) log K
+
+ (c) (λk )K
+          k=1 is unimodal. Its maximizing set consists of one index or two adjacent indices; the sequence is
+     strictly increasing before this set and strictly decreasing after it. If kλ is any maximizing index, then
+                                                                          
+                                                   aK      log(2ρλ ) K
+                                   kλ = max 1,          −                    + O(1).                        (15)
+                                                  a+1        a + 1 log K
+      Here ρλ = 1.2564312 . . . is the unique positive solution of eρ = 1 + 2ρ, and
+                  a(1 + a) log2 K
+                                                                                                
+                                                                                       1 + a log K
+        λ1 = Θ                         ,   max  λ k   = Θ(1  + a log K) λ 1 , λK =  Θ                λ1 .                               (16)
+                 K(1 + a log K)2          1≤k≤K                                            K
+
+   Figure 1 illustrates the auxiliary softplus sequence and the three hyperparameter sequences. Increasing
+a delays the transition of αk towards 1, and shifts the peak of λk toward the end of the horizon, while βk
+decreases for k ≥ 2 after the large initial value β1 = 0.
+
+                                                                            1.0
+      101
+      100                                                                   0.8
+     10 1
+                                                                            0.6
+ k   10 2                                                               k
+     10 3                                                                   0.4
+     10 4
+     10 5         a = 1/2            a=2                                    0.2                                  a = 1/2          a=2
+     10 6         a=1                a=3                                             1=0
+                                                                                                                 a=1              a=3
+                                                                            0.0
+         0.0       0.2        0.4       0.6      0.8          1.0              0.0         0.2         0.4       0.6       0.8          1.0
+                       Normalized iteration k/K                                                  Normalized iteration k/K
+                               ωk                                                                        αk
+     500000                            a = 1/2          a=2                 10 5
+                                       a=1              a=3
+     400000                                                                 10 6
+                                                                            10 7
+ k   300000
+                                                                            10 8
+                                                                        k
+     200000
+                                                                            10 9
+     100000                                                                 10 10          a = 1/2            a=2
+                 1=0
+                                                                                           a=1                a=3
+          0                                                                 10 11
+           0.0         0.2     0.4         0.6    0.8         1.0                0.0        0.2         0.4       0.6       0.8         1.0
+                         Normalized iteration k/K                                                 Normalized iteration k/K
+                               βk                                                                        λk
+
+Figure 1: The auxiliary softplus sequence from (10) and iKM parameters from (12) for K = 106 and
+a ∈ {1/2, 1, 2, 3}. The horizontal axis is the normalized iteration k/K. The isolated values α1 = β1 = 0 are
+marked separately. The ωk and λk panels use logarithmic vertical scales.
+
+Convergence analysis.           We are now ready to present the convergence rate of stochastic iKM.
+
+
+                                                                    6
+Theorem 1 (Convergence rate for stochastic iKM). Under the filtration and measurability setting of Sub-
+section 2.1, suppose that Fix T ̸= ∅, T satisfies nonexpansiveness (3), and (6), (8) hold. Fix K ≥ 2, keep
+the initial points x0 , x1 arbitrary and deterministic, choose a satisfying (9), and generate xK , yK , zK by (4)
+using the schedule (12). Then there is an absolute constant C > 0 such that
+                                                       1/2
+                                                      2
+                         max            E ∥vK − T vK ∥
+                    vK ∈{xK ,yK ,zK }
+                                                                                    
+                           1 + 1/a                                 σ log K   BK log K
+                    ≤C                                 ⋆
+                                         inf ∥x1 − p ∥ + (1 + a)     √     +             .                  (17)
+                               K      p⋆ ∈Fix T                        K        K
+
+    The proof is in Appendix B.3. For every fixed a = Θ(1) satisfying (9), the first term in (17) characterizes
+the deterministic contribution, while the centered-noise contribution is encapsulated in the second term. The
+dependence on the tuning parameter a displays a mild problem-dependent trade-off: increasing a improves
+the deterministic factor 1 + 1/a but worsens the noise and bias factor 1 + a, whereas decreasing a has the
+opposite effect. The convergence rate simultaneously achieves the optimal rates for both deterministic and
+stochastic settings under our proposed schedule.
+                                                                            √
+Optimal sample complexity of stochastic iKM. Suppose BK ≤ B K for some constant B ≥ 0, and
+fix a constant a = Θ(1) satisfying (9). Since each iteration uses one oracle call, Theorem 1 implies that, for
+small enough ϵ > 0, it suffices to take
+                                                                                 !
+                                                          (σ + B)2
+                                                                         
+                                    1                                   2 σ+B
+                          K=O                        ⋆
+                                         inf ∥x1 − p ∥ +            log                                   (18)
+                                    ϵ p⋆ ∈Fix T              ϵ2              ϵ
+
+to guarantee
+                                                                           1/2
+                                                                        2
+                                        max                E ∥vK − T vK ∥          ≤ ϵ.                     (19)
+                                   vK ∈{xK ,yK ,zK }
+
+   Notably, in the unbiased case bk ≡ 0 (so B = 0), with σ > 0, (18) matches the stochastic lower bound
+inherited from smooth convex optimization [Foster et al., 2019, Theorem 2] up to one logarithmic factor,
+while improving the dependence on ϵ relative to the O(ϵ−4 ) random-iterate bound known for stochastic KM
+under a related additive martingale-difference oracle model [Bravo and Cominetti, 2024, Proposition 5.1 and
+Corollary 5.4].
+Optimal convergence rate of deterministic iKM under nonexpansiveness. In the deterministic
+setting where σ = 0 and there’s no bias, Theorem 1 implies that the deterministic iKM under nonexpan-
+siveness achieves O(1/K) last-iterate rate, which is worst-case
+                                                     √          optimal [Park and Ryu, 2022, Theorem 4.6].
+Moreover, this rate strictly improves the slower O(1/ K) rate of the no-inertia KM iteration (1) [Davis and
+Yin, 2016].
+
+
+3    Conclusion
+Our proposed iKM schedule achieves accelerated last-iterate convergence for iKM under nonexpansiveness
+and standard stochastic-oracle assumptions. It reaches both near-optimal stochastic sample complexity and
+the optimal deterministic last-iterate rate, using a simple single-loop update without variance reduction or
+recursive regularization.
+     These guarantees suggest two complementary directions for future work. First, it would be valuable to
+develop and evaluate practical implementations of stochastic iKM in large-scale stochastic first-order and
+operator-splitting methods. In particular, deep neural network training provide an important testbed of
+how far the benefits extend beyond the present theory. Second, the fixed-point viewpoint makes it possible
+to apply the stochastic iKM method for model-free reinforcement learning, where adapting the inertial
+mechanism developed here may lead to simple, single-loop model-free algorithms that are more sample-
+efficient.
+
+
+
+
+                                                              7
+Acknowledgement
+The work of Y. Chi is supported in part by NSF under DMS-2601955, ECCS-2537189, ECCS-2537078, and
+AFOSR under FA9550-26-1-B181.
+
+
+References
+Z. Allen-Zhu. How to make the gradients small stochastically: Even faster convex and nonconvex sgd.
+  Advances in Neural Information Processing Systems, 31, 2018.
+H. H. Bauschke and P. L. Combettes. Convex Analysis and Monotone Operator Theory in Hilbert Spaces.
+  CMS Books in Mathematics. Springer International Publishing, Cham, second edition, 2017. doi: 10.1007/
+  978-3-319-48311-5. URL https://doi.org/10.1007/978-3-319-48311-5.
+R. I. Boţ and D.-K. Nguyen. Fast Krasnosel’skiı̆–Mann Algorithm with a Convergence Rate of the Fixed
+  Point Iteration of o(1/k). SIAM Journal on Numerical Analysis, 61(6):2813–2843, 2023. doi: 10.1137/
+  22M1504305. URL https://doi.org/10.1137/22M1504305.
+R. I. Boţ, E. Chenchene, and J. M. Fadili. Fast Krasnoselskii–Mann Method with Overrelaxation and
+  Preconditioners. IMA Journal of Numerical Analysis, 2026. doi: 10.1093/imanum/drag042. URL https:
+  //doi.org/10.1093/imanum/drag042. Advance article, drag042.
+M. Bravo and R. Cominetti. Sharp Convergence Rates for Averaged Nonexpansive Maps. Israel Journal of
+ Mathematics, 227(1):163–188, 2018. doi: 10.1007/s11856-018-1723-z. URL https://doi.org/10.1007/
+ s11856-018-1723-z.
+M. Bravo and R. Cominetti. Stochastic Fixed-Point Iterations for Nonexpansive Maps: Convergence and Er-
+ ror Bounds. SIAM Journal on Control and Optimization, 62(1):191–219, 2024. doi: 10.1137/22M1515550.
+ URL https://doi.org/10.1137/22M1515550.
+M. Bravo and J. P. Contreras. Stochastic Halpern Iteration in Normed Spaces and Applications to
+ Reinforcement Learning. Mathematical Programming, 2026. doi: 10.1007/s10107-026-02345-1. URL
+ https://doi.org/10.1007/s10107-026-02345-1.
+X. Cai, C. Song, C. Guzmán, and J. Diakonikolas.     Stochastic Halpern Iteration with Vari-
+  ance Reduction for Stochastic Monotone Inclusions.    In Advances in Neural Information
+  Processing Systems, volume 35, pages 24766–24779. Curran Associates, Inc., 2022.      doi:
+  10.52202/068431-1796.   URL https://proceedings.neurips.cc/paper_files/paper/2022/hash/
+  9cf5fff2f85310e6ece5bc3a8489b6fa-Abstract-Conference.html.
+L. Chen and L. Luo. Near-Optimal Algorithms for Making the Gradient Small in Stochastic Minimax
+  Optimization. Journal of Machine Learning Research, 25(387):1–44, 2024. URL https://www.jmlr.org/
+  papers/v25/22-1126.html.
+R. Cominetti, J. A. Soto, and J. Vaisman. On the Rate of Convergence of Krasnosel’skiı̆–Mann Iterations
+  and Their Connection with Sums of Bernoullis. Israel Journal of Mathematics, 199(2):757–772, 2014. doi:
+  10.1007/s11856-013-0045-4. URL https://doi.org/10.1007/s11856-013-0045-4.
+J. P. Contreras and R. Cominetti. Optimal Error Bounds for Non-Expansive Fixed-Point Iterations in
+  Normed Spaces. Mathematical Programming, 199(1–2):343–374, 2023. doi: 10.1007/s10107-022-01830-7.
+  URL https://doi.org/10.1007/s10107-022-01830-7.
+D. Cortild and C. Cartis. Stochastic Krasnoselskii–Mann Iterations: Convergence without Uniformly
+  Bounded Variance. arXiv preprint arXiv:2604.22581, 2026. doi: 10.48550/arXiv.2604.22581. URL
+  https://arxiv.org/abs/2604.22581.
+D. Cortild and J. Peypouquet. Krasnoselskii–Mann Iterations: Inertia, Perturbations and Approximation.
+  Journal of Optimization Theory and Applications, 204(2):35, 2025. doi: 10.1007/s10957-024-02600-5. URL
+  https://doi.org/10.1007/s10957-024-02600-5.
+
+
+                                                   8
+F. Cui, Y. Yang, Y. Tang, and C. Zhu. Convergence Analysis of an Inexact Inertial Krasnoselskii–Mann
+  Algorithm with Applications. arXiv preprint arXiv:1908.11029, 2019. doi: 10.48550/arXiv.1908.11029.
+  URL https://arxiv.org/abs/1908.11029.
+D. Davis and W. Yin. Convergence Rate Analysis of Several Splitting Schemes. In R. Glowinski, S. J.
+  Osher, and W. Yin, editors, Splitting Methods in Communication, Imaging, Science, and Engineering,
+  Scientific Computation, pages 115–163. Springer International Publishing, Cham, 2016. doi: 10.1007/
+  978-3-319-41589-5_4. URL https://doi.org/10.1007/978-3-319-41589-5_4.
+J. Diakonikolas. Solving Stochastic Fixed-Point Equations with High Probability. arXiv preprint
+  arXiv:2607.09097, 2026. doi: 10.48550/arXiv.2607.09097. URL https://arxiv.org/abs/2607.09097.
+Q.-L. Dong, Y. J. Cho, and T. M. Rassias. General Inertial Mann Algorithms and Their Convergence Analysis
+  for Nonexpansive Mappings. In T. M. Rassias, editor, Applications of Nonlinear Analysis, volume 134 of
+  Springer Optimization and Its Applications, pages 175–191. Springer International Publishing, Cham,
+  2018. doi: 10.1007/978-3-319-89815-5_7. URL https://doi.org/10.1007/978-3-319-89815-5_7.
+D. J. Foster, A. Sekhari, O. Shamir, N. Srebro, K. Sridharan, and B. Woodworth. The Complexity of Making
+  the Gradient Small in Stochastic Convex Optimization. In Proceedings of the Thirty-Second Conference
+  on Learning Theory, volume 99 of Proceedings of Machine Learning Research, pages 1319–1345. PMLR,
+  2019. URL https://proceedings.mlr.press/v99/foster19b.html.
+B. Halpern. Fixed Points of Nonexpanding Maps. Bulletin of the American Mathematical Soci-
+  ety, 73(6):957–961, 1967. doi: 10.1090/S0002-9904-1967-11864-0. URL https://doi.org/10.1090/
+  S0002-9904-1967-11864-0.
+H. Iiduka. Mini-Batch Stochastic Krasnosel’skiı̆–Mann Algorithm for Nonexpansive Fixed Point Problems.
+  arXiv preprint arXiv:2604.06909, 2026. doi: 10.48550/arXiv.2604.06909. URL https://arxiv.org/abs/
+  2604.06909.
+M. A. Krasnosel’skii. Two Remarks on the Method of Successive Approximations. Uspekhi Matematicheskikh
+ Nauk, 10(1(63)):123–127, 1955. URL https://www.mathnet.ru/eng/rm7954.
+F. Lieder. On the Convergence Rate of the Halpern-Iteration. Optimization Letters, 15(2):405–418, 2021.
+  doi: 10.1007/s11590-020-01617-9. URL https://doi.org/10.1007/s11590-020-01617-9.
+P.-E. Maingé. Convergence Theorems for Inertial KM-Type Algorithms. Journal of Computational and
+  Applied Mathematics, 219(1):223–236, 2008. doi: 10.1016/j.cam.2007.07.021. URL https://doi.org/10.
+  1016/j.cam.2007.07.021.
+W. R. Mann. Mean Value Methods in Iteration. Proceedings of the American Mathematical Soci-
+ ety, 4(3):506–510, 1953. doi: 10.1090/S0002-9939-1953-0054846-3. URL https://doi.org/10.1090/
+ S0002-9939-1953-0054846-3.
+J. J. Maulén, I. Fierro, and J. Peypouquet. Inertial Krasnoselskii–Mann Iterations. Set-Valued and Vari-
+   ational Analysis, 32(2):10, 2024. doi: 10.1007/s11228-024-00713-7. URL https://doi.org/10.1007/
+   s11228-024-00713-7.
+N. Nguyen-Trung and Q. Tran-Dinh. A Class of Accelerated Fixed-Point-Based Methods with Delayed
+  Inexact Oracles and Its Applications. arXiv preprint arXiv:2512.13547, 2025. doi: 10.48550/arXiv.2512.
+  13547. URL https://arxiv.org/abs/2512.13547.
+J. Park and E. K. Ryu. Exact Optimal Accelerated Complexity for Fixed-Point Iterations. In K. Chaudhuri,
+   S. Jegelka, L. Song, C. Szepesvári, G. Niu, and S. Sabato, editors, Proceedings of the 39th International
+   Conference on Machine Learning, volume 162 of Proceedings of Machine Learning Research, pages 17420–
+   17457. PMLR, 2022. URL https://proceedings.mlr.press/v162/park22c.html.
+N. Pischke and T. Powell. Asymptotic Regularity of a Generalised Stochastic Halpern Scheme. Journal of
+  Optimization Theory and Applications, 210(1):3, 2026. doi: 10.1007/s10957-026-03032-z. URL https:
+  //doi.org/10.1007/s10957-026-03032-z.
+
+
+                                                     9
+T. Yoon and N. Loizou. Direct Acceleration of Stochastic Root-Finding Without Variance Reduction and
+  Regularization. arXiv preprint arXiv:2608.12043, 2026. URL https://arxiv.org/abs/2608.12043.
+T. Yoon, J. Kim, J. J. Suh, and E. K. Ryu. Optimal Acceleration for Minimax and Fixed-Point
+  Problems is Not Unique. In Proceedings of the 41st International Conference on Machine Learning,
+  volume 235 of Proceedings of Machine Learning Research, pages 57244–57314. PMLR, 2024. URL
+  https://proceedings.mlr.press/v235/yoon24b.html.
+
+
+
+A     Relation to Fast KM
+Fast KM was introduced by Boţ and Nguyen [2023] as an accelerated method for finding fixed points of
+nonexpansive operators. A recent generalization provides an explicit nonasymptotic O(K −1 ) fixed-point-
+residual bound [Boţ et al., 2026, Remark 5], matching the optimal worst-case order for general nonexpansive
+fixed-point problems [Park and Ryu, 2022, Theorem 4.6].
+    We first show that Fast KM can be viewed as iKM with specific parameters. Following the notation of
+Fast KM, let α > 2 and 0 < s ≤ 1. Starting from arbitrary z0 , z1 ∈ H, Fast KM performs, for every k ≥ 1,
+the iteration
+                              
+                         sα            (1 − s)k                   sα            sk
+         zk+1 = 1 −               zk +          (zk − zk−1 ) +          T zk +     (T zk − T zk−1 ).   (20)
+                     2(k + α)           k+α                    2(k + α)        k+α
+
+See Boţ and Nguyen [2023, Algorithm 2.1] and Boţ et al. [2026, Section 3.3.1, Eq. (3.21)]. To express (20)
+as iKM, choose iKM parameters
+
+                                    k(1 − s)                    2k              s(α − 2)
+                        αk =                       ,    βk =       ,    λk =             .            (21)
+                                k + α − 2s (α − 2)             α−2              2(k + α)
+
+Proposition 1 (Fast KM as deterministic iKM). Let z0 , z1 ∈ H be arbitrary Fast-KM initial points. Run
+deterministic iKM (5) with the parameters in (21) and the base points
+
+                                    x0 = 2z1 − (1 − s)z0 − sT z0 ,
+                                                                                                      (22)
+                                                
+                                               2        2(1 − s)      2s
+                                    x1 = 1 +       z1 −           z0 − T z0 .
+                                               α           α          α
+
+Then its query sequence satisfies (20) for every k ≥ 1.
+   The proof of Proposition 1 is given in Appendix A.1. It is worth highlighting that the parameters in
+(21) differ from those in our main schedule (12). While Fast KM achieve the optimal rate under exact
+deterministic evaluations, our schedule (12) is optimal for both deterministic and stochastic regimes.
+
+A.1     Proof of Proposition 1
+Let
+
+                                         dk := xk − xk−1 ,     G := I − T.                            (23)
+
+The initialization (22) gives
+                                         α−2
+                                                                                                     (24)
+                                                                      
+                                      d1 = −    z1 − (1 − s)z0 − sT z0 .
+                                           α
+Since β1 = 2/(α − 2) by (21), from the deterministic iKM scheme (5) and (22) we know that the first iKM
+query is indeed
+                                    2                        2                        
+               x1 + β1 d1 = z1 +      z1 − (1 − s)z0 − sT z0 −   z1 − (1 − s)z0 − sT z0 = z1 .
+                                    α                          α
+
+
+
+                                                        10
+   From (5) and the identity zk = xk + βk dk , we have
+
+                                  xk+1 = (1 − λk )(xk + αk dk ) + λk T zk
+                                        (23)
+                                        = (1 − λk )(xk + αk dk ) + λk (zk − Gzk )
+                                                                                                 (25)
+                                                                   
+                                        = xk + (1 − λk )αk + λk βk dk − λk Gzk .
+
+   The parameter choice (21) yields
+
+                                         k + α − 2s (α − 2)     k(1 − s)         k(1 − s)
+                        (1 − λk )αk =                                          =          ,
+                                              k+α           k + α − 2s (α − 2)    k+α
+
+and
+                                                     s(α − 2) 2k       sk
+                                         λk βk =                    =     .
+                                                     2(k + α) α − 2   k+α
+Consequently,
+                                                                        k
+                                               (1 − λk )αk + λk βk =       .                     (26)
+                                                                       k+α
+Using (26) in (25) gives
+                                                     k       s(α − 2)
+                                         dk+1 =         dk −          Gzk .                      (27)
+                                                    k+α      2(k + α)
+   The identity zj = xj + βj dj further gives
+
+                    zk+1 − zk = (1 + βk+1 )dk+1 − βk dk
+                                                       
+                              (27)              k                         s(α − 2)
+                               = (1 + βk+1 )        − βk dk − (1 + βk+1 )          Gzk .         (28)
+                                              k+α                         2(k + α)
+
+By (21),
+                                   k         2k + α k   2k          αk
+                    (1 + βk+1 )       − βk =          −    =−                ,
+                                  k+α         α−2 k+α α−2     (α − 2)(k + α)
+and
+                                          s(α − 2)   2k + α s(α − 2)   s(2k + α)
+                            (1 + βk+1 )            =                 =           .
+                                          2(k + α)    α − 2 2(k + α)   2(k + α)
+Substituting these identities into (28) yields
+
+                                                         αk            s(2k + α)
+                              zk+1 − zk = −                       dk −           Gzk .           (29)
+                                                   (α − 2)(k + α)      2(k + α)
+
+   At k = 1, (24) and (29) give
+
+                                        z1 − (1 − s)z0 − sT z0   s(2 + α)
+                           z2 − z 1 =                          −          (z1 − T z1 ).
+                                                1+α              2(1 + α)
+Rearranging this identity gives
+                                  
+                             sα           1−s                 sα            s
+              z2 = 1 −               z1 +     (z1 − z0 ) +          T z1 +     (T z1 − T z0 ),
+                          2(1 + α)        1+α              2(1 + α)        1+α
+
+which is (20) at k = 1.
+   It remains to verify (20) for k ≥ 2. (29) and (27) at index k − 1 give
+
+                                          α(k − 1)             s(2k − 2 + α)
+                       zk − zk−1 = −                    dk−1 −               Gzk−1 ,
+                                     (α − 2)(k − 1 + α)        2(k − 1 + α)
+                                     k−1              s(α − 2)
+                               dk =          dk−1 −              Gzk−1 .
+                                    k−1+α           2(k − 1 + α)
+
+
+                                                            11
+Eliminating dk−1 yields
+                                       α−2                s(α − 2)
+                             dk = −        (zk − zk−1 ) −          Gzk−1 ,      k ≥ 2.                    (30)
+                                        α                    α
+Substituting (30) into (29), we obtain
+                                  k                   sk           s(2k + α)
+                   zk+1 − zk =       (zk − zk−1 ) +       Gzk−1 −            Gzk
+                                 k+α                k+α            2(k + α)
+                                  k                    sα            sk
+                               =     (zk − zk−1 ) −          Gzk −       (Gzk − Gzk−1 ).                  (31)
+                                 k+α                2(k + α)        k+α
+Finally, expanding G = I − T in (31) gives
+                              
+                         sα           (1 − s)k                   sα            sk
+          zk+1 = 1 −             zk +          (zk − zk−1 ) +          T zk +     (T zk − T zk−1 ),
+                      2(k + α)         k+α                    2(k + α)        k+α
+which is (20) for every k ≥ 2. Together with the k = 1 identity above, this proves the claimed representation.
+
+
+B     Proofs for stochastic iKM
+B.1     Auxiliary Lemmas
+Define the residual operator
+                                                     G := I − T.                                          (32)
+At this point we need the following consequences of nonexpansiveness, whose proof is deferred to Ap-
+pendix B.4.1.
+Lemma 2 (Residual operator of a nonexpansive map). Suppose that T : H → H is nonexpansive. Then G
+is 1/2-cocoercive, hence monotone, and 2-Lipschitz:
+                               1          2
+               ∀x, y ∈ H,        ∥Gx − Gy∥ ≤ ⟨Gx − Gy, x − y⟩ ,           ∥Gx − Gy∥ ≤ 2 ∥x − y∥ .         (33)
+                               2
+Moreover, the zeros of G are exactly the fixed points of T :
+
+                                           Gp⋆ = 0     ⇐⇒     p⋆ ∈ Fix T.                                 (34)
+
+    We will also use the following regularized-root lemma repeatedly. The proof is in Appendix B.4.2.
+Lemma 3 (Existence and firm nonexpansiveness). Let G : H → H be monotone and continuous. For every
+µ > 0 and v ∈ H, the equation
+                                        Gp + µ(p − v) = 0                                     (35)
+has a unique solution. If pµ (v) denotes this solution, then the solution map is firmly nonexpansive: for all
+v, v ′ ∈ H,
+                                                    2
+                                ∥pµ (v) − pµ (v ′ )∥ ≤ ⟨pµ (v) − pµ (v ′ ), v − v ′ ⟩ .                 (36)
+
+Auxiliary parameters.         Define
+                                          4(1 + 1/a)ω0
+                                  µk =                 > 0,        1 ≤ k ≤ K + 1,                         (37)
+                                             Kωk−1
+where ωk is defined in (10). Then by (37), (11), and (12) we have
+                                              µk+1   ωk−1    rk                        rk
+                            ∀1 ≤ k ≤ K :           =      =1+ ,              λk = uk      .               (38)
+                                               µk     ωk     2                         µk
+We will use the following basic bounds for these schedule quantities repetitively. The proof is deferred to
+Appendix B.4.3.
+
+
+                                                         12
+Lemma 4 (Auxiliary bounds for the schedule). For K ≥ 2 and a satisfying (9), consider the schedule
+(10)–(12). Then, for 1 ≤ k ≤ K,
+                                             µk+1   ωk−1
+                                      1<          =      < K (a+1)/K ≤ 2.                                      (39)
+                                              µk     ωk
+Moreover, for 1 ≤ k ≤ K,
+
+                                        0 < rk < 2,                                                           (40a)
+                                                                 (a+1)/K
+                                                     2(a + 1)K             log K
+                                              rk <                                 ,                          (40b)
+                                                                    K
+                                           rk   5
+                                       0<     < ,                                                             (40c)
+                                          µk    6
+                                       0 < λk < uk < 1.                                                       (40d)
+
+For 2 ≤ k ≤ K,
+                                               αk   uk − λk       µk − rk
+                          βk > 0,       0<        =         = uk            < uk < 1.                          (41)
+                                               βk   1 − λk       µk − uk rk
+
+B.2     Proof of Lemma 1
+We first prove the parameter ranges and part (a). Steps 2–4 establish parts (b) and (c).
+Step 1: parameter ranges and the order of αk .                  Define the continuous interpolation of the auxiliary
+sequence (ωk )K
+              k=0 from (10) on [0, 1] by
+
+                       ω(t) = log(1 + K a−(a+1)t ),         z(t) = K a−(a+1)t ,           0 ≤ t ≤ 1.           (42)
+
+Then
+
+                                         ω(k/K) = ωk ,           ∀0 ≤ k ≤ K.                                   (43)
+
+It follows that ω is strictly decreasing since
+                                                                      z(t)
+                                      ω ′ (t) = −(a + 1) log K               < 0.                              (44)
+                                                                    1 + z(t)
+
+   Multiplying (41) by βk yields the factorization
+                                                      µk − rk
+                                    αk = (uk βk )               ,       2 ≤ k ≤ K.                             (45)
+                                                     µk − uk rk
+Thus it remains to bound the two factors on the right-hand side.
+  For the first factor, the formulas for uk and βk in (11) and (12) give
+                                                     2rk
+                                 u k βk =                           ,      2 ≤ k ≤ K.                          (46)
+                                            rk−1 (1 + rk )(2 + rk )
+Its lower bound requires rk−1 < rk . To prove this strict monotonicity, define
+
+                                                                    1 − e−s
+                               F (t) = − log ω(t),        ϕ(s) =            ,          s > 0.                  (47)
+                                                                       s
+Since es > 1 + s for s > 0,
+                                                       (s + 1)e−s − 1
+                                            ϕ′ (s) =                  < 0.                                     (48)
+                                                             s2
+Furthermore,
+
+                  F ′ (t) = (a + 1) log K ϕ(ω(t)),        F ′′ (t) = (a + 1) log K ϕ′ (ω(t))ω ′ (t) > 0,       (49)
+
+
+                                                           13
+where the first identity follows from z(t)/(1 + z(t)) = 1 − e−ω(t) , which is a consequence of (42); the second
+uses (48) and (44). For 1 ≤ k ≤ K,
+                                                                          Z k/K
+                                µk+1
+                          log        = F (k/K) − F ((k − 1)/K) =                     F ′ (t) dt,            (50)
+                                 µk                                        (k−1)/K
+
+where the first equality uses (38) and (43). Since F ′ is strictly increasing by the second relation in (49), the
+integrals in (50) increase strictly with k. The first identity in (38) and (40a) therefore give
+
+                                            0 < r1 < r2 < · · · < rK < 2.                                   (51)
+
+    For the upper bound in (46), we also need a lower bound on rk−1 in terms of rk . A second differentiation
+of (44) gives
+                                                                  z(t)
+                                  ω ′′ (t) = (a + 1)2 (log K)2             > 0.                          (52)
+                                                               (1 + z(t))2
+Thus ω ′ is increasing. For 2 ≤ k ≤ K,
+                                     Z (k−1)/K                Z k/K
+                    ωk−2 − ωk−1 = −            ω ′ (t) dt ≥ −                  ω ′ (t) dt = ωk−1 − ωk .     (53)
+                                         (k−2)/K                     (k−1)/K
+
+Consequently, (53), (11), and (38) give
+
+                              2(ωk−2 − ωk−1 )   2(ωk−1 − ωk )    2rk
+                     rk−1 =                   ≥               =        ,                 2 ≤ k ≤ K.         (54)
+                                   ωk−1             ωk−1        rk + 2
+Therefore, for 2 ≤ k ≤ K,
+                                  1           2                      1
+                                    <                    < uk βk ≤        < 1,                              (55)
+                                  6   (1 + rk )(2 + rk )           1 + rk
+where the first inequality follows from rk < 2 in (40a), the second inequality follows from (51) and (46), the
+third inequality follows from (54) and (46), and the final inequality follows from rk > 0 in (40a).
+    For the second factor in (45), (40c) and (40d) give
+
+                                         µk − rk      1 − rk /µk       rk
+                                                   =               >1−    .                                 (56)
+                                        µk − uk rk   1 − uk rk /µk     µk
+Thus
+                                1 (40c) rk (56) µk − rk
+                                   < 1−     <             < 1,                 2 ≤ k ≤ K,                   (57)
+                                6       µk     µk − uk rk
+where the final inequality follows because (40a) and (40d) give
+
+                                   (µk − uk rk ) − (µk − rk ) = rk (1 − uk ) > 0.
+
+Combining (45), (55), and (57) gives
+                                            1
+                                              < αk < 1,           2 ≤ k ≤ K.                                (58)
+                                           36
+Also, (12) gives α1 = 0. This proves (13) and part (a).
+Step 2: monotonicity and endpoint orders of βk . Since βk = 4/(3rk−1 ) by (12) for all 2 ≤ k ≤ K,
+(51) immediately gives
+                                  β2 > β3 > · · · > βK > 0.                                   (59)
+It remains to prove the two endpoint orders (14). We first write each successive logarithmic ratio in a form
+that can be estimated locally. (49) and (50) give
+                                                 Z k/K
+                                        µk+1
+                                  log        =               (a + 1) log K ϕ(ω(t)) dt.                      (60)
+                                         µk        (k−1)/K
+
+
+                                                             14
+To bound the integrand, observe that by (47), for every s > 0,
+                                               1            2
+                                                  ≤ ϕ(s) ≤     ,                                           (61)
+                                              1+s          1+s
+where the lower bound follows from es ≥ 1 + s; for the upper bound, use ϕ(s) ≤ 1 ≤ 2/(1 + s) when s ≤ 1,
+and ϕ(s) ≤ 1/s ≤ 2/(1 + s) when s ≥ 1. Both ω and ϕ are decreasing by (44) and (48), so the integrand in
+(60) is increasing and therefore
+
+                           (a + 1) log K                µk+1   (a + 1) log K
+                                         ϕ(ωk−1 ) ≤ log      ≤               ϕ(ωk ).
+                                K                        µk         K
+
+Applying (61) to these two endpoint values, and using 1 + ωk−1 < 2(1 + ωk ) from (39), yields
+
+                         (a + 1) log K   (a + 1) log K       µk+1   2(a + 1) log K
+                                       <               ≤ log      ≤                .                       (62)
+                          2K(1 + ωk )    K(1 + ωk−1 )         µk      K(1 + ωk )
+
+Apply the elementary inequalities
+
+                                    log q < q − 1 ≤ q log q      for 1 < q < 2,                            (63)
+
+with q = µµk+1
+            k
+               ∈ (1, 2), where the inclusion follows from (39). Using rk = 2(q − 1) from (38) then gives
+
+                                                  µk+1              µk+1
+                                          2 log        < rk < 4 log      .                                 (64)
+                                                   µk                µk
+
+Together with (62) and (64), this gives
+
+                                     (1 + a) log K        8(1 + a) log K
+                                                   < rk <                .                                 (65)
+                                      K(1 + ωk )            K(1 + ωk )
+
+Substituting this estimate into βk = 4/(3rk−1 ) gives
+
+                              K(1 + ωk−1 )         4K(1 + ωk−1 )
+                                            < βk <                ,          2 ≤ k ≤ K.                    (66)
+                             6(1 + a) log K        3(1 + a) log K
+
+   (10) and (39) give
+
+               log 2                                                     ω0
+                       (1 + a log K) ≤ max{a log K, log 2} < ω0 ,           < ω1 < ω0 ≤ 1 + a log K,       (67)
+             1 + log 2                                                   2
+and
+                                 ωK = log(1 + K −1 ),           ωK < ωK−1 < 2ωK .                          (68)
+For t ≥ 0,                                        Z t
+                                       t                 ds
+                                          ≤                 = log(1 + t) ≤ t.
+                                      1+t          0    1+s
+Taking t = K −1 gives
+                                            1                   1
+                                              ≤ log(1 + K −1 ) ≤ .                                         (69)
+                                           2K                   K
+(67), (68), and (69) imply
+
+                        ω0 = Θ(ω1 ) = Θ(1 + a log K),           ωK−1 = Θ(ωK ) = Θ(K −1 ),                  (70)
+
+where all implicit constants are absolute. Substitution into (66) gives
+                                                                               
+                                  K           1                            K
+                        β2 = Θ          a+            ,     βK = Θ                    .                    (71)
+                                 1+a        log K                     (1 + a) log K
+
+
+                                                           15
+Together with (59), this proves part (b) and (14).
+Step 3: unimodality and peak location of λk . To prove the shape and location claims for (λk )K        k=1 , we
+express the sequence as samples of a one-variable profile at the decreasing grid points (ωk )K
+                                                                                             k=1 . For  w > 0,
+define                                                                        3∆(w)2
+                 ∆(w) = log K (a+1)/K − K (a+1)/K − 1 e−w ,                                               (72)
+                                                          
+                                                                      Φ(w) =              .
+                                                                               w + 2∆(w)
+For 1 ≤ k ≤ K, (10) gives eωk − 1 = K a−(a+1)k/K , and hence
+                                                                                  2∆(ωk )
+                   ωk−1 = log 1 + K (a+1)/K (eωk − 1) = ωk + ∆(ωk ),         rk =           .             (73)
+                                                                                      ωk
+(73), (11), and (12) give
+                                                       K
+                                           λk =                Φ(ωk ).                                    (74)
+                                                  4(1 + 1/a)ω0
+   We next show that Φ has a unique maximizer. Differentiating the second formula in (72) gives
+
+                                          3∆(w)
+                            Φ′ (w) =                [2(w + ∆(w))∆′ (w) − ∆(w)] .                          (75)
+                                       (w + 2∆(w))2
+
+The prefactor in (75) is positive for w > 0, so only the bracket determines the sign. By (72) we have
+
+                           K (a+1)/K − 1 e−w
+                                         
+           ′
+         ∆ (w) = (a+1)/K                             > 0,     ∆′′ (w) = −∆′ (w)(1 + ∆′ (w)) < 0.         (76)
+                   K          − K (a+1)/K − 1 e−w
+
+Using (76), the derivative of the bracket in (75) is
+                                                                                        
+          d                                                                       1
+            [2(w + ∆(w))∆′ (w) − ∆(w)] = ∆′ (w)(1 + ∆′ (w)) 2(1 − w − ∆(w)) −              .              (77)
+         dw                                                                   1 + ∆′ (w)
+
+The bracket on the RHS of (77) is strictly decreasing, since
+
+                                                                                ∆′′ (w)
+                                                    
+                 d                            1                    ′
+                     2(1 − w − ∆(w)) −                 =  −2(1 + ∆   (w)) +
+                dw                        1 + ∆′ (w)                        (1 + ∆′ (w))2
+                                                                                                          (78)
+                                                       (76)                     ∆′ (w)
+                                                        = −2(1 + ∆′ (w)) −               < 0.
+                                                                              1 + ∆′ (w)
+
+The bracket in (75) and the sign-controlling bracket in (77) have the following values at w = 0 and limits as
+w → ∞:
+                             [2(w + ∆(w))∆′ (w) − ∆(w)]w=0 = 0,
+                                                        
+                                                   1
+                          2(1 − w − ∆(w)) −                    = 2 − K −(a+1)/K > 0,
+                                              1 + ∆′ (w) w=0
+                                                                   (a + 1) log K                         (79)
+                            lim [2(w + ∆(w))∆′ (w) − ∆(w)] = −                   < 0,
+                           w→∞
+                                                                       K
+                                                       1
+                        lim 2(1 − w − ∆(w)) −                  = −∞.
+                       w→∞                        1 + ∆′ (w)
+(77)– (79) show that the bracket in (75) first increases from zero and then decreases to a negative limit,
+crossing zero exactly once on (0, ∞). Thus Φ′ is positive and then negative, so Φ has a unique maximizer
+w⋆ ∈ (0, ∞).
+   By (74), λk is a positive constant times Φ(ωk ), and (44) shows that ωk decreases strictly with k. Hence
+the sampled sequence increases until the grid crosses w⋆ and decreases afterward. If w⋆ lies outside the
+sampled interval [ωK , ω1 ], the maximum is attained at one boundary index; otherwise it is attained at one
+or both of the adjacent grid points bracketing w⋆ . This proves the asserted unimodality for every K ≥ 2
+and a satisfying (9).
+
+
+                                                       16
+   It remains to locate w⋆ . By (9),
+                                               (a + 1) log K
+                                          0<                 ≤ log 2.                                    (80)
+                                                    K
+The first identity in (76) also admits the form
+
+                                              1 − e−∆(w)   ∆(w)
+                                   ∆′ (w) =              = w    ϕ(∆(w)),                                 (81)
+                                                ew − 1    e −1
+where ϕ is defined in (47). Hence the bracket in (75) equals
+                                                                   
+                                            2(w + ∆(w))
+                                    ∆(w)                 ϕ(∆(w)) − 1 .                                   (82)
+                                               ew − 1
+
+By (47) and (61), 1/(1 + s) ≤ ϕ(s) < 1 for s > 0. Thus (82) is positive at w = 1:
+                                  2(1 + ∆(1))                2
+                                              ϕ(∆(1)) − 1 ≥     − 1 > 0.                                 (83)
+                                     e−1                    e−1
+Moreover, (72) and (80) give 0 < ∆(2) < (a + 1) log K/K ≤ log 2 < 1, so the same bracket is negative at
+w = 2:
+                                2(2 + ∆(2))                 6
+                                    2
+                                            ϕ(∆(2)) − 1 < 2    − 1 < 0.                            (84)
+                                   e −1                  e −1
+The uniqueness established in (77)– (79) therefore gives
+
+                                                  1 < w⋆ < 2.                                            (85)
+
+   Taylor’s theorem and (80) give, with an absolute remainder constant,
+
+                                                                          (a + 1)2 log2 K
+                                                                                       
+                                  (a + 1) log K        (a + 1) log K
+             K (a+1)/K
+                       − 1 = exp                  −1=                +O                     .            (86)
+                                       K                    K                   K2
+
+Moreover, (72) and the first identity in (76) can be written as
+                                                                        
+                                ∆(w) = log 1 + K (a+1)/K − 1 (1 − e−w ) ,
+                                                                
+
+                                                K (a+1)/K − 1 e−w
+                                                                                                        (87)
+                                 ′
+                                ∆ (w) =                               .
+                                          1 + K (a+1)/K − 1 (1 − e−w )
+
+For w ∈ [1, 2], (86) and (1 + x)−1 = 1 + O(x) give
+                                                                               
+                                        1                         (a + 1) log K
+                                                       = 1 + O                   .                      (88)
+                           1 + K (a+1)/K − 1 (1 − e−w )                K
+
+Applying log(1 + x) = x + O(x2 ) to the first identity in (87), and using (86) and (88) in the second, gives
+
+                                                      (a + 1)2 log2 K
+                                                                     
+                       (a + 1) log K
+              ∆(w) =                 (1 − e−w ) + O                     ,
+                            K                               K2
+                                             (a + 1)2 log2 K
+                                                                                       
+                        (a + 1) log K                                          (a + 1) log K
+               ′
+             ∆ (w) =                   +O                         −w
+                                                                 e · 1+O                                  (89)
+                              K                    K2                               K
+                                                (a + 1)2 log2 K
+                                                               
+                       (a + 1) log K −w
+                    =                e +O                         .
+                            K                         K2
+
+Substituting (89) into the bracket in (75) yields, uniformly for w ∈ [1, 2],
+                                                                                          
+                        K                                                    (a + 1) log K
+                                [2(w + ∆(w))∆′ (w) − ∆(w)] = q(w) + O                        ,
+                  (a + 1) log K                                                   K                      (90)
+                                                                       −w
+                                                            q(w) = e        (2w + 1) − 1.
+
+                                                       17
+Then we have
+                                         q ′ (w) = e−w (1 − 2w),              q(0) = 0,
+                                             −1
+                                                                                                                      (91)
+                                 q(1) = 3e         − 1 > 0,          q(2) = 5e−2 − 1 < 0.
+Thus q increases on (0, 1/2), decreases on (1/2, ∞), and has a unique positive zero ρλ ∈ (1, 2). It satisfies
+
+                                                       eρλ = 1 + 2ρλ .                                                (92)
+
+The bracket in (75) vanishes at w⋆ . Thus (85) and (90) give
+                                                                 
+                                                    (a + 1) log K
+                                       q(w⋆ ) = O                   .                                                 (93)
+                                                         K
+
+Moreover, (91) gives the uniform bound
+
+                                  |q ′ (w)| = e−w (2w − 1) ≥ e−2 ,                  w ∈ [1, 2].                       (94)
+
+Since q(ρλ ) = 0, q ′ has constant sign on [1, 2], and w⋆ , ρλ ∈ (1, 2),
+                                                   Z w⋆               (94)
+                                      |q(w⋆ )| =          q ′ (s) ds ≥ e−2 |w⋆ − ρλ |.
+                                                    ρλ
+
+Consequently,                                                                                 
+                                                              (93)           (a + 1) log K
+                                  |w⋆ − ρλ | ≤ e2 |q(w⋆ )| = O                                     .
+                                                                                  K
+Therefore,                                                                         
+                                                                (a + 1) log K
+                                            w⋆ = ρλ + O                                 .                             (95)
+                                                                     K
+   On the other hand, (10) is equivalently
+                                                    
+                                            (a + 1)k
+                         log(eωk − 1) = a −            log K,                               0 ≤ k ≤ K.                (96)
+                                               K
+
+Thus the strictly increasing transformation ω 7→ log(eω − 1) maps (ωk )K
+                                                                       k=0 to a decreasing arithmetic grid
+with spacing (a + 1) log K/K. Moreover,
+
+                               d                 1         1
+                                 log(ew − 1) =     −w
+                                                      ≤         ,                           w ∈ [1, 2].
+                              dw               1−e      1 − e−1
+Thus, by (95),
+                                                                                                           
+                                                 (a + 1) log K               (92)             (a + 1) log K
+             log(ew⋆
+                       − 1) = log(eρλ
+                                        − 1) + O                              = log(2ρλ ) + O                     .   (97)
+                                                      K                                            K
+
+The left-hand side of (97) is positive by (85), whereas (96) at k = K equals − log K < 0. Replacing ωk by
+w⋆ in (96) and solving for the real-valued grid index gives
+
+                                                aK   K log(ew⋆ − 1)
+                                                   −                ,
+                                               a+1   (a + 1) log K
+
+which is strictly less than K. The sequence (λk )K   k=1 samples only the integer grid indices 1, . . . , K. If the
+real-valued index above lies in [1, K), then it either is an integer or lies between two adjacent integers. Hence
+(74) and the sign change in (75) imply that kλ is that integer or one of those two adjacent integers. If the
+real-valued index is less than 1, then w⋆ > ω1 , so (74) and (75) imply kλ = 1. Consequently,
+
+                                                           K log(ew⋆ − 1)
+                                                                          
+                                                  aK
+                                  kλ − max 1,           −                      ≤ 1.                            (98)
+                                                 a+1        (a + 1) log K
+
+                                                              18
+Combining (97) and (98) yields
+                                                                
+                                              aK   log(2ρλ ) K
+                                 kλ = max 1,     −                 + O(1).                          (99)
+                                             a+1     a + 1 log K
+
+So (15) follows.
+Step 4: endpoint values and peak height of λk . It remains to prove the three orders in (16). First,
+(12) gives
+                                          Kωk−1
+                                  λk =               uk rk .                                  (100)
+                                       4(1 + 1/a)ω0
+To estimate the factor uk rk , using 0 < rk < 2 from (40a) in the definition of uk in (11) gives
+                                                rk        3rk
+                                                   < uk <     .                                    (101)
+                                                8          4
+(65) and (101) give
+                                  (1 + a)2 log2 K           48(1 + a)2 log2 K
+                                      2         2
+                                                  < uk rk <                   .                    (102)
+                                   8K (1 + ωk )               K 2 (1 + ωk )2
+(39) gives
+                                                ωk−1 = Θ(ωk ).                                     (103)
+The first comparison in (67) gives
+
+                                a                 1        1 + log 2         a
+                                           ≤             <                              .          (104)
+                      (1 + a)(1 + a log K)   (1 + 1/a)ω0     log 2 (1 + a)(1 + a log K)
+
+Substituting (102)– (104) into (100) yields
+
+                                     a(1 + a) log2 K
+                                                              
+                                                       ωk
+                             λk = Θ                              ,        1 ≤ k ≤ K.               (105)
+                                     K(1 + a log K) (1 + ωk )2
+
+(70) also gives                                                               
+                              ω1                1                   ωK          1
+                                      = Θ                ,                  = Θ    .               (106)
+                           (1 + ω1 )2      1 + a log K           (1 + ωK )2     K
+(105) and (106) yield
+
+                                 a(1 + a) log2 K
+                                                                              
+                                                                     1 + a log K
+                         λ1 = Θ                    ,         λK = Θ                λ1 .            (107)
+                                 K(1 + a log K)2                         K
+
+   For the peak height, define
+                                       j = min{1 ≤ k ≤ K : ωk ≤ log 2}.                            (108)
+This index exists because (10) gives ω0 > log 2 > ωK . By (39) and the minimality in (108),
+
+                               log 2                      ωj            log 2
+                                     < ωj ≤ log 2,                ≥               .                (109)
+                                 2                     (1 + ωj )2   2(1 + log 2)2
+
+Together with s/(1 + s)2 ≤ 1/4 for s > 0, (109) gives
+                                                    ωk
+                                            max             = Θ(1).                                (110)
+                                           1≤k≤K (1 + ωk )2
+
+
+(105), (110), and (107) give
+                                          max λk = Θ(1 + a log K) λ1 .                             (111)
+                                        1≤k≤K
+
+(107) and (111) prove (16) and complete the proof of Lemma 1.
+
+
+                                                       19
+B.3    Proof of Theorem 1
+Step 1: reducing the last-iterate residual to an accumulated potential. For ρ ∈ R, define the final
+              ρ
+affine point vK , and let RK be the worst-case root-mean-square residual over the segment 0 ≤ ρ ≤ 1:
+                                                                               1/2
+                         ρ                                          ρ       ρ 2
+                        vK = (1 − ρ)xK + ρzK ,     RK = sup E ∥vK     − T vK ∥       .               (112)
+                                                                0≤ρ≤1
+
+By (13), βK > 0. Hence the definitions of yK and zK in (4) give
+                                                             αK
+                             yK − xK = αK (xK − xK−1 ) =        (zK − xK ).                             (113)
+                                                             βK
+Then, by the iKM update (4),
+                                                          α /βK
+                                       0
+                                 xK = vK ,           yK = vKK     ,            1
+                                                                         zK = vK .                      (114)
+(114) and (41) show that all three final points xK , yK , zK correspond to parameters in [0, 1]. Therefore
+                                                                  1/2
+                                                                 2
+                                      max         E ∥vK − T vK ∥        ≤ RK .                           (115)
+                                 vK ∈{xK ,yK ,zK }
+
+Thus it suffices to bound RK .
+   Lemma 2 shows that the operator G in (32) satisfies the hypotheses of Lemma 3. For every 1 ≤ k ≤ K,
+(37) gives µk > 0. Let pk be the unique solution of
+                                             Gpk + µk (pk − xk ) = 0.                                   (116)
+Existence and uniqueness follow from Lemma 3. Moreover, (36) and Cauchy–Schwarz imply that, for every
+µ > 0,
+                                      ∥pµ (v) − pµ (v ′ )∥ ≤ ∥v − v ′ ∥ .
+Thus pµ is continuous. Since xk is Fk -measurable, it follows that pk = pµk (xk ) is Fk -measurable.
+                        ρ
+  By the definition of vK  in (112) and the root equation (116),
+                                ρ
+                           µK (vK − pK ) = (1 − ρ)µK (xK − pK ) + ρµK (zK − pK )
+                                           = (1 − ρ)GpK + ρµK (zK − pK ).                               (117)
+Consequently, for every 0 ≤ ρ ≤ 1,
+                            ρ
+                       µK ∥vK − pK ∥ ≤ (1 − ρ) ∥GpK ∥ + ρµK ∥zK − pK ∥
+                                                      q
+                                                               2            2
+                                       p
+                                     ≤ (1 − ρ)2 + ρ2 ∥GpK ∥ + µ2K ∥zK − pK ∥
+                                       q
+                                                2                2
+                                     ≤ ∥GpK ∥ + µ2K ∥zK − pK ∥ ,                                        (118)
+
+where the second inequality is Cauchy–Schwarz in R2 , and the third inequality uses (1 − ρ)2 + ρ2 ≤ 1 for
+0 ≤ ρ ≤ 1.
+   Define the potential
+                                                        2        2
+                                    Ψk := µ2k ∥zk − pk ∥ + ∥Gpk ∥ .                                (119)
+Then (118) gives
+                                              ρ                1 p
+                                            ∥vK − pK ∥ ≤          ΨK .                                  (120)
+                                                              µK
+The triangle inequality and the 2-Lipschitz estimate in (33) give
+                                         ρ        ρ
+                                      ∥GvK ∥ ≤ ∥GvK − GpK ∥ + ∥GpK ∥
+                                               (33)
+                                                     ρ
+                                               ≤ 2 ∥vK  − pK ∥ + ∥GpK ∥
+                                                        
+                                                       2 p
+                                               ≤ 1+           ΨK ,                                      (121)
+                                                      µK
+
+
+                                                         20
+                                                                            √
+where the third inequality uses (118) and the immediate consequence ∥GpK ∥ ≤ ΨK of (119).
+   For real-valued random variables, write
+
+                      L2 (Ω; R) := X : Ω → R : X is measurable and E|X|2 < ∞ .
+                                   
+
+
+The following lemma, whose proof is given in Appendix B.4.4, ensures that the potential is integrable.
+Lemma 5 (Potential measurability and integrability).
+                                            √         For every 1 ≤ k ≤ K, the random variable Ψk is
+Fk -measurable and integrable. Consequently, Ψk ∈ L2 (Ω; R) and (EΨk )1/2 < ∞.
+   By Lemma 5, taking the L2 -norm for each fixed 0 ≤ ρ ≤ 1 is justified and yields
+                                         1/2          2
+                                                           
+                                      ρ 2
+                                 E ∥GvK ∥       ≤ 1+         (EΨK )1/2 .
+                                                        µK
+
+The right-hand side is independent of ρ. Taking the supremum over 0 ≤ ρ ≤ 1 and using the definition of
+RK in (112), we obtain                               
+                                                   2
+                                       RK ≤ 1 +         (EΨK )1/2 .                               (122)
+                                                  µK
+
+Step 3: one-step estimate of the potential.                It therefore remains to control (EΨK )1/2 . For this purpose,
+we use the following one-step estimate.
+Lemma 6 (one-step potential estimate). For every 1 ≤ k ≤ K − 1,
+                                            p                     2
+                         E[Ψk+1 | Fk ] ≤         Ψk + rk ∥bk ∥          + rk2 σ 2              almost surely.     (123)
+
+   Its proof appears in Appendix B.4.5. Taking expectations in (123), for 1 ≤ k ≤ K − 1 we obtain
+                                                 p              2 
+                    EΨk+1 = E[E[Ψk+1 | Fk ]] ≤ E     Ψk + rk ∥bk ∥     + rk2 σ 2
+                                                                                     2
+                                                                                 2
+                                                        ≤ (EΨk )1/2 + rk (E ∥bk ∥ )1/2 + rk2 σ 2 ,                (124)
+
+where the second inequality is Minkowski’s inequality in L2 (Ω), using rk > 0 from (40a). All quantities are
+finite by Lemma 5 and the finiteness of BK in (7). Since both sides of (124) are nonnegative, taking square
+roots gives                                                                 
+                                                                  2
+                           (EΨk+1 )1/2 ≤ (EΨk )1/2 + rk (E ∥bk ∥ )1/2 , rk σ    .                      (125)
+                                                                                                      2
+For 0 ≤ j ≤ K − 1, put
+
+                           j                                            j
+                                                                                    !1/2
+                           X               2 1/2
+                                                                        X
+                    Sj =         rk (E ∥bk ∥ )     ,      Vj = σ              rk2          ,       S0 = V0 = 0.   (126)
+                           k=1                                          k=1
+
+We claim that
+                            (EΨj+1 )1/2 ≤ (EΨ1 )1/2 + Sj + Vj ,                      0 ≤ j ≤ K − 1.               (127)
+For j = 0, the claim is an equality because S0 = V0 = 0. Now fix 1 ≤ j ≤ K − 1 and suppose that the claim
+holds with j − 1 in place of j. The induction hypothesis and the definition of Sj give
+                                             2                                                              2
+                   (EΨj )1/2 + rj (E ∥bj ∥ )1/2 ≤ (EΨ1 )1/2 + Sj−1 + Vj−1 + rj (E ∥bj ∥ )1/2
+                                                       = (EΨ1 )1/2 + Sj + Vj−1 .                                  (128)
+
+
+
+
+                                                              21
+All quantities in (128) are nonnegative by (126) and (40a). Therefore the Euclidean norm is nondecreasing
+in its first coordinate, and (125), (128) give
+                                                                              
+                                                                  2
+                             (EΨj+1 )1/2 ≤ (EΨj )1/2 + rj (E ∥bj ∥ )1/2 , rj σ
+                                                                                 2
+                                                                        
+                                                  1/2
+                                         ≤ (EΨ1 ) + Sj + Vj−1 , rj σ
+                                                                             2
+                                                           
+                                                  1/2
+                                         = (EΨ1 ) + Sj , 0 + (Vj−1 , rj σ)
+                                                                                 2
+                                                           
+                                                  1/2
+                                         ≤ (EΨ1 ) + Sj , 0        + ∥(Vj−1 , rj σ)∥2
+                                                                                    2
+                                                   = (EΨ1 )1/2 + Sj + Vj ,
+where the last inequality is the Euclidean triangle inequality, and the last equality uses Vj2 = Vj−1
+                                                                                                   2
+                                                                                                      + rj2 σ 2 ,
+which follows from (126). This completes the induction. Taking j = K − 1 yields
+                                                K−1                       K−1
+                                                                                  !1/2
+                                                X               2 1/2
+                                                                          X
+                       (EΨK )  1/2         1/2
+                                   ≤ (EΨ1 ) +        rk (E ∥bk ∥ ) + σ          2
+                                                                               rk      .                (129)
+                                                               k=1                            k=1
+
+    Combining (122) and (129) yields the decomposition
+                                                                                                            !1/2 
+                                               K−1                                             K−1
+                              2                 X              2
+                                                                                                 X                
+                 RK ≤ 1 +            (EΨ1 )1/2 +     rk (E ∥bk ∥ )1/2 + σ                              rk2            .   (130)
+                             µK                                                                                 
+                                                                  k=1                            k=1
+
+
+Step 3: bounding the terms in (130).                     We first bound (EΨ1 )1/2 in (130). Set
+                                           D := ⋆ inf         ∥x1 − p⋆ ∥ ,         0 ≤ D < ∞,                             (131)
+                                                   p ∈Fix T
+
+where finiteness follows from Fix T ̸= ∅. Since β1 = 0, (4) gives z1 = x1 . Thus substituting (116) into (119)
+gives
+                                                                2
+                                            Ψ1 = 2µ21 ∥x1 − p1 ∥ .                                       (132)
+Moreover, x1 is deterministic, so uniqueness in Lemma 3 implies that p1 , and hence Ψ1 , is deterministic. Fix
+any p⋆ ∈ Fix T . (34) and (116) give Gp⋆ = 0 and Gp1 = µ1 (x1 − p1 ), respectively. Hence the monotonicity
+estimate in (33) gives
+                                      0 ≤ ⟨Gp1 − Gp⋆ , p1 − p⋆ ⟩ = µ1 ⟨x1 − p1 , p1 − p⋆ ⟩
+                                          = µ1 ⟨x1 − p1 , (x1 − p⋆ ) − (x1 − p1 )⟩
+                                                                                    
+                                                                                   2
+                                          = µ1 ⟨x1 − p1 , x1 − p⋆ ⟩ − ∥x1 − p1 ∥ .
+
+Since µ1 > 0, rearranging this inequality gives the first inequality below, and Cauchy–Schwarz gives the
+second:
+                                   2
+                         ∥x1 − p1 ∥ ≤ ⟨x1 − p1 , x1 − p⋆ ⟩ ≤ ∥x1 − p1 ∥ ∥x1 − p⋆ ∥ .               (133)
+If x1 = p1 , the desired distance bound is immediate; otherwise, dividing (133) by ∥x1 − p1 ∥ gives the same
+bound. Since p⋆ ∈ Fix T was arbitrary, (131) gives
+                 ∥x1 − p1 ∥ ≤ ⋆ inf          ∥x1 − p⋆ ∥ = D,
+                                  p ∈Fix T
+                                                                   √                            √
+                          1/2 (132)
+                                      √                   (37) 4       2(1 + 1/a)              4 2(1 + 1/a)D
+                 (EΨ1 )        =          2 µ1 ∥x1 − p1 ∥ =                       ∥x1 − p1 ∥ ≤               .            (134)
+                                                                         K                           K
+                          PK−1                 2                PK−1 2 1/2
+   We next bound            k=1   rk (E ∥bk ∥ )1/2 and σ(        k=1 rk )  in (130). Squaring (40b) and summing over
+k = 1, . . . , K yields
+                      K                                                   2
+                                          2(a + 1)K (a+1)/K log K                  4(a + 1)2 K 2(a+1)/K log2 K
+                      X               
+                            rk2 ≤ K                                            =                               .          (135)
+                                                     K                                          K
+                      k=1
+
+
+
+                                                                     22
+(40b) and the definition of BK in (7) give
+              K−1                                         K−1
+                                                                              2(a + 1)K (a+1)/K log K
+              X                                           X
+                                2 1/2                                 2
+                      rk (E ∥bk ∥ )     ≤         max rk      (E ∥bk ∥ )1/2 ≤                         BK .       (136)
+                                                1≤k≤K−1                                  K
+              k=1                                                  k=1
+
+(135) gives
+                                                K−1
+                                                            !1/2
+                                                X                      2(a + 1)K (a+1)/K σ log K
+                                        σ             rk2          ≤             √               .               (137)
+                                                k=1
+                                                                                   K
+At iteration K, (10) gives
+
+                              (1 + 1/a)ω0 > (a + 1) log K,                        ωK = log(1 + K −1 ) < K −1 ,
+
+Therefore
+               (37)    2 (37)   KωK−1      (39)    KωK            KωK               1           1
+              0 <         =                 <               <               <               <       ,            (138)
+                      µK      2(1 + 1/a)ω0      (1 + 1/a)ω0   (a + 1) log K   (a + 1) log K   log 2
+
+where the last inequality uses a > 0 and K ≥ 2. Substituting (134), (136), (137), and (138) into (130) gives
+                              ( √                                                         )
+                           1       4 2(1 + 1/a)D                        σ log K    B K log K
+            RK ≤ 1 +                             + 2(a + 1)K (a+1)/K      √     +
+                         log 2           K                                  K          K
+                               (  √                                              )
+                           1       4 2(1 + 1/a)D              σ log K    BK log K
+                 ≤ 1+                            + 4(a + 1)     √     +                ,               (139)
+                         log 2           K                        K          K
+
+where the last inequality uses K (a+1)/K ≤ 2 from (39). (131), (115) and (139) give (17).
+
+B.4     Proofs of the auxiliary lemmas
+B.4.1    Proof of Lemma 2
+By (32), it gives
+                                                                                    2
+                                 2 ⟨Gx − Gy, x − y⟩ − ∥Gx − Gy∥
+                                                                                                          2
+                                 = 2 ⟨x − y − (T x − T y), x − y⟩ − ∥x − y − (T x − T y)∥
+                                                                            (3)
+                                                 2                      2
+                                 = ∥x − y∥ − ∥T x − T y∥ ≥ 0.                                                    (140)
+
+This is the first inequality in (33). Cauchy–Schwarz then gives
+                                1          2
+                                  ∥Gx − Gy∥ ≤ ⟨Gx − Gy, x − y⟩ ≤ ∥Gx − Gy∥ ∥x − y∥ ,                             (141)
+                                2
+which yields the second inequality in (33). Finally,
+                                                        (32)
+                                        Gp⋆ = 0 ⇐⇒ p⋆ − T p⋆ = 0 ⇐⇒ p⋆ ∈ Fix T,                                  (142)
+
+which proves (34).
+
+B.4.2    Proof of Lemma 3
+Since G is continuous and monotone with full domain, it is maximal monotone [Bauschke and Combettes,
+2017, Corollary 20.28]. Minty’s theorem therefore shows that its resolvent is everywhere defined, and
+
+                                                            pµ (v) := (I + µ−1 G)−1 v                            (143)
+
+
+                                                                            23
+exists uniquely for every v ∈ H. If p = pµ (v) and p′ = pµ (v ′ ), their defining equations give
+
+                                        Gp = µ(v − p),             Gp′ = µ(v ′ − p′ ),                  (144)
+
+and therefore
+                                         Gp − Gp′ = µ (v − v ′ ) − (p − p′ ) .                          (145)
+                                                     
+
+Further, monotonicity of G gives
+                                                 (145)
+                                                       n                               o
+                                                                                     2
+                         0 ≤ ⟨Gp − Gp′ , p − p′ ⟩ = µ ⟨v − v ′ , p − p′ ⟩ − ∥p − p′ ∥ .                 (146)
+
+Therefore
+                                                         2
+                                    ∥pµ (v) − pµ (v ′ )∥ ≤ ⟨pµ (v) − pµ (v ′ ), v − v ′ ⟩ ,
+which is (36).
+
+B.4.3    Proof of Lemma 4
+For x > 0 and c > 1, the function x 7→ (1+x)c −1−cx vanishes at zero and has derivative c((1+x)c−1 −1) > 0.
+Therefore
+                                log(1 + cx) < c log(1 + x),  ∀x > 0, c > 1.                           (147)
+For x = K a−(a+1)k/K and c = K (a+1)/K , we have x > 0, c > 1, and (10) gives
+
+                                      ωk = log(1 + x),          ωk−1 = log(1 + cx).
+
+Thus by (147), ωk−1 < cωk which yields
+                                                       ωk−1
+                                                 1<         < K (a+1)/K .
+                                                        ωk
+This together with (9) proves (39). Taking logarithms and using the definition of µk in (37), we have
+
+                                                       µk+1   (a + 1) log K
+                                             0 < log        <               .                           (148)
+                                                        µk         K
+
+(38) and (39) together give (40a).
+   For q > 1, the function q log q − (q − 1) vanishes at one and has derivative log q > 0. Thus (38), (39),
+and (148) give
+
+                                                                      2(a + 1)K (a+1)/K log K
+                                            
+                                   µk+1               µk+1     µk+1
+                      rk = 2            −1       ≤2        log      <                         ,
+                                    µk                 µk       µk               K
+
+which proves (40b).
+   To prove (40c), set
+                                    ∆k = ωk−1 − ωk ,           ζk = K a−(a+1)(k−1)/K .                  (149)
+Then (10) gives
+                                                                                  
+                                   ∆k = log(1 + ζk ) − log 1 + ζk e−(a+1) log K/K
+                                           Z (a+1) log K/K
+                                                            d
+                                      =−                       log(1 + ζk e−s ) ds
+                                            0              ds
+                                        Z (a+1) log K/K
+                                                           ζk e−s
+                                      =                             ds
+                                          0              1 + ζk e−s
+                                        (a + 1) log K ζk
+                                      <                        .                                        (150)
+                                              K         1 + ζk
+
+
+
+                                                              24
+Also, (10) gives
+                               (1 + 1/a)ω0 > (1 + 1/a)a log K = (a + 1) log K.                         (151)
+Since rk = 2∆k /ωk by (11), (37), (150), and (151) yield
+
+                                        rk      Kωk−1 ∆k       1 ωk−1 ζk
+                                           =                 <              .                          (152)
+                                        µk   2(1 + 1/a)ω0 ωk   2 ωk 1 + ζ k
+
+If 0 < ζk ≤ 4, then (39) and (152) give
+                                                     rk  1   4 4
+                                                        < ·2· = .                                      (153)
+                                                     µk  2   5 5
+If ζk > 4, then (9), (10) and (150) give
+                                                                                       
+                                      ζk                                        ζk
+                       ∆k < log 2          < log 2,        ωk = log 1 +                     > log 3.   (154)
+                                    1 + ζk                                  K (a+1)/K
+
+By (154),
+                                          ωk−1     ∆k     log 2  5
+                                               =1+    <1+       < .                                    (155)
+                                           ωk      ωk     log 3  3
+(152) and (155) imply
+                                                 rk  1 5 ζk      5
+                                                    < ·         < .
+                                                 µk  2 3 1 + ζk  6
+Together with (153) and the positivity in (37) and (40a), this proves (40c).
+   By (40a) and (11), we have
+                                                   3rk               3rk      3
+                              0 < uk =                          <            < < 1,                    (156)
+                                            2(1 + rk )(2 + rk )   2(2 + rk )  4
+
+(156), (38), and (40c) give (40d).
+   For 2 ≤ k ≤ K, (12) and (40a) give βk > 0, while (12) and (38) give
+
+                                           αk   uk − λ k       µk − rk
+                                              =          = uk            .
+                                           βk   1 − λk        µk − uk rk
+
+By (40d), this ratio is positive, and
+                                                     αk   λk (1 − uk )
+                                             uk −       =              > 0.
+                                                     βk     1 − λk
+The above two expressions prove (41).
+
+B.4.4   Proof of Lemma 5
+For 1 ≤ k ≤ K − 1, the conditional second-moment bound in (8) and the tower property for the nonnegative
+                     2
+random variable ∥ξk ∥ give                    h             i
+                                                 2               2
+                                          E ∥ξk ∥ = E E[∥ξk ∥ | Fk ] ≤ σ 2 .                           (157)
+
+Thus ξk ∈ L2 . Moreover, the finiteness of BK in (7) gives bk ∈ L2 for the same range of k.
+  The triangle inequality and (3) give
+                                                                     (3)
+                                    ∥T z∥ ≤ ∥T z − T 0∥ + ∥T 0∥ ≤ ∥z∥ + ∥T 0∥ .                        (158)
+
+Consequently,
+                                    2            2           2
+                          E ∥T z∥ ≤ 2E ∥z∥ + 2 ∥T 0∥ < ∞                   whenever z ∈ L2 .           (159)
+Thus T maps L random variables to L random variables.
+                   2                         2
+
+
+
+
+                                                            25
+   The query formulas in (4) can be written, for 1 ≤ k ≤ K, as
+
+                                              yk = (1 + αk )xk − αk xk−1 ,
+                                                                                                            (160)
+                                              zk = (1 + βk )xk − βk xk−1 .
+
+For 1 ≤ k ≤ K − 1, (6) and (4) further give
+
+                                         Tbk (zk ) = T zk + bk + ξk ,
+                                                                                                            (161)
+                                           xk+1 = (1 − λk )yk + λk Tbk (zk ).
+
+Since L2 is closed under finite linear combinations and all schedule coefficients are deterministic and finite
+by (10)–(12) and (13), (159)–(161) show that
+
+                         xk−1 , xk , bk , ξk ∈ L2    =⇒        yk , zk , T zk , Tbk (zk ), xk+1 ∈ L2 .      (162)
+
+Since the arbitrary initial points x0 , x1 are deterministic, they lie in L2 . Induction over k = 1, . . . , K − 1
+therefore proves x0 , . . . , xK ∈ L2 . The two query formulas in (160) then imply yk , zk ∈ L2 for every
+1 ≤ k ≤ K. Notice that this argument uses neither the K-th oracle call nor any square-integrability
+assumption on bK .
+   Fix 1 ≤ k ≤ K, and let pµk (·) denote the regularized-root map from Lemma 3. Equation (116) gives
+pk = pµk (xk ). Firm nonexpansiveness (36) and Cauchy–Schwarz give
+                                          2
+                          ∥pk − pµk (0)∥ ≤ ⟨pk − pµk (0), xk ⟩ ≤ ∥pk − pµk (0)∥ ∥xk ∥ .
+
+Since both norms are nonnegative, it follows pointwise that
+
+                                    ∥pk − pµk (0)∥ ≤ ∥xk ∥             almost surely.                       (163)
+
+Since xk ∈ L2 and pµk (0) ∈ H is deterministic, (163) implies pk ∈ L2 . Hence zk − pk ∈ L2 , while (116)
+implies Gpk ∈ L2 . It follows from (119) that
+                                                                   2            2
+                                    EΨk = µ2k E ∥zk − pk ∥ + E ∥Gpk ∥ < ∞.                                  (164)
+
+   Finally, zk is Fk -measurable by the oracle setup, and pk is Fk -measurable by the argument following
+(116). (33) implies that G is continuous,
+                                √         and hence Gpk is Fk -measurable. Therefore Ψk is Fk -measurable.
+Equation (164) is equivalent to Ψk ∈ L2 (Ω; R), and it also gives (EΨk )1/2 < ∞.
+
+B.4.5    Proof of Lemma 6
+Define the corrected query point
+                                                            rk
+                                                                                                            (165)
+                                                                             
+                                              zek := zk −      zk − Tbk (zk ) .
+                                                            µk
+Fix 1 ≤ k ≤ K − 1. The definitions of uk and αk in (11) and (12), respectively, give
+
+                              (1 − λk )αk + λk βk = (uk − λk )βk + λk βk = uk βk .                          (166)
+
+The definition of zk in (4) gives zk − xk = βk (xk − xk−1 ). Using this identity, we can rewrite the x-update
+in (4) as follows:
+                                                                                
+                       xk+1 = xk + (1 − λk )αk (xk − xk−1 ) + λk Tbk (zk ) − xk
+                                                                                      
+                            = xk + (1 − λk )αk + λk βk (xk − xk−1 ) − λk zk − Tbk (zk )
+                                                      rk                  
+                            = xk + uk (zk − xk ) − uk      zk − Tbk (zk )
+                                                      µk
+                            = (1 − uk )xk + uk zek ,                                                        (167)
+
+
+
+                                                              26
+where the second and third equalities use zk −xk = βk (xk −xk−1 ), the third also uses (166) and λk = uk rk /µk
+from (38), and the last equality uses (165).
+   Define the half-iterate error
+                                         Sk = µk (e
+                                                  zk − pk ) + rk Gpk ,                                    (168)
+where pk is defined in (116). We’ll use Sk as a bridge to prove (123): we first upper bound Ψk+1 by
+     2        2                            2        2
+∥Sk ∥ + ∥Gpk ∥ , and then upper bound ∥Sk ∥ + ∥Gpk ∥ in terms of Ψk .
+                                                 2              2
+Step 1: upper bounding Ψk+1 by ∥Sk ∥ + ∥Gpk+1 ∥ .                   (168) and (116) give
+                                               zk − xk ) = Sk − (1 + rk )Gpk .
+                                           µk (e                                                          (169)
+Then we have
+                              (116)
+                    Gpk+1 = µk+1 (xk+1 − pk+1 )
+                              (167)
+                               = µk+1 {(1 − uk )(xk − pk ) + uk (e
+                                                                 zk − pk ) − (pk+1 − pk )}
+                              (116) µk+1
+                               =           {(1 − uk )Gpk + uk µk (e
+                                                                  zk − pk ) − µk (pk+1 − pk )}
+                                      µk
+                              (168) µk+1
+                                =          {(1 − uk )Gpk + uk (Sk − rk Gpk ) − µk (pk+1 − pk )}
+                                      µk
+                                 µk+1
+                              =         {[1 − (1 + rk )uk ]Gpk + uk Sk − µk (pk+1 − pk )} .               (170)
+                                   µk
+From (38), (11) and (12) we can compute that
+           µk+1         3rk                µk+1             1                 µk+1                 rk
+                uk =            ,               βk+1 uk =        ,       1−         1 − (1 + rk )uk = .   (171)
+            µk       4(1 + rk )             µk            1 + rk               µk                    4
+Using (171) in (170) yields
+                                                    3rk         rk
+                        µk+1 (pk+1 − pk ) =                 Sk − Gpk − (Gpk+1 − Gpk ).                    (172)
+                                                 4(1 + rk )     4
+Consequently,
+            0 ≤ 2µk+1 ⟨pk+1 − pk , Gpk+1 − Gpk ⟩
+              (172)    3rk                           rk                                        2
+                =              ⟨Sk , Gpk+1 − Gpk ⟩ −    ⟨Gpk , Gpk+1 − Gpk ⟩ − 2 ∥Gpk+1 − Gpk ∥ ,         (173)
+                    2(1 + rk )                       2
+where the inequality follows from the monotonicity estimate in (33), together with µk+1 > 0 from (37). Since
+rk > 0 by (40a), solving (173) for the cross term gives
+                                                 6                          8                2
+                 2 ⟨Gpk , Gpk+1 − Gpk ⟩ ≤             ⟨Sk , Gpk+1 − Gpk ⟩ −    ∥Gpk+1 − Gpk ∥ .           (174)
+                                               1 + rk                       rk
+Moreover, substituting (167) into the update zk+1 = xk+1 + βk+1 (xk+1 − xk ) from (4) gives
+                   zk+1 − xk+1 = βk+1 uk (e
+                                          zk − xk ),                                   zk − xk ).
+                                                            zk+1 = xk + (1 + βk+1 )uk (e                  (175)
+Thus we have
+                                              (116)
+                      µk+1 (zk+1 − pk+1 ) = µk+1 (zk+1 − xk+1 ) + Gpk+1
+                                              (175)
+                                                                zk − xk ) + Gpk+1
+                                                = µk+1 βk+1 uk (e
+                                              (169) µk+1                         
+                                                =        βk+1 uk Sk − (1 + rk )Gpk + Gpk+1
+                                                     µk
+                                              (171)   1                    
+                                                =          Sk − (1 + rk )Gpk + Gpk+1
+                                                    1 + rk
+                                                    1
+                                              =         Sk + Gpk+1 − Gpk .                                (176)
+                                                 1 + rk
+
+
+                                                           27
+Therefore, we have the following estimation of the potential:
+                                                2
+                1                                    2
+    Ψk+1 =           Sk + Gpk+1 − Gpk + ∥Gpk+1 ∥
+             1 + rk
+                1           2        2    2
+          =          2
+                       ∥Sk ∥ + ∥Gpk ∥ +        ⟨Sk , Gpk+1 − Gpk ⟩
+            (1 + rk )                   1 + rk
+                                                                    2
+                  + 2 ⟨Gpk , Gpk+1 − Gpk ⟩ + 2 ∥Gpk+1 − Gpk ∥
+          (174)       1           2        2    8                          2(4 − rk )               2
+           ≤                 ∥Sk ∥ + ∥Gpk ∥ +        ⟨Sk , Gpk+1 − Gpk ⟩ −            ∥Gpk+1 − Gpk ∥
+                  (1 + rk )2                  1 + rk                           rk
+                                                                                                             2
+                   4 + 7rk             2        2  2(4 − rk )                     2rk
+          =                     2
+                                  ∥Sk ∥ + ∥Gpk ∥ −            Gpk+1 − Gpk −                    Sk                ,   (177)
+              (4 − rk )(1 + rk )                       rk                   (4 − rk )(1 + rk )
+
+where the first equality uses (176) in the first term of the potential (119). By (40a), (4 − rk )(1 + rk )2 > 0,
+                            2
+and the coefficient of ∥Sk ∥ is at most one because
+
+                                 (4 − rk )(1 + rk )2 − (4 + 7rk ) = rk2 (2 − rk ) ≥ 0.                               (178)
+
+Thus (177) and (178), together with 2(4 − rk )/rk > 0, imply
+                                                                2          2
+                                                    Ψk+1 ≤ ∥Sk ∥ + ∥Gpk ∥ .                                          (179)
+
+                                        2               2
+Step 2: upper bounding ∥Sk ∥ + ∥Gpk+1 ∥ in terms of Ψk .                       (168), (165), (6), and (32) give the exact
+response identity
+                                  (168)
+                               Sk = µk (e
+                                        zk − pk ) + rk Gpk
+                                  (165)                               
+                                   = µk (zk − pk ) − rk zk − Tbk (zk ) + rk Gpk
+                                  (6)
+                                  = µk (zk − pk ) − rk (zk − T zk − bk − ξk ) + rk Gpk
+                                  (32)
+                                  = µk (zk − pk ) − rk (Gzk − Gpk ) + rk bk + rk ξk .                                (180)
+
+Moreover, (32) gives                                              
+                                                 rk             rk      rk
+                                              I−    G=       1−      I+    T.                                        (181)
+                                                 µk             µk      µk
+By (40c), the two coefficients on the right are nonnegative and sum to one. Hence, for any x, y ∈ H,
+                                                        
+                                     rk               rk
+                                I−      G x− I −         G y
+                                     µk               µk
+                                               
+                               (181)         rk             rk
+                                 =      1−        (x − y) +    (T x − T y)
+                                             µk             µk
+                                                                      (3)
+                                         rk              rk
+                               ≤ 1−           ∥x − y∥ +     ∥T x − T y∥ ≤ ∥x − y∥ .                  (182)
+                                        µk               µk
+
+Thus I − (rk /µk )G is nonexpansive. Since µk > 0,
+
+                           ∥µk (zk − pk ) − rk (Gzk − Gpk )∥
+                                                              
+                                           rk                rk
+                             = µk     I−       G zk − I −       G pk ≤ µk ∥zk − pk ∥ .                               (183)
+                                           µk                µk
+
+   From the measurability argument in the proof of Lemma 5 and the oracle setup, the vector
+
+                                            µk (zk − pk ) − rk (Gzk − Gpk ) + rk bk
+
+
+                                                              28
+is Fk -measurable. By the same lemma, (119), (183), and the finiteness of BK in (7), this vector is also
+square-integrable; moreover, ξk ∈ L2 by (157). Thus (180), (8), and (183) imply
+                   h         i
+                        2                                               2             2
+                 E ∥Sk ∥ Fk = ∥µk (zk − pk ) − rk (Gzk − Gpk ) + rk bk ∥ + rk2 E[∥ξk ∥ | Fk ]
+                                                           2
+                              ≤ (µk ∥zk − pk ∥ + rk ∥bk ∥) + rk2 σ 2 .                            (184)
+
+Consequently,
+                  h        i          (184)
+                        2           2                            2        2
+                 E ∥Sk ∥ Fk + ∥Gpk ∥ ≤ (µk ∥zk − pk ∥ + rk ∥bk ∥) + ∥Gpk ∥ + rk2 σ 2
+                                         (119)                                       2
+                                           = Ψk + 2µk rk ∥zk − pk ∥ ∥bk ∥ + rk2 ∥bk ∥ + rk2 σ 2
+                                         (119)
+                                                                           2
+                                                      p
+                                           ≤ Ψk + 2rk Ψk ∥bk ∥ + rk2 ∥bk ∥ + rk2 σ 2
+                                            p              2
+                                         =     Ψk + rk ∥bk ∥ + rk2 σ 2 .                          (185)
+
+This together with (179) gives (123).
+
+
+
+
+                                                      29
+

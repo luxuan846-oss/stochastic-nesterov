@@ -1,0 +1,2627 @@
+IMA Journal of Numerical Analysis (2026) 00, 1–46
+https://doi.org/10.1093/imanum/drag042
+
+
+
+    Fast Krasnoselskii–Mann method with overrelaxation and preconditioners
+
+
+
+
+                                                                                                                                                       Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                                 RADU I. BOŢ AND ENIS CHENCHENE∗
+  Faculty of Mathematics, University of Vienna, Oskar-Morgenstern-Platz 1, A-1090 Vienna, Austria
+                       ∗ Corresponding author: enis.chenchene@univie.ac.at
+
+                                                                      AND
+
+                                   JALAL M. FADILI
+Normandie Univ, ENSICAEN, CNRS, GREYC, 6 Boulevard du Maréchal Juin, F-14050 Caen, France
+
+                             [Received on 29 November 2024; revised on 15 March 2026]
+
+     We study accelerated Krasnoselskii–Mann-type methods with preconditioners in both continuous and
+     discrete time. From a continuous-time model we derive a generalized fast Krasnoselskii–Mann method,
+     providing a new yet simple proof of convergence that leads to unprecedented flexibility in parameter
+     tuning, allowing up to twice larger relaxation parameters. Our analysis unifies inertial and anchoring
+     acceleration mechanisms and offers a broad range of parameter choices, which prove beneficial in practice.
+     Additionally, we extend our analysis to the case where preconditioners are allowed to be degenerate,
+     unifying the treatment of various splitting methods and establishing the weak convergence of shadow
+     sequences.
+
+     Keywords: inertial accelerations; Nesterov acceleration; Halpern method; fast Krasnosel’ki˘ı–Mann
+     method; degenerate proximal point algorithm.
+
+
+
+1. Introduction
+Let T : H → H be a nonexpansive operator on the real Hilbert space H . Our objective is to solve the
+fixed-point problem:
+
+                                                   Find x ∈ H such that x = T (x),                                                           (1.1)
+
+with fast methods in continuous and discrete time, and apply these results to splitting methods providing
+convergence of the so-called shadow sequences (to be made precise later).
+    If T = I − ∇ f , where f : H → R is a convex and smooth function whose set of minimizers is
+nonempty, (1.1) is equivalent to minimizing f . The most popular accelerated method to minimize f in
+discrete time is the celebrated Nesterov’s algorithm (Nesterov, 1983). Su et al. (2016) later discovered
+that Nesterov’s algorithm can be understood as a specific finite differences discretization of the following
+ODE:
+                                                  α
+                                        ẍ(t) +     ẋ(t) + ∇ f (x(t)) = 0,            for t ≥ t0 > 0                                        (1.2)
+                                                  t
+
+with α = 3 and initial data (x(t0 ), ẋ(t0 )) = (x0 , v0 ) ∈ H 2 . Although the convergence of x(t) to a
+minimizer of f remains an open problem for α = 3 (except in one dimension where convergence holds
+
+                       © The Author(s) 2026. Published by Oxford University Press on behalf of the Institute of Mathematics and its Applications.
+This is an Open Access article distributed under the terms of the Creative Commons Attribution License (https://creativecommons.org/licenses/by/
+                4.0/), which permits unrestricted reuse, distribution, and reproduction in any medium, provided the original work is properly cited.
+2                                                  R. I. BOŢ ET AL.
+
+
+(Attouch et al., 2019a)), the trajectories of (1.2) satisfy f (x(t)) − minf = O (t−2 ) as t → +∞, which is
+an improvement over the o(t−1 ) rate of the standard gradient flow. Later, in Chambolle & Dossal (2015);
+Attouch et al. (2018), it has been shown that replacing the critical parameter α = 3 with any α > 3
+ensures the weak convergence of x(t) to a minimizer of f , and improves the rate of convergence for the
+
+
+
+
+                                                                                                                     Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+function values from O (t−2 ) to o(t−2 ).
+    However, these inertial acceleration methods often suffer from significant oscillations. This issue was
+addressed by Attouch et al. (2016), and later by Attouch et al. (2022, 2023), who proposed to couple
+the asymptotically vanishing viscous damping term in (1.2) to an additional geometric Hessian-driven
+damping term, previously introduced in Alvarez et al. (2002); Attouch et al. (2012), resulting in the
+system
+
+                                 α              d
+                       ẍ(t) +     ẋ(t) + β (t) ∇ f (x(t)) + ∇ f (x(t)) = 0,   for t ≥ t0 ,                (1.3)
+                                 t              dt
+
+which, for α > 3 and appropriate coefficient β (t) > 0, has the important benefit of retaining the o(t−2 )
+rate on the objective, while ensuring the weak convergence of trajectories, and attenuating oscillations.
+    Inspired by (1.3) we here study the much more general case where ∇ f is replaced by any monotone
+and Lipschitz continuous operator Q : H → H :
+
+                                 α              d
+                      ẍ(t) +      ẋ(t) + β (t) Q(x(t)) + b(t)Q(x(t)) = 0,     for t ≥ t0 .                (1.4)
+                                 t              dt
+
+For instance, to solve (1.1), it is natural to consider Q := I − T , which is indeed monotone and Lipschitz,
+and the equilibria of (1.4) are solutions to (1.1). Note that while oscillations attenuation with Hessian-
+driven damping are quite well understood and intuitive in optimization contexts (where Q = ∇ f ),
+the interpretation of the geometric damping for general monotone operators is not always clear and
+remains an open problem. In fact, the geometric damping might not always reduce oscillations for general
+monotone operators as we will see in some case in our numerical results. Nonetheless, we will still stick
+with this terminology in this paper for consistency reasons.
+    Although the system in (1.3) generates fast converging trajectories for a range of admissible
+parameters (cf. (Attouch et al., 2023, theorem 2.1)), when one turns to the general operator setting (1.4)
+the situation becomes significantly more delicate. A notable contribution in this direction was made by
+Boţ et al. (2025b), who studied (1.4) with b(t) := 12 (β˙ (t) + αt β (t)), the so-called fast Optimistic Gradient
+Descent Ascent (Fast-OGDA) system. In particular, they showed that when β is constant and α > 2 this
+dynamical system generates trajectories weakly converging to a zero of Q (provided that the set of zeros
+of Q is nonempty) with a convergence rate of Q(x(t)) = o(t−1 ) as t → +∞. Therefore, (1.4) can be
+seen as an accelerated version of the first-order system
+
+                                        ẋ(t) + Q(x(t)) = 0,     for t ≥ t0 .                               (1.5)
+
+Indeed, when Q is a cocoercive operator it is known that each solution trajectory generated by (1.5)
+                                                                                   1
+weakly converges to a zero of Q with a convergence rate of Q(x(t)) = o(t− 2 ) as t → +∞ (Attouch
+et al., 2025). To further emphasize this crucial difference we refer to rates of the form O (t−1 ), or o(t−1 )
+as fast rates.
+                                               GENERALIZED FAST-KM                                                         3
+
+   It turns out that the specific choice b(t) := 12 (β˙ (t) + αt β (t)) in (1.4) considered by Boţ et al.
+(2025b) is ultimately due to the impossibility of exploiting function values in the Lyapunov analysis.
+This immediately leads us to the natural question:
+
+
+
+
+                                                                                                                                Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+     Can Fast-OGDA in Boţ et al. (2025b) be extended to accommodate more general parameters b, enabling
+     new fast and flexible numerical algorithms for solving (1.1)?
+
+   In this paper, following a similar approach to Attouch et al. (2023), we show that is possible to
+consider the more general choice1
+
+                                          β (t)
+            b(t) := (1 − η)β˙ (t) + θ           ,   for   η ∈ (0, 1)     and    θ := (1 − η) + η (α − 1),              (1.6)
+                                            t
+
+which recovers Boţ et al. (2025b) by setting η = 12 , i.e., θ = α2 . Our convergence guarantees for a
+general parameter η ∈ (0, 1) cover those in Boţ et al. (2025b): in particular, we establish that, e.g., if
+α > 2 and β is constant, we have weak convergence of the trajectories to zeros of Q with a convergence
+rate of Q(x(t)) = o(t−1 ) as t → +∞. Additionally, we show that in the two edge cases η = 0 or
+η = 1 the rate Q(x(t)) = o(t−1 ) cannot be achieved in general, unveiling the tightness of our analysis
+and an intriguing fundamental limitation in the choice of the parameter function b.
+    The Fast-OGDA system is in turn related to a seemingly completely different mechanism: the
+Tikhonov regularization, also known as anchoring mechanism. Specifically, for β (t) ≡ 1 and η = 0, the
+dynamical system (1.4) can be easily seen to be equivalent to
+
+                                                    α−1
+                               ẋ(t) + Q(x(t)) +        (x(t) − v) = 0,          for t ≥ t0 ,                          (1.7)
+                                                     t
+
+with anchor point v := x0 + αt−1 0
+                                    (ẋ(t0 ) + Q(x0 )), cf. Section 2.2. The dynamical system (1.7) is nothing
+but the Tikhonov regularization of the monotone operator flow (1.5), see Browder (1976); Reich (1977);
+Cominetti et al. (2008), that in fact, not only generates trajectories that converge strongly to the projection
+of v onto zer Q, but also exhibits the rate Q(x(t)) = O (t−1 ) as t → +∞ for all α ≥ 2.
+    The system (1.7) can also be recognized as the continuous-time model of the celebrated Halpern
+method, which is a classical method in fixed-point theory (Suh et al., 2023; Boţ & Nguyen, 2026).
+A simplified version of (1.7) was studied in Suh et al. (2023) in finite-dimensional spaces. In the
+discrete-time setting Sabach & Shtern (2017) and, independently, Lieder (2021) proved that Halpern’s
+method achieves the convergence rate of O (k−1 ) as k → +∞ on the norm of the fixed-point residual.
+Interestingly, this cannot be improved to o(k−1 ) in normed spaces; see Contreras & Cominetti (2023). The
+connection between Halpern’s method and momentum-type algorithms have been observed previously
+in Contreras & Cominetti (2023); Tran-Dinh (2024); Yoon et al. (2024).
+    The o(k−1 ) convergence rate of the fixed-point residual norm is achieved by Algorithm 1, the main
+focus of our paper. This algorithm solves the fixed-point problem (1.1) and can be viewed as a discrete-
+time analogue of the continuous dynamics (1.4), with b given by (1.6), β ≡ 1 and Q = I − T . It yields
+an accelerated variant of the classical Krasnoselskii–Mann method (Mann, 1953; Krasnoselskii, 1955),
+which for x0 ∈ H and relaxation parameter θ ∈ (0, 1) iterates
+
+
+
+  1
+     Observe that θ ∈ (1, α − 1) is a convex combination of 1 and α − 1 with parameter η ∈ (0, 1). The redundancy in notation
+will be justified later in the analysis, which turns out more convenient to write with respect to η.
+4                                                R. I. BOŢ ET AL.
+
+
+Algorithm 1 (Generalized) Fast Krasnoselskii–Mann method
+    1: Pick σ > 0, α > 2, θ ∈ (1, α − 1)
+    2: Initialize x−1 , x0 ∈ H
+    3: for k = 0, 1, . . . do
+
+
+
+
+                                                                                                               Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                               k                                      
+    4:     xk+1 = xk + k+σ  θ
+                               T (x ) − xk + 1 − k+σ
+                                                  α
+                                                       T (xk ) − T (xk−1 )
+    5: end for
+
+
+                                                           
+                                  xk+1 = xk + θ T (xk ) − xk ,       for k ≥ 0.                        (1.8)
+
+                                                             1
+The scheme (1.8) is known to only exhibit the rate o(k− 2 ) as k → +∞ on the fixed-point residual; see
+Davis & Yin (2016); Liang et al. (2016). We can see that Algorithm 1 extends (1.8) by incorporating a
+momentum term, governed by the standard coefficient αk := 1 − k+σ     α
+                                                                         , and features vanishing relaxation
+                     θ
+parameters θk := k+σ . Leveraging the enhanced flexibility of b in (1.6) it extends the Fast-Krasnoselskii–
+Mann method (Fast-KM) introduced by Boţ & Nguyen (2023), allowing for more general parameters
+θ ∈ (1, α − 1) and σ > 0. It results, in particular, in (almost) twice larger relaxation parameters—from
+θ = α2 to θ arbitrarily close to α − 1, as well as a general parameter σ > 0. As we will show in Section 5
+this enhanced flexibility leads to notable practical improvements, consistently outperforming the baseline
+method in several benchmark problems. We strongly rely on the important interplay between continuous
+and discrete-time dynamics to derive a convergence proof for Algorithm 1 that matches almost exactly
+the continuous-time approach, making it easily accessible using the latter as a guideline. Additionally,
+this allows us to cover, in a unifying fashion, the important special case of α = σ = 2, for which the
+method reduces to the Optimal Halpern Method (Lieder, 2021), as well as the edge case θ = 1, for which
+Algorithm 1 reduces to a Halpern-type method, much like (1.7) in continuous time.
+     Since Algorithm 1 allows us to find fixed points of nonexpansive operators it emerges as a unified
+algorithmic framework to design accelerated variants of operator splitting methods, such as primal-dual
+(Chambolle & Pock, 2011), forward–backward (Beck & Teboulle, 2009), Douglas–Rachford (Douglas
+& Rachford, 1956; Lions & Mercier, 1979), Davis–Yin (Raguet et al., 2013; Davis & Yin, 2017) and
+several other extensions. Following the recent insights in He & Yuan (2012); Bredies et al. (2022,
+2024) these methods can be studied as fixed-point iterations with respect to nonexpansive mappings
+in a renormed Hilbert space, see Section 4. In this context the metric might actually be degenerate,
+i.e., only inducing a Hilbert seminorm, and thus the analysis requires a careful adaptation. We do so by
+delineating a degenerate Opial Lemma, a fundamental ingredient that allows us to adapt the convergence
+analysis of Algorithm 1 almost effortlessly to this degenerate setting. We apply this result to accelerate
+the convergence of a recent extension of the Douglas–Rachford splitting method (Lions & Mercier, 1979;
+Bredies et al., 2024), ensuring the weak convergence of the so-called shadow sequences in an infinite-
+dimensional Hilbert space setting.
+
+1.1 Contributions
+Our main contributions are summarized as follows:
+•     We introduce a generalization of the Fast-OGDA system introduced by Boţ et al. (2025b) with b as
+      in (1.6), and show that if β is constant our analysis is tight in the sense that the edge cases in the
+      parameter bounds (1.6) do not lead to fast little-o convergence rates.
+                                        GENERALIZED FAST-KM                                                5
+
+•   We introduce Algorithm 1 as a discretization of the proposed continuous-time model and propose
+    a new convergence proof that matches almost exactly the continuous-time approach. The method
+    generalizes (Boţ & Nguyen, 2023) integrating two degrees of freedom: it considers a general
+    parameter σ > 0 and a general parameter θ ∈ (1, α − 1), while maintaining the fast little-o rate
+
+
+
+
+                                                                                                                Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+    on the fixed-point residual. Additionally, we cover the convergence analysis also in the edge case
+    α = σ = 2, which corresponds to the Optimal Halpern Method (Yoon et al., 2024), thereby providing
+    a unified analysis of inertial and anchoring (Tikhonov) acceleration mechanisms.
+•   We establish an Opial-type lemma with degenerate preconditioners, and adapt our convergence proof
+    to this setting. We further discuss how this allows us to systematically obtain convergence results for
+    several accelerated splitting methods, establishing the weak convergence of the so-called shadow
+    sequences in infinite-dimensional Hilbert spaces, thus closing a gap in Boţ & Nguyen (2023).
+•   We present numerical experiments that demonstrate that the Fast-KM method with large relaxation
+    parameters seemingly outperforms the baseline choice in Boţ & Nguyen (2023).
+
+
+1.2 Notation and preliminaries
+In this section we fix the notation and introduce some preliminary results on nonexpansive operators
+in Hilbert spaces and their connection to monotone operators; see Bauschke & Combettes (2017) for a
+comprehensive account. An operator T : H → H is said to be nonexpansive if
+
+                             T (x) − T (x ) ≤ x − x ,    for all x, x ∈ H .                         (1.9)
+
+The set of fixed points of T is the defined by Fix T := {x ∈ H | x = T (x)}. In this paper we always
+assume that Fix T = ∅. If T is nonexpansive the operator Ts := sT + (1 − s)I for s ∈ (0, 1) is said to be
+s-averaged. T1/2 is called firmly nonexpansive. It follows from (Bauschke & Combettes, 2017, remark
+4.34(iv)) that I − Ts is 2s
+                         1
+                            -cocoercive, i.e., it satisfies the following inequality:
+
+                                          1
+      x − x , (I − Ts )(x) − (I − Ts )(x ) ≥ (I − Ts )(x) − (I − Ts )(x )2 ,        for x, x ∈ H .   (1.10)
+                                            2s
+
+In particular, I − Ts is a monotone operator. A set-valued mapping A : H → 2H is monotone if it obeys
+                                        
+                            a − a , u − u ≥ 0,    for all (u, a), (u , a ) ∈ gra A,                    (1.11)
+
+where the set gra A ⊆ H × H is the graph of A and is defined by gra A := {(u, a) | a ∈ A(u)}. A
+monotone operator is called maximally monotone if its graph is maximal (with respect to the inclusions
+of sets) among the class of monotone operators. The inverse of a set-valued mapping A is denoted by
+A−1 and defined through its graph by gra A−1 := {(a, u) | (u, a) ∈ gra A}. The resolvent of A is the
+mapping JA := (I + A)−1 , where I denotes the identity operator on H . From (Bauschke & Combettes,
+2017, proposition 23.8), A is maximally monotone if and only if JA is a single-valued mapping from H
+to H , which is 1-cocoercive, or simply cocoercive (or firmly nonexpansive). Moreover, it is clear that the
+operator T := 2JA − I is nonexpansive. Conversely, from (Bauschke & Combettes, 2017, corollary 23.9),
+if T is nonexpansive there exists a maximally monotone operator A such that T = 2JA − I . Furthermore,
+fixed points of T correspond to zeros of A, i.e., elements of Fix T = zer A := {u ∈ H | 0 ∈ A(u)}. We also
+6                                                         R. I. BOŢ ET AL.
+
+
+denote  as weak convergence and → as strong convergence. Eventually, we denote 1, n := {1, . . . , n}
+for all n ∈ N.
+
+
+
+
+                                                                                                                                      Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+2. Continuous-time system and analysis
+In this section we introduce a general dynamical system that extends Fast-OGDA from Boţ et al. (2025b).
+Let Q : H → H be a monotone and Lipschitz continuous operator2 and consider the dynamical system:
+
+                                   α              d
+                         ẍ(t) +     ẋ(t) + β (t) Q(x(t)) + b(t)Q(x(t)) = 0,              t ≥ t0 > 0,                      (2.1)
+                                   t              dt
+where b is defined for all t ≥ t0 by
+
+                                                      β (t)
+                       b(t) := (1 − η)β˙ (t) + θ            ,   where      θ := (1 − η) + η (α − 1),                        (2.2)
+                                                        t
+with the additional parameter η ∈ (0, 1). The system (2.1) recovers the choice in Boţ et al. (2025b) by
+setting η = 12 , for which θ = α2 , and can be leveraged to approach solutions to (1.1) by setting Q = I − T,
+since indeed:
+                                               zer Q = zer(I − T ) = Fix T .
+
+
+    We will need that (2.1) admits at least one strong global solution for every starting point x(0) =
+x0 ∈ H , i.e., such that x and ẋ are locally absolutely continuous on [t0 , +∞), and x satisfies (2.1)
+almost everywhere (a.e.) on [t0 , +∞). In turn, this will entail that for every locally absolutely continuous
+trajectory t → x(t) the trajectory t → Q(x(t)) is also locally absolutely continuous. In fact, using
+(Haraux, 1991, proposition 6.2.1), Lipschitz continuity of Q and mild conditions on β (t) it can be shown
+that the system (2.1) has a unique strong solution trajectory. In fact, Lipschitz continuity of Q can even
+be weakened to Lipschitz continuity over the bounded subsets of H to show the existence and uniqueness
+of a maximal solution. The passage to a global solution would use a classical contradiction argument and
+boundedness of the trajectory that we will show in our Lyapunov analysis.
+
+2.1 Lyapunov analysis
+To study the second-order dynamical system (2.1) we introduce, for x∗ ∈ zer Q = ∅, the energy function
+Eλ : [t0 , +∞) → R+ that will play a fundamental role in our analysis,
+                                               ξ (t)               c             1
+             Eλ (t) := δ (t) Q(x(t)), x(t) − x∗ +      Q(x(t))2 + x(t) − x∗ 2 + vλ (t)2 ,
+                                                   2                 2             2                                        (2.3)
+                                 ∗
+                                                                 
+             v (t) := λ(x(t) − x ) + t ẋ(t) + (1 − η)β (t)Q(x(t)) ,
+              λ
+
+
+for some constant λ ≥ 0, and parameters given by
+
+               δ (t) := ηλβ (t)t,      ξ (t) := η (1 − η)β (t)2 t2 ,      c := λ(α − 1 − λ),          for t ≥ t0 .          (2.4)
+
+
+ 2
+    Note that the Lipschitz continuity of Q is only useful to establish the existence and uniqueness of a strong solution to (2.1),
+which in turn entails the almost everywhere differentiability of t  → Q(x(t)).
+                                             GENERALIZED FAST-KM                                                           7
+
+This choice of the parameters allows us to establish the following result, whose proof is postponed to
+Appendix A.2.
+LEMMA 1. Let x∗ ∈ zer Q = ∅, x : [t0 , +∞) → H be a solution trajectory to (2.1), and Eλ the energy
+function defined in (2.3). Then, for almost all t ≥ t0 , we have
+
+
+
+
+                                                                                                                                Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                   
+    d λ                     2−α                          t
+       E (t) = λtη β˙ (t) +      β (t) Q(x(t)), x(t) − x∗ − (α − 1 − λ)ẋ(t) + β (t)Q(x(t))2
+    dt                        t                             2
+                                
+                                           2−α            1         β (t)
+               + β (t)t2 (1 − η)η β˙ (t) +      β (t) + (α − 1 − λ)        Q(x(t))2
+                                            t             2           t
+                                     d           t
+                − ηt2 β (t) ẋ(t),      Q(x(t)) − (α − 1 − λ)ẋ(t)2 .                                                 (2.5)
+                                     dt          2
+
+   Lemma 1 naturally leads us to consider the following growth condition for t → β (t):
+                            β˙ (t)t
+                       0≤           ≤ α − 2 − ε,            for ε ∈ [0, α − 2], and all t ≥ t0 ,                        (2.6)
+                             β (t)
+
+which, with a suitable rearrangement, writes equivalently as
+                                          2−α            β (t)
+                               β˙ (t) +       β (t) ≤ −ε       ,         for all t ≥ t0 .                               (2.7)
+                                           t               t
+
+This makes the coefficient in front of the term Q(x(t))2 negative and bounded away from zero at least
+for λ sufficiently close to α − 1, hence leading to the desired energy decrease. This observation is crucial
+to establish the following convergence result.
+THEOREM 1. Let Q : H → H be a monotone and Lipschitz continuous operator with zer Q = ∅. Let
+x∗ ∈ zer Q, x : [t0 , +∞) → H be a solution trajectory to (2.1) for some η ∈ (0, 1) and α ≥ 2. Suppose
+that (2.6) holds with ε ≥ 0. Then, it holds
+                                                                   
+                                         1                            1
+               Q(x(t)), x(t) − x∗ = O           , Q(x(t)) = O               as t → +∞.          (2.8)
+                                         tβ (t)                       tβ (t)
+
+Additionally, if α > 2 and ε > 0 then the following holds:
+ (i) We have the following integral bounds:
+     ∞                                               ∞                                           ∞
+         β (t) Q(x(t)), x(t) − x∗ dt < +∞,                  tβ (t)2 Q(x(t))2 d t < +∞,               tẋ(t)2 d t < +∞.
+    t0                                                t0                                      t0
+
+
+
+ (ii) x(t) converges weakly to a zero of Q as t → +∞.
+(iii) The following fast rates of convergence hold as t → +∞:
+                                                                                                            
+                                           1                             1                                      1
+            Q(x(t)), x(t) − x∗ = o                ,        Q(x(t)) = o                and   ẋ(t) = o           .
+                                           tβ (t)                        tβ (t)                                   t
+8                                               R. I. BOŢ ET AL.
+
+
+REMARK 1 (The gap function rate). The quantity Q(x(t)), x(t) − x∗  is non-negative by the monotonicity
+of Q. To understand the significance of the convergence rates associated with this quantity, which we
+refer to as the gap function, we first consider the simple case where Q = ∇ f and f is a smooth convex
+function. By convexity, we have f (x(t)) − minH f ≤ Q(x(t)), x(t) − x∗ , from which we recover the
+
+
+
+
+                                                                                                                 Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+same convergence rate for the objective function.
+    This property remains valid when minimizing f + g, where f is an L-smooth function and g is a
+proper
+     lower semicontinuous
+                              convex function with argmin(
+                                                              f + g) = ∅. In this case we take Q(x) =
+τ −1 x − M (x) , where τ ∈ (0, 2/L), M (x) = proxτ g x − τ ∇ f (x) , and proxτ g denotes the proximal
+mapping of τ g. As we will see in Section 4 this gap function also plays a key role in applications to
+primal-dual-type algorithms, where it serves as a bound for the primal-dual gap, see Example 1.
+
+Proof. To lighten notation we abbreviate (t) with t as a subscript. Additionally, we write Qt instead of
+Q(x(t)) and ∂t instead of dtd . Setting λ := α − 1 in (2.5), discarding the negative terms, we get using (2.7)
+and monotonicity of Q that for almost all t ≥ t0
+                                                                              
+                       ∂t Etα −1 ≤ −ε(α − 1)ηβt Qt , xt − x∗ − ηt2 βt ẋt , ∂t Qt ≤ 0,
+
+where the last inner product is nonpositive since, using monotonicity of Q,
+
+                                             x − xt Q(xt+h ) − Q(xt )
+                         − ẋt , ∂t Qt = − lim t+h   ,                  ≤ 0.                            (2.9)
+                                           h→0    h           h
+
+
+     Thus, Etα −1 is nonincreasing and since all the terms in (2.3) are non-negative we get
+
+                                        η (1 − η) 2 2
+                (α − 1)ηtβt Qt , xt − x∗ +         βt t Qt 2 ≤ Etα0−1 ,      for all t ≥ t0 ,
+                                              2
+
+hence (2.8).
+   Let us now turn to claims (i)–(iii). Suppose that (2.6) holds for some ε > 0. Thus, (2.5) and
+monotonicity of Q yield for all 0 ≤ λ ≤ α − 1 and almost all t ≥ t0 :
+                                                             
+                                t                                       1
+    ∂t Etλ ≤ −εληβt Qt , xt − x∗ − (α − 1 − λ)ẋt 2 + βt2 t −(1 − η)ηε + (α − 1 − λ) Qt 2 .
+                                  2                                       2
+
+Let ¯λ := α − 1 − εη (1 − η). Observe that ¯λ ∈ [3(α − 2)/4, α − 1]. We then have
+
+                          0 ≤ α − 1 − λ ≤ εη (1 − η),                     ¯ α − 1].
+                                                             for all λ ∈ [λ,
+
+                                  ¯ α − 1] and almost all t ≥ t0
+It then follows that for all λ ∈ [λ,
+
+                                           t                    1
+               ∂t Etλ ≤ −ληεβt Qt , xt − x∗ − (α − 1 − λ)ẋt 2 − βt2 t(1 − η)ηQt 2 .               (2.10)
+                                             2                    2
+
+Integrating this inequality and using that the energy function Eλ is non-negative we get (i).
+                                          GENERALIZED FAST-KM                                                9
+
+    To show (ii) we start by expressing Etλ − Etα −1 , which reads
+                                                                  
+                   Etλ − Etα −1 = − η (α − 1 − λ)βt t Qt , xt − x∗
+
+
+
+
+                                                                                                                  Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                                       λ                         1         1
+                                   +     (α − 1 − λ)xt − x∗ 2 + vλt 2 − vαt −1 2 .
+                                       2                         2         2
+
+Using the three point identity we get
+
+1 λ 2 1 α −1 2     1                                      
+  vt  − vt  = − vλt − vαt −1 2 + vλt , vλt − vαt −1
+2        2         2
+                   (α − 1 − λ)(α − 1 + λ)                                                           
+                =−                            xt − x∗ 2 − (α − 1 − λ)t xt − x∗ , ẋt + (1 − η)βt Qt .
+                               2
+
+Plugging this above we arrive at
+                                                    
+      Etλ − Etα −1 = −η (α − 1 − λ)βt t Qt , xt − x∗
+                       (α − 1)(α − 1 − λ)                                                          
+                      −                     xt − x∗ 2 − (α − 1 − λ)t xt − x∗ , ẋt + (1 − η)βt Qt
+                               2
+                                                  
+                   = −(α − 1 − λ)βt t Qt , xt − x∗
+                          (α − 1)(α − 1 − λ)                                        
+                      −                      xt − x∗ 2 − (α − 1 − λ)t xt − x∗ , ẋt .                 (2.11)
+                                  2
+
+Therefore, we get for almost all t ≥ t0
+                                                                                  
+                    Etλ − Etα −1 = −(α − 1 − λ) (α − 1)q(t) + tq̇(t) − (α − 1)I (t) ,                   (2.12)
+
+where we have denoted
+
+                              1                                         t                 
+                    q(t) :=     x − x∗ 2 + I (t)   and   I (t) :=         βs Qs , xs − x∗ ds.
+                              2 t                                      t0
+
+Note that I (t) admits a limit as t → +∞ by (i). Moreover, from (2.10) we also get that for each λ ∈
+ ¯ α − 1] the limit limt→+∞ Etλ exists. In particular, the limit of Etλ − Etα −1 exists. Hence, we deduce
+[λ,
+from (2.12) that limt→+∞ q(t) + α −1 t
+                                        q̇(t) exists. This implies, due to (Attouch et al., 2016, lemma A.2)
+and since α > 2, that also limt→+∞ q(t) exists. In view of the definition of q(t), I (t) admitting a limit we
+get that limt→+∞ xt − x∗  exists. x(t) is, in particular, bounded, and one can extract a weakly convergent
+subsequence. Using (2.8) and that t → β (t) is nondecreasing it is immediate to see that the weak cluster
+point of each such weakly converging subsequence is a zero of Q. We now invoke the standard Opial’s
+lemma to get (ii).
+    Let us now establish the little-o rates in (iii). To do so we first note that, since the limit of t → q(t)
+exists, from (2.12) we get
+                                                                       
+                                lim tq̇(t) = lim t ẋt + βt Qt , xt − x∗ ∈ R.
+                                t+∞          t→+∞
+10                                                     R. I. BOŢ ET AL.
+
+
+Therefore, since for almost all t ≥ t0
+
+        1                                                                           η
+Etα −1 =  (α − 1)(xt − x∗ ) + t(ẋt + (1 − η)βt Qt )2 + η (α − 1)βt t Qt , xt − x∗ + (1 − η)βt2 t2 Qt 2
+        2                                                                             2
+
+
+
+
+                                                                                                                    Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+        1                                                     
+       = (α − 1)2 xt − x∗ 2 + (α − 1)t xt − x∗ , ẋt + βt Qt
+        2
+                t2                         η
+            +      ẋt + (1 − η)βt Qt 2 + (1 − η)βt2 t2 Qt 2 ,
+                2                          2
+we deduce that
+                                                                                      
+                           0 ≤  := lim t2 ẋt + (1 − η)βt Qt 2 + η (1 − η)βt Qt 2
+                                      t→+∞
+
+exists. Suppose that  > 0. Then, there exists s ≥ t0 such that
+
+        +∞                                                  
+                t ẋt + (1 − η)βt Qt 2 + η (1 − η)βt Qt 2 d t
+       t0
+                          +∞                                                                +∞ 
+                  ≥            t2 ẋt + (1 − η)βt Qt 2 + η (1 − η)βt Qt 2 t−1 d t ≥              d t = +∞,
+                      s                                                                   s     2t
+
+leading to a contradiction with the last two integral bounds in (i). This shows that  = 0 and combining
+this with Jensen’s inequality proves the last two little-o rates in (iii). The first rate follows from the second
+by applying Cauchy–Schwarz and using the boundedness of the trajectories.                                      
+
+REMARK 2 (On the growth of β ). The parameter function β can be understood as a time-scaling parameter
+(Attouch et al., 2019b). As such, it directly impacts the rate of convergence, as shown in Theorem
+1(iii). However, contrarily to classical autonomous first-order dynamical systems, where the time-scaling
+parameter can grow arbitrarily fast while maintaining convergence, the nonautonomous nature of our
+second-order dynamical system—particularly the fixed decay rate of the vanishing damping parameter
+α
+ t —imposes a fundamental constraint on the growth of β . Indeed, applying Grönwall’s inequality to
+integrate (2.6), we get that β (t) must satisfy
+
+                                                     β (t) ≤ β0 tα −2
+
+for β0 > 0. Clearly, the growth of β (t) depends on the vanishing damping parameter α . Choosing
+β (t) = tα −2−ε with ε ∈ (0, α −2), we can achieve arbitrarily fast decay rates o(t−ν ), where ν := α −1−ε,
+by increasing α .
+
+
+2.2 Edge cases and connection to Tikhonov regularization
+It is instructive to inspect the edge cases in Theorem 1. We can recognize two different boundary regimes:
+θ ∈ {1, α − 1}, which corresponds to η ∈ {0, 1}, and ε = 0.
+
+2.2.1 Edge cases in θ . As observed byn Attouch et al. (2019b), as well as Boţ & Nguyen (2023);
+Boţ et al. (2025b), while the analysis of the continuous-time system (2.1) can be performed with
+                                         GENERALIZED FAST-KM                                            11
+
+general parameter functions β satisfying the growth condition (2.6), constant parameters β are the
+only choices currently compatible with explicit numerical schemes. For this reason we focus here on
+this important setting, and, without loss of generality, we set β = 1. We nonetheless keep in mind
+that allowing a general parameter function β provides a broader continuous-time perspective and helps
+
+
+
+
+                                                                                                              Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+connect our framework with the surrounding literature on accelerated dynamical systems, where time-
+scaling parameters naturally arise.
+    We have the two edge cases:
+•   θ = 1: we get the system
+                                    α        d         1
+                          ẍ(t) +     ẋ(t) + Q(x(t)) + Q(x(t)) = 0,        for t ≥ t0 .            (2.13)
+                                    t        dt        t
+
+    Multiplying (2.13) by t we can rewrite (2.13) as
+
+                            d                  
+                               tẋ(t) + tQ(x(t)) + (α − 1)ẋ(t) = 0,       for t ≥ t0 ,             (2.14)
+                            dt
+
+    which, integrating from t0 to t, leads us to
+
+                                                (α − 1)
+                            ẋ(t) + Q(x(t)) +           (x(t) − v) = 0,   for t ≥ t0 ,              (2.15)
+                                                   t
+
+    where v := x0 + αt−1 0
+                           (ẋ(t0 ) + Q(x0 )). This is the so-called anchored or Tikhonov regularization of
+    the flow (1.5), which is known to provide (i) strong convergence to the orthogonal projection of v
+    onto zer Q and (ii) the rate Q(x(t)) = O (t−1 ) for all α ≥ 2, see, e.g. Boţ & Nguyen (2026).
+    The rate on the residual cannot be improved to a little-o rate, as the following simple counterexample
+    in dimension 2 shows: pick α = 3 and Q : R2 → R2 being the 90◦ counter-clockwise rotation, which
+    is indeed monotone and Lipschitz. Identifying x(t) with a complex number, and Q(x(t)) as ix(t), the
+    general solution x : [t0 , +∞) → C ∼= R2 = H of (2.13) can be obtained explicitly and is defined for
+    c1 , c2 ∈ R, as
+
+                                             c1 (1 − it) c2 −it
+                                    x(t) =              + 2e ,     for t ≥ t0 .                     (2.16)
+                                                  t2      t
+
+    As it can be immediately observed this only satisfies tQ(x(t)) = tix(t) = tx(t) ≥ c21 for all
+    t ≥ t1 and t1 > t0 large enough. Therefore, the little-o rates cannot be achieved in this setting.
+•   θ = α − 1: it leads us to the system:
+
+                                  α        d          α−1
+                        ẍ(t) +     ẋ(t) + Q(x(t)) +     Q(x(t)) = 0,            for t ≥ t0 .      (2.17)
+                                  t        dt          t
+
+    The same choice as in the first point above, i.e., with Q(x(t)) = ix(t), α = 3 and H = R2 ∼
+                                                                                              = C, leads
+    us to a general solution x : [t0 , +∞) → C defined for c1 , c2 ∈ R as
+
+                                             c1   c (1 + it) −it
+                                    x(t) =     2
+                                                 + 2 2      e ,    for t ≥ t0 ,                     (2.18)
+                                             t        t
+12                                                  R. I. BOŢ ET AL.
+
+
+     which, similarly as before, only satisfies tQ(x(t)) = tix(t) = tx(t) ≥ c22 for all t ≥ t1 and
+     t1 > t0 large enough. As a result, in this edge case no little-o rates on the residual can be achieved.
+     However, differently from the case θ = 1, the dynamics (2.17) does not seem to reduce to a known
+     first-order dynamical system and its asymptotic properties for general monotone Lipschitz operators
+
+
+
+
+                                                                                                                         Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+     remain an open problem.
+
+
+2.2.2 Saturating the growth condition. Let us now consider a nonconstant parameter β , but saturating
+the growth condition (2.6), i.e., with ε = 0, which yields, for α ≥ 2,
+
+                        β (t)
+             β˙ (t) +         (2 − α ) = 0,   which is solved for       β (t) = β0 tα −2 ,      for β0 > 0.     (2.19)
+                          t
+
+One can check that in this case b(t) = (1 − η)β˙ (t) + θ β (tt ) = β˙ (t) + β (tt ) , and thus (2.1) reads as
+
+                         α              d                 1     
+               ẍ(t) +     ẋ(t) + β (t) Q(x(t)) + β˙ (t) + β (t) Q(x(t)) = 0,               for t ≥ t0 .       (2.20)
+                         t              dt                 t
+
+Multiplying (2.20) by t we shall write
+
+                                       d                          
+             0 = tẍ(t) + ẋ(t) + tβ (t)  Q(x(t)) + tβ˙ (t) + β (t) Q(x(t)) + (α − 1)ẋ(t) = 0
+                                       dt
+                  d                       
+                =     t ẋ(t) + β (t)Q(x(t)) + (α − 1)ẋ(t).                                                    (2.21)
+                  dt
+
+Integrating (2.21) from t0 to t we unveil two interesting properties. First, if α = 1 the system is
+fundamentally equivalent to a first-order system with perturbation and time-scaling (see (Attouch et al.,
+2025)). Secondly, if α > 1, we can rewrite it as
+
+                                                         α−1
+                            ẋ(t) + β0 tα −2 Q(x(t)) +       (x(t) − v) = 0,         t ≥ t0 ,                   (2.22)
+                                                          t
+
+where v := αt−1     0
+                      (ẋ(t0 ) + β (t0 )Q(x(t0 ))) + x(t0 ). We are once again in the setting of Tikhonov
+regularization and continuous-time version of Halpern method: The system (2.22) generates trajectories
+that converge strongly to the projection of v onto the set of zeros of Q with convergence rate Q(x(t)) =
+O (t−(α −1) ), see, e.g., (Cominetti et al., 2008) and (Boţ & Nguyen, 2026, corollary 2.16.) for the rate.
+
+
+3. Convergence analysis of algorithm 1
+In this section we present the convergence analysis of Algorithm 1. Let us first show that the latter can
+indeed be understood as a discretization of (2.1). Let (xk )k∈N be the sequence generated by Algorithm
+1, Q := I − T and, for all k ≥ −1, set
+
+                    zk+1 := T (xk ) and        Qk+1 := Q(xk ) = (I − T )(xk ) = xk − zk+1 .                      (3.1)
+                                         GENERALIZED FAST-KM                                                 13
+
+Recall that Algorithm 1 reads, for all k ≥ 0, as
+
+                                   θ  k               α 
+                    xk+1 − xk =       T (x ) − xk + 1 −      (T (xk ) − T (xk−1 )).                       (3.2)
+                                  k+σ                   k+σ
+
+
+
+
+                                                                                                                   Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+Therefore, using the definition of Q and (3.1), we get
+
+                                                     θ             α  k+1
+                 zk+2 − zk+1 + Qk+2 − Qk+1 = −          Qk+1 + 1 −     (z   − zk ).                       (3.3)
+                                                    k+σ            k+σ
+
+Now, bringing every term to the left-hand side we get
+
+                                     α                              θ
+             zk+2 − 2zk+1 + zk +        (zk+1 − zk ) + Qk+2 − Qk+1 +     Qk+1 = 0.                        (3.4)
+                                    k+σ                              k+σ
+
+Denoting by tk := k − 1 + σ we get for all k ≥ 0
+                                     α  k+1                     θ k+1
+                 zk+2 − 2zk+1 + zk +      z    − zk + Qk+2 − Qk+1 +      Q  = 0,                          (3.5)
+                                     tk+1                           tk+1
+
+which, when zk+1 ≃ xk (asymptotically the case), can be understood as an explicit discretization of (2.1)
+with β ≡ 1, step size 1 and Q := I − T , which is Lipschitz continuous and monotone. This explicit
+discretization differs from the one proposed in Boţ & Nguyen (2023) in the specific case θ = α2 . The
+latter relies on a clever product-space reformulation of the second-order dynamical system, whereas (3.5)
+preserves the structural form of (2.1). As we will see in Section 3.1 this will allow us to construct a new
+energy function that almost exactly mirrors the continuous-time one in (2.3), all the while allowing for
+twice larger relaxation parameters.
+REMARK 3 (Resolvent viewpoint). The discrete dynamical system (3.5) can also be understood, this time
+for all k ≥ 0, as a semi-implicit discretization of (2.1). Consider the multivalued operator Q : H → 2H
+defined by Q := T −1 − I . In this way T can be represented as the resolvent operator of Q , i.e., T =
+JQ := (I + Q )−1 . Using this notation we can write
+
+                       Qk+1 = (I − T )(xk ) ∈ Q (T (xk )) = Q (zk+1 ),     for all k ≥ 0.                 (3.6)
+
+Comparing (3.5) with (2.1) in light of (3.6) we observe that, although Q is not necessarily Lipschitz
+continuous—nor even single-valued—Algorithm 1 can be interpreted as a semi-implicit finite-difference
+discretization of (2.1) applied to Q and with β ≡ 1, now formulated entirely in terms of the single
+sequence (zk )k∈N . To further clarify this point suppose that Q is single-valued. Then, due to (3.6), we
+can rewrite (3.5), i.e., Algorithm 1, as
+                         α  k+1 k                         θ
+     zk+2 − 2zk+1 + zk +      z − z + Q (zk+2 ) − Q (zk+1 ) +      Q (zk+1 ) = 0,                for all k ≥ 0.
+                         tk+1                                 tk+1
+
+In particular, the term dtd Q(x(t)) is replaced by the implicit difference Qk+2 − Qk+1 , and the term θt Q(x(t))
+is replaced by its explicit evaluation tkθ+1 Qk+1 . Furthermore, by Minty’s classical result (Minty, 1962),
+14                                                          R. I. BOŢ ET AL.
+
+
+if T is firmly nonexpansive then Q is maximally monotone. More generally, if T is only nonexpansive
+then Q is 12 -comonotone; see Bauschke et al. (2021) for a detailed discussion on this class of operators.
+    The main difference with the implicit discretization of the Fast-OGDA system proposed in Boţ et al.
+(2025b) is that the latter, being implicit also on the force term, does not lead to an easily implementable
+
+
+
+
+                                                                                                                                         Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+numerical method as it involves computing the resolvent of Q with an iteration-dependent step size,
+which is hardly possible in practice. While being hard to implement in practice, the approach in Boţ
+et al. (2025b) allows to consider more general time-scaling parameters βk , yielding improved rates in
+the same fashion as in the classical Güler acceleration for proximal-point algorithms (Güler, 1991, 1992),
+see also (Boţ et al., 2025b, remark 2) for a more complete account on the role of β .
+
+
+3.1 Lyapunov energy
+To analyse Algorithm 1 we denote finite differences with the Δ symbol, i.e., for a sequence (ak )k∈N ,
+we define Δak := ak+1 − ak for all k ≥ 0. Second-order differences are denoted by Δ2 , i.e., Δ2 ak =
+Δ(Δa)k := Δak+1 − Δak . These notations will prove handy in our analysis since we follow closely the
+continuous-time Lyapunov analysis. In this sense it is convenient to recall some discrete-time calculus
+rule listed in Appendix A.1.
+    Inspired by the continuous-time approach we introduce an energy function that matches almost
+exactly3 (2.3). Specifically, we consider for all k ≥ −1 the sequences zk+1 := T (xk ) and Qk+1 := Q(xk ),
+where Q := I − T , and for all k ≥ 1, λ ∈ (0, α − 1], and any z∗ ∈ zer Q = Fix T , the energy function
+                                         δ          ξ            c             1
+                  Ekλ := δk Qk , zk − z∗ + k Qk 2 + k Qk 2 + zk−1 − z∗ 2 + vk 2 ,
+                                            2         2           2             2                                              (3.7)
+                                                                
+                            k−1      ∗
+                    k
+                  v := λ(z       − z ) + tk−1 Δzk−1 + (1 − η)Q ,
+                                                               k
+
+
+where tk := k − 1 + σ , a constant λ ≥ 0, and parameters given by
+
+                    δk := ηλtk−1 ,        ξk := (1 − η)ηtk2−1 ,        c := λ(α − 1 − λ),           for k ≥ 1.                 (3.8)
+                                                                                                
+Note that the only substantial difference with (2.3) is that the first inner product Qk , zk − z∗ is no longer
+non-negative, since Qk = Q(xk−1 ), i.e., Q is evaluated at xk−1 rather than at zk . Observe that, in light of
+Remark 3, this inner product would be non-negative as soon as T is firmly nonexpansive, in which case
+Qk ∈ Q (zk ), with Q maximally monotone. The second term allows us to make Ekλ non-negative even
+for general nonexpansive operators. Indeed, observing that Q/2 is firmly nonexpansive, it follows from
+(Bauschke & Combettes, 2017, proposition 4.4) that for every x, y ∈ H
+
+                                                                              1
+ Q(x) − Q(y), T (x) − T (y) = Q(x) − Q(y), x − y − Q(x) − Q(y)2 ≥ − Q(x) − Q(y)2 . (3.9)
+                                                                              2
+                                                                                       
+Using this with x = xk−1 and y = z∗ ∈ Fix T , hence Q(z∗ ) = 0, we get that Qk , zk − z∗ + 12 Qk 2 ≥ 0.
+
+
+
+
+   3
+     Yet another difference with prior work and, in particular, with Attouch et al. (2022); Boţ et al. (2025b) is that the term in vk
+is scaled differently.
+                                        GENERALIZED FAST-KM                                                15
+
+3.2 Energy decrease
+We start with the following preliminary result, which represents the discrete-time counterpart of
+Lemma 1, and our first main contribution:
+
+
+
+
+                                                                                                                 Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+LEMMA 2. Let T : H → H be a nonexpansive operator with Fix T = ∅. Let (xk )k∈N be a sequence
+generated by Algorithm 1 for some η ∈ (0, 1), σ > 0, and α ≥ 2. Then there exists λ < α − 1 such that
+for all λ ∈ (λ, α − 1] and all k ≥ 1 such that tk ≥ λ it holds
+
+                                                                  1
+    Ekλ+1 − Ekλ ≤ −λη (α − 2)     xk−1 − T (xk−1 ), T (xk−1 ) − z∗ + xk−1 − T (xk−1 )2
+                                                                     2
+                                                                          
+                                           η
+                    − η (1 − η)(α − 2)tk −    1 − η + η (α − 1) − λ(α − 1) xk−1 − T (xk−1 )2
+                                                                   2
+                                           2
+                               t − (2ηθ + η + θ ) k−1
+                  + (α − 1 − λ) k                x     − T (xk−1 )2
+                                       2
+                               t − (α + 2 + η (α − 1))
+                  − (α − 1 − λ) k                      T (xk−1 ) − T (xk−2 )2 .                      (3.10)
+                                         2
+
+   Observe that the first term on the right-hand side is negative due to (3.9). The proof of Lemma 2,
+which is postponed to Appendix A.2, follows exactly the continuous-time approach with Q := I − T .
+We are now ready to establish the discrete counterpart of Theorem 1.
+THEOREM 2. Let T : H → H be a nonexpansive operator with Fix T = ∅. Let (xk )k∈N be a sequence
+generated by Algorithm 1 for some η ∈ (0, 1), σ > 0, and α ≥ 2. Then,
+   (i) We have xk − T (xk ) = O (k−1 ) as k → +∞. Suppose now that α > 2 and let z∗ ∈ Fix T . Then,
+  (ii) We have the summability properties:
+
+                                                       1
+                              xk − T (xk ), T (xk ) − z∗ + xk − T (xk )2 < +∞,
+                                                          2
+                        k∈N
+                                                           
+                            kxk − T (xk )2 < +∞ and           kxk − xk−1 2 < +∞.
+                        k∈N                                   k∈N
+
+ (iii) The sequence (xk )k∈N converges weakly to a fixed point of T as k → +∞.
+  (iv) We have the following fast rates of convergence:
+                                                1
+                     xk − T (xk ), T (xk ) − z∗ + xk − T (xk )2 = o(k−1 ),
+                                                 2
+                    xk − xk−1  = o(k−1 )    and    xk − T (xk ) = o(k−1 )   as k → +∞.
+
+
+Proof. As in the proof of Lemma 2 it is convenient to introduce the additional sequence (zk )k∈N . We recall
+that the latter is defined by zk+1 := T (xk ), and thus satisfies (3.5) with Qk+1 := Q(xk ) := (I − T )(xk ) =
+xk − zk+1 for all k ≥ 0.
+16                                                   R. I. BOŢ ET AL.
+
+
+     (i) We set λ = α − 1 and (3.10) becomes, after elementary computations,
+                                                     1                              α k 2
+ ΔEkα −1 ≤ −η (α − 1)(α − 2)             Qk , zk − z∗ + Qk 2 − η (1 − η)(α − 2) tk −   Q  , (3.11)
+                                                       2                               2
+
+
+
+
+                                                                                                                    Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+for all k ≥ 1 such that tk ≥ α − 1, which also implies tk ≥ α2 as α ≥ 2. Therefore, using (3.9), there
+is k¯ ≥ 1 large enough such that for all k ≥ k¯ we have ΔEα −1 ≤ 0. Therefore, for all k ≥ k¯ , we have
+                                                         k
+ξk+1
+     Qk+1 2 ≤ Eα −1 ≤ Eα −1 whence we get the claim recalling the expressions of ξ and t .
+  2              k+1     k¯                                                         k     k
+     Suppose from now on that α > 2.
+     (ii) Setting again λ = α − 1 and embarking from (3.11) we have after summing on both sides that
+
+                              k 
+                                                 1                          
+                                                                              k
+         η (α − 1)(α − 2)            Qk , zk − z∗ + Qk 2 + η (1 − η)(α − 2)   (ti − tk¯ )Qi 2
+                                                   2
+                              i=k¯                                                     i=k¯
+
+                          ≤ Ekα¯ −1 − Ekα+1
+                                         −1
+                                            ≤ Ekα¯ −1 < +∞.
+
+Passing to the limit as k → +∞ we get the first two summability claims. For the last one we set
+λ = α − 1 − ε, for ε > 0 to be chosen small enough. Then, discarding the first negative term in
+(3.10), we have
+                                                                                 
+                                                   ε      η (1 − η) 
+            ΔEkα −1−ε ≤       − η (1 − η)(α − 2) −    tk +             (α − 1)2 − 1 Qk 2
+                                                   2           2
+                            t − (α + 2 + η (α − 1))
+                          −ε k                      Δzk−1 2 .                                            (3.12)
+                                      2
+
+Therefore, for 0 < ε < η (1 − η)(α − 2), there exists k˜ ≥ 1 large enough such that for all k ≥ k˜ ,
+                                                      ε
+                                         ΔEkα −1−ε ≤ − (tk − tk˜ )Δzk−1 2 ,
+                                                      2
+                                                                                              
+                                                                                                  k∈N kΔzk−1  <
+where we have discarded the first negative term in (3.12). Summing again we get                                2
+
++∞. Observe now that since Qk+1 = xk − zk+1 by definition we have
+
+           Δxk−1 2 = xk − xk−1 2 = Δzk + ΔQk 2 ≤ 2Δzk 2 + 4Qk+1 2 + 4Qk 2 .
+
+Multiplying by k, summing and using the summability claims proved above we conclude.
+   (iii) We argue as in the continuous-time setting and set λ = α − 1 − ε, for ε > 0 small enough as
+before. We will emphasize the dependency of (vk )k∈N on λ by writing explicitly (vkλ )k∈N . Let k ≥ 1. We
+have
+                                                                1
+                         α −1
+                 Ek − Ek = −η (α − 1 − λ)tk−1 Qk , zk − z∗ + Qk 2
+                   λ
+                                                                    2
+                                         λ                            1          1
+                                     +     (α − 1 − λ)zk−1 − z∗ 2 + vkλ 2 − vkα −1 2 .
+                                         2                           2        2       
+                                                                                (I )
+                                        GENERALIZED FAST-KM                                              17
+
+Let us now compute (I) separately. By the three point identity we get
+
+                 1 k 2 1 k
+        (I) :=    v  − vα −1 2
+                 2 λ    2
+
+
+
+
+                                                                                                               Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                 λ2 − (α − 1)2 k−1                                                         
+             =                z   − z∗ 2 − tk−1 (α − 1 − λ) Δzk−1 + (1 − η)Qk , zk−1 − z∗ .
+                       2
+
+Therefore,
+                                                                           η
+             Ekλ − Ekα −1 = −(α − 1 − λ) tk−1 Qk , zk − z∗ − (1 − η)Δzk−1 + tk−1 Qk 2
+                                                                               2
+                              (α − 1) k−1                                   
+                            +        z    − z∗ 2 + tk−1 Δzk−1 , zk−1 − z∗ .
+                                 2
+
+Therefore, this can be written as
+                                    
+        Ekλ − Ekα −1 = − (α − 1 − λ) (α − 1)qk + tk−1 Δqk − (α − 1)Ik
+                                                 t                            
+                        − (1 − η)tk−1 Qk , Δzk−1 − k−1 Δzk−1 2 + (1 − η)Qk 2 ,                   (3.13)
+                                                    2
+
+where we have denoted
+
+                                                           k−1 
+                                                                               1
+                      1
+                 qk := zk−1 − z∗ 2 + Ik    and   Ik :=           Qj , zj − z∗ + Qj 2 .
+                      2                                                          2
+                                                           j=1
+
+
+Recall that Ik is non-negative due to (3.9), hence so is qk . As argued in the proof of (i) ΔEkα −1 ≤ 0 for
+all k large enough, and thus 2c zk − z∗ 2 ≤ Ekα −1 < +∞, i.e., (zk )k∈N is a bounded sequence. It then
+follows from the last two summability properties of (ii) that the terms terms in the second line of (3.13)
+converge to 0. (ii) also gives that Ik admits a limit. Moreover, Ekλ and Ekα are non-negative and decreasing
+for k large enough as argued above. Therefore, we deduce that
+                                         tk−1
+                             lim qk +         Δq = lim (Eλ − Ekα −1 ) ∈ R.                           (3.14)
+                            k→+∞        α − 1 k k→+∞ k
+
+We are then in a position to apply (Boţ et al., 2025a, lemma A.4) (see also (Attouch et al., 2023, lemma
+A.2) for a weaker variant that requires σ ∈ N) to (3.14) to infer that (qk )k∈N admits a limit. Using again
+that Ik has a limit by (ii) we get that (zk − z∗ )k∈N converges. Since Qk  = xk−1 − T (xk−1 ) =
+xk−1 − zk  → 0 by (i) we have limk→+∞ xk−1 − z∗ 2 = limk→+∞ zk − z∗ 2 , and thus the limit of
+xk − z∗  exists. The weak convergence claim of (xk )k∈N then follows from the standard Opial’s lemma.
+    (iv) Let us first note that since the limit of (qk )k∈N exists (see the proof of (iii)) (3.14) yields
+                                                       1                         1          
+   R  lim tk−1 Δqk = lim tk−1             Qk , zk − z∗ + Qk 2 + Δzk−1 , zk − z∗ − Δzk−1 2 .
+        k→+∞                k→+∞                         2                          2
+                                                                                              (3.15)
+18                                               R. I. BOŢ ET AL.
+
+
+Now, from (3.7), we have
+
+                  1
+                                                                 2
+                                                                    
+          Ekα −1 =  (α − 1)(zk−1 − z∗ ) + tk−1 Δzk−1 + (1 − η)Qk 
+                  2
+
+
+
+
+                                                                                                                  Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                                                1           (1 − η)ηtk2−1 k 2
+                  + η (α − 1)tk−1 Qk , zk − z∗ + Qk 2 +                   Q 
+                                                     2             2
+                  (α − 1)2 k−1              t2  
+                                                                   2 1
+                                                                   
+                =          z     − z∗ 2 + k−1 Δzk−1 + (1 − η)Qk  + (1 − η)ηtk2−1 Qk 2
+                      2                       2                          2
+                    1                                                          
+                  − (α − 1)(1 − η)tk−1 Qk 2 − (α − 1)(1 − η)tk−1 Qk , Δzk−1
+                    2
+                                               1                          1          
+                                             ∗                           ∗
+                  + (α − 1)tk−1 Q , z − z + Q  + Δzk−1 , z − z − Δzk−1  .
+                                    k k                k 2         k                  2
+                                                   2                          2
+
+Combining (3.15) (hence the last line has a limit), (ii) (hence the second line converges to 0) and that
+limk→∞ zk−1 − z∗ 2 and limk→∞ Ekα −1 exist as proved above we deduce that
+                                                        2 1
+                                     1                   
+                      lim   tk2−1      Δzk−1 + (1 − η)Qk  + (1 − η)ηQk 2          ∈ R.
+                     k→+∞            2                       2
+
+Observe now that the summability claims of (ii) already give us that
+
+                            lim inf k2 Δzk 2 = 0   and     lim inf k2 Qk 2 = 0.                     (3.16)
+                             k→+∞                            k→+∞
+
+
+Thus, these are actually limits. To transfer the rates from zk to xk we use the relation xk = Qk+1 + zk+1 ,
+yielding the last two rates in (iv). Using Cauchy–Schwarz and boundedness of (zk )k∈N we also deduce
+the first. This concludes the proof.                                                                    
+
+REMARK 4 (The discrete gap function rate). While the convergence rates for the discrete velocity xk −
+xk−1  and the fixed-point residual xk − T (xk ) are relatively natural in this context the rate
+
+                                                1
+                     xk − T (xk ), T (xk ) − z∗ + xk − T (xk )2 = o(k−1 )   as k → +∞                 (3.17)
+                                                 2
+
+may initially appear less intuitive. However, as we will see in Section 4, it plays a key role in applications
+to primal-dual-type algorithms, where it serves as a bound for the primal-dual gap, see Example 1. See
+also Remark 1 for its continuous-time counterpart.
+
+REMARK 5 (Nonasymptotic rates). In this work we primarily focus on asymptotic convergence rates,
+i.e., the behaviour as k → +∞. Nevertheless, for each admissible parameter choice and each quantity
+of interest, we can also derive corresponding nonasymptotic rates with explicit constants. Let us also
+                                                       λ,η                                    α −1,η
+emphasize here the dependency of Ekλ on η by writing Ek . Embarking from (3.11) we have Ek+1 ≤
+ α −1,η                                                                                      α −1,η      α −1,η
+Ek        for all k ≥ 1 such that tk ≥ α − 1. If we now only consider σ ≥ α − 1 we obtain Ek+1        ≤ Ek
+                                            GENERALIZED FAST-KM                                           19
+
+for all k ≥ 1 (i.e., k¯ in the proof of Theorem 2(i) can be set to 1), leading to the following explicit
+bounds:
+                                                 1                             α −1,η
+                                                                               E1
+                xk−1 − T (xk−1 ), T (xk−1 ) − z∗ + xk−1 − T (xk−1 )2 ≤                 ,
+
+
+
+
+                                                                                                                Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                                                     2                     η (α − 1)tk−1
+                                                                                                 (3.18)
+                                             α −1,η
+                 k−1         k−1 2        2E1
+              x       − T (x ) ≤                    ,
+                                       η (1 − η)tk2−1
+
+           α −1,η
+where E1       is a constant that only depends on the initial conditions, on z∗ , and the algorithms
+parameters, including η—see (3.7) for the precise definition. A particularly illustrative situation occurs
+when α = 2, η = 12 and σ = 1, which yields t0 = 0, and thus
+
+                                            4z0 − z∗ 2   4T (x−1 ) − x∗ 2
+                    xk−1 − T (xk−1 )2 ≤                =                      for all k ≥ 2.        (3.19)
+                                               tk2−1           (k − 1)2
+
+A more in-depth investigation of the two bounds in (3.18), including the influence of the parameter η, is
+left for future work.
+
+
+3.3 Connection to existing algorithms
+Algorithm 1 offers a flexible and unifying framework that is connected to a broad class of existing
+methods. In this section we highlight a few notable special cases and related algorithms to place them
+more clearly within the literature.
+
+3.3.1 Connection to (Boţ & Nguyen, 2023). As we mentioned in the introduction Algorithm 1 is
+a generalization of the scheme (2.8) in Boţ & Nguyen (2023). The latter can be recovered by setting
+σ = α + 1 and θ = α2 , which gives, renaming xk as xk+1 , for all k ≥ 1,
+                                                        
+           k+1               α             α                   α            k                
+       x         = 1−              x +
+                                    k
+                                                 T (x ) + 1 −
+                                                     k
+                                                                            T (x ) − T (xk−1 ) ,      (3.20)
+                         2(k + α )     2(k + α )              k+α
+
+with initial points x0 , x1 ∈ H . This is also a special case of (Boţ & Nguyen, 2023, algorithm 2.1), which
+can be recovered by introducing a step size s ∈ (0, 1] and considering Ts := (1 − s)I + sT , which is
+now s-averaged and has the same fixed points as T . Indeed, substituting T by Ts in (3.20) we get for all
+k ≥ 1:
+           
+                      sα             (1 − s)k k                   sα                sk  k                
+  xk+1 = 1 −                   xk +            (x − xk−1 ) +             T (xk ) +      T (x ) − T (xk−1 ) .
+                  2(k + α )            k+α                     2(k + α )           k+α
+                                                                                                       (3.21)
+
+Conversely, if T is ζ -averaged, we shall consider (3.21) with s ∈ (0, 1/ζ ], which is equivalent to applying
+(3.20) with T replaced by sT + (1 − s)I .
+
+3.3.2 Connection to Halpern-type methods. Similarly to the continuous-time dynamics discussed in
+Section 2.2.1 Algorithm 1 reduces to an anchored method when we set θ = 1. First, when α = 2, σ = α
+20                                              R. I. BOŢ ET AL.
+
+
+and x0 = T (x−1 ) it is clear that Algorithm 1 coincides with the momentum form of the Optimal Halpern
+Method (OHM) (Sabach & Shtern, 2017; Lieder, 2021), and in turn with Kim’s accelerated proximal
+point algorithm (Kim, 2021), since the latter two are equivalent, see (Yoon et al., 2024, appendix B). In
+the edge case of setting θ equal to 1 it turns out that Algorithm 1 is indeed equivalent to anchored-type
+
+
+
+
+                                                                                                              Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+methods for any α ≥ 2 and σ > 0, as we will show in the following result.
+PROPOSITION 3. Let (xk )k∈N be the sequence generated by Algorithm 1 with α ≥ 2, θ = 1 and σ > 0.
+Then, (xk )k∈N satisfies
+
+                                xk+1 = εk v + (1 − εk )T (xk ),     for k ≥ 0,                      (3.22)
+
+              −1
+where εk := kα+σ and v := αt−1
+                            0
+                               (x0 − T (x−1 )) + T (x−1 ).
+
+Proof. Multiplying the update rule of Algorithm 1 by tk+1 := k + σ we get
+
+      (k + σ )(xk+1 − xk )
+          = T (xk ) − xk + (k + σ − α )(T (xk ) − T (xk−1 ))
+          ⇐⇒ tk+1 (xk+1 − xk ) + xk
+                                                      
+           − T (xk ) + (k + σ − 1)(T (xk+1 ) − T (xk )) + (α − 1)(T (xk ) − T (xk−1 )) = 0
+                                                                                      
+          ⇐⇒ tk+1 xk+1 − tk xk − tk+1 T (xk ) − tk T (xk−1 ) + (α − 1) T (xk ) − T (xk−1 ) = 0.
+
+Summing the above equation from 0 to k, dividing the result by tk+1 and rearranging terms we get the
+claim.                                                                                            
+    Note that in the edge case θ = 1 we cannot expect to obtain little-o rates for fixed-point residuals,
+and the convergence of the iterates is in fact in the strong topology, but is established with completely
+different techniques than those we have applied in Section 3.2: The former rely on the Grönwall’s lemma
+(see, e.g., ()), the latter on Opial’s lemma.
+REMARK 6 (A crucial performance trade-off). When α = σ = 2 Algorithm 1 specializes to OHM,
+which is known to achieve optimal worst-case fixed-point residual decay among the class of first-order
+methods—in a sense very close in spirit to Nemirovsky–Yudin result for convex optimization. More
+precisely, in Diakonikolas & Wang (2022); Park & Ryu (2022) it is stated that for any dimension n there
+exists an operator on Rn such that no other method in this class yields a smaller fixed-point residual
+at iteration n. However, as shown in Contreras & Cominetti (2023) in the cased of Banach spaces this
+optimality in worst-case rates comes with a twist: OHM may not satisfy a little-o decay, meaning that
+there exist instances where the fixed-point residual is uniformly upper bounded by Ck for all k ∈ N, for
+some constant C > 0. Our numerical experiments in Section 5 suggest that this phenomenon is not just
+theoretical—it typically occurs in practice. On the other hand, choosing parameters that allow Algorithm
+1 to depart from OHM (e.g., α > 2) may sacrifice worst-case optimality, but enables little-o convergence
+rates. This guarantees that for each instance there exists a kˆ beyond which the residual is strictly lower
+than Ck . While kˆ may be large and the acceleration effect delayed, we observe that in many practical
+scenarios the convergence is significantly faster.
+                                       GENERALIZED FAST-KM                                            21
+
+
+3.3.3 Connection to inertial KM and Nesterov’s method. The Fast-KM method is not the first attempt
+to introduce a Nesterov-type acceleration for iterative methods governed by nonexpansive operators.
+The earliest such attempt dates back to 2001, with the work of Alvarez & Attouch (2001). Starting
+
+
+
+
+                                                                                                            Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+from an implicit discretization of the celebrated Heavy Ball with Friction (HBF) dynamical system
+governed by a maximally monotone operator they arrived at the following numerical algorithm, for a
+firmly nonexpansive operator T :
+
+                                                              
+                        xk+1 = T (xk ) + αk T (xk ) − T (xk−1 ) ,        for all k ≥ 0,           (3.23)
+
+
+with αk ∈ (0, 1). Note that if αk := 1− k+σ
+                                         α
+                                            with σ > 0, α ≥ 3 and T := I −τ ∇ f for an L-smooth function
+f : H → R and τ ∈ (0, L ] then (3.23) coincides with the Ravine formulation of the celebrated Nesterov
+                         1
+
+Accelerated Gradient method (Nesterov, 1983; Attouch & Fadili, 2022), which is known to yield the
+optimal convergence rate in convex optimization. While (3.23) can still provide weakly converging
+sequences for general (firmly) nonexpansive operators—specifically if αk ≤ ᾱ < 13 , cf. (Alvarez
+& Attouch, 2001, proposition 2.1)—whether it achieves fast convergence rates in this general setting
+remains unclear. A first negative answer was provided only recently in Maulén et al. (2024), in a broader
+context involving iteration-dependent operators and more general parameter choices. Specifically, in
+the context of (3.23), (Maulén et al., 2024, theorem 4(ii)) shows that if αk satisfies a specific growth
+condition—implying, in particular, that supk∈N αk < 1—then one only obtains
+
+
+                                                   dist(x0 , Fix T )
+                        min xk − T (xk ) ≤ M           √           ,    for all n ≥ 1,          (3.24)
+                       0≤k≤n                                n
+
+                                                                                          1
+for some constant M > 0. This result is ergodic and of suboptimal order O (n− 2 ).
+    Comparing (3.23) with Algorithm 1 we see that (3.23) could, in principle, be recovered from
+                                                                θ
+Algorithm 1 by replacing the vanishing regularization term k+σ     with 1, and by capping αk at a value
+strictly smaller than 1. In the continuous-time model (2.1) this would correspond to taking b ≡ 1 and a
+non-vanishing damping function, respectively. However, doing so would worsen the rate to (3.24). Thus,
+we learn that letting αk → 1 and using a vanishing regularization parameter k+σ θ
+                                                                                   are both essential for
+achieving fast convergence rates for general nonexpansive operators.
+
+3.3.4 Connection to Tran–Dinh’s method. Tran-Dinh (2024) proposed a method that is able to achieve
+a fast little-o rate for solving root-finding problems of the form:
+
+
+                                    find x ∈ H such that      0 = G(x),                           (3.25)
+
+
+where G : H → H is L1 -cocoercive, for L > 0. The method in (Tran-Dinh, 2024, theorem 3) is formulated
+as
+
+                                                                         
+                  xk+1 = xk + θ¯k (xk − xk−1 ) − η̄k G(xk ) − γ̄k G(xk−1 ) ,       for k ≥ 0,     (3.26)
+22                                                  R. I. BOŢ ET AL.
+
+
+with parameter sequences defined, for γ̄ ∈ (0, 1), ω > 2, and all k ≥ 0, as
+
+                                 k+1                    γ̄ k + ω + 1                   γ̄ θ¯k
+                     θ¯k :=              ,     η̄k :=                   and   γ̄k :=          .       (3.27)
+                              k + 2ω + 2                L k + 2ω + 2                   L η̄k
+
+
+
+
+                                                                                                                Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+It turns out that (3.26) is a special case of Algorithm 1. Indeed, considering the operator T := I − γ̄L G,
+solving (3.25) is equivalent to finding a fixed point of T , T being γ̄2 -averaged. If we now apply Algorithm
+1 to find a fixed point of T setting σ := 2ω + 2, α := 2ω + 1 and θ := ω we obtain exactly (3.26) with
+the parameter choices (3.27). Interestingly, Theorem 2 allows us to further extend the parameter choices
+proposed in Tran-Dinh (2024) to ω ≥ 12 , instead of ω ≥ 2, and γ̄ ∈ (0, 2] instead of γ̄ ∈ (0, 1), as well
+as to establish a last-iterate rate on the gap function.
+
+
+4. Application to splitting methods with preconditioners
+The goal here is apply our results to operator splitting methods for solving monotone inclusion problems,
+i.e., finding a zero of one or sum of maximally monotone operators. We follow the algorithmic framework
+introduced in Bredies et al. (2022). For a maximally monotone operator A : H → 2H we introduce a
+preconditioner M , i.e., a self-adjoint positive semidefinite bounded linear operator M : H → H , which
+induces
+          a Hilbertian (semi)inner product u, vM := u, Mv and associated (semi) norm uM :=
+   u, uM for all u, v ∈ H . Given A and M we consider the resolvent:
+
+                                 JM −1 A := (I + M −1 A)−1 = (M + A)−1 M .                             (4.1)
+
+It is worth noting that without further hypothesis JM −1 A is not necessarily single-valued nor defined
+everywhere on H . On the other hand, this representation is helpful in practice, and evaluating JM −1 A can
+be facilitated by the right choice of M . As first remarked by He & Yuan (2012) this is in fact the case for
+primal-dual-type methods:
+EXAMPLE 1 (PDHG). Let f : H → R ∪ {+∞} and g : K → R ∪ {+∞} be proper, convex and lower
+semicontinuous functions on the Hilbert spaces H and K , and L : H → K a linear bounded map. The
+Primal-Dual-Hybrid-Gradient (PDHG) method by Chambolle & Pock (2011) is a classical scheme to
+find a solution to the following saddle point problem:
+
+                                 min max L (x, y) := f (x) + Lx, y − g∗ (y),                         (4.2)
+                                 x∈H y∈K
+
+
+where g∗ is the Legendre–Fenchel conjugate of g. This has abundant applications in applied mathematics,
+see, e.g., Chambolle & Pock (2016). The PDHG iteration takes the form
+                                 
+                                     xk+1 = proxτ1 f1 (xk − τ1 LT yk ),
+                                                                                                       (4.3)
+                                     yk+1 = proxτ2 f ∗ (yk + τ2 L(2xk+1 − xk )).
+                                                    2
+
+
+
+Under a mild qualification condition the generated sequence uk := (xk , yk ) converges weakly to a saddle
+point of L as soon as τ1 τ2 L2 < 1, see He & Yuan (2012); Bredies et al. (2022). Following He & Yuan
+(2012) the method can be understood as fixed-point iterations with respect to JM −1 A with
+                                               GENERALIZED FAST-KM                                                           23
+
+                                                                               
+                                         ∂ f LT                             −LT  1
+                                                                                 τ1 I
+                                    A :=                    and     M :=           .                                       (4.4)
+                                         −L ∂ g∗                         −L τ12 I
+
+The operator JM −1 A can in fact be easily computed due to the block-lower triangular structure of A + M
+
+
+
+
+                                                                                                                                    Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+(recall the formula (4.1) or see (Bredies et al., 2022, section 3) for the detailed computations), and the
+resulting fixed-point iteration coincides with (4.3).
+    The step-size condition τ1 τ2 L2 < 1 is equivalent to the positive definiteness of M (Bredies et al.,
+2022), which makes M −1 A a maximally monotone operator on the Hilbert space H endowed with the
+norm induced by M . Being an instance of the (preconditioned) proximal point algorithm (Bredies et al.,
+2022) the rate on the fixed-point residual is
+                                                                       1
+                                   uk − JM −1 A (uk )M = o(k− 2 )          as k → +∞.                                    (4.5)
+
+A second classical convergence measure for (4.3) is the primal-dual gap,4 which we define as
+
+                           Gu∗ (x, y) := L (x, y∗ ) − L (x∗ , y),          for all (x, y) ∈ H × K .                        (4.6)
+
+The quantity that in Remark 4 we referred to as the gap function (3.19) is indeed an upper bound for
+(4.6). Specifically, using convexity and the definition of A in (4.4), we get
+                                                                                 
+              Gu∗ (xk+1 , yk+1 ) ≤ uk − JM −1 A (uk ), JM −1 A (uk ) − u∗
+                                                                                  M
+                                                                                        1
+                                   ≤ uk − JM −1 A (uk ), JM −1 A (uk ) − u∗             + uk − JM −1 A (uk )2M .         (4.7)
+                                                                                  M      2
+
+Note that uk − JM −1 A (uk ) = uk − uk+1 ∈ M −1 A(uk+1 ), so the first inner product (4.7) is non-negative in
+                                                                                     1
+this case. Secondly, while the right-hand side of (4.7) vanishes at the rate o(k− 2 ), it is also summable,
+leading, using convexity of Gu∗ , to the classical O (k−1 ) ergodic rate for (4.6), see (Chambolle & Pock,
+2016).
+   By allowing the preconditioner M to be degenerate, i.e., with ker M = ∅ Bredies & Sun (2015,
+2017), and later Bredies et al. (2022), recognized that the class of methods representable as iterations
+with respect to degenerate preconditioners can be greatly broadened to include methods such as the
+Douglas–Rachford Splitting (DRS) (Lions & Mercier, 1979) and its extensions (Bredies et al., 2024).
+
+4.1 Preliminaries on degenerate proximal point
+The notion of monotonicity and cocoercivity can be extended to a preconditioned setting, even with a
+degenerate preconditioner M : H → H . For a maximally monotone operator A and a preconditioner M
+we shall consider the operator M −1 A as a composition of the multi-valued operators M −1 (pre-image)
+and A, defined as: v ∈ M −1 A(u) if and only if Mv ∈ A(u). It is easy to check that M −1 A is monotone
+
+
+
+  4
+     More precisely, the primal-dual gap should be defined as supu∗ ∈zer A Gu∗ (x, y). However, as zer A might be unbounded, this
+quantity is not easily controllable, leading to notions such as restricted primal-dual gap (Chambolle & Pock, 2011) or to further
+assumptions such as boundedness of zer A (Mokhtari et al., 2020). In this example we keep the presentation simple and avoid
+taking the sup.
+24                                               R. I. BOŢ ET AL.
+
+
+with respect to the semi-inner product induced by M . We then say that M −1 A is M -monotone. Likewise,
+its resolvent JM −1 A is M -cocoercive in the sense that
+                                
+                    v − v , u − u M ≥ v − v 2M ,     for all (u, v), (u , v ) ∈ gra JM −1 A .
+
+
+
+
+                                                                                                                Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                                                                                                       (4.8)
+
+Due to the degeneracy of the preconditioner the operator JM −1 A is not necessarily single-valued and
+could even have empty domain. To avoid such pathological cases we suppose dom JM −1 A = H . A further
+hypothesis we shall require is that the operator
+
+                                   (M + A)−1 is Lipschitz over Im M ,                                  (4.9)
+
+which makes JM −1 A a well-defined Lipschitz operator on H , since indeed JM −1 A = (M + A)−1 M . From
+this representation we immediately get the fundamental property:
+
+                      JM −1 A (u) − JM −1 A (u )2 ≤ Lu − u 2M ,       for all u, u ∈ H .          (4.10)
+
+We refer to fixed-point iterations with respect to JM −1 A as preconditioned proximal point algorithm,
+which, for θ ∈ (0, 2) and u0 ∈ H , reads as
+                                                           
+                            uk+1 = uk + θ JM −1 A (uk ) − uk ,         for all k ∈ N.                 (4.11)
+
+The convergence guarantees of (4.11) are given in (Bredies et al., 2022, theorem 2.9). Specifically, if
+(4.9) holds then (uk )k∈N and (JM −1 A (uk ))k∈N converge weakly to the same zero of A with the rate:
+
+                                                             1
+                              uk − JM −1 A (uk )M = o(k− 2 )       as k → +∞.                       (4.12)
+
+An appealing property of positive semidefinite preconditioners is that evaluating JM −1 A automatically
+produces a quotient space operation. Suppose that M has closed range and consider a factorization of M
+as M = CC∗ , with C : D → H one-to-one from a Hilbert space D (D ∼      = Im M ) to H . We say that CC∗ is
+                                                               ∗
+an onto decomposition of M . In this case one can prove that C is onto (Bredies et al., 2022, proposition
+2.3) and the operator C∗  A := (C∗ A−1 C)−1 is maximally monotone (Bredies et al., 2022, theorem
+2.13). The resolvents of M −1 A and of C∗  A are tightly connected: if M has closed range and M = CC∗
+is onto then
+                                                         
+                              C∗ JM −1 A (u) = JC∗ A C∗ u ,         for all u ∈ H .                  (4.13)
+
+This is particularly useful as it reveals that the evaluation of JM −1 A is somewhat equivalent to evaluating
+JC∗ A , which is a resolvent of a maximally monotone operator and is defined on D, which is isomorphic
+to Im M ; see (Chenchene, 2023, theorem 3.3.3) for a proof. This implies that the sequence wk := C∗ uk ∈
+D is a classical proximal point method with respect to the maximally monotone operator C∗  A:
+                                                          
+                            wk+1 = wk + θ JC∗ A (wk ) − wk as k → +∞.                                (4.14)
+                                        GENERALIZED FAST-KM                                                25
+
+However, although JM −1 A (uk ) = (M + A)−1 (Cwk ) from (4.1) and M = CC∗ , the weak convergence
+of (uk )k∈N and (JM −1 A (uk ))k∈N , in infinite-dimensional spaces, does not follow directly from that of
+(wk )k∈N . For clarity, we present a prototypical example:
+EXAMPLE 2 (Douglas–Rachford (Bredies & Sun, 2015; Bredies et al., 2022)). Let A1 , A2 : H → 2H be
+
+
+
+
+                                                                                                                 Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+two maximally monotone operators on H and assume that zer(A1 + A2 ) = ∅. Following Bredies et al.
+(2022) the DRS method for finding a zero of A1 + A2 can be understood as iterating JM −1 A with the
+operators
+                    ⎡           ⎤                        ⎡      ⎤ ⎡ ⎤
+                      A1   I −I                          I −I I       I "       #
+              A := ⎣ −I   A2 I ⎦           and    M := ⎣−I I −I ⎦ = ⎣−I ⎦ I −I I .                     (4.15)
+                       I −I   0                          I −I I       I  :=C
+                                                                             
+                                                                              ∗
+
+
+
+Indeed, since M + A is block lower-triangular evaluating JM −1 A = (M + A)−1 M only requires accessing
+the resolvents of A1 and A2 ; we refer to Bredies et al. (2022) for the detailed computation. If uk :=
+(x1k , x2k , vk ) ∈ H 3 is such that uk+1 := JM −1 A (uk ) the DRS method can be obtained via the substitution
+wk := x1k − x2k + vk , which yields for all k ∈ N:
+            ⎧ k+1                                                     ⎛                  ⎞
+            ⎨x1 = JA1 (w ),
+                           k
+                                                                               x1k+1
+             x k+1
+                   = JA2 (2x1k+1 − wk ),         and   JM −1 A (uk ) := ⎝      x2k+1     ⎠.            (4.16)
+            ⎩ 2k+1                                                              k+1  k+1
+             w     = wk + x2k+1 − x1k+1 .                                w + 2(x2 − x1 )
+                                                                          k
+
+
+
+This corresponds to taking wk = C∗ uk , which defines a fixed-point iteration with respect JC∗ A , the
+operator C∗  A now being maximally monotone. It follows from (Bredies et al., 2022, theorem 2.9) that
+(wk )k∈N weakly converges to some w∗ ∈ zer C∗  A, with the rate
+
+     x2k+1 − x1k+1  = wk − JC∗ A (wk ) = uk − JM −1 A (uk )M = o(k− 2 ),
+                                                                                 1
+                                                                                     as k → +∞.        (4.17)
+
+Additionally, (JM −1 A (uk ))k∈N weakly converges to a zero of A, yielding that the solution estimates
+(x1k+1 )k∈N and (x2k+1 )k∈N (a.k.a. shadow sequences) weakly converge to the same zero of A1 + A2 .
+     Note that the weak convergence of the shadow sequences remained an open problem for almost 30
+years until Svaiter proposed a convergence proof in Svaiter (2011). The analysis of iterations associated
+to (4.1) with a degenerate preconditioner allows to recover this result from general principles applicable
+to a broad range of algorithms; see Bredies et al. (2022).
+
+EXAMPLE 3 (Graph Douglas–Rachford (Chenchene, 2023; Bredies et al., 2024; Åkerman et al., 2025)).
+The graph-Douglas–Rachford Splitting method (Graph-DRS) is an extension of the Douglas–Rachford
+method to solve instances of:
+
+                                 find x ∈ H :     0 ∈ A1 (x) + · · · + AN (x),                         (4.18)
+
+with A1 , . . . , AN : H → 2H maximally monotone operators. The method requires picking two real
+matrices Z , Zˆ ∈ RN ×(N −1) and a step size τ > 0, with ker Z T = span{1} ⊂ ker Zˆ T where 1 :=
+(1, . . . , 1)T ∈ RN . Then, denoting by L := ZZ T , Lˆ := Zˆ Zˆ T and d := diag(L + L),
+                                                                                     ˆ the update rule
+26                                                    R. I. BOŢ ET AL.
+
+
+reads as
+           ⎧                 
+           ⎪                        i−1 
+                                                               N −1
+           ⎪
+           ⎪   k+1                             ˆ        k+1   1 
+           ⎪
+           ⎪ x     = J τ       − 2
+                                         L   + L      x     +         Zij wkj ,   for all i ∈ 1, N ,
+           ⎨ i         di Ai     di       hi     hi    h
+                                                              di
+
+
+
+
+                                                                                                                     Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                                      h=1                         j=1
+                                                                                                           (4.19)
+           ⎪
+           ⎪          
+                      N
+           ⎪
+           ⎪ k+1
+                        Zij xik+1 ,
+           ⎩wj = wj −                        for all j ∈ 1, N − 1.
+                  k
+           ⎪
+                                i=1
+
+This method generalizes a number of splitting methods and can in fact be shown to encompass all
+averaged frugal resolvent splitting methods with minimal lifting in the sense of Ryu, see (Åkerman
+et al., 2025) and the references therein. Similarly to Example 2, it can be understood in the framework of
+degenerate proximal point methods with respect to JC∗ A for a maximally monotone operator A : H →
+2H , and a degenerate preconditioner M := CC∗ , this time with C∗ : H → H N −1 and H := H 2N −1 , cf.
+(Bredies et al., 2024) for their precise (but technical) definition. Moreover, xk+1 := (x1k+1 , . . . , xN
+                                                                                                         k+1
+                                                                                                             ) are
+the first N components of (M + A)−1 (Cwk ), where wk := (wk1 , . . . , wkN −1 ).
+    While in (4.17) the fixed-point residual coincides with the difference of the two solution estimates,
+for (4.19) it controls a natural dispersion functional between the components of xk+1 , i.e., their
+variance:
+
+                        1  k+1
+                           N
+             k+1                             1
+     Var(x         ) :=    xi − x̄k+1 2 ≤      wk − JC∗ A (wk )2 = o(k−1 ),             as k → +∞, (4.20)
+                        N                   λ1 N
+                          i=1
+
+                         k+1
+where x̄k+1 := N1 N  i=1 xi   , and λ1 is the smallest nonzero eigenvalue of L, see (Bredies et al., 2024,
+proposition 3.8) or (Chenchene, 2023, lemma 5.2.1) for a proof of the inequality in (4.20). Additionally,
+due to (Bredies et al., 2022, theorem 2.9), all the solution estimates (xik+1 )k∈N for i ∈ 1, N  converge
+weakly to the same solution to (4.18).
+
+
+4.2 Fast degenerate preconditioned proximal point algorithms
+Once the preconditioned resolvent JM −1 A is formed, e.g., as in Examples 1, 2 and 3, we can employ
+it in conjunction to Algorithm 1 to study accelerated variants of degenerate preconditioned proximal
+                                             θ
+point iterations (4.11). Denoting by θk := k+σ   and αk := 1 − k+σ
+                                                                 α
+                                                                    we can consider, for s ∈ (0, 2], the
+M -averaged operator T := I + s(JM −1 A − I ) and apply Algorithm 1, yielding, for all k ≥ 0,
+                                                                                                 
+      uk+1 = uk + αk (1 − s)(uk − uk−1 ) + sθk JM −1 A (uk ) + sαk JM −1 A (uk ) − JM −1 A (uk−1 ) .       (4.21)
+
+Similarly to the nonaccelerated setting, if M has closed range, using (4.13), the sequence wk := C∗ uk ∈ D
+can be easily seen to define an instance of Algorithm 1 with respect to T˜ := I + s(JC∗ A − I ),
+the latter being 2s -averaged in the classical sense since C∗  A is maximally monotone. Therefore,
+convergence rates and weak convergence of (wk )k∈N follow immediately from Theorem 2. However,
+using this argument, the weak convergence of (JM −1 A (uk ))k∈N does not follow from that of (wk )k∈N
+since the convergence of (wk )k∈N is in the weak topology and JM −1 A (uk ) = (M + A)−1 (Cwk ) is typically
+nonlinear. The following lemma captures the argument that allows us to close this important gap and
+extend the analysis to general preconditioners, with nonnecessarily closed range. The main argument
+                                        GENERALIZED FAST-KM                                                27
+
+was used implicitly in Bredies et al. (2022) to study degenerate proximal point algorithms. By isolating
+its key mechanism we show that the analysis of Bredies et al. (2022) can be extended well beyond the
+proximal point setting.
+LEMMA 3 (Opial in the degenerate setting). Let A be a maximally monotone operator with zer A = ∅,
+
+
+
+
+                                                                                                                Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+and M a self-adjoint positive semidefinite preconditioner such that (M + A)−1 is Lipschitz over Im M
+and JM −1 A has full domain. Let (uk )k∈N be a sequence, and suppose that:
+  (i) for all u∗ ∈ Fix JM −1 A the limit limk→+∞ uk − u∗ M exists;
+ (ii) and limk→+∞ uk − JM −1 A (uk )M = 0.
+   Then, JM −1 A (uk )  u∗ ∈ zer A as k → +∞. If, additionally, M has closed range and M = CC∗ is
+onto then for wk := C∗ uk :
+
+    wk  w∗ ∈ zer C∗  A and          (A + M )−1 (Cwk ) = JM −1 A (uk )  u∗ ∈ zer A,     as k → +∞.
+
+
+Proof. For brevity, let us denote by vk := JM −1 A (uk ) for all k ∈ N. From (i), we deduce that the sequence
+(Muk )k∈N is bounded. Therefore, since (M + A)−1 C is Lipschitz and JM −1 A = (M + A)−1 M , which is
+then single-valued everywhere on H , also (vk )k∈N is bounded. Since M (uk − vk ) ∈ A(vk ) for all k ∈ N
+limk→+∞ M (uk − vk ) = 0 from (ii), and A is maximally monotone (in particular, its graph is weak-
+to-strong sequentially closed (Bauschke & Combettes, 2017, proposition 20.38)), every weak cluster
+point of (vk )k∈N belongs to zer A. Now we show that, in fact, it admits only one weak cluster point, and
+thus (vk )k∈N converges weakly to it. Let (vkj )j∈N and (vki )i∈N be two weakly converging subsequences
+and v∗ , v∗∗ ∈ H their respective weak cluster points. Note that, from (i) and (ii), for all u∗ ∈ zer A,
+limk→+∞ vk − u∗ M = limk→+∞ uk − u∗ M , which we denote by (u∗ ). Suppose by contradiction
+that v∗ − v∗∗ M = 0. Thus,
+                                                                                                      
+    (v∗∗ ) = lim vki − v∗∗ 2M = lim        vki − v∗ 2M + 2vki − v∗ , v∗ − v∗∗ M + v∗ − v∗∗ 2M
+              i→+∞                    i→+∞
+
+                                   = v∗ − v∗∗ 2M + lim vki − v∗ 2M > (v∗ ),                      (4.22)
+                                                       i→+∞
+
+
+where we have used that vki  v∗ . Reversing the role of v∗ and v∗∗ we also get (v∗∗ ) < (v∗ ), hence the
+desired contradiction, which yields Mv∗ = Mv∗∗ . Hence, JM −1 A (v∗ ) = JM −1 A (v∗∗ ), and, since v∗ , v∗∗ ∈
+zer A = Fix JM −1 A , we obtain v∗ = v∗∗ .
+    If M has closed range and M = CC∗ is onto, using (4.13), we obtain, since C∗ is onto, that for each
+w ∈ zer C∗  A there exists u∗ ∈ zer A such that C∗ u∗ = w∗ , and thus
+  ∗
+
+
+                             wk − w∗ 2 = C∗ uk − C∗ u∗ 2 = uk − u∗ 2M                           (4.23)
+
+admits a limit as k → +∞. Similarly, limk→+∞ wk − JC∗ A (wk )2 = 0. The classical Opial’s lemma
+yields that wk  w∗ ∈ zer C∗  A. Using now that (A + M )−1 (Cwk ) = JM −1 A (uk ) for all k ∈ N, which
+follows from (4.1), and that JM −1 A (uk )  u∗ , we conclude the proof.                             
+    Naturally, a similar result holds in continuous time. We now describe how this lemma can be used to
+establish the convergence of several accelerated splitting methods in a unified manner. It is important to
+emphasize, however, that Lemma 3 does not provide any information about the asymptotic behaviour of
+28                                                      R. I. BOŢ ET AL.
+
+
+the sequence (uk )k∈N itself, which requires a separate, method-specific analysis. We opted to present the
+adaptation of Theorem 2, i.e., the one for algorithmic schemes. The same can be done for Theorem 1,
+i.e., for continuous-time dynamics, but we leave this to the reader.
+THEOREM 4. Let A be a maximally monotone operator with zer A = ∅, and M a self-adjoint positive
+
+
+
+
+                                                                                                                                Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+semidefinite preconditioner such that (M + A)−1 is Lipschitz over Im M and JM −1 A has full domain. Let
+(uk )k∈N be the sequence5 generated by Algorithm 1 with T = (1 − s)I + sJM −1 A , s ∈ (0, 2], α > 2,
+θ ∈ (1, α − 1) and σ > 0. Then,
+  (i) We have, for all u∗ ∈ zer A,
+                                                                          
+                                  uk − JM −1 A (uk ), JM −1 A (uk ) − u∗        < +∞,
+                                                                            M
+                           k∈N
+                                                                    
+                                  kuk − JM −1 A (uk )2M < ∞,                 kuk − uk−1 2M < +∞.
+                            k∈N                                      k∈N
+
+
+ (ii) (JM −1 A (uk ))k∈N converges weakly to some u∗ ∈ zer A as k → +∞. Additionally, if s = 1, also
+      (uk )k∈N converges weakly to u∗ .
+(iii) We have the following fast rates of convergence:
+                                                           
+                  uk − JM −1 A (uk ), JM −1 A (uk ) − u∗       = o(k−1 ),
+                                                           M
+
+                 uk − uk−1 M = o(k−1 )          and      uk − JM −1 A (uk )M = o(k−1 )       as k → +∞.
+
+     Suppose furthermore that M has closed range and that M = CC∗ is onto with C : D → H . Then,
+wk := C∗ uk satisfies (i)–(iii) with M −1 A replaced by C∗  A and seminorms replaced by norms (in D),
+and wk  C∗ u∗ as k → +∞.
+
+Proof. The proof of point (i) and point (iii) follow exactly the same lines of Theorem 2 by replacing every
+norm by M -seminorms, every inner product with M -semi-inner products and setting Q = s(I − JM −1 A ).
+In fact, the only property utilized is the nonexpansiveness of T , which in this context translates as the M -
+nonexpansiveness of sJM −1 A + (1 − s)I for s ∈ (0, 2] see (Bredies et al., 2022, remark 2.7). Specifically,
+(i) can be proven by following the arguments in the proof Theorem 2(ii). This yields, in particular, that
+
+                                             lim uk − JM −1 A (uk )M = 0.                                          (4.24)
+                                           k→+∞
+
+Similarly, statement (iii) can be shown following the proof of Theorem 2(iv).
+    Regarding (ii), following the proof of statement Theorem 2(iii), we get that limk→+∞ uk − u∗ M
+exists for any u∗ ∈ zer A. We are now in the setting of the degenerate Opial lemma (Lemma 3), which
+yields weak convergence of (JM −1 A (uk ))k∈N to some u∗ ∈ zer A. To conclude, we pick s = 1 and establish
+the weak convergence of (uk )k∈N to u∗ by showing that ϕk := 12 uk − JM −1 A (uk )2 vanishes as k → +∞.
+Using (4.21) and denoting for brevity yk := uk − JM −1 A (uk ) and Δk := JM −1 A (uk+1 ) − JM −1 A (uk ) for all
+
+
+
+  5
+    We denote by (uk )k∈N the sequence generated by Algorithm 1 to avoid confusion with xk = (x1k , . . . , xN
+                                                                                                             k ) generated by
+Graph-DRS discussed in Section 4.3.3.
+                                           GENERALIZED FAST-KM                                               29
+
+k ≥ 0 we get
+                                                                                   
+           yk+1 = uk + θk (JM −1 A (uk ) − uk ) + αk JM −1 A (uk ) − JM −1 A (uk−1 ) − JM −1 A (uk+1 )
+                                                                  
+
+
+
+
+                                                                                                                   Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                = (1 − θk )yk + αk JM −1 A (uk ) − JM −1 A (uk−1 ) + JM −1 A (uk ) − JM −1 A (uk+1 ).
+                 = (1 − θk )yk + αk Δk−1 − Δk .
+
+Using the Young inequality with weight ξk > 0 and (4.10) we can write
+                                                                      
+   ϕk+1 − ϕk ≤ − 1 − (1 − θk )2 (1 + ξk ) ϕk + 1 + ξk−1 Δk−1 2 + Δk 2
+                                                                                    
+             ≤ − 1 − (1 − θk )2 (1 + ξk ) ϕk + 1 + ξk−1 L uk − uk−1 2M + uk+1 − uk 2M .              (4.25)
+
+Picking now, for all k large enough such that θk < 2,
+
+                           2 − θk                                                θ
+               ξk = θk               ,   we get    εk := 1 − (1 − θk )2 (1 + ξk ) = k (2 − θk ).         (4.26)
+                         2(1 − θk )2                                                2
+
+                          / 1 by definition of θk and (kuk − uk−1 2M )k∈N is summable from point (i),
+Therefore, since (εk )k∈N ∈
+it follows from (4.25) that ϕk → 0. Thus, uk  u∗ weakly as well.                                    
+
+REMARK 7. If α = σ = 2 we are in the setting of the OHM method (cf. Section 3.3.2), which produces
+a sequence that converges strongly. In this case, if M has closed range, there is indeed no need to rely
+on a different analysis with degenerate preconditioners since the map (M + A)−1 C is Lipschitz, and the
+convergence of (uk )k∈N would follow from that of (wk )k∈N .
+
+
+4.3 Application to splitting algorithms
+In this section we illustrate how Theorem 4 can be applied to show complete convergence results for
+accelerated splitting algorithms. We consider only three notable examples, but the analysis applies to
+a broad range of algorithms such as those in (Chenchene, 2023, chapter 4) or in (Bredies et al., 2022,
+section 3). See also the recent contribution (Sun et al., 2025) for an application to ADMM, using similar
+techniques to ours.
+
+4.3.1 Fast PDHG. We start from the PDHG method by Chambolle–Pock (Chambolle & Pock, 2011)
+described in Example 1. Applying (4.21) with s ∈ (0, 2], and JM −1 A build as in Example 1, with step sizes
+satisfying τ1 τ2 L2 ≥ 1, we obtain a variant of the PDHG algorithm (4.3) enhanced with momentum.
+Denoting by , uk+1 := (,xk+1 , y
+                              ,k+1 ) := JM −1 A (uk ) and recalling the definition of the primal-dual gap Gu∗
+in (4.7), Theorem 4(iii), yields the following fast rates on the last iterate:
+
+         uk − JM −1 A (uk )M = o(k−1 )     and          xk+1 , y
+                                                     Gu∗ (,     ,k+1 ) = o(k−1 )   as k → +∞,            (4.27)
+
+                                                                                       1
+for all u∗ := (x∗ , y∗ ) saddle point of (4.2), thus improving the corresponding o(k− 2 ) rates for the standard
+PDHG method. Additionally, from Theorem 4(ii), we obtain the weak convergence of (,              uk )k∈N and (if
+s = 1) of (u )k∈N to the same saddle point of L . Note that in the nondegenerate setting τ1 τ2 L2 > 1
+             k
+30                                                R. I. BOŢ ET AL.
+
+
+the application of OHM, i.e., Algorithm 1 in the edge case α = σ = 2, to PDHG was proposed in Kim
+(2021). Recall that this setting yields a different convergence regime, featuring O -rates together with
+strong convergence, whereas for α > 2 we obtain o-rates with weak convergence.
+
+
+
+
+                                                                                                                   Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+4.3.2 Fast Douglas–Rachford splitting. In the special case of Douglas–Rachford iterations according
+to Example 2, applying (4.21) we obtain, for α > 2, θ ∈ (1, α − 1), the Fast-Douglas–Rachford method:
+     ⎧ k+1
+     ⎨x1 = JA1 (w ),
+                     k
+         k+1
+       x     = JA2 (2x1k+1 − wk ),                                                              (4.28)
+     ⎩ 2k+1                                                                                 
+       w     = wk + αk (wk − wk−1 ) + sθk (x2k+1 − x1k+1 ) + sαk x2k+1 − x2k − (x1k+1 − x1k ) .
+
+Theorem 4, together with the degenerate preconditioned proximal point formulation of the method
+                                                                                  1
+described in Example 2, allows us to improve the worst-case rate (4.17) from o(k− 2 ) to
+
+                                 x2k+1 − x1k+1  = o(k−1 )     as k → +∞,                                (4.29)
+
+while keeping the weak convergence of the shadow sequences (x1k+1 )k∈N and (x2k+1 )k∈N to the same
+zero of A1 + A2 . Let us underscore that while (4.29) and the weak convergence of (wk )k∈N follow
+from classical theory and were established in Boţ & Nguyen (2023) in the corresponding special case,
+the weak convergence of the shadow sequences requires dedicated analysis. Here, it follows from
+Theorem 4(ii).
+
+4.3.3 Fast graph Douglas–Rachford splitting. In this section we show the application of Theorem 4
+to Graph-DRS presented in Example 3. Applying (4.21) we get, for k ≥ 0 and w−1 , w0 ∈ H N −1 , α > 2
+and θ ∈ (0, 1):
+ ⎧                 
+                       2               
+ ⎪                                                    N −1
+                                                   1 
+                          i−1
+ ⎪
+ ⎪   k+1                            ˆ        k+1
+ ⎪
+ ⎪ x     = J τ       −        L   + L      x     +         Zij wkj ,   for all i ∈ 1, N ,
+ ⎨ i         di Ai     di      hi     hi    h
+                                                   di
+                         h=1                           j=1
+ ⎪
+ ⎪                                   
+                                     N                 
+                                                       N
+ ⎪
+ ⎪  k+1
+        =  k
+             +      k
+                      −  k−1
+                               −             k+1
+                                                 −       Zij (xik+1 − xik ),           for all j ∈ 1, N − 1.
+ ⎪
+ ⎩ wj     wj   αk (wj   wj   )   sθk   Zij xi      sαk
+                                          i=1                  i=1
+                                                                                                          (4.30)
+
+Also in this case, Theorem 4, together with the degenerate preconditioned proximal point representation
+of the method mentioned in Example 3, allows us to improve the rates in (4.20) yielding
+
+                                    Var(xk+1 ) = o(k−2 )      as k → +∞,                                  (4.31)
+
+keeping the weak convergence of the solution estimates (xik+1 )i∈N to the same solution x∗ ∈ H of (4.18).
+
+
+5. Numerical experiments
+In this section we present our numerical experiments, which were performed in Python on a 12th-Gen.
+Intel(R) Core(TM) i7–1255U, 1.70–4.70 GHz laptop with 16 GB of RAM. The code is available for
+reproducibility at https://github.com/echnen/fast- km.
+                                        GENERALIZED FAST-KM                                            31
+
+5.1 Toy problems
+In these first numerical experiments we consider two main instances of T :
+•   We consider an optimization problem that can be written as
+
+
+
+
+                                                                                                             Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                                            min f1 (x) + · · · + fN (x),                             (5.1)
+                                            x∈Rd
+
+
+    for f1 , . . . , fN : Rd → R ∪ {+∞} proper, convex and lower semicontinuous such that proxτ fi can be
+    easily computed for each τ > 0. In this case we take T as given in (4.19) applied to the first-order
+    optimality conditions of (5.1), and thus use Fast Graph-DRS initialized with w−1 = w0 = 0.
+•   As in Boţ & Nguyen (2023), for dimension d ∈ N even, we consider T : Rd → Rd defined by
+    T (x) := Jτ Σ (x), where τ = 10−1 and Σ is the skew-symmetric (hence monotone) matrix given
+    block-wise by
+                                                       
+                                                   0 I
+                                           Σ :=          ,
+                                                   −I 0
+
+    where I is now the identity operator in Rd/2 and 0 represents the zero operator in Rd/2 . In this case
+    we use Algorithm 1 initialized with x−1 = x0 = 1.
+
+
+5.2 The influence of parameters
+As we introduced two degrees of flexibility in Algorithm 1 consisting in the parameter θ ∈ (1, α − 1)
+and σ > 0 we first numerically investigate the influence of these two parameters separately. We consider
+the two instances of T described in Section 5.1. In the first one we set d = 2, N = 2, and thus apply the
+Fast-Douglas–Rachford method according to Section 4.3.2 to
+
+                                                               1
+                       f1 (x) := 10−3 |x|   and    f2 (x) :=     dist2 (x, B),   x ∈ R2 ,
+                                                               2
+
+where B is the unit Euclidean ball centred at (1, 1)T . The two proximity operators are easily accessed
+through soft-thresholding and averaged projection onto B, respectively; see (Bauschke & Combettes,
+2017, example 14.5 and proposition 24.8(vii)). In the second one we set d = 10.
+
+5.2.1 Influence of θ . In this section we perform a systematic comparison between η = 12 , which was
+introduced (when σ = α + 1) in Boţ & Nguyen (2023) and the choices η ∈ (0, 1), interpolating the
+parameter ranges θ ∈ (1, α − 1). Specifically, we consider α = 2, 4, 16, 32 and two different choices of
+σ , σ = 2 and σ = 17. Note in particular that the special case of Boţ & Nguyen (2023) is considered with
+α = 32. When α = 2 the methods with different values of η all coincide (since θ = 1 for all η ∈ (0, 1))
+and, when σ = 2, the resulting method reduces to OHM, see Section 3.3.2. We plot the results in Fig. 1
+and Fig. 2.
+     Our numerical experiments demonstrate that Algorithm 1 performs particularly well compared with
+the baseline choice η = 12 . As shown in Fig. 1 performances improve noticeably when θ > α2 ; in fact, the
+larger the relaxation parameter, the faster the method tends to converge. However, this behaviour does
+32                                                          R. I. BOŢ ET AL.
+
+
+
+
+                                                                                                                                         Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+FIG. 1. Results of Section 5.2.1 with the first instance of T described in Section 5.1: comparison of different choices of η ∈ (0, 1),
+with corresponding colours indicated in the colourbar. The case η = 12 is highlighted .
+
+
+
+
+FIG. 2. Results of Section 5.2.1 with T as described the second instance of T described in Section 5.1: comparison of different
+choices of η ∈ (0, 1), with corresponding colours indicated in the colorbar. η = 12 is highlighted.
+
+
+
+not occur in Fig. 2, which corresponds to the case where T is the resolvent of a skew-symmetric matrix.
+In that setting the baseline choice η = 12 yields the best performance.
+    We suspect that this contrasting behaviour stems from an intrinsic trade-off between minimizing the
+gap function and minimizing the fixed-point residual. An inspection of the constants in (3.18) suggests
+that larger relaxation parameters favour gap-function reduction, while their effect on the fixed-point
+                                                GENERALIZED FAST-KM                                                        33
+
+
+
+
+                                                                                                                                Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+           FIG. 3. Results of Section 5.2.2: comparison between different choices of σ ∈ (0, 100). σ = α is highlighted.
+
+
+residual appears to be strongly problem-specific. In particular, when T is the resolvent of a skew-
+symmetric operator the gap function is identically zero, making the residual the sole quantity of interest.
+    Eventually, we can also observe that while OHM (α = σ = 2), i.e., the accelerated Douglas–
+Rachford method in the sense of Kim (Kim, 2021), achieves an optimal nonasymptotic convergence
+rate (Yoon et al., 2024), Algorithm 1, which exhibits order-optimal, but little-o rates, can perform much
+better in practice.
+
+5.2.2 The influence of σ . Keeping in mind (3.5) the parameter σ is related to the starting time t0 in the
+continuous dynamics (2.1). Recall in fact that the discrete time is defined by tk = k − 1 + σ so t0 = σ − 1.
+We test 20 different choices of σ spaced evenly from 1 to 100 and take the four choices α = 2, 4, 16,
+32. We put particular emphasis on the choice σ = α , which, for α = 2 leads to OHM (Lieder, 2021;
+Yoon et al., 2024). We consider only the operator T corresponding to the second instance of Section 5.1.
+The results are depicted in Fig. 3. We refrain from displaying the results for the first instance of T in
+Section 5.1 since the results therein are almost indistinguishable. Regarding the tuning of the parameter
+σ our experiments suggest indeed setting σ = α .
+
+5.3 Cooling heuristics
+Motivated by the insights of Sections 5.2.1 and 5.2.2 we propose a ‘cooling’ heuristics,6 which consists
+in gradually increasing the parameter α along the iterations until a certain upper bound αmax is reached:
+α0 < α1 < · · · < αmaxit/2 = αmax . Specifically, we consider two different strategies: a linear and
+a logarithmic parameter scaling. In either case we set α0 > 0, αmax = 100α0 , and we fix a maximum
+number of iterations maxit. Then, in first case, at each iteration we increase α with a fixed step size,
+
+
+
+  6
+      The name is borrowed from Consensus Based Optimization literature (Fornasier et al., 2022).
+34                                                 R. I. BOŢ ET AL.
+
+
+
+
+                                                                                                            Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                             FIG. 4. Results of Section 5.3: testing cooling heuristics.
+
+
+
+in such a way that αmax is reached for k = maxit/2. In the second case the increase is defined in a
+logarithmic scale.
+    To set up our numerical experiment we consider α = 2, 4, 16, 32, and the operator T as given in the
+second choice in Section 5.1. For each α we compare the performance of the vanilla Krasnoselskii–Mann
+(KM) method, Fast-KM with η = 12 and α = σ , and Fast-KM with linear and logarithmic scaling in the
+cooling heuristics and η = 12 , α0 = α , abbreviated (Fast-KM-LNC) and (Fast-KM-LGC), respectively.
+Recall that αmax = 100α0 . The results are shown in Fig. 4. A notable insight from these experiment is
+the beneficial convergence speed of Algorithm 1 with large parameters α , but without incurring into the
+undesirable initial instability state; see also Adly & Attouch (2024) who thoroughly studied the choice
+of α for the ODE (1.4) when β (t) ≡ 0, b(t) ≡ 1 and Q is the gradient of a convex function.
+
+5.4 Application to realistic problems
+In this section we test Algorithm 1 to solve optimization problems arising from realistic settings.
+We start with an application to Optimal Transport (OT), and, in particular, to the Beckmann minimal
+flow formulation of the Wasserstein 1 distance, where DRS proved particularly effective (Papadakis
+et al., 2014; Benamou & Carlier, 2015; Carlier et al., 2024). In the second experiment we consider the
+geometric median problem, a standard nonsmooth benchmark especially for distributed optimization.
+    In these two experiments we compare the performance of (i) the vanilla KM method, (ii) Algorithm
+1 with η = 0.5, (iii) Algorithm 1 with η = 0.9 and (iv) Algorithm 1 with a linear cooling heuristics as
+introduced in Section 5.3. The results are reported in Fig. 5.
+
+5.4.1 Optimal transport. In this experiment we tackle a high-dimensional OT problem, which is
+usually solved in its regularized primal form using the celebrated Sinkhorn Algorithm (Benamou et al.,
+2015). Consider a square grid Ω := {(i, j) | i, j ∈ 1, p}, with p     ∈ N, and two
+                                                                                    discrete probability
+measures μ, and ν on Ω , i.e., μ, ν ∈ Rn+ with n = p2 such that ni=1 μi = ni=1 ν = 1. Denoted
+by div the discrete divergence operator with Neumann boundary conditions on Ω defined trough finite
+differences (see, e.g. (Carlier et al., 2024)) we aim at solving the following convex problem:
+
+
+                                  min σ 2,1 ,         s.t.:   div σ = μ − ν ,                     (5.2)
+                                σ ∈Rn×2
+                                               GENERALIZED FAST-KM                                                         35
+
+
+
+
+                                                                                                                                  Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+FIG. 5. Results of Section 5.4. In Fig. 5a we solve a geometric median problem (Section 5.4.2), using Graph-DRS as the fixed-
+point operator T , cf. Section 4.3.3 and Example 3. In Fig. 5b we solve an 1 large-scale optimal transportation problem, using
+Chambolle–Pock as the fixed-point operator T , cf. Section 4.3.1 and Example 1.
+
+
+                                                               
+where σ 2,1 is the group-lasso penalty, i.e., σ 2,1 := ni=1 σi , and for each i ∈ 1, n, σi ∈ R2 .
+Specifically, we consider p = 100, which represents a relatively large-scale instance for OT.
+    This basis pursuit-type problem can be addressed by applying the Chambolle–Pock method (cf.
+Example 1) with f (σ ) := σ 2,1 , g(σ ) := ι{μ−ν } (σ ) and L := div. These two functions are indeed prox-
+friendly. proxτ f is the group soft-thresholding operator (see (Bauschke & Combettes, 2017, example
+14.5)), while proxτ g is just the constant function mapping to μ − ν . We apply the Fast-Chambolle–
+Pock solver (Section 4.3.1) to solve (5.2) with τ1 τ2 = 10−1 , which is a lower bound for L2 and
+τ1 = 10−3 , 10−2 and 10−1 .
+    As can be seen from Fig. 5b the Fast-Chambolle–Pock method emerges here as a great practical
+alternative to the plain Chambolle–Pock: the method outperformed the standard approach with KM,
+especially in regimes with high oscillations, and confirmed once again that large relaxation parameters
+are indeed beneficial in practice.
+
+5.4.2 Solving the geometric median problem. We now turn to computing the geometric median of N
+sample points in Rd . Given a sample {xi }i of N points in Rd we aim at solving
+                                           min x − x1  + · · · + x − xN .                                            (5.3)
+                                           x∈Rd
+
+To solve (5.3) we consider the graph-DRS operator in (4.19) splitting (5.3) in N terms. We consider
+N = 100 and d = 100. All the terms x → x − xi  are in fact prox-friendly with proximity operators
+that can be computed by simply applying the soft-thresholding operator suitably shifted by xi . We apply
+(4.30) with Zˆ = 0 and build an arbitrary Z such that ker Z ∗ = span{1} and show the results in Fig. 5a.
+The same conclusions drawn from the OT experiment in Section 5.4.2 remain true here.
+
+
+6. Conclusion
+In this paper we introduced a generalized version of the Fast-KM method proposed in Boţ & Nguyen
+(2023), incorporating two additional degrees of flexibility through the parameters θ ∈ (1, α − 1)
+and σ > 0. We provided a new convergence proof based on a semi-implicit discretization of a
+continuous-time model. Notably, our approach encompasses the case α = 2, which corresponds to
+the Optimal Halpern Method, thereby unifying the convergence analysis of these two acceleration
+36                                                   R. I. BOŢ ET AL.
+
+
+mechanisms. We demonstrated how these results can be applied to operator splitting methods potentially
+with preconditioners, offering critical convergence guarantees for the so-called shadow sequences.
+Furthermore, our numerical experiments showcased the benefits afforded by the added flexibility of
+the method. This paper opens up new intriguing questions: (i) what is the tight nonasymptotic rate for
+
+
+
+
+                                                                                                                         Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+Algorithm 1? (ii) Does Algorithm 1 converge when θ = α − 1? We leave this for future research.
+
+Funding
+Austrian Science Fund (FWF) (W 1260 to R.I.B. and P 34922-N to E.C.).
+
+                                                    REFERENCES
+ADLY, S. & ATTOUCH, H. (2024) Complexity analysis based on tuning the viscosity parameter of the Su–Boyd–Candès
+    inertial gradient dynamics. Set-Valued Var. Anal., 32, 17.
+ÅKERMAN, A., CHENCHENE, E., GISELSSON, P. & NALDI, E. (2025) Splitting the forward-backward algorithm: a full
+    characterization. https://arxiv.org/abs/2504.10999.
+ALVAREZ, F. & ATTOUCH, H. (2001) An inertial proximal method for maximal monotone operators via discretization
+    of a nonlinear oscillator with damping. Set-Valued Anal., 9, 3–11. https://doi.org/10.1023/A:1011253113155.
+ALVAREZ, F., ATTOUCH, H., BOLTE, J. & REDONT, P. (2002) A second-order gradient-like dissipative dynamical
+    system with Hessian-driven damping: application to optimization and mechanics. J. Math. Pures Appl. (9),
+    81, 747–779.
+ATTOUCH, H., BOŢ, R. I. & NGUYEN, D.-K. (2025) Fast convex optimization via time scale and averaging of the
+    steepest descent. Math. Oper. Res., 50, 2633–2665.
+ATTOUCH, H., CHBANI, Z., FADILI, J. & RIAHI, H. (2019a) Rate of convergence of the Nesterov accelerated gradient
+    method in the subcritical caseα ≤ 3. ESAIM Control Optim. Calc. Var., 25, 2.
+ATTOUCH, H., CHBANI, Z. & RIAHI, H. (2019b) Fast proximal methods via time scaling of damped inertial dynamics.
+    SIAM J. Optim., 29, 2227–2256.
+ATTOUCH, H., CHBANI, Z., FADILI, J. & RIAHI, H. (2022) First-order optimization algorithms via inertial systems with
+    Hessian driven damping. Math. Program., 193, 113–155. https://doi.org/10.1007/s10107- 020- 01591- 1.
+ATTOUCH, H., CHBANI, Z., FADILI, J. & RIAHI, H. (2023) Convergence of iterates for first-order optimization algorithms
+    with inertia and Hessian driven damping. Optimization, 72, 1199–1238.
+ATTOUCH, H., CHBANI, Z., PEYPOUQUET, J. & REDONT, P. (2018) Fast convergence of inertial dynamics and algorithms
+    with asymptotic vanishing viscosity. Math. Program., 168, 123–175.
+ATTOUCH, H. & FADILI, J. (2022) From the Ravine method to the Nesterov method and vice versa: a dynamical system
+    perspective. SIAM J. Optim., 32, 2074–2101.
+ATTOUCH, H., MAINGÉ, P.-E. & REDONT, P. (2012) A second-order differential system with Hessian-driven damping;
+    application to non-elastic shock laws. Differ. Equations Appl., 4, 27–65.
+ATTOUCH, H., PEYPOUQUET, J. & REDONT, P. (2016) Fast convex optimization via inertial dynamics with Hessian driven
+    damping. J. Differ. Equations, 261, 5734–5783.
+BAUSCHKE, H. H. & COMBETTES, P. L. (2017) Convex Analysis and Monotone Operator Theory in Hilbert Spaces,
+    CMS Books in Mathematics/Ouvrages de Mathématiques de la SMC, 2nd edn. Cham: Springer.
+BAUSCHKE, H. H., MOURSI, W. M. & WANG, X. (2021) Generalized monotone operators and their averaged resolvents.
+    Math. Program., 189, 55–74. https://doi.org/10.1007/s10107- 020- 01500- 6.
+BECK, A. & TEBOULLE, M. (2009) A fast iterative shrinkage-thresholding algorithm for linear inverse problems. SIAM
+    J. Imag. Sci., 2, 183–202.
+BENAMOU, J.-D. & CARLIER, G. (2015) Augmented Lagrangian methods for transport optimization, mean field games
+    and degenerate elliptic equations. J. Optim. Theory Appl., 167, 1–26.
+BENAMOU, J.-D., CARLIER, G., CUTURI, M., NENNA, L. & PEYRÉ, G. (2015) Iterative Bregman projections for regularized
+    transportation problems. SIAM J. Sci. Comput., 37, A1111–A1138. https://doi.org/10.1137/141000439.
+                                          GENERALIZED FAST-KM                                                   37
+
+BOŢ, R. I. & CHENCHENE, E. (2026) Extragradient method with flexible anchoring: strong convergence and fast
+      residual decay. SIAM J. Optim., 36, https://doi.org/10.1137/24M1703562.
+BOŢ, R. I., CHENCHENE, E., CSETNEK, E. R. & HULETT, D. A. (2025a) Accelerating diagonal methods for bilevel
+      optimization: Unified convergence via continuous-time dynamics. Math. Program., https://doi.org/10.1007/
+
+
+
+
+                                                                                                                      Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+      s10107- 026- 02376- 8.
+BOŢ, R. I., CSETNEK, E. R. & NGUYEN, D.-K. (2025b) Fast optimistic gradient descent ascent (OGDA) method
+      in continuous and discrete time. Found. Comput. Math., 25, 163–222. https://doi.org/10.1007/s10208- 023-
+      09636- 5.
+BOŢ, R. I. & NGUYEN, D.-K. (2026) Tikhonov regularization of monotone operator flows not only ensures strong
+      convergence of the trajectories but also speeds up the vanishing of the residuals. J. Complexity, 94, 102029.
+      https://www.sciencedirect.com/science/article/pii/S0885064X26000142.
+BOŢ, R. I. & NGUYEN, D.-K. (2023) Fast Krasnoselskii–Mann algorithm with a convergence rate of the fixed point
+      iteration of o(1/k). SIAM J. Numer. Anal., 61, 2813–2843.
+BREDIES, K., CHENCHENE, E., LORENZ, D. A. & NALDI, E. (2022) Degenerate preconditioned proximal point algorithms.
+      SIAM J. Optim., 32, 2376–2401.
+BREDIES, K., CHENCHENE, E. & NALDI, E. (2024) Graph and distributed extensions of the Douglas–Rachford method.
+      SIAM J. Optim., 34, 1569–1594.
+BREDIES, K. & SUN, H. (2015) Preconditioned Douglas–Rachford splitting methods for convex-concave saddle-point
+      problems. SIAM J. Numer. Anal., 53, 421–444.
+BREDIES, K. & SUN, H. (2017) A proximal point analysis of the preconditioned alternating direction method of
+      multipliers. J. Optim. Theory Appl., 173, 878–907.
+BROWDER, F. E. (1976) Nonlinear Operators and Nonlinear Equations of Evolution in Banach Spaces, in ‘Proceed-
+      ings of Symposia in Pure Mathematics’, vol. 18, part 2. Providence, RI: American Mathematical Society.
+CARLIER, G., CHENCHENE, E. & EICHINGER, K. (2024) Wasserstein medians: robustness, PDE characterization, and
+      numerics. SIAM J. Math. Anal., 56, 6483–6520.
+CHAMBOLLE, A. & DOSSAL, C. (2015) On the convergence of the iterates of the ‘fast iterative shrinkage/thresholding
+      algorithm’. J. Optim. Theory Appl., 166, 968–982.
+CHAMBOLLE, A. & POCK, T. (2011) A first-order primal-dual algorithm for convex problems with applications to
+      imaging. J. Math. Imaging Vision, 40, 120–145. https://doi.org/10.1007/s10851- 010- 0251- 1.
+CHAMBOLLE, A. & POCK, T. (2016) An introduction to continuous optimization for imaging. Acta Numer., 25, 161.
+CHENCHENE, E. (2023) Splitting Methods in Nonsmooth Convex Degenerate Optimization, Dissertation (PhD). Graz:
+      University of Graz.
+COMINETTI, R., PEYPOUQUET, J. & SORIN, S. (2008) Strong asymptotic convergence of evolution equations governed
+      by maximal monotone operators with Tikhonov regularization. J. Differ. Equations, 245, 3753–3763.
+CONTRERAS, J. P. & COMINETTI, R. (2023) Optimal error bounds for non-expansive fixed-point iterations in normed
+      spaces. Math. Program., 199, 343–374.
+DAVIS, D. & YIN, W. (2016) Convergence rate analysis of several splitting schemes. Splitting Methods in Communi-
+      cation, Imaging, Science, and Engineering. Springer International Publishing, pp. 115–163.
+DAVIS, D. & YIN, W. (2017) A three-operator splitting scheme and its optimization applications. Set-Valued Var.
+      Anal., 25, 829–858.
+DIAKONIKOLAS, J. & WANG, P. (2022) Potential function-based framework for minimizing gradients in convex and
+      min-max optimization. SIAM J. Optim., 32, 1668–1697.
+DOUGLAS Jr., J. & RACHFORD Jr., H. H. (1956) On the numerical solution of heat conduction problems in two and
+      three space variables. Trans. Am. Math. Soc., 82, 421–439.
+FORNASIER, M., HUANG, H., PARESCHI, L. & SÜNNEN, P. (2022) Anisotropic diffusion in consensus-based optimization
+      on the sphere. SIAM J. Optim., 32, 1984–2012.
+GÜLER, O. (1991) On the convergence of the proximal point algorithm for convex minimization. SIAM J. Control
+      Optim., 29, 403–419.
+GÜLER, O. (1992) New proximal point algorithms for convex minimization. SIAM J. Optim., 2, 649–664.
+38                                                  R. I. BOŢ ET AL.
+
+
+HARAUX, A. (1991) Systèmes Dynamiques Dissipatifs et Applications, Vol. 17 of Recherches en Mathématiques
+     Appliquées. Paris: Masson.
+HE, B. & YUAN, X. (2012) Convergence analysis of primal-dual algorithms for a saddle-point problem: from
+     contraction perspective. SIAM J. Imag. Sci., 5, 119–149.
+
+
+
+
+                                                                                                                       Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+KIM, D. (2021) Accelerated proximal point method for maximally monotone operators. Math. Program., 190, 57–87.
+     https://doi.org/10.1007/s10107- 021- 01643- 0.
+KRASNOSELSKII, M. A. (1955) Two remarks on the method of successive approximations. Uspekhi Matematicheskikh
+     Nauk, 10, 123–127.
+LIANG, J., FADILI, J. & PEYRÉ, G. (2016) Convergence rates with inexact non-expansive operators. Math. Program.,
+     159, 403–434. http://dx.doi.org/10.1007/s10107- 015- 0964- 4.
+LIEDER, F. (2021) On the convergence rate of the Halpern-iteration. Optim. Lett., 15, 405–418.
+LIONS, P. L. & MERCIER, B. (1979) Splitting algorithms for the sum of two nonlinear operators. SIAM J. Numer. Anal.,
+     16, 964–979.
+MANN, W. R. (1953) Mean value methods in iteration. Proc. Am. Math. Soc., 4, 506–510. https://www.ams.org/
+     journals/proc/1953- 004- 03/S0002- 9939- 1953- 0054841- X/.
+MAULÉN, J. J., FIERRO, I. & PEYPOUQUET, J. (2024) Inertial Krasnoselskii–Mann iterations. Set-Valued Var. Anal., 32,
+     10. https://doi.org/10.1007/s11228- 024- 00713- 7.
+MINTY, G. J. (1962) Monotone (nonlinear) operators in Hilbert space. Duke Math. J., 29, 341–346.
+MOKHTARI, A., OZDAGLAR, A. E. & PATTATHIL, S. (2020) Convergence rate of O (1/k) for optimistic gradient and
+     extragradient methods in smooth convex-concave saddle point problems. SIAM J. Optim., 30, 3230–3251.
+                                                                                                            
+NESTEROV, Y. (1983) A method for solving the convex programming problem with convergence rate O 1/k2 . Proc.
+     USSR Acad. Sci., 269, 543–547. https://api.semanticscholar.org/CorpusID:145918791.
+PAPADAKIS, N., PEYRÉ, G. & OUDET, E. (2014) Optimal transport with proximal splitting. SIAM J. Imag. Sci., 7,
+     212–238.
+PARK, J. & RYU, E. K. (2022) Exact optimal accelerated complexity for fixed-point iterations. Proceedings of the
+     39th International Conference on Machine Learning’, Vol. 162 of Proceedings of Machine Learning Research
+     (K. CHAUDHURI, S. JEGELKA, L. SONG, C. SZEPESVARI, G. NIU & S. SABATO eds.). PMLR, pp. 17420–17457. https://
+     proceedings.mlr.press/v162/park22c.html.
+RAGUET, H., FADILI, J. & PEYRÉ, G. (2013) A generalized forward-backward splitting. SIAM J. Imag. Sci., 6,
+     1199–1226.
+REICH, S. (1977) Nonlinear evolution equations and nonlinear ergodic theorems. Nonlinear Anal. Theory Methods
+     Appl., 1, 319–330.
+SABACH, S. & SHTERN, S. (2017) A first order method for solving convex bilevel optimization problems. SIAM J.
+     Optim., 27, 640–660.
+SU, W., BOYD, S. & CANDÈS, E. J. (2016) A differential equation for modeling Nesterov’s accelerated gradient method:
+     theory and insights. J. Mach. Learn. Res., 17, 1–43.
+SUH, J., PARK, J. & RYU, E. K. (2023) Continuous-time analysis of anchor acceleration. Advances in Neural
+     Information Processing Systems, 36, 32782–32866.
+SUN, D., YUAN, Y., ZHANG, G. & ZHAO, X. (2025) Accelerating preconditioned ADMM via degenerate proximal point
+     mappings. SIAM J. Optim., 35, 1165–1193.
+SVAITER, B. F. (2011) On weak convergence of the Douglas-Rachford method. SIAM J. Control Optim., 49, 280–287.
+TRAN-DINH, Q. (2024) From Halpern’s fixed-point iterations to Nesterov’s accelerated interpretations for root-
+     finding problems. Comput. Optim. Appl., 87, 181–218.
+YOON, T., KIM, J., SUH, J. J. & RYU, E. K. (2024) Optimal acceleration for minimax and fixed-point problems is not
+     unique. Proceedings of the 41st International Conference on Machine Learning, Vol. 235 of Proceedings of
+     Machine Learning Research. PMLR, pp. 57244–57314.
+                                           GENERALIZED FAST-KM                                                39
+
+Appendices
+
+A.1 Discrete calculus rules
+
+
+
+
+                                                                                                                    Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+Let a := (ak )k∈N , b := (bk )k∈N and c := (ck )k∈N be three real sequences. The product of two sequences a
+and b is denoted by ab := (ak bk )k∈N . As usual, if a = b, we denote a2 = ab. Recall that Δak := ak+1 −ak
+for all k ∈ N, Therefore, for all k ≥ 0 it holds
+
+                   Δ(ab)k = Δak bk + ak+1 Δbk ,
+                  Δ(abc)k = Δak bk ck + ak+1 Δbk ck + ak+1 bk+1 Δck ,                                      (A.1)
+
+                       Δa2k = 2(ak+1 − ak )ak + (Δak )2 = 2(ak+1 − ak )ak+1 − (Δak )2 .
+
+This formalism can be readily extended to sequences in a Hilbert space H , with products replaced by
+inner products. For instance, if (zk )k∈N is a sequence in H , and ζ k := 12 zk 2 for all k ≥ 0, we can write
+                                        1                     1
+                         Δζk = Δzk , zk + Δzk 2 = Δzk , zk+1 − Δzk 2 .                                 (A.2)
+                                         2                      2
+
+Similar rules as those in (A.1) apply for products of sequences in H and in R, for instance if (εk )k∈N is
+a real sequence then for all k ≥ 0
+
+                             Δ(εz)k = Δεk zk + εk+1 Δzk = Δzk εk + zk+1 Δεk .                              (A.3)
+
+
+
+A.2 Missing proofs
+The following proofs were postponed from the main part of the paper.
+Proof of Lemma 1. For the sake of notation we also abbreviate Etλ := Eλ (t), ẋt := ẋ(t), xt := x(t),
+vλt := vλ (t), δt := δ (t) and ξt := ξ (t). Additionally, instead of writing dtd we write ∂t . Using Leibniz rule
+we get for almost all t ≥ t0 :
+                                                                                
+                        ∂t Etλ = δ˙t Qt , xt − x∗ + δt ∂t Qt , xt − x∗ + δt Qt , ẋt
+                                 ξ˙t                                                 
+                                +    Q 2 + ξt ∂t Qt , Qt + c xt − x∗ , ẋt + vλt , v̇λt .               (A.4)
+                                  2 t
+                                               
+Let us compute the last inner product vλt , v̇λt . For v̇λt we have, using constitutive equation (2.1), that for
+almost all t ≥ t0 :
+                                            α                                                        
+      v̇λt = (λ + 1)ẋt + (1 − η)βt Qt + t − ẋt − βt ∂t Qt − bt Qt + (1 − η)β˙t Qt + (1 − η)βt ∂t Qt
+                                               t
+           = (λ + 1 − α )ẋt + (1 − η)βt Qt − tηβt ∂t Qt + t((1 − η)β˙t − bt )Qt
+                                  
+                                                               β
+           = −(α − 1 − λ)ẋt − t bt − (1 − η)β˙t − (1 − η) t Qt − tβt η∂t Qt .
+                                                                t
+40                                                          R. I. BOŢ ET AL.
+
+
+Denoting by wt := bt − (1 − η)β˙t − (1 − η) βtt the inner product read for almost all t ≥ t0 as
+     λ λ                                                                                       
+     vt , v̇t = − λ(α − 1 − λ) xt − x∗ , ẋt − (α − 1 − λ)tẋt 2 − (1 − η)(α − 1 − λ)tβt Qt , ẋt
+                                                 
+                − λtwt xt − x∗ , Qt − t2 wt ẋt , Qt − t2 βt wt (1 − η)Qt 2
+
+
+
+
+                                                                                                                                          Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                                                                                    
+                − ηtλβt xt − x∗ , ∂t Qt − ηt2 βt ẋt , ∂t Qt − t2 βt2 (1 − η)η Qt , ∂t Qt .           (A.5)
+Plugging (A.5) into (A.4), using the definition of δt , ξt and c from (2.4) and cancelling out the appropriate
+terms we obtain for almost all t ≥ t0 that
+                                                                                                
+    ∂t Etλ = δ˙t − tλwt Qt , xt − x∗ − ηt2 βt ẋt , ∂t Qt + δt − (1 − η)(α − 1 − λ)tβt − t2 wt Qt , ẋt
+                  
+                      ξ˙t
+              +           − (1 − η)t2 βt wt Qt 2 − (α − 1 − λ)tẋt 2 .                                                      (A.6)
+                       2
+Let us study the quadratic form in the second line of (A.6) separately.7 Plugging in the definitions of δt ,
+ξt in (2.4) and of b in (2.2) we get, first, wt = (α − 1)η βtt , hence,
+                               δt − (1 − η)(α − 1 − λ)tβt − t2 wt = −tβt (α − 1 − λ),
+                                                                     
+                               ξ˙t                                          (2 − α )
+                                   − (1 − η)t2 βt wt = βt t2 (1 − η)η β˙t +          βt ,
+                                2                                              t
+so the quadratic form simplifies to
+                                                   
+                                                       ξ˙
+     δt − (1 − η)(α − 1 − λ)tβt − t2 wt Qt , ẋt + t − (1 − η)t2 βt wt Qt 2 − (α − 1 − λ)tẋt 2
+                                                         2
+                                                     
+                                                         (2 − α )
+       = − tβt (α − 1 − λ) Qt , ẋt + βt t2 (1 − η)η β˙t +          βt Qt 2 − (α − 1 − λ)tẋt 2
+                                                              t
+            t                                 t
+       = − (α − 1 − λ)ẋt + βt Qt 2 − (α − 1 − λ)ẋt 2
+            2                                2
+                         
+                                     β              1            β
+         + βt t2 (1 − η)η β˙t + t (2 − α ) + (α − 1 − λ) t Qt 2 .
+                                     t              2            t
+Plugging this and the definition of ξt and of wt into (A.6) we get the claim.                                                       
+
+Proof of Lemma 2. Let k ≥ 1. Apply the discrete Leibniz rule (see Appendix A.1) to get
+                                                                            
+                                                                                  δ
+         ΔEkλ = Δδk Qk , zk − z∗ + δk+1 ΔQk , zk − z∗ + δk+1 Qk+1 , Δzk + Δ         Q2
+                                                                                  2                                      k
+                  1                               1
+                + Δξk Qk 2 + ξk+1 ΔQk , Qk+1 − ξk+1 ΔQk 2
+                  2                                  2
+
+
+  7
+    The coefficient bt in (2.2) is in fact the only parameter that (i) does not depend on λ (artificial parameter introduced in the
+Lyapunov analysis), and (ii) can make this quadratic form negative semidefinite for all λ ∈ (0, α − 1]. To see this consider λ = α − 1.
+Then, δt must be equal to t2 wt , which yields (2.2).
+                                        GENERALIZED FAST-KM                                              41
+                                     c
+                 + c Δzk−1 , zk − z∗ − Δzk−1 2
+                                      2
+                               1
+                 + Δvk , vk+1 − Δvk 2 .                                                             (A.7)
+                                  2
+
+
+
+
+                                                                                                               Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+Following the continuous-time
+                                 approach we first write Δvk only in terms of zk−1 − z∗ , Qk and ΔQk , then
+compute Δvk , v  k +1   and finally plug everything into ΔEkλ . This will give the necessary cancellations.
+Using that Δtk = 1 and the update of Algorithm 1 (see (3.5)) we get
+                                                                                   
+     Δvk = λΔzk−1 + Δtk−1 Δzk−1 + (1 − η)Qk + tk Δ2 zk−1 + (1 − η)ΔQk
+                                                     
+                                                           α                    θ
+           = λΔzk−1 + Δzk−1 + (1 − η)Q + tk − Δzk−1 − ΔQk − Qk + (1 − η)ΔQk
+                                               k
+                                                           tk                  tk
+           = − (α − 1 − λ)Δzk−1 − (θ − (1 − η))Qk − tk ηΔQk
+           = − (α − 1 − λ)Δzk−1 − η (α − 1)Qk − tk ηΔQk .                                    (A.8)
+                               
+Let us now evaluate Δvk , vk+1 ; we get
+            
+ Δvk , vk+1
+                                                                                               
+= −λ(α − 1 − λ) Δzk−1 , zk − z∗ − tk (α − 1 − λ) Δzk−1 , Δzk − (α − 1 − λ)tk (1 − η) Δzk−1 , Qk+1
+                                                                                   
+   − λη (α − 1) Qk , zk − z∗ − tk η (α − 1) Qk , Δzk − tk η (1 − η)(α − 1) Qk , Qk+1
+                                                                  
+   − λtk η ΔQk , zk − z∗ − tk2 η ΔQk , Δzk − η (1 − η)tk2 ΔQk , Qk+1 .                       (A.9)
+
+Let us now inspect Δvk 2 :
+
+            1            1                    t2            1
+           − Δvk 2 = − η2 (α − 1)2 Qk 2 − k η2 ΔQk 2 − (α − 1 − λ)2 Δzk−1 2
+            2            2                     2            2
+                                                                              
+                       − (α − 1)η tk Q , ΔQk − η (α − 1 − λ)(α − 1) Qk , Δzk−1
+                                  2     k
+
+                                                   
+                       − ηtk (α − 1 − λ) Δzk−1 , ΔQk .                                               (A.10)
+Plugging (A.9) and (A.10) into (A.7) and rearranging suitably we get
+                                                   
+   ΔEkλ = −λη (α − 2) Qk , zk − z∗ − tk2 η ΔQk , Δzk                                                 (A.11)
+                                        
+          − ηtk (α − 1 − λ) Δzk−1 , ΔQk
+             1                                                     
+          + η (1 − η)Δtk2−1 Qk 2 − tk η (1 − η)(α − 1) Qk , Qk+1                                   (A.12)
+             2
+             η2                                        
+          − (α − 1)2 Qk 2 − (α − 1)η2 tk Qk , ΔQk
+             2
+                                                                                       
+          + ληtk Qk+1 , Δzk − (α − 1 − λ)tk (1 − η) Δzk−1 , Qk+1 − tk η (α − 1) Qk , Δzk             (A.13)
+42                                                R. I. BOŢ ET AL.
+
+                                                  
+           − η (α − 1 − λ)(α − 1) Qk , Δzk−1
+                                       
+           − tk (α − 1 − λ) Δzk−1 , Δzk                                                           (A.14)
+
+
+
+
+                                                                                                            Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+            1
+           − (α − 1 − λ)2 Δzk−1 2
+            2
+                                                  
+            1 2            λ                        δ
+           − ηtk ΔQk  − (α − 1 − λ)Δzk−1  + Δ
+                       2                     2
+                                                      Q2                   ,                    (A.15)
+            2              2                        2                    k
+
+where in the last line we have used η (1 − η) + η2 = η. To deal with the various non-negative off-sets in
+the inner products (A.12), (A.13) and (A.14) we make a discrete version of the continuous-time quadratic
+form appear and control the remainder with Young’s inequality. This gives
+               1                                                       
+     (A.12) := η (1 − η)Δtk2−1 Qk 2 − tk η (1 − η)(α − 1) Qk , Qk+1
+               2
+                   η2                                        
+               − (α − 1)2 Qk 2 − (α − 1)η2 tk Qk , ΔQk
+                    2
+                                                                                                  
+                    (1 − η) 2                           η
+             =η            Δtk−1 − (1 − η)tk (α − 1) − (α − 1)2 Qk 2 − tk (α − 1)η Qk , ΔQk
+                       2                                2
+                                                                                           
+                                            1     1
+             = − η (1 − η) (α − 2)tk +         + η2 (α − 1)2 Qk 2 −tk (α − 1)η Qk , ΔQk ,
+                                            2     2
+                                                                   
+                                          (Q.1)
+
+where in the coefficient that multiplies Qk 2 we have used, by the definition of tk ,
+                        1 2         1                                        1
+                          Δtk−1 =       (k − 1 + σ )2 − (k − 2 + σ )2 = tk − ,                    (A.16)
+                        2           2                                          2
+hence 12 Δtk2−1 − tk (α − 1) = − 12 − tk (α − 2). The first term of our quadratic form involving Qk 2
+                                  
+appears. We now force Qk , Δzk−1 to appear. This comes from the fact that
+                                                                                           
+ (A.13) := ληtk Qk+1 , Δzk − (α − 1 − λ)tk (1 − η) Δzk−1 , Qk+1 − tk η (α − 1) Qk , Δzk
+                                                 
+              −η (α − 1 − λ)(α − 1) Qk , Δzk−1
+                                                                                           
+          = ληtk Qk , Δzk−1 − (α − 1 − λ)tk (1 − η) Qk , Δzk−1 − tk η (α − 1) Qk , Δzk−1
+                                                                                                 
+              +ληtk Qk+1 , Δ2 zk−1 − (α − 1 − λ)tk (1 − η) ΔQk , Δzk−1 − tk η (α − 1) Qk , Δ2 zk−1
+                                                                      
+              +ληtk ΔQk , Δzk−1 − η (α − 1 − λ)(α − 1) Qk , Δzk−1
+                                                                         
+          = −(α − 1 − λ)tk Qk , Δzk−1 −tk η (α − 1 − λ) Qk , Δ2 zk−1
+                                       
+                          (Q.2)
+                                                                    
+              +ληtk ΔQk , Δ2 zk−1 − (α − 1 − λ)tk (1 − η) ΔQk , Δzk−1
+                                      GENERALIZED FAST-KM                                              43
+
+                                                            
+         + ληtk ΔQk , Δzk−1 − η (α − 1 − λ)(α − 1) Qk , Δzk−1
+
+       = (Q.2)
+                                                                                        
+
+
+
+
+                                                                                                             Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+         −tk η (α − 1 − λ) Qk , Δ2 zk−1 +ληtk ΔQk , Δzk − (α − 1 − λ)tk (1 − η) ΔQk , Δzk−1
+                                    
+                       (II )
+                                         
+         −η (α − 1 − λ)(α − 1) Qk , Δzk−1 .
+                                      
+                          (N .1)
+
+We will handle (II) separately later. To conclude we make the term in Δzk−1 2 appear. Starting with
+(A.14) we have
+                                      1
+ (A.14) := −tk (α − 1 − λ) Δzk−1 , Δzk − (α − 1 − λ)2 Δzk−1 2
+                                        2
+                                                                      1
+         = − tk (α − 1 − λ)Δzk−1 2 − tk (α − 1 − λ) Δzk−1 , Δ2 zk−1 − (α − 1 − λ)2 Δzk−1 2 .
+                                                               2                  
+                       (Q.3)                           (III )                        (N .2)
+
+Once again we will deal with (III) later. Gathering all the terms together we get
+                                                    
+ ΔEkλ = −λη (α − 2) Qk , zk − z∗ − tk2 η ΔQk , Δzk
+                                         
+        − ηtk (α − 1 − λ) Δzk−1 , ΔQk
+                                            
+        + (Q.1) − tk (α − 1)η Qk , ΔQk
+                                                                               
+        + (Q.2) + (II) + ληtk ΔQk , Δzk − (α − 1 − λ)tk (1 − η) ΔQk , Δzk−1 + (N.1)
+         + (Q.3) + (III) + (N.2)
+                                                         
+           1                λ                              δ
+         − ηtk2 ΔQk 2 − (α − 1 − λ)Δzk−1 2 + Δ            Q2
+           2                2                              2         k
+                                                          
+       = −λη (α − 2) Qk , zk − z∗ − (tk2 − λtk )η ΔQk , Δzk
+                                     
+         − tk (α − 1 − λ) Δzk−1 , ΔQk
+                                        
+         + (Q.1) − tk (α − 1)η Qk , ΔQk
+
+         + (Q.2) + (II) + (N.1)
+                                                                           
+                                  1              λ                           δ
+         + (Q.3) + (III) + (N.2) − ηtk2 ΔQk 2 − (α − 1 − λ)Δzk−1 2 + Δ     Q2               . (A.17)
+                                  2              2                           2                k
+
+Let us now collect all the terms in (Q.2) and (Q.3) and argue analogously to the continuous-time setting
+to get
+                                               
+ (Q.2) + (Q.3) = −(α − 1 − λ)tk Qk , Δzk−1 − tk (α − 1 − λ)Δzk−1 2
+44                                                R. I. BOŢ ET AL.
+
+                                                        2 
+                = −(α − 1 − λ)tk       Qk , Δzk−1 + Δzk−1 
+                                             2 1 
+                                  1 k                   2 1
+                = −(α − 1 − λ)tk    Q + Δzk−1  + Δzk−1  − Qk 2
+                                  2               2          2
+
+
+
+
+                                                                                                             Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                             t                      t                         t 
+                                                                                             2
+                                                                                             
+                = (α − 1 − λ) k Qk 2 − (α − 1 − λ) k Δzk−1 2 − (α − 1 − λ) k Qk + Δzk−1  .
+                              2                      2                         2
+                                                                                          (A.18)
+
+Note that the positive term (α − 1 − λ) t2k in the last display is not a concern when α > 2 since we shall
+take λ arbitrarily close to α − 1 in our Lyapunov analysis in such a way that when combined with (Q.1)
+the coefficient in front of Qk 2 will be negative. The case α = 2 will be treated with λ = α − 1. We
+now deal with (II) and (III), while the terms labelled with a capital ‘N ’ will be handled properly later.
+We have
+                                                
+         (II) = −(α − 1 − λ)tk η Qk , Δ2 zk−1
+
+                                      α                θ
+             = −(α − 1 − λ)tk η Qk , − Δzk−1 − ΔQk − Qk
+                                      tk               tk
+                                                                            
+             = (α − 1 − λ)ηtk Qk , ΔQk + (α − 1 − λ) α η Qk , Δzk−1 + ηθ Qk 2 .                  (A.19)
+                                                                            
+                                                                      (N .3)
+
+As far as (III) is concerned we have
+                                            
+  (III) = −tk (α − 1 − λ) Δzk−1 , Δ2 zk−1
+
+                                   α                θ
+       = −tk (α − 1 − λ) Δzk−1 , − Δzk−1 − ΔQk − Qk
+                                   tk               tk
+                                                                                     
+       = tk (α − 1 − λ) Δzk−1 , ΔQk + α (α − 1 − λ)Δzk−1 2 + θ (α − 1 − λ) Δzk−1 , Qk . (A.20)
+                                                                                    
+                                                                       (N .4)
+
+Plugging now (II) and (III) into (A.17) we get
+                                                                          
+                  ΔEkλ = −λη (α − 2) Qk , zk − z∗ − (tk2 − λtk )η ΔQk , Δzk
+                                                 
+                         + (Q.1) −tk λη Qk , ΔQk
+                                             
+                                          (IV )
+
+                          + (Q.2) + (N.1) + (N.3)
+                          + (Q.3) + (N.2) + (N.4)
+                                                                   
+                           1               λ                         δ
+                          − ηtk2 ΔQk 2 − (α − 1 − λ)Δzk−1 2 +Δ     Q2              ,         (A.21)
+                           2              2                      2               k
+                                                          (N .5)
+                                       GENERALIZED FAST-KM                                              45
+                                             
+where the term tk (α − 1 − λ) Δzk−1 , ΔQk cancelled out with the corresponding one in (III), and we
+                                           k     
+simplified the coefficient that multiplies Q , ΔQk using the contribution from (II). Let us also define for
+brevity: (N ) := (N.1) + (N.2) + (N.3) + (N.4) + (N.5) and inspect (IV): using the polarization identity
+and recalling that δk = tk−1 λη we get
+
+
+
+
+                                                                                                              Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+                                       
+                (IV) = −tk λη Qk , ΔQk
+                              
+                                1 k+1 2 1 k 2 1
+                     = −tk λη     Q  − Q  − ΔQk 2
+                                2        2     2
+                        1                1              λ          t
+                     = − tk ληQk+1 2 + tk−1 ληQk 2 + ηQk 2 + k ληΔQk 2
+                        2                2              2          2
+                          
+                             δ          λ         t
+                     = −Δ      Q2 + ηQk 2 + k ληΔQk 2 .                                       (A.22)
+                             2      k   2          2
+
+
+Inserting (IV), (Q.1), (Q.2) and (Q.3) into (A.21), simplifying and grouping terms yields
+
+
+                                                                          1
+                                   1
+ ΔEkλ = −(tk2 − λtk )η    ΔQk , Δzk + ΔQk 2 − λη (α − 2) Qk , zk − z∗ + Qk 2
+                                     2                                        2
+                                                                             
+             λ             λ                                    1     1
+         +     η (α − 2) + η Qk 2 − η (1 − η) (α − 2)tk +        + η2 (α − 1)2 Qk 2 + (N)
+             2             2                                    2     2
+                        t                    t                          t 
+                                                                          
+                                                                                      2
+                                                                                      
+         + (α − 1 − λ) k Qk 2 − (α − 1 − λ) k Δzk−1 2 − (α − 1 − λ) k Qk + Δzk−1  . (A.23)
+                        2                     2                         2
+
+
+
+   We now make use of (3.9) to infer that
+
+
+                                                   1
+                                        ΔQk , Δzk ≥ − ΔQk 2 .                                     (A.24)
+                                                     2
+
+
+This allows us to get for k ≥ 1 and such that tk ≥ λ
+
+
+                                                      
+          η                                                              α−1−λ
+ ΔEkλ ≤ −      (1 − η) + η (α − 1) − λ(α − 1) Q  − η (1 − η)(α − 2) −
+                                  2               k 2
+                                                                               tk Qk 2
+            2                                                              2
+                        t                        t 
+                                                                2
+                                                                
+          − (α − 1 − λ) k Δzk−1 2 − (α − 1 − λ) k Qk + Δzk−1  + (N).           (A.25)
+                        2                         2
+46                                            R. I. BOŢ ET AL.
+
+
+Now, invoking the Young’s inequality on all the inner products appearing in (N), we obtain
+                                               1
+    (N) = −η (α − 1 − λ)(α − 1) Qk , Δzk−1 − (α − 1 − λ)2 Δzk−1 2
+                                                   2
+                                                     
+
+
+
+
+                                                                                                      Downloaded from academic.oup.com/imajna/advance-article/doi/10.1093/imanum/drag042/8768710 by guest on 10 October 2026
+           + (α − 1 − λ) α η Qk , Δzk−1 + ηθ Qk 2
+                                                                λ
+           + α (α − 1 − λ)Δzk−1 2 + θ (α − 1 − λ) Δzk−1 , Qk − (α − 1 − λ)Δzk−1 2
+                                                                  2
+                                                      α+1
+         = (α − 1 − λ) ηθ Qk 2 + (η + θ ) Qk , Δzk−1 +        Δzk−1 2
+                                                             2
+                       
+                             η+θ                          α + 2 + η (α − 1)
+         ≤ (α − 1 − λ) ηθ +          Qk 2 + (α − 1 − λ)                   Δzk−1 2 .      (A.26)
+                               2                                  2
+Inserting (A.26) into (A.25) and rearranging we get the claim.                                   
+

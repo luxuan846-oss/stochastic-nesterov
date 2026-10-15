@@ -1,0 +1,1495 @@
+                                                      Stochastic Krasnoselskii-Mann Iterations:
+                                                  Convergence without Uniformly Bounded Variance
+                                                                     Daniel Cortild1 (daniel.cortild@maths.ox.ac.uk)
+                                                                     Coralia Cartis1 (coralia.cartis@maths.ox.ac.uk)
+                                                                       Juan Peypouquet2 (j.g.peypouquet@rug.nl)
+                                                          1
+                                                              Mathematical Institute, University of Oxford, Oxford, United Kingdom
+                                                              2
+                                                                Bernoulli Institute, University of Groningen, Groningen, Netherlands
+
+
+
+
+arXiv:2604.22581v3 [math.OC] 11 Sep 2026
+                                                                                     Last Compiled: September 14, 2026
+
+
+                                                                                                    Abstract
+                                                We investigate the Stochastic Krasnoselskii-Mann iterations for expected nonexpansive fixed-point problems in
+                                                a real separable Hilbert space. We establish convergence guarantees under significantly weaker assumptions on
+                                                the variance than those typically used in the literature. In particular, instead of a uniform bound on the variance
+                                                of the stochastic oracle, we only assume finite variance at a single fixed point. Under this assumption, we prove
+                                                almost sure weak convergence of the iterates, derive convergence rates for the expected residual and the last-
+                                                iterate residual, and obtain almost sure convergence rates for the running minimum residual. Notably, we recover
+                                                the best-known stochastic oracle complexity without imposing uniformly bounded variance. We illustrate the
+                                                applicability of our results to Stochastic Gradient Descent, where we recover known guarantees, to Stochastic
+                                                Three-Operator Splitting and Stochastic Backward-Forward Splitting, for which we obtain the first results that
+                                                avoid uniform variance bounds, and to a novel Stochastic Lifted Three-Operator Splitting.
+
+                                                Keywords. Krasnoselskii-Mann Iterations, Variance-at-Solution Assumption, Stochastic Gradient Descent,
+                                                Stochastic Three-Operator Splitting, Stochastic Backward-Forward Splitting.
+
+                                                Mathematics Subject Classification (2000) 46N10, 47J26, 65K10, 90C25, 90C15.
+
+
+                                           1    Introduction
+                                           Fixed-point problems are central in optimization and variational analysis, providing a unified and systematic ap-
+                                           proach to solve nonlinear and operator equations. In this work, we consider the fixed point problem
+
+                                                                                                Find p ∈ Fix(T ),
+
+                                           where T : H → H is a nonexpansive mapping on a real separable Hilbert space H, meaning that ∥T x−T y∥ ≤ ∥x−y∥
+                                           for all x, y ∈ H, where H has associated inner product ⟨·, ·⟩ and induced norm ∥ · ∥, and Fix(T ) = {x ∈ H : T x = x}
+                                           denotes its set of fixed points. A standard algorithm for tackling such problems is the Krasnoselskii-Mann iterations
+                                           [32, 31], which are given by
+                                                                                   xk+1 = (1 − λk )xk + λk T xk for k ≥ 0,                                 (KM)
+                                           where x0 ∈ H and (λk ) ⊂ (0, 1) is a sequence of relaxation parameters. This was introduced independently in [32]
+                                                     1
+                                           for λk = k+1 and in [31] for λk ≡ 1/2. Weak convergence of the iterates was later established in [38] for constant
+                                                                                               P∞
+                                           parameters and for variable parameters satisfying k=0 λk (1 − λk ) = +∞ in [28]. For a recent overview of the
+                                           method, we refer to [21, 19] and the references therein.
+                                           A modern challenge resides within the computability of the operator T . It is in general computationally prohibitive
+                                           to evaluate the operator at each iteration. As such, we assume access to the operator only through a stochastic oracle
+                                           Tξ . We assume this estimator to be unbiased, namely that T = Eξ∼D [Tξ ], where D is a probability distribution
+                                           parameterizing the operators, such that the problem becomes
+
+                                                                                        Find p ∈ Fix(T ) = Fix(Eξ [Tξ ]).
+
+                                           To this end, we study a stochastic variant of the standard Krasnoselskii-Mann iterations, given in Algorithm SKM.
+                                           As in stochastic optimization, the stochasticity arises from sampling one operator at each iteration, rather than
+
+                                                                                                        1
+evaluating the expected operator. Stochastic Krasnoselskii-Mann iterations were previously studied in a block-
+coordinate framework with additive stochastic errors in [14, 16].
+
+Algorithm SKM (Stochastic Krasnoselskii-Mann)
+Require: Tξ : H → H nonexpansive with Eξ [Tξ ] = T , Relaxation parameters λk ∈ (0, 1).
+ for k = 0, . . . , K − 1 do
+    Draw ξk ∼ D randomly and independently
+    Update xk+1 = (1 − λk )xk + λk Tξk (xk )
+ end for
+ return xK
+
+
+As is standard for fixed-point methods, we assume the operator Tξ to be nonexpansive for D-almost all ξ, and the
+set of fixed points of T , denoted by Fix(T ), to be non-empty.
+When dealing with stochastic algorithms, one typically needs to make an assumption about the estimator Tξ . The
+usual one in the literature [8, 9, 29] is to assume that the variance of the stochastic oracle is uniformly bounded.
+Specifically, it is typically assumed that there exists a σ 2 such that, for all x ∈ H,
+
+                                             E ∥(T − Tξ )x∥2 ≤ σ 2 < +∞.
+                                                             
+
+In the functional case, this has been shown to be unverifiable or unrealistic in practice [7], which creates a significant
+gap between theoretical guarantees and practical applicability. The literature therefore has started avoiding making
+this assumption [5, 34, 35, 27, 26, 30, 18, 24]. This naturally raises the question of whether the above assumption
+can be relaxed in the fixed point setting while still preserving meaningful guarantees. However, weakening the
+variance assumptions appears to be nontrivial, as existing analyses heavily rely on uniform variance bounds.
+Motivation. The motivation for this study arose from recent work on differentially private empirical risk min-
+imization [17]. The setting can naturally be written as the sum of three operators, thereby inviting the natural
+algorithm of Stochastic Three-Operator Splitting. However, existing analyses mostly rely on a uniform variance
+bound, which did not hold in the studied setting. Instead, the natural assumption was finite variance at a solution,
+an assumption that has become standard in recent stochastic optimization literature. This observation led us to
+investigate general stochastic fixed-point iterations under such relaxed noise assumptions.
+Contributions. We provide a convergence analysis of Algorithm SKM in a real Hilbert space setting. Our
+contributions are as follows.
+  1. We introduce a variance-at-solution assumption, requiring a bounded variance at a single solution p ∈ Fix(T ),
+     namely that
+                                            E ∥(T − Tξ )p∥2 ≤ σ∗2 < +∞.
+                                                           
+
+      Our key insight is that, by exploiting nonexpansiveness, this local variance assumption propagates to all fixed
+      points and yields a global variance control.
+  2. Under this assumption, we establish almost sure convergence of the residuals and weak almost sure convergence
+     of the iterates to a point in Fix(T ).
+  3. We derive convergence rates on the expected random residual and the expected last-iterate residual, and
+     recover the best-known stochastic oracle complexities O(ε−4 ) and O(ε−6 ) respectively, previously established
+     under uniformly bounded variance [8]. We moreover obtain the same complexity rate almost surely on the
+     running minimum residual, up to logarithmic factors. We moreover derive results for horizon-independent
+     step-sizes, matching the horizon-dependent complexities, up to logarithmic factors.
+  4. We apply our results to Stochastic Gradient Descent, recovering known guarantees, and to Stochastic Three-
+     Operator Splitting and Stochastic Backward-Forward Splitting, where we obtain the first results that do not
+     make use of uniformly bounded variance assumptions.
+These contributions demonstrate that uniformly bounded variance is unnecessarily strong, and can be relaxed to a
+weaker, local variance assumption without loss of convergence or complexity guarantees.
+Comparison with Previous Works. Earlier works studied stochastically perturbed Krasnoselskii-Mann itera-
+tions in block-coordinate and additive-error frameworks. Combettes and Pesquet [14] establish almost sure weak
+
+                                                            2
+convergence results. In a sequel work [16], they obtain mean-square and linear convergence, under additional
+contractive-type assumptions. More recently, Combettes and Madariaga [12] develop a general geometric frame-
+work covering randomly relaxed Krasnoselskii-Mann iterations with stochastic additive errors. The stochastic noise
+assumptions in these works do not cover the variance-at-solution assumption presented in this work. Moreover,
+these works do not provide comparable finite-time residual bounds in the general nonexpansive setting.
+Our work is therefore most closely related, in terms of residual complexity, to the following works.
+   • The closest prior work is due to Bravo and Cominetti [8], who study Stochastic Krasnoselskii-Mann iterations
+     in normed spaces. They consider a framework with additive noise and allow martingale-difference pertur-
+     bations whose variance may grow in a controlled manner, and obtain convergence of the expected residual
+     and almost sure weak convergence of the iterates. The most directly comparable explicit complexity bounds
+     are obtained under uniformly bounded variance. In that regime, they prove a O(ε−6 ) complexity result for
+     the last-iterate residual, and a O(ε−4 ) complexity result for a random iterate in the Euclidean setting, for
+     horizon-dependent step-sizes. For horizon-independent step-sizes, they obtain a residual convergence rate of
+     Õ(K −1/4 ). We recover their results under weaker assumptions.
+   • Bravo and Contreras [9] study Stochastic Halpern iterations in normed spaces, again under the stronger
+     uniformly bounded variance assumption. Their method uses increasing minibatches and yields an O(ε−5 )
+     oracle complexity on the last-iterate residual.
+   • Finally, we were made aware of the work by Iiduka [29] during the writing of this manuscript, and note
+     that our work was developed independently. They study Stochastic Krasnoselskii-Mann iterations, still under
+     uniformly bounded variance, and obtain convergence in O(ε−4 ) stochastic oracle calls. They show convergence
+     of the expected residuals and establish convergence of the iterates in finite dimensions, and do not allow for
+     our weaker assumption.
+The key distinctions are summarized in Table 1.
+
+
+Table 1: Comparison of finite-horizon complexities to previous works. For “Assumption”, σ 2 < +∞ indicates
+uniformly bounded variance, whereas σ∗2 < +∞ indicates bounded variance at a fixed point. “Oracle Calls” denotes
+total number of calls to the stochastic oracle.
+        Reference       Algorithm         Assumption             Batch           Oracle            A.S.           Metric
+                                                                  Size         Complexity          Rate?
+           [8]             SKM               σ 2 < +∞1          Constant         O(ε−6 )            No         Last-Iterate2
+           [8]             SKM               σ 2 < +∞1          Constant         O(ε−4 )            No           Random
+           [9]            SHalpern           σ 2 < +∞          Increasing        Õ(ε−5 )           No         Last-Iterate
+          [29]             SKM               σ 2 < +∞          Increasing        O(ε−4 )            No         Running Min
+        Thm 2.10           SKM               σ∗2 < +∞           Constant         O(ε−4 )            No           Random
+        Thm 2.10           SKM               σ∗2 < +∞           Constant         õ(ε−4 )           Yes        Running Min
+        Thm 2.11           SKM               σ∗2 < +∞           Constant         O(ε−6 )            No         Last-Iterate
+      1 They study Martingale Difference Noise, but only obtain explicit rates in the special case of uniformly bounded variance.
+      2 Requires the additional assumption that the range of T is bounded.
+
+
+
+
+In the quasi-contractive setting, the work by Chen et al. [11] provides a O(K −1/2 ) rate for the distance to the unique
+fixed-point, under the assumption that the second moment of the noise grows at most affinely with the square norm
+of the current iterate. Their assumption is much weaker than uniformly bounded variance, and is implied by ours.
+We finally note the recent work [13], which discusses last-iterate residual rates with guarantees in an almost-sure
+setting, albeit under a different variance assumption.
+Structure. We present our assumptions, main results and a numerical illustration in Section 2. In Section 3,
+we apply our results to Stochastic Gradient Descent, Stochastic Three-Operator Splitting, Stochastic Backward-
+Forward, and Stochastic Lifted Three-Operator Splitting. Auxiliary results are gathered in Appendix A.
+
+
+
+
+                                                                   3
+2     Convergence Results
+In this section, we present our main convergence results for Algorithm SKM. We first introduce our standing
+assumptions, including our variance-at-solution assumption, and establish key lemmas. We then derive convergence
+guarantees for the iterates and the expected residual. Finally, we present a simple numerical illustration.
+
+2.1    Assumptions
+We begin by introducing the assumptions used throughout the analysis. The first assumption is on the problem at
+hand.
+
+ Assumption 2.1 (Problem Assumption).
+ We assume the operators Tξ are nonexpansive for D-almost all ξ. We further assume that ξ 7→ Tξ x is measurable
+ and Bochner integrable for each x ∈ H and define T : H → H by x 7→ Eξ∼D [Tξ x]. Moreover, we assume Fix(T )
+ to be nonempty.
+
+We note that under the Problem Assumption 2.1, it immediately holds that T is nonexpansive.
+The second assumption treats the stochasticity in the problem. Our key contribution is that we do not require a
+uniformly bounded variance, as done in prior works, but merely a bounded variance-at-solution assumption.
+
+ Assumption 2.2 (Variance Assumption).
+ We assume that, for some p ∈ Fix(T ),
+
+                                             E ∥(Tξ − T )p∥2 ≤ σ∗2 < +∞.
+                                                           
+
+
+The next lemma shows that if the quantity in the Variance Assumption 2.2 is bounded for some p ∈ Fix(T ), then
+the quantity is constant over all Fix(T ), and hence bounded for all p ∈ Fix(T ). This parallels the corresponding
+result in the function setting explored in [25, Lemma 4.17].
+
+ Lemma 2.3 (Bounded Variance at All Fixed Points).
+ Under the Problem Assumption 2.1 and the Variance Assumption 2.2, it holds that, for all p ∈ Fix(T ),
+
+                                          E ∥(Tξ − T )p∥2 ≤ σ∗2 .
+                                                        
+
+
+Proof. Consider any two fixed points p, p′ ∈ Fix(T ). As such, by convexity of x 7→ ∥x∥2 , it holds that
+
+                          ∥p − p′ ∥2 = ∥E[Tξ p] − E[Tξ p′ ]∥2 ≤ E ∥Tξ p − Tξ p′ ∥2 ≤ ∥p − p′ ∥2 .
+                                                                                 
+
+
+Therefore equality holds, namely ∥E[Tξ p − Tξ p′ ]∥2 = E ∥Tξ p − Tξ p′ ∥2 , and thus Tξ p − Tξ p′ has zero variance and
+                                                                         
+
+is almost surely constant. In particular, it is equal to its expectation, namely Tξ p − Tξ p′ = T p − T p′ almost surely,
+which implies that (Tξ − T )p = (Tξ − T )p′ for all p, p′ ∈ Fix(T ) almost surely, and p 7→ E ∥(Tξ − T )p∥2 is constant
+                                                                                                             
+
+over Fix(T ), as claimed.
+
+Moreover, if the quantity in Assumption 2.2 is bounded for some p ∈ Fix(T ), then we may bound it for all x ∈ H,
+albeit with a non-constant right-hand side. We refer to this as a variance transfer result. The below generalizes the
+functional setting [25, Lemmas 4.19 and 4.20].
+
+ Lemma 2.4 (Variance Transfer Lemma).
+ Under the Problem Assumption 2.1 and the Variance Assumption 2.2, it holds that, for all x ∈ H and p ∈ Fix(T ),
+
+                                    E ∥(Tξ − T )x∥2 ≤ 2σ∗2 + 2∥x − p∥2 .
+                                                  
+
+
+
+
+                                                            4
+Proof. We have, by the triangle inequality and the Variance Assumption 2.2,
+             q                      q                   q
+                E[∥(Tξ − T )x∥2 ] ≤ E[∥(Tξ − T )p∥2 ] + E[∥Tξ x − Tξ p − (T x − T p)∥2 ]
+                                         q
+                                  ≤ σ∗ + E[∥Tξ x − Tξ p − (T x − T p)∥2 ]
+                                         q
+                                  = σ∗ + E[∥Tξ x − Tξ p∥2 − 2⟨Tξ x − Tξ p, T x − T p⟩ + ∥T x − T p∥2 ]
+                                         q
+                                  = σ∗ + E[∥Tξ x − Tξ p∥2 ] − ∥T x − T p∥2
+                                     ≤ σ∗ + ∥x − p∥,
+
+where we discarded the negative term and used the nonexpansiveness of Tξ in the last inequality. The result follows
+by the standard inequality (a + b)2 ≤ 2a2 + 2b2 . We note this result holds for all p ∈ Fix(T ), and not only the one
+in the Variance Assumption 2.2, by Lemma 2.3.
+Remark 2.5. In Lemma 2.4, one can apply Young’s inequality more generally to deduce that
+
+                           E ∥(Tξ − T )x∥2 ≤ (1 + η −1 )σ∗2 + (1 + η)∥x − p∥2 ,
+                                         
+
+for any η > 0. In the case of interpolation, where σ∗2 = 0, the first term disappears, and we therefore deduce that
+
+                                            E ∥(Tξ − T )x∥2 ≤ ∥x − p∥2 .
+                                                           
+
+This results in a reduction of the bias terms in Theorems 2.10 and 2.11. Although we are not aiming at optimizing
+the constants in these expressions, this fact is interesting for the numerical comparison in Section 2.3.
+
+2.2     Convergence Results
+We let Fk = σ(x0 , ξ0 , ξ1 , . . . , ξk−1 ) be a filtration adapted to the iterate xk . In particular, ξk is independent of Fk .
+For simplicity of notation, we write Ek as E[·|Fk ] and E as a total expectation.
+To establish convergence,
+                      P∞we impose   assumptions on the step-size sequence. We denote by ℓp (N) all sequences
+                                p
+(λk )k∈N ⊂ R such that k=0 |λk | < +∞, where p ≥ 1.
+
+ Assumption 2.6 (Parameter Assumption).
+ The relaxation parameters (λk ) ⊂ (0, 1) satisfy (λk ) ∈ ℓ2 (N)\ℓ1 (N).
+
+We first analyze the setting where the realizations Tξ are nonexpansive, namely that ∥Tξ x − Tξ y∥ ≤ ∥x − y∥ for
+all x, y ∈ H, and later consider the setting where, additionally, T is q-quasi-contractive for q ∈ (0, 1), namely that
+∥T x − p∥ ≤ q∥x − p∥ for all x ∈ H and p ∈ Fix(T ).
+
+2.2.1   Nonexpansive Setting
+We define the following quantity for notational convenience
+                                                           k−1
+                                                           Y
+                                                    Λk =         (1 + 2λ2i )−1 .
+                                                           i=0
+
+We note that ΛK ≥ Λ̄ for some Λ̄ > 0 under the assumption that (λk ) ∈ ℓ2 (N). In fact, since ln(1 + x) ≤ x for all
+x > −1,                                                              !                 !
+                             K−1
+                              Y                     K−1
+                                                    X                          K−1
+                                                                               X
+                         −1
+                       ΛK =       (1 + 2λ2k ) = exp     ln(1 + 2λ2k ) ≤ exp 2       λ2k ,                      (1)
+                                   k=0                      k=0                                k=0
+                                P∞
+so we may pick Λ̄−1 = exp 2             2
+                                          
+                                   k=0 λk < +∞.
+
+We also introduce a random index NK , independent of the algorithmic randomness, defined by
+                                             Λk+1 λk (1 − λk )
+                             P(NK = k) = PK−1                                  for k = 0, . . . , K − 1.                    (2)
+                                          k′ =0 Λk +1 λk (1 − λk )
+                                                  ′     ′       ′
+
+
+
+This index allows us to convert weighted averages of the residual into guarantees on a single (random) iterate.
+
+                                                                  5
+Remark 2.7. The Parameter Assumption 2.6 is naturally satisfied for step-sizes λk = λ0 (k + 1)−a for a ∈ (1/2, 1]
+and λ0 ∈ (0, 1), since                         
+                                                       1−α
+                              K−1
+                               X               Θ(K
+                                                          )     if α < 1,
+                                          −α
+                                   (k + 1) = Θ(ln(K))            if α = 1,
+                                               
+                               k=0             
+                                                 Θ(1)            if α > 1.
+It also holds for λk = λ0 (k + 1)−a ln(k + e)−1 with λ0 ∈ (0, 1) for a ∈ [1/2, 1], since
+                            K−1
+                                                        (
+                             X
+                                        −a         −1     Θ(K 1−a ln(K)−1 )         if a < 1,
+                                 (k + 1) ln(k + e) =
+                             k=0
+                                                          Θ(ln(ln(K)))              if a = 1,
+
+and, for all a ∈ [1/2, 1],
+                                            K−1
+                                            X
+                                                   (k + 1)−2a ln(k + e)−2 = Θ(1).
+                                             k=0
+
+
+ Lemma 2.8 (Decrease Inequality).
+ Assume the Problem Assumption 2.1 and the Variance Assumption 2.2 hold, and let (xk ) be the random iterates
+ determined by Algorithm SKM. Then it holds that, for every p ∈ Fix(T ),
+
+                  Ek ∥xk+1 − p∥2 ≤ (1 + 2λ2k )∥xk − p∥2 − λk (1 − λk )∥T xk − xk ∥2 + 2λ2k σ∗2 ,
+                               
+
+
+Proof. It holds that
+
+        Ek ∥xk+1 − p∥2 = Ek ∥(1 − λk )(xk − p) + λk (Tξk xk − p)∥2
+                                                                 
+
+                        = (1 − λk )2 ∥xk − p∥2 + λ2k Ek ∥Tξk xk − p∥2 + 2λk (1 − λk )Ek [⟨xk − p, Tξk xk − p⟩]
+                                                                    
+
+                        = (1 − λk )2 ∥xk − p∥2 + λ2k Ek ∥Tξk xk − p∥2 + 2λk (1 − λk )⟨xk − p, T xk − p⟩.
+                                                                    
+
+
+By writing
+                              2⟨xk − p, T xk − p⟩ = ∥xk − p∥2 + ∥T xk − p∥2 − ∥T xk − xk ∥2
+and
+
+                   Ek ∥Tξk xk − p∥2 = Ek ∥Tξk xk − xk ∥2 + ∥xk − p∥2 + 2Ek [⟨Tξk xk − xk , xk − p⟩]
+                                                      
+
+                                     = Ek ∥Tξk xk − xk ∥2 + ∥xk − p∥2 + 2⟨T xk − xk , xk − p⟩
+                                                        
+
+                                     = Ek ∥Tξk xk − xk ∥2 − ∥T xk − xk ∥2 + ∥T xk − p∥2 ,
+                                                        
+
+
+we obtain that
+
+        Ek ∥xk+1 − p∥2 = (1 − λk )∥xk − p∥2 + λ2k Ek ∥Tξk xk − xk ∥2 + λk ∥T xk − p∥2 − λk ∥T xk − xk ∥2
+                                                                  
+
+                        ≤ ∥xk − p∥2 + λ2k Ek ∥Tξk xk − xk ∥2 − λ2k ∥T xk − xk ∥2 − λk (1 − λk )∥T xk − xk ∥2
+                                                           
+
+                             ≤ (1 + 2λ2k )∥xk − p∥2 − λk (1 − λk )∥T xk − xk ∥2 + 2λ2k σ∗2 ,
+
+where the first inequality follows by nonexpansiveness of T , and the second by the Variance Transfer Lemma 2.4.
+
+Items 2 and 3 of the following lemma are standard consequences of stochastic quasi-Fejér and almost-supermartingale
+arguments, see for instance [14, Proposition 2.3]. We provide the short derivation below in order to identify explicitly
+the problem-dependent terms and establish the bound in Item 1.
+
+ Lemma 2.9.
+ Assume the Problem Assumption 2.1 and the Variance Assumption 2.2 hold, and let (xk ) be the random iterates
+ determined
+            by Algorithm
+                            SKM. Under the Parameter Assumption 2.6, the following hold
+    1. E ∥xk − p∥2 is bounded uniformly in k for all p ∈ Fix(T ),
+       ∥xk − p∥ is almost surely convergent for all p ∈ Fix(T ), and
+    2. P
+         ∞                           2
+    3.   k=0 λk (1 − λk )∥T xk − xk ∥ < +∞ almost surely.
+
+
+
+                                                               6
+Proof.    1. By multiplying Lemma 2.8 by Λk+1 on both sides, noting that Λk+1 (1 + 2λ2k ) = Λk and that Λk+1 ≤ 1,
+      and taking total expectation, we obtain
+                  Λk+1 E ∥xk+1 − p∥2 ≤ Λk E ∥xk − p∥2 − Λk+1 λk (1 − λk )E ∥T xk − xk ∥2 + 2λ2k σ∗2 .
+                                                                                      
+                                                                                                              (3)
+     By summing for k = 0, . . . , K − 1 and bounding away the negative term, we obtain
+                                                    ∥x0 − p∥2 + 2 K−1      2 2
+                                                                    P
+                                                 2                    k=0 λk σ∗
+                                         
+                                       E ∥xK − p∥ ≤                             .
+                                                                 ΛK
+                         PK−1           P∞                                               
+     In particular, since k=0 λ2k ≤ k=0 λ2k < +∞ and ΛK ≥ Λ̄ > 0, we get that E ∥xK − p∥2 is uniformly
+     bounded in K.
+2+3. The conditions of the Robbins-Siegmund Almost-Supermartingale Theorem A.1 with
+                    Yk = ∥xk − p∥2 ,     Xk = λk (1 − λk )∥T xk − xk ∥2 ,   Zk = 2λ2k σ∗2 ,   and   ηk = 2λ2k
+     hold by Lemma P2.8 and the Parameter Assumption 2.6. As such, we get that ∥xk − p∥2 converges almost
+                      ∞
+     surely and that k=0 λk (1 − λk )∥T xk − xk ∥2 < +∞ almost surely.
+
+The following theorem provides the main convergence rate theorem, in which we show that the expectation of the
+residual at a random iterate converges. This immediately implies convergence of the minimal iterate along the
+trajectory. However, in practice, that is inconvenient as it requires evaluating all the residuals, which is precisely
+what the stochastic setting seeks to avoid. The idea of introducing the random iterate is inspired by [8].
+
+ Theorem 2.10 (Bounds on Random and Minimal Running Residuals).
+ Assume the Problem Assumption 2.1 and the Variance Assumption 2.2 hold, and let (xk ) be the random iterates
+ determined by Algorithm SKM. Then, for K ≥ 1,
+
+                                                   dist(x0 , Fix(T ))2 + 2 K−1  2 2
+                                                                           P
+                                                2                           k=0 λk σ∗
+                                 
+                                E ∥T xNK − xNK ∥ ≤             PK−1                   ,
+                                                          ΛK k=0 λk (1 − λk )
+
+ where NK is sampled according to Equation (2), and E is taken over all sources of randomness. Moreover, under
+ the Parameter Assumption 2.6, for K ≥ 1,
+                                                                                                          
+                                      1                                                       1
+     E[∥T xNK − xNK ∥] ≤ O qP                        and   min ∥T xk − xk ∥ ≤ o qP                        ,
+                                  K−1                      k≤K−1                         K−1
+                                  k=0 λ k (1 − λ k )                                     k=0 λ  k (1 − λ k )
+
+ where the latter holds almost surely.
+
+Proof. By summing Equation (3) for k = 0, . . . , K − 1, we obtain
+                                             K−1
+                                             X                                        K−1
+                                                                                      X
+                ΛK E ∥xK − p∥2 ≤ ∥x0 − p∥2 −     Λk+1 λk (1 − λk )E ∥T xk − xk ∥2 + 2     λ2k σ∗2 .
+                                                                              
+
+                                                    k=0                                           k=0
+                      
+Bounding ΛK E ∥xK − p∥2 by 0 and rearranging yields
+                          K−1
+                          X                                                       K−1
+                                                                                  X
+                                 Λk+1 λk (1 − λk )E ∥T xk − xk ∥2 ≤ ∥x0 − p∥2 + 2     λ2k σ∗2 ,
+                                                                
+
+                          k=0                                                         k=0
+
+and specifically, we obtain
+                        PK−1                                                 PK−1
+                          k=0Λk+1 λk (1 − λk )E ∥T xk − xk ∥2     ∥x0 − p∥2 + 2 k=0 λ2k σ∗2
+                              PK−1                              ≤  PK−1                     .
+                                 k=0 Λk+1 λk (1 − λk )                k=0 Λk+1 λk (1 − λk )
+                                                      
+The left-hand side coincides with E ∥T xNK − xNK ∥2 , and the right-hand side yields the wanted inequality by
+noting that (Λk ) is nonincreasing
+                                  and by taking the infimum over all p ∈ Fix(T ). The conclusion follows as
+E[∥T xNK − xNK ∥]2 ≤ E ∥T xNK − xNK ∥2 . The final almost sure result follows from Lemma 2.9 and Lemma
+A.2.
+
+                                                             7
+The previous proof technique naturally yields bounds on the expected residual. In order to get last-iterate bounds,
+we define a ghost-sequence of points not visited by the algorithm but only introduced for theoretical purposes, as
+done in [22], for instance.
+
+ Theorem 2.11 (Bound on Last-Iterate Residual).
+ Assume the Problem Assumption 2.1 and the Variance Assumption 2.2 hold, and let (xk ) be the random iterates
+ determined by Algorithm SKM. Then, for K ≥ 1,
+                                                          !                        PK−1
+                       2                    2               dist(x0 , Fix(T ))2 + 2 k=0 λ2k σ∗2
+                                                                                                + 16QK σ∗2 ,
+                        
+         E ∥T xK − xK ∥ ≤ 16QK + PK−1
+                                       k=0 λ k (1 − λ k )                    Λ K
+
+               PK−1                 PK−1 2
+                k=0 Λk+1 λk (1−λk )  i=k λi
+ where QK =       PK−1                      .
+                    k=0 Λk+1 λk (1−λk )
+
+
+                                                                                                    
+Proof. Fix any p ∈ Fix(T ). By the bound obtained in the proof of Lemma 2.9, we know that E ∥xk − p∥2 for
+k = 0, . . . , K − 1 is bounded by a constant M < +∞ given by
+                                                                         PK−1
+                                                            ∥x0 − p∥2 + 2 k=0 λ2k σ∗2
+                                                    M=
+                                                                       ΛK
+                                                                                                     (k)
+We start by fixing an index k ∈ {0, . . . , K − 1}, and define the sequence {yi }i≥k , given by
+                                     (k)              (k)                   (k)            (k)
+                                    yk     = xk ,    yi+1 = (1 − λi )yi           + λi T yi          for i ≥ k.
+                              (k)
+Specifically, the sequence {yi }i≥k starts at xk , and follows the deterministic Krasnoselskii-Mann iterations x+ =
+Sλ x, for Sλ : x 7→ (1 − λ)x + λT x. As such, since the deterministic Krasnoselskii-Mann mapping is nonexpansive
+and Ei [(T − Tξi )xi ] = 0, it holds that, for k ≤ i ≤ K − 1,
+                        h               i       h                                                    i
+                                   (k)                         (k)
+                     Ei ∥xi+1 − yi+1 ∥2 = Ei ∥Sλi xi − Sλi yi − Sλi xi + ((1 − λi )xi + λi Tξi xi ∥2
+                                                h                                     i
+                                                               (k)
+                                           = Ei ∥Sλi xi − Sλi yi + λi (Tξi − T )xi ∥2
+                                                h           i
+                                                        (k)
+                                           ≤ Ei ∥xi − yi ∥2 + λ2i Ei ∥(Tξi − T )xi ∥2
+                                                                                       
+                                                h           i
+                                                        (k)
+                                           ≤ Ei ∥xi − yi ∥2 + 2λ2i (∥xi − p∥2 + σ∗2 ),
+
+which, taking total expectation, yields
+                                h              i   h           i
+                                         (k)               (k)
+                              E ∥xi+1 − yi+1 ∥2 ≤ E ∥xi − yi ∥2 + 2λ2i (M + σ∗2 ).
+
+Iterating this yields that
+
+                               h           i   h           i K−1
+                                       (k)             (k)
+                                                              X
+                              E ∥xK − yK ∥2 ≤ E ∥xk − yk ∥2 +    λ2i (2M + 2σ∗2 ).
+                                                                                         i=k
+
+As such, we obtain that
+                                                                     (k)           (k)     (k)         (k)
+                              ∥T xK − xK ∥ = ∥T xK − T yK + T yK − yK + yK − xK ∥
+                                                                  (k)              (k)         (k)
+                                                    ≤ 2∥xK − yK ∥ + ∥T yK − yK ∥
+                                                                  (k)
+                                                    ≤ 2∥xK − yK ∥ + ∥T xk − xk ∥,
+
+where the latter follows by the monotonic nonincrease of deterministic Krasnoselskii-Mann iterations. Specifically,
+                                                 K−1
+                                                 X
+                                           2
+                                                     λ2i (M + σ∗2 ) + 2E ∥T xk − xk ∥2 ,
+                                                                                   
+                             E ∥T xK − xK ∥ ≤ 16
+                                                               i=k
+
+
+
+                                                                        8
+which, after multiplication by Λk+1 λk (1 − λk ) and summing over k = 0, . . . , K − 1, we get
+K−1
+X                                         K−1
+                                          X                   K−1
+                                                              X                   K−1
+                                                                                  X
+      Λk+1 λk (1−λk )E ∥T xK − xK ∥2 ≤ 16                         λ2i (M +σ∗2 )+2     Λk+1 λk (1−λk )E ∥T xk − xk ∥2 .
+                                                                                                                 
+                                              Λk+1 λk (1−λk )
+k=0                                            k=0                 i=k                 k=0
+              PK−1
+Dividing by      k=0Λk+1 λk (1 − λk ) and using the bound from Theorem 2.10 then yields
+                                 PK−1                     PK−1                                PK−1
+                                         Λk+1 λk (1 − λk ) i=k λ2i               ∥x0 − p∥2 + 2 k=0 λ2k σ∗2
+           E ∥T xK − xK ∥2 ≤ 16 k=0PK−1                            (M + σ∗2 ) + 2 PK−1
+                         
+                                                                                                           ,
+                                         k=0 Λk+1 λk (1 − λk )                       k=0 Λk+1 λk (1 − λk )
+
+which gives the wanted inequality by replacing M by its value, bounding Λk+1 ≥ ΛK for all k = 0, . . . , K − 1, and
+taking the infimum over all p ∈ Fix(T ).
+
+ Corollary 2.12 (Convergence Rates of Expected Residual).
+ Assume the Problem Assumption 2.1 and the Variance Assumption 2.2 hold, and let (xk ) be the random iterates
+ determined by Algorithm SKM. Then it holds that
+    1. (Polynomial Decreasing Relaxation Parameter) If λk = λ0 · (k + 1)−a for a ∈ (1/2, 1], then, for K ≥ 1,
+                                                                                             
+                                     1−a                                                      1−a
+                            O K − 2
+                                            if a < 1                               o K − 2
+                                                                                                       if a < 1
+        E[∥T xNK − xNK ∥] ≤             1
+                                                       and    min ∥T xk − xk ∥ ≤                1
+                                                                                                    
+                            O ln(K)− 2
+                                            if a = 1        k≤K−1                  o ln(K)− 2
+                                                                                                       if a = 1,
+
+        where the latter holds almost surely as K → ∞. Moreover,
+                                                         2a−1
+                                                    O(K − 2 )
+                                                  
+                                                  
+                                                                              if 1/2 < a < 2/3,
+                                                  O(ln(K) 12 K − 16 )
+                                                  
+                                                                               if a = 2/3,
+                                E[∥T xK − xK ∥] ≤        1−a
+                                                  
+                                                  
+                                                   O(K − 2 )                  if 2/3 < a < 1,
+                                                              1
+                                                    O(ln(K)− 2 )               if a = 1.
+                                                  
+
+      2. (Poly-Logarithmic Decreasing Relaxation Parameter) If λk = λ0 · (k + 1)−a ln(k + e)−1 for a ∈ [1/2, 1], then,
+         for K ≥ 3,                                (        1−a      1
+                                                     O(K − 2 ln(K) 2 )       if 1/2 ≤ a < 1,
+                              E[∥T xNK − xNK ∥] ≤               −21
+                                                     O((ln ln K) )           if a = 1,
+        and, as K → ∞,                                 (         1−a      1
+                                                           o(K − 2 ln(K) 2 )     if 1/2 ≤ a < 1,
+                                  min ∥T xk − xk ∥ ≤                    1
+                                 k≤K−1                     o((ln ln K)− 2 )      if a = 1,
+         where the latter holds almost surely.
+      3. (Constant Horizon-Dependent Relaxation Parameter) If λk ≡ λ0 K −a with a ∈ [1/2, 1) for K ≥ 1, then
+                                                                                                    
+               E[∥T xNK − xNK ∥] ≤ O K − min(a,1−a)/2   and E[∥T xK − xK ∥] ≤ O K − min(−1+2a,1−a)/2 .
+
+                                                                                                   PK−1          PK−1
+Proof. The result follows by Theorems 2.10 and 2.11, by substituting appropriate bounds for         k=0   λk ,    k=0   λ2k
+and ΛK .
+  1. The bounds for the first two inequalities follow directly from Remark 2.7 and Theorem 2.10. For the last
+     inequality, we note that
+                                    K−1
+                                    X             X∞
+                                          2
+                                        λi = λ0 2
+                                                     (i + 1)−2a ≤ O((k + 1)1−2a ),
+                                         i=k         i=k
+       and since 1 − λk ≥ 1/2 eventually, we get that
+                                                            PK−1             !
+                                                                        1−3a
+                                                             k=0 (k + 1)
+                                                QK ≤ O      PK−1              ,
+                                                                         −a
+                                                              k=0 (k + 1)
+
+       and the result again follows from Remark 2.7 and Theorem 2.11.
+
+                                                             9
+  2. This follows directly from Remark 2.7 and Theorem 2.10.
+  3. It holds that
+               K−1
+               X                                      K−1
+                                                      X
+                     λ2k = λ20 K 1−2a      and              λk (1 − λk ) = λ0 K 1−a (1 − λ0 K −a ) = λ0 K 1−a − λ20 K 1−2a .
+               k=0                                    k=0
+
+                            2λ20 K 1−2a        2λ20
+     Moreover, Λ−1
+                K ≤ e              ≤ e      by Equation (1), and the first conclusion follows by Theorem 2.10.
+     Moreover, QK ≤ λ20 K 1−2a , and the second conclusion follows by Theorem 2.11.
+
+ Theorem 2.13 (Strong Convergence of Residuals and Weak Convergence of Iterates).
+ Assume the Problem Assumption 2.1 and the Variance Assumption 2.2 hold, and let (xk ) be the random iterates
+ determined by Algorithm SKM. Moreover, assume the Parameter Assumption 2.6 holds. Then, almost surely, it
+ holds that
+    1. ∥T xk − xk ∥ converges to 0, and
+    2. xk converges weakly to an element in Fix(T ).
+
+Proof. We prove the two statements separately.
+  1. The conclusion follows from Lemma A.3 with ηk = λk , rk = ∥T xk − xk ∥, wk = (Tξk − T )xk . We shall show
+     that the conditions of Lemma A.3 are almost surely satisfied:
+                          P∞       2
+      (a) The condition
+                     P∞ 2k=0 ηk rk < +∞ is almost        surely satisfied. Indeed, note that by the Parameter Assump-
+          tion 2.6, k=0 λk < +∞, and hence λ2k → 0. As such, there exists a k0 ≥ 0 such that, for all k ≥ k0 ,
+          λk ≤ 12 , in which case λk (1 − λk ) ≥ λ2k . As such, almost surely,
+                             ∞
+                             X                ∞
+                                              X                               ∞
+                                                                              X
+                                   ηk rk2 =           λk ∥T xk − xk ∥2 ≤ 2           λk (1 − λk )∥T xk − xk ∥2 < +∞,
+                            k=k0              k=k0                            k=k0
+
+          where the final inequality follows from Lemma 2.9.
+      (b) The main inequality condition is satisfied for L = 2. In fact, consider
+
+               |rk+τ − rk | = |∥T xk+τ − xk+τ ∥ − ∥T xk − xk ∥| ≤ ∥T xk+τ − xk+τ − T xk + xk ∥ ≤ 2∥xk+τ − xk ∥
+                                    X−1
+                                   k+τ                              X−1
+                                                                   k+τ
+                             =2             xi+1 − xi = 2                  λi (T xi − xi ) + λi (Tξi − T )xi
+                                     i=k                             i=k
+                                    X−1                  X−1                               X−1              X−1
+                                   k+τ                  k+τ                               k+τ              k+τ
+                                                                                                                          !
+                             ≤2            λi ri + 2              λi (Tξi − T )xi = 2            ηi ri +          ηi wi   ,
+                                    i=k                     i=k                            i=k              i=k
+
+          where the inequalities follow by the triangle inequality and the nonexpansiveness of T .
+                          PK
+      (c) The quantity ( k=0 ηk wk )K converges almost surely and in L2 . Indeed, since (wk ) is a martingale
+          difference sequence with respect to (FK+1 )K and by applying Lemma 2.4, we get, for any K ≥ 0,
+                                    2
+                                     
+                         XK              XK       h                 i     XK         K
+                                                                                     X
+                                                                  2
+                                             λ2k E ∥(Tξk − T )xk ∥ ≤ 2σ∗2    λ2k + 2   λ2k E ∥xk − p∥2 ,
+                                                                                                     
+                     E      ηk wk  =
+                           k=0                   k=0                                      k=0         k=0
+
+                                                              
+          which is bounded since (λk ) ∈ ℓ2 (N) and E ∥xk − p∥2 is bounded by Lemma 2.9. As such, the martingale
+                     PK
+          sequence ( k=0 ηk wk )K≥0 is uniformly L2 -bounded, so it converges almost surely and in L2 .
+     Specifically, the conditions of Lemma A.3 are almost surely satisfied, and hence rk = ∥T xk − xk ∥ → 0 almost
+     surely.
+  2. Lemma 2.9 proves that (xk ) is almost surely bounded. Consider any weak limit point x∗ of (xk ). By Part
+     1, it holds that T xk − xk → 0 almost surely, and by Browder’s Demiclosedness Principle [10], since T is
+     nonexpansive, it holds that x∗ ∈ Fix(T ) almost surely. Moreover, for any p ∈ Fix(T ), it holds that ∥xk − p∥
+     converges almost surely by Lemma 2.9. Therefore there exists Ωp , dependent on p, representing the realization
+
+                                                                     10
+        of the algorithmic randomness, such that ∥xk − p∥ converges on Ωp and such that P(Ωp ) = 1. We take a
+        countable dense subset {pj } of Fix(T ), which exists as H is separable, and denote Ω = ∩j Ωpj , such that
+        P(Ω) = 1. Then, for any q ∈ Fix(T ), we construct a sequence (qj ) ⊂ {pj } such that qj → q. It holds that
+                                                                                j→∞
+                                          |∥xk − q∥ − ∥xk − qj ∥| ≤ ∥q − qj ∥ → 0.
+
+        Since ∥xk − qj ∥ converges on Ω for all j ≥ 0, ∥xk − q∥ must converge on Ω. As such, ∥xk − p∥ converges almost
+        surely simultaneously for all p ∈ Fix(T ) on the common event Ω. As such, by Opial’s Lemma [36], (xk ) must
+        converge weakly to a point in Fix(T ) almost surely.
+
+2.2.2     Quasi-Contractive Setting
+We now consider the more restrictive setting of a contractive operator, formalized by the following additional
+assumption. Notably, we only assume the expected operator to be q-quasi-contractive, and not each realization.
+
+ Assumption 2.14 (Problem Assumption, Contractiveness).
+ We assume the operator T is q-quasi-contractive for q ∈ (0, 1) and that Fix(T ) is nonempty.
+
+We note that under Assumption 2.14, Fix(T ) is a singleton.
+
+ Lemma 2.15 (Decrease Inequality).
+ Let Problem Assumptions 2.1 and 2.14 and Variance Assumption 2.2 hold, and let (xk ) be the random iterates
+ determined by Algorithm SKM. Then it holds that, with Fix(T ) = {p} and for all k ≥ 0, almost surely,
+
+                        Ek ∥xk+1 − p∥2 ≤ (1 − λk + λk q)2 + 2λ2k ∥xk − p∥2 + 2λ2k σ∗2 .
+                                                              
+
+
+Proof. This follows by the Variance Transfer Lemma 2.4 and noting that
+
+                  Ek ∥xk+1 − p∥2 = Ek ∥(1 − λk )(xk − p) + λk (T xk − p) + λk (Tξk − T )xk ∥2
+                                                                                           
+
+                                   = ∥(1 − λk )(xk − p) + λk (T xk − p)∥2 + Ek ∥λk (Tξk − T )xk ∥2
+                                                                                                  
+
+                                     ≤ (1 − λk + λk q)2 ∥xk − p∥2 + 2λ2k σ∗2 + 2λ2k ∥xk − p∥2 ,
+
+which rewrites to the wanted inequality.
+
+ Theorem 2.16 (Strong Convergence of Iterates and Convergence Rates).
+ Let Problem Assumptions 2.1 and 2.14 and Variance Assumption 2.2 hold, and let (xk ) be the random iterates
+ determined by Algorithm SKM. Then, for Fix(T ) = {p},
+    1. Under Parameter Assumption 2.6, (xk ) converges strongly to p almost surely;
+                                          b
+    2. Under the step-size schedule λk = k+a for a > b > 0, it holds that, for K ≥ 1
+                                                                                     
+                         
+                         O(K −b(1−q) )                 1
+                                               if 2b < 1−q ,                          
+                                                                                      O(K −b(1−q) )                 1
+                                                                                                            if 2b < 1−q ,
+                         
+                                                                                     
+                                                                                      
+                                     1   1                                                        1   1
+            E[∥xK − p∥] ≤ O(log(K) 2 K − 2 )            1
+                                               if 2b = 1−q ,   and   E[∥T xK − xK ∥] ≤ O(log(K) 2 K − 2 )            1
+                                                                                                            if 2b = 1−q ,
+                                                                                     
+                         O(K − 21 )                                                  O(K − 12 )
+                                                                                     
+                                                        1                                                            1
+                                                                                     
+                                               if 2b > 1−q ,                                                if 2b > 1−q ,
+
+
+Proof. We prove the two statements separately.
+  1. By the Robbins-Siegmund Theorem A.1, by rewriting the Decrease Inequality in Lemma 2.15 as
+
+                 Ek ∥xk+1 − p∥2 ≤ 1 + 2λ2k ∥xk − p∥2 − 1 − (1 − λk + λk q)2 ∥xk − p∥2 + 2λ2k σ∗2 ,
+                                                                      
+
+
+        and noting that 1 − (1 − λk + λk q)2 ≥ λk (1 −
+                                                     Pq), we obtain that ∥xk − p∥2 converges almost surely and that
+        P ∞              2                             ∞                                     2
+          k=0 λk ∥xk − p∥ < +∞ almost surely. As       k=0 λk = +∞, we deduce that ∥xk − p∥ → 0 almost surely.
+
+  2. This follows immediately by the Decrease Inequality in Lemma 2.15 and Lemma A.4. The second inequality
+     follows by noting that ∥T xK − xK ∥ = ∥T xK − p + p − xK ∥ ≤ (1 + q)∥xK − p∥.
+
+
+
+                                                               11
+2.3     Numerical Illustration
+We numerically validate our theoretical findings on a set of toy examples1 . Specifically, we consider the setting of
+2 operators on H = R2 , T1 : x 7→ x the identity and T2 : x 7→ eiθ x a rotation by the angle θ ∈ (0, 2π), where we
+identified R2 with C for computational simplicity, sampled uniformly at random. As such, T = E[Tξ ] has as unique
+fixed point the origin. As this is a fixed point of both T1 and T2 , Assumption 2.2 holds with σ∗2 = 0. Importantly,
+the uniformly bounded variance assumption fails for any θ ∈ (0, 2π), since
+
+                                           E ∥(T − Tξ )x∥2 = sin(θ/2)2 ∥x∥2 .
+                                                         
+
+
+Experimental Setup. We run the experiment on 36 equally partitioned       angles θ between
+                                                                                           π/36 and π, with initial
+point x0 = (1, 1). For each angle, given a trajectory, we compute ENK ∥T xNK − xNK ∥2 and ∥T xK − xK ∥2 , average
+it over multiple trajectories, and compare it to the result obtained in Theorems 2.10 and 2.11. These averages are
+over 100 independent trajectories.
+For each trajectory, we run 500000 iterations. For the random expected residual, we set a relaxation parameter of
+λk = λ̄(k + 1)−0.5 ln(k + e)−1 , and for the last-iterate expected residual, λk = λ̄(k + 1)−2/3 , for λ̄ = 0.1.
+Results. The results are shown in Figure 1. The theoretical curves are slightly tighter than the ones obtained in
+the theorems, as we apply Remark 2.5 for the comparison. The empirical decay is consistent with the dependence on
+K predicted by Theorems 2.10 and 2.11. The theoretical bound is conservative in its constants, which is expected
+since Lemma 2.4 does not exploit the linear structure of this example. We note that the last-iterate bounds are
+overly conservative in many scenarios, but accurate (up to constant factors) in extreme cases.
+
+
+
+
+                                      
+Figure 1: Empirical ENK ∥T xNK − xNK ∥2 compared to Theorem 2.10 (left) and empirical ∥T xK − xK ∥2 compared
+to Theorem 2.11 (right).
+
+
+3      Special Cases
+In this section, we illustrate the applicability of our results by considering three representative applications. First, in
+Section 3.1, we revisit Stochastic Gradient Descent, showing our framework recovers known guarantees. Secondly, in
+Section 3.2, we analyze Stochastic Three-Operator Splitting and Stochastic Backward-Forward Splitting, for which
+we obtain, to the best of our knowledge, the first convergence guarantees without uniformly bounded variance.
+The convergence of Stochastic Three-Operator Splitting however requires the restrictive convex-graph assumption,
+which we overcome in Section 3.3, where we consider a novel Stochastic Lifted Three-Operator Splitting.
+
+3.1     Stochastic Gradient Descent
+We consider the standard expectation minimization problem
+
+                                                  min f (x) = Eξ∼D [fξ (x)],                                      (E-min)
+                                                  x∈H
+    1 The code is available on https://github.com/DanielCortild/Stochastic-KM.
+
+
+
+
+                                                              12
+where fξ : H → R is a family of convex and L-smooth functions. We assume the problem is well-defined, in the
+sense that ξ 7→ fξ (x) is D-measurable for all x ∈ H and that Eξ [fξ (x)] is finite for all x ∈ H, and that the problem
+is well-posed, in the sense that f has a minimizer. Moreover, we assume the problem is differentiable, namely that
+fξ is differentiable for D-almost all ξ and ∇f (x) = Eξ [∇fξ (x)]. Regarding the noise, we make the weak assumption
+of bounded variance at the solution [5], namely that there exists a point x∗ ∈ argmin f such that
+                                             E ∥∇fξ (x∗ )∥2 ≤ σ∗2 < +∞.
+                                                          
+                                                                                                             (SGD-Ass)
+A natural algorithm is the one of Stochastic Gradient Descent (SGD), given by, with x0 ∈ H and for k ≥ 0,
+                                                                            iid
+                                    xk+1 = xk − γλk ∇fξk (xk ),    where ξk ∼ D,                                (SGD)
+where (γλk ) ⊂ (0, 2/L) is a sequence of step-sizes. This algorithm may be cast into the form of Algorithm SKM by
+writing Tξ = I − γ∇fξ , which is nonexpansive if γ ∈ (0, 2/L), such that the Problem Assumption 2.1 is verified. We
+note that Fix(T ) = {x∗ : ∇f (x∗ ) = 0} = argmin f . Moreover, for the x∗ ∈ argmin f = Fix(T ) given in Equation
+(SGD-Ass),
+                   E ∥(T − Tξ )x∗ ∥2 = γ 2 E ∥∇fξ (x∗ ) − ∇f (x∗ )∥2 = γ 2 E ∥∇fξ (x∗ )∥2 ≤ γ 2 σ∗2 ,
+                                                                                    
+
+so the Variance Assumption 2.2 is verified up to a multiplicative factor of γ 2 in the constant.
+As such, Corollary 2.12 and Theorem 2.13 imply the following.
+
+ Corollary 3.1 (Application to Algorithm SGD).
+ Consider Problem (E-min) and assume the variance-at-solution condition (SGD-Ass) holds. Let (xk ) be generated
+ by the (SGD) iterations with γ ∈ (0, 2/L). Then, for λ0 ∈ (0, 1),
+                                       (       1                          1
+                                         O(K − 4 )         if λk ≡ λ0 K − 2 ,
+                      E[∥∇f (xNK )∥] ≤             1   1                       1
+                                         O(ln(K) 2 K − 4 ) if λk = λ0 (k + 1)− 2 ln(k + e)−1 ,
+
+ where NK is defined in (2), and
+                                             (      1                          2
+                                              O(K − 6 )         if λk ≡ λ0 K − 3 ,
+                             E[∥∇f (xK )∥] ≤            1   1                       2
+                                              O(ln(K) 2 K − 6 ) if λk = λ0 (k + 1)− 3 .
+
+ Moreover, for the non-finite-horizon step-size schedules, (xk ) converges weakly almost surely to a minimizer of f ,
+ and ∥∇f (xk )∥ → 0 almost surely.
+
+We make several remarks regarding this result.
+  1. By L-smoothness, rates on the function value gap can be translated into rates on the expected gradient norm,
+     since                                     p                p
+                                E[∥∇f (x)∥] ≤ E[∥∇f (x)∥2 ] ≤ 2LE[f (x) − inf f ].
+      The rate O(K −1/4 ) on the expected gradient norm is the rate obtained by translating the known minimax
+      rate for function values for stochastic approximation in the non-strongly convex case [1]. Our obtained rate
+      was already established under the same assumption in [26, 18] for the average iterate.
+  2. Our rate for the last iterate is slower than current state-of-the-art results [3, 24], which achieve (up to loga-
+     rithmic factors) the rate of O(K −1/4 ). Notably, our rate matches the previously best-known rate, presented
+     in [5].
+Overall, this result shows that classical guarantees for Stochastic Gradient Descent can be recovered as a consequence
+of our fixed point framework, without relying on problem-specific arguments.
+
+3.2    Stochastic Three-Operator Splitting
+We consider the monotone inclusion problem
+                                             Find x∗ ∈ Zer(A + B + C),                                          (MI3)
+where A and B are maximally monotone operators, and C is a τ -cocoercive operator. We assume we only have
+access to C through an unbiased stochastic estimator, namely that Cx = E[Cξ x], where Cξ is τ -cocoercive D-almost
+
+                                                          13
+surely. We assume the problem is well-defined, in the sense that ξ 7→ Cξ x is D-measurable for all x ∈ H and E[Cξ x]
+is finite for all x ∈ H, and well-posed, in the sense that Zer(A + B + C) ̸= ∅.
+A standard algorithm to tackle Problem (MI3) is the Three-Operator Splitting method [20], which iterates an
+operator
+                               Tdet = I − JρA + JρB ◦ (2JρA − I − ρC ◦ JρA ),
+where ρ ∈ (0, 2τ ) acts as a step-size. We propose the following stochastic version of the operator
+                                      Tξ = I − JρA + JρB ◦ (2JρA − I − ρCξ ◦ JρA ).                       (STOS-Op)
+Applying Algorithm SKM with the operator Tξ gives rise to the Stochastic Three-Operator Splitting method, given
+by, with x0 ∈ H and for k ≥ 0,
+                              
+                              yk
+                                    = JρA xk ,
+                                                                            iid
+                                zk   = JρB (2yk − xk − ρCξk yk ), where ξk ∼ D,                        (STOS)
+                              
+                                xk+1 = xk − λk (yk − zk ).
+                              
+
+
+An important realization is that in general Tdet ̸= E[Tξ ] = T , since JρB is in general a nonlinear operator. As such,
+we only show convergence to a point in Fix(T ), which are not necessarily solutions to the original problem, provided
+this set is nonempty.
+However, one can show that, in certain settings, the set of fixed points of T = E[Tξ ] coincides with the set of zeros
+of A + B + C, which are the solutions to our problem, such that the operator T still encodes the wanted problem.
+
+ Lemma 3.2 (Link between Fixed Points and Zeros).
+ Let A, B : H 7→ 2H be maximally monotone such that graph(B) is convex, and let Cξ : H → H be τ -cocoercive
+ for D-almost all ξ. Define Tξ as in Equation (STOS-Op) and let T = E[Tξ ]. Then JρA (Fix(T )) = Zer(A + B + C).
+
+Proof. We show the equality by proving both inclusions.
+ (⊆) Take x ∈ Fix(T ), and define v = JρA x, such that x−v
+                                                        ρ ∈ Av. Moreover, define wξ = JρB (2v − x − ρCξ v), such
+     that
+                                     x = T x = E[x − v + wξ ] ⇐⇒     E[wξ ] = v.
+     Moreover,
+                                             v − x v − wξ
+                                              uξ =  +         − Cξ v ∈ Bwξ .
+                                               ρ         ρ
+     As B is assumed to have a convex graph, this implies that
+                                   v − x v − E[wξ ]             v−x
+                        E[uξ ] =        +           − E[Cξ v] =     + 0 − Cv ∈ B(E[wξ ]) = Bv.
+                                     ρ       ρ                   ρ
+     As x−v
+         ρ ∈ Av, this yields the wanted conclusion.
+
+ (⊇) Take z ∈ Zer(A + B + C), and pick a ∈ Az and b ∈ Bz such that a + b + Cz = 0. Define x = z + ρa such that
+     JρA x = z, and wξ = JρB (2z − x − ρCξ z), such that
+                                          z − wξ   z−x          z − wξ
+                                   uξ =          +     − Cξ z =        − a − Cξ z ∈ Bwξ .
+                                             ρ      ρ              ρ
+     By convexity of graph(B), it holds that
+                                      z − E[wξ ]                 z − E[wξ ]
+                           E[uξ ] =              − a − E[Cξ z] =            − a − Cz ∈ B(E[wξ ]).
+                                          ρ                          ρ
+     As B is a monotone operator and b ∈ Bz, it holds that
+                                                                        
+                                      z − E[wξ ]
+                                                 − a − Cz − b, E[wξ ] − z ≥ 0.
+                                          ρ
+     Since a + b + Cz = 0, this implies that − ρ1 ∥z − E[wξ ]∥2 ≥ 0, which in turn implies that z = E[wξ ]. This may
+     be rearranged into E[Tξ x] = x, which implies that x ∈ Fix(T ).
+
+                                                           14
+We make the assumption that the estimator has finite variance at a fixed-point, being that
+
+                                     E ∥(C − Cξ )JρA p∥2 ≤ σ∗2 < +∞,
+                                                         
+                                                                                                            (MI3-Ass)
+
+where p ∈ Fix(T ), and note that, provided B has a convex graph, JρA p is a solution of Problem (MI3).
+We note that the operator Tξ is nonexpansive as each Cξ is τ -cocoercive and ρ ∈ (0, 2τ ), by [20, Proposition 3.1].
+As such, the Problem Assumption 2.1 is satisfied. Moreover, for some p ∈ Fix(T ),
+
+              E ∥(Tξ − T )p∥2 = inf E ∥Tξ p − y∥2
+                                                 
+                                 y∈H
+
+                               ≤ E ∥Tξ p − Tdet p∥2
+                                                   
+
+                               = E ∥JρB (2JρA p − p − ρC(JρA p)) − JρB (2JρA p − p − ρCξ (JρA p))∥2
+                                                                                                   
+
+                               ≤ ρ2 E ∥(Cξ − C)JρA p∥2
+                                                      
+
+                                ≤ ρ2 σ∗2 < +∞,
+
+where the first inequality follows by nonexpansiveness of JρB and the second by assumption on Cξ . As such, the
+Variance Assumption 2.2 is also verified.
+
+ Corollary 3.3 (Application to Algorithm STOS).
+ Consider Problem (MI3) and assume that graph(B) is convex, and assume the variance-at-solution condition
+ (MI3-Ass) holds. Let (xk , yk , zk ) be generated by the (STOS) iterations with ρ ∈ (0, 2τ ). Then, for λ0 ∈ (0, 1),
+                                             (       1                          1
+                                               O(K − 4 )         if λk ≡ λ0 K − 2 ,
+                   E[∥T xNK − xNK ∥] ≤                   1   1                       1
+                                               O(ln(K) 2 K − 4 ) if λk = λ0 (k + 1)− 2 ln(k + e)−1 ,
+
+ where NK is defined in (2), and
+                                              (      1                          2
+                                               O(K − 6 )         if λk ≡ λ0 K − 3 ,
+                            E[∥T xK − xK ∥] ≤            1   1                       2
+                                               O(ln(K) 2 K − 6 ) if λk = λ0 (k + 1)− 3 .
+
+ Moreover, for the non-finite-horizon step-size schedules, (xk ) converges weakly almost surely to a point p ∈ Fix(T )
+ such that JρA p ∈ Zer(A + B + C), and ∥T xk − xk ∥ → 0 almost surely.
+
+To the best of our knowledge, only two prior works have considered the Stochastic Three-Operator Splitting algo-
+rithm, both in the functional setting. The first is [41], which considers the strongly convex setting, and hence does
+not offer a valid comparison. The second is [40], which shows convergence in function values at a rate of O(K −1/2 ),
+which is not directly comparable to our residual terms. Both of these works operate in the uniformly bounded
+variance setting, and we are not aware of any prior works that do not make use of that assumption.
+In Section 3.3, we study an algorithm overcoming the assumption of graph(B) being convex. To conclude this
+subsection, we analyze the case of B = 0, where this assumption is automatically satisfied. Then the problem
+reduces to finding x∗ ∈ Zer(A + C), where A : H → 2H is a maximally monotone operator and C : H → H is a
+τ -cocoercive operator, and Assumption (MI3-Ass) reduces to finite variance of Cξ at a solution of the problem,
+by Lemma 3.2. Moreover, Algorithm (STOS) reduces to a stochastic version of the Backward-Forward splitting
+algorithm [4], given by, with x0 ∈ H and for k ≥ 0,
+                                                                                    iid
+                             xk+1 = (1 − λk )xk + λk (I − ρCξk )JρA xk ,   where ξk ∼ D.                        (SBF)
+
+Specifically, we obtain the following convergence result.
+
+ Corollary 3.4 (Application to Algorithm SBF).
+ Consider Problem (MI3) with B = 0 and assume the variance-at-solution condition (MI3-Ass) holds. Let (xk ) be
+ generated by the (SBF) iterations with ρ ∈ (0, 2τ ). Then, for λ0 ∈ (0, 1),
+                                         (        1                          1
+                                           O(K − 4 )          if λk ≡ λ0 K − 2 ,
+                    E[∥T xNK − xNK ∥] ≤              1   1                       1
+                                           O(ln(K) 2 K − 4 ) if λk = λ0 (k + 1)− 2 ln(k + e)−1 ,
+
+
+                                                            15
+ where NK is defined in (2), and
+                                                (      1                          2
+                                                 O(K − 6 )         if λk ≡ λ0 K − 3 ,
+                              E[∥T xK − xK ∥] ≤            1   1                       2
+                                                 O(ln(K) 2 K − 6 ) if λk = λ0 (k + 1)− 3 .
+
+ Moreover, for the non-finite-horizon step-size schedules, (xk ) converges weakly almost surely to a point p ∈ Fix(T )
+ such that JρA p ∈ Zer(A + C), and ∥T xk − xk ∥ → 0 almost surely.
+
+This result is, to the best of our knowledge, the first result on a stochastic version of the Backward-Forward
+splitting algorithm under our variance assumption. Uniform boundedness assumptions have been studied in this
+context previously [39]. Stochastic Forward-Backward splitting, based on the opposite operator order, was studied
+in [15] under different noise assumptions.
+
+3.3    Stochastic Lifted Three-Operator Splitting
+To overcome the strong assumption of convex graph of B in Section 3.2, we introduce a lifted version of the
+algorithm. Observe that a point x ∈ H solves Problem (MI3) if, and only if, there exists a point u ∈ H such that
+                                                                              
+                                                                      
+                                 x        A       0      0 I          C 0 
+                                    ∈ Zer         −1 +            +           .                    (MI3-Lifted)
+                                 u          0 B         −I 0          0 0 
+                                           |    {z   } | {z } | {z }
+                                                      A              B           C
+
+For A, B maximally monotone operators, B −1 , and therefore also A, is maximally monotone [6]. Moreover, B is
+linear, continuous and skew-symmetric, and therefore also maximally monotone. Finally, C is τ -cocoercive since C
+is. Moreover, without additional assumptions, B is linear, and therefore has a convex graph [2].
+Define Cξ as the matrix with upper-left entry Cξ , the stochastic evaluation of C, and 0 everywhere else. The
+Stochastic Three-Operator Splitting operator from Section 3.2 applied to Problem (MI3-Lifted) then yields
+
+                                     Tξ = I − JρA + JρB ◦ (2JρA − I − ρCξ ◦ JρA ).
+
+Lemma 3.2 guarantees that, for T = E[Tξ ], it holds that JρA (Fix(T )) = Zer(A + B + C). Specifically, for any
+(v̂, û) ∈ Fix(T ), it holds that JρA (v̂, û) = (JρA v̂, JρB −1 û) ∈ Zer(A + B + C), so that JρA v̂ ∈ Zer(A + B + C), which
+thus solves Problem (MI3).
+Applying Algorithm SKM with the operator Tξ gives rise to the Stochastic Lifted Three-Operator Splitting method,
+given by, with x0 = (v0 , u0 ) ∈ H × H and for k ≥ 0,
+                         
+                         
+                         
+                          (ykv , yku )     = (JρA (vk ), uk − ρJρ−1 B (uk /ρ)),
+                         
+                          v u                                                              iid
+                           (zk , zk )       = (2ykv − vk − ρCξk ykv , 2yku − uk ), where ξk ∼ D,
+                                                                                                        (SLTOS)
+                         
+                         
+                          (wkv , wku )     = (1 + ρ2 )−1 (zkv − ρzku , ρzkv + zku ),
+                                                           v    v                 u   u
+                         
+                               k+1 , uk+1 ) = (vk − λk (yk − wk ), uk − λk (yk − wk )).
+                         (v
+
+Note that we used the relation JρB −1 (x) = x − ρJρ−1 B (x/ρ).
+Finally, Assumption (MI3-Ass) reduces to assuming there exists a solution x̂ to Problem (MI3) so that
+
+                                        E ∥(C − Cξ )x̂∥2 ≤ σ∗2 < +∞,
+                                                       
+                                                                                                (Lifted-MI3-Ass)
+
+which, by the same reasoning as in Section 3.2, yields the Variance Assumption 2.2. Specifically, we obtain the
+following result.
+
+ Corollary 3.5 (Application to Algorithm SLTOS).
+ Consider Problem (MI3) and assume the variance-at-solution condition (Lifted-MI3-Ass) holds. Let (xk ) be
+
+
+
+
+                                                             16
+ generated by the (SLTOS) iterations with ρ ∈ (0, 2τ ). Then, for λ0 ∈ (0, 1),
+                                        (        1                          1
+                                          O(K − 4 )          if λk ≡ λ0 K − 2 ,
+                    E[∥T xNK − xNK ∥] ≤             1    1                      1
+                                          O(ln(K) 2 K − 4 ) if λk = λ0 (k + 1)− 2 ln(k + e)−1 ,
+
+ where NK is defined in (2), and
+                                                (         1                           2
+                                                    O(K − 6 )         if λk ≡ λ0 K − 3 ,
+                            E[∥T xK − xK ∥] ≤                 1   1                       2
+                                                    O(ln(K) 2 K − 6 ) if λk = λ0 (k + 1)− 3 .
+
+ Moreover, for the non-finite-horizon step-size schedules, (xk ) converges weakly almost surely to a point x̂ =
+ (v̂, û) ∈ Fix(T ) satisfying JρA (v̂) ∈ Zer(A + B + C), and ∥T xk − xk ∥ → 0 almost surely.
+
+
+4    Conclusion
+In this paper, we established the convergence of the Stochastic Krasnoselskii-Mann iterations for expected fixed-point
+problems under the weak assumption of finite variance at a single fixed point, relaxing the typically-made uniformly
+bounded variance assumption. Under this weaker assumption, we recover the best-known O(ε−4 ) stochastic oracle
+complexity for the convergence of a random expected residual, show the rate holds almost surely for the running
+minimum residual, derive a O(ε−6 ) oracle complexity for the last iterate expected residual, and prove almost sure
+weak convergence of the iterates to a fixed point. These results show that uniformly bounded variance is not intrinsic
+in the analysis of stochastic fixed point methods, and can be replaced by a significantly weaker local condition.
+Furthermore, we demonstrate the applicability of our results by considering four representative examples. For the
+case of Stochastic Gradient Descent, we recover known convergence results. However, for Stochastic Three-Operator
+Splitting and Stochastic Backward-Forward Splitting, we obtain results which are the first to bypass the uniformly
+bounded variance assumption. We additionally introduce a novel Stochastic Lifted Three-Operator Splitting, which
+removes the convex graph assumption required by our Stochastic Three-Operator Splitting method.
+
+Outlook. An interesting direction of future research is to understand how the stochasticity in Algorithm SKM
+interacts with inertia. Specifically, in order to control the stochasticity, we made the assumption that the relaxation
+parameters decrease to 0. However, for inertial results, it is typical that the relaxation sequences need to be
+uniformly bounded away from 0 [19, 33].
+
+Acknowledgments. Daniel Cortild acknowledges the support of the Clarendon Funds Scholarship. Coralia
+Cartis’ work was supported by the Hong Kong Innovation and Technology Commission (InnoHK Project CIMDA)
+and by the EPSRC grant EP/Y028872/1, Mathematical Foundations of Intelligence: An “Erlangen Programme”
+for AI. Juan Peypouquet benefited from the support of the FMJH Program Gaspard Monge for optimization and
+operations research and their interactions with data science.
+
+
+A     Auxiliary Results
+This section collects some known facts about real sequences and random variables, which are central to our conver-
+gence results. The proofs are included for the reader’s convenience.
+We start by recalling the well-known Robbins-Siegmund Almost-Supermartingale Theorem [37].
+
+ Theorem A.1 (Robbins-Siegmund Almost-Supermartingale Theorem).
+                            be nonnegative random variables adapted to the filtration Fk . Let ηk be a nonnegative
+ Let (Xk ), (Yk ) and (Zk ) P
+                             ∞
+ real sequence such that k=0 ηk < +∞. Assume that, for every k ≥ 0, almost surely,
+                                                                             ∞
+                                                                             X
+                             E[Yk+1 |Fk ] ≤ (1 + ηk )Yk − Xk + Zk     and          Zk < +∞,
+                                                                             k=0
+                     P∞
+ Then we have that      k=0 Xk < +∞ almost surely and that Yk converges almost surely.
+
+
+
+                                                              17
+ Lemma A.2.
+ Let (xk ), (ηk ) be real nonnegative sequences such that
+                                       ∞
+                                       X                            ∞
+                                                                    X
+                                             ηk xk < +∞      and            ηk = +∞.
+                                       k=0                          k=0
+
+ Then, as K → ∞,                                                                  !
+                                                                        1
+                                                min        xk = o PK−1                .
+                                             k=0,...,K−1                     ηk
+                                                                     k=0
+
+                        PK−1
+Proof. Define SK = k=0 ηk and mK = mink=0,...,K−1 xk . Fix a K ≥ 1 and a N < K. Then it holds, for all
+k = N, . . . , K − 1, that mK ≤ xk . Specifically,
+                                                            K−1
+                                                            X                 K−1
+                                                                              X
+                                     (SK − SN )mK =               ηk mK ≤             η k xk ,
+                                                            k=N               k=N
+
+which implies that
+                                                           K−1                            K−1
+                                            SK      X           1      X
+                               SK mK ≤            ·   ηk xk =     S
+                                                                     ·   η k xk .
+                                          SK − SN             1− S N
+                                                           k=N                    K       k=N
+
+Taking the lim sup on both sides yields that
+                                                                    ∞
+                                                                    X
+                                               lim sup SK mK ≤             ηk xk ,
+                                                K→∞
+                                                                   k=N
+                  P∞
+since SK → ∞. As k=0 ηk xk < +∞, taking the limit N → ∞ yields that lim supK→∞ SK mK ≤ 0, which means
+that mK = o(1/SK ), as wanted.
+
+Finally, we will make use of [23, Lemma 1], which was originally used to show almost sure last-iterate convergence
+of SGD.
+
+ Lemma A.3.
+                                                             P∞                      P∞
+ Let (rk ) and (ηk ) be nonnegative sequences in R such that k=0 ηk rk2 < +∞ and that k=0 ηk = +∞. Assume
+ there exists an L ≥ 0 such that, for all K ≥ 0 and τ ≥ 0,
+
+                                                      X−1           X−1
+                                                    K+τ            K+τ
+                                                                               !
+                                 |rK+τ − rK | ≤ L ·        ηk rk +        ηk wk ,
+                                                           k=K                k=K
+
+                                           PK
+ where (wk ) is a sequence in H such that ( k=0 ηk wk )K converges in H. Then (rk ) converges to 0.
+
+Proof. If L = 0, the condition implies rk ≡ r is constant, and therefore rk ≡ 0, such that the result follows. Now
+assume L > 0.
+    P∞                   P∞
+As k=0 ηk = +∞ and k=0 ηk rk2 < +∞, it must hold that lim inf k→∞ rk = 0. If lim supk→∞ rk > 0, there must
+exist a ς > 0 such that rk > 3ς infinitely often. Define the sequences (nk ) and (mk ) such that
+                                                                (
+                                                                  ri ≤ ς     if nk ≤ i < mk
+                      nk < mk < nk+1 for all k ≥ 0, and
+                                                                  ri > ς     if mk ≤ i < nk+1 .
+     P∞                    PK
+Since k=0 ηk rk2 < +∞ and ( k=0 ηk wk )K converges, for any ε > 0, there must exist j̄ ≥ 0 such that, for all
+M ≥ mj̄ ,
+                                       M
+                                       X                            M
+                                                                    X
+                                              ηk rk2 < ε   and              ηk wk < ε.
+                                      k=mj̄                        k=mj̄
+
+
+
+                                                             18
+Now fix any m ∈ [mj , nj+1 ) for some j ≥ j̄, such that
+                                                                      nj+1 −1                 nj+1 −1
+                                                                                                                   !
+                                                                          X                     X
+                                        |rm − rnj+1 | ≤ L ·                         ηk rk +                ηk wk
+                                                                          k=m                   k=m
+                                                                               nj+1 −1
+                                                                                                       !
+                                                                                X
+                                                                          −1
+                                                           ≤L·        ς                  ηk rk ς + ε
+                                                                                k=m
+                                                                               nj+1 −1
+                                                                                                      !
+                                                                                X
+                                                                          −1
+                                                           ≤L·        ς                  ηk rk2 + ε
+                                                                                k=m
+                                                                      −1
+                                                                              
+                                                           ≤L· ς           ε+ε .
+                 ς
+Picking ε = L(ς −1 +1) , we get that
+                                                     rm ≤ rnj+1 + |rm − rnj+1 | ≤ 2ς.
+This contradicts the assumption that rk > 3ς infinitely often, and hence means that it must hold that lim supk→∞ rk =
+0, as claimed.
+
+ Lemma A.4.
+ Let a > 0, b, c, d ≥ 0 and (uk ) be a nonnegative sequence in R so that, for every k ≥ 0,
+                                                                  
+                                                    b        c                d
+                                    uk+1 ≤ 1 −         +         2
+                                                                     uk +          .
+                                                 k + a (k + a)            (k + a)2
+
+ Then                                                         −b
+                                                         O(k )
+                                                                      if b < 1,
+                                                                    −1
+                                                     uk ≤ O(log(k)k ) if b = 1,
+                                                         
+                                                           O(k −1 )
+                                                         
+                                                                       if b > 1.
+
+                                                     b       c
+Proof. Choose k0 ≥ 0 sufficiently large so that 1 − k+a + (k+a) 2 > 0 for k ≥ k0 . Define
+
+
+
+                                                            k−1
+                                                            Y                          
+                                                                           b       c
+                                                  Pk,j =              1−      +          ,
+                                                             i=j
+                                                                         i + a (i + a)2
+
+so that
+                                                                                     k−1
+                                                                                     X       Pk,j+1
+                                                     uk ≤ Pk,k0 uk0 + d ·                            .
+                                                                                            (j + a)2
+                                                                                     j=k0
+
+Now note that, as log(1 + x) ≤ x for x > −1, for j ≥ k0 ,
+                                                 k−1        k−1
+                                                                                             cπ 2
+                                                                                        
+                                                 X    1     X       1                k+a
+                                 log Pk,j ≤ −b           +c             2
+                                                                          ≤ −b log         +      ,
+                                                 i=j
+                                                     i+a    i=j
+                                                                (i + a)              j+a      6
+
+so that                                             2      b          b
+                                                    cπ    j+a          j+a
+                                         Pk,j ≤ exp    ·         =M·          .
+                                                     6    k+a          k+a
+Plugging this back into the recursion gives
+                                                                b
+                           b                k−1        j+1+a                               b                            b k−1
+                   k0 + a                     X           k+a                        k0 + a                   dM           1     X
+    uk ≤ M ·                     uk0 + dM ·                           ≤M·                          uk0 +               1 +     ·    (j + a)b−2 ,
+                   k+a                                (j + a)2                       k+a                    (k + a)b       a
+                                              j=k0                                                                              j=k0
+
+which yields the wanted result by considering the cases b < 1, b = 1 and b > 1.
+
+
+
+                                                                               19
+References
+ [1] A. Agarwal, M. J. Wainwright, P. Bartlett, and P. Ravikumar. Information-theoretic lower bounds on the oracle
+     complexity of convex optimization. In Advances in Neural Information Processing Systems, volume 22, 2009.
+
+ [2] M. M. Alves and B. F. Svaiter. Maximal Monotone Operators with a Unique Extension to the Bidual. Journal of
+     Convex Analysis, 16(2):409–421, 2009.
+
+ [3] A. Attia, M. Schliserman, U. Sherman, and T. Koren. Fast Last-Iterate Convergence of SGD in the Smooth Interpolation
+     Regime. In The Thirty-ninth Annual Conference on Neural Information Processing Systems, Oct. 2025.
+
+ [4] H. Attouch, J. Peypouquet, and P. Redont. Backward–forward algorithms for structured monotone inclusions in Hilbert
+     spaces. Journal of Mathematical Analysis and Applications, 457(2):1095–1117, Jan. 2018.
+
+ [5] F. Bach and E. Moulines. Non-Asymptotic Analysis of Stochastic Approximation Algorithms for Machine Learning. In
+     Advances in Neural Information Processing Systems, volume 24, 2011.
+
+ [6] H. H. Bauschke and P. L. Combettes. Convex Analysis and Monotone Operator Theory in Hilbert Spaces. CMS Books
+     in Mathematics. Springer International Publishing, Cham, 2017.
+
+ [7] L. Bottou, F. E. Curtis, and J. Nocedal. Optimization Methods for Large-Scale Machine Learning. SIAM Review,
+     60(2):223–311, Jan. 2018.
+
+ [8] M. Bravo and R. Cominetti. Stochastic Fixed-Point Iterations for Nonexpansive Maps: Convergence and Error Bounds.
+     SIAM Journal on Control and Optimization, 62(1):191–219, Feb. 2024.
+
+ [9] M. Bravo and J. P. Contreras. Stochastic Halpern iteration in normed spaces and applications to reinforcement learning.
+     Mathematical Programming, Mar. 2026.
+
+[10] F. E. Browder. Nonexpansive nonlinear operators in a Banach space. Proceedings of the National Academy of Sciences,
+     54(4):1041–1044, 1965.
+
+[11] Z. Chen, S. T. Maguluri, S. Shakkottai, and K. Shanmugam. Finite-Sample Analysis of Contractive Stochastic Approx-
+     imation Using Smooth Convex Envelopes. In Advances in Neural Information Processing Systems, volume 33, pages
+     8223–8234. Curran Associates, Inc., 2020.
+
+[12] P. L. Combettes and J. I. Madariaga. A Geometric Framework for Stochastic Iterations, Apr. 2025. arXiv preprint
+     arXiv:2504.02761.
+
+[13] P. L. Combettes and J. I. Madariaga. Almost Supermartingale Extensions of Olivier’s Theorem, July 2026. arXiv
+     preprint arXiv:2607.02489.
+
+[14] P. L. Combettes and J.-C. Pesquet. Stochastic Quasi-Fejér Block-Coordinate Fixed Point Iterations with Random
+     Sweeping. SIAM Journal on Optimization, 25(2):1221–1248, Jan. 2015.
+
+[15] P. L. Combettes and J.-C. Pesquet. Stochastic Approximations and Perturbations in Forward-Backward Splitting for
+     Monotone Operators. Pure and Applied Functional Analysis, 1(1):13–37, 2016.
+
+[16] P. L. Combettes and J.-C. Pesquet. Stochastic quasi-Fejér block-coordinate fixed point iterations with random sweeping
+     II: Mean-square and linear convergence. Mathematical Programming, 174(1):433–451, Mar. 2019.
+
+[17] D. Cortild and C. Cartis. Quadratic Objective Perturbation: Curvature-Based Differential Privacy, May 2026. arXiv
+     preprint arXiv:2605.05905.
+
+[18] D. Cortild, L. Ketels, J. Peypouquet, and G. Garrigos. Bias-Optimal Bounds for SGD: A Computer-Aided Lyapunov
+     Analysis, May 2025. arXiv preprint arXiv:2505.17965.
+
+[19] D. Cortild and J. Peypouquet. Krasnoselskii–Mann Iterations: Inertia, Perturbations and Approximation. Journal of
+     Optimization Theory and Applications, 204(2):35, Jan. 2025.
+
+[20] D. Davis and W. Yin. A Three-Operator Splitting Scheme and its Optimization Applications. Set-Valued and Variational
+     Analysis, 25(4):829–858, Dec. 2017.
+
+[21] Q.-L. Dong, Y. J. Cho, S. He, P. M. Pardalos, and T. M. Rassias. The Krasnosel’skiı̆-Mann Iterative Method: Recent
+     Progress and Applications. Springer Cham, 2022.
+
+[22] S. S. Du and W. Hu. Linear Convergence of the Primal-Dual Gradient Method for Convex-Concave Saddle Point
+     Problems without Strong Convexity, Feb. 2019. arXiv preprint arXiv:1802.01504.
+
+
+                                                            20
+[23] Francesco Orabona. Almost Sure Convergence of SGD on Smooth Non-Convex Functions, Oct. 2020.
+
+[24] G. Garrigos, D. Cortild, L. Ketels, and J. Peypouquet. Last-Iterate Complexity of SGD for Convex and Smooth
+     Stochastic Problems, July 2025. arXiv preprint arXiv:2507.14122.
+
+[25] G. Garrigos and R. M. Gower. Handbook of Convergence Theorems for (Stochastic) Gradient Methods, Mar. 2024.
+     arXiv preprint arXiv:2301.11235.
+
+[26] R. Gower, O. Sebbouh, and N. Loizou. SGD for Structured Nonconvex Functions: Learning Rates, Minibatching and
+     Interpolation. In Proceedings of the 24th International Conference on Artificial Intelligence and Statistics, Mar. 2021.
+
+[27] R. M. Gower, N. Loizou, X. Qian, A. Sailanbayev, E. Shulgin, and P. Richtárik. SGD: General Analysis and Improved
+     Rates. In Proceedings of the 36th International Conference on Machine Learning, May 2019.
+
+[28] C. W. Groetsch. A note on segmenting Mann iterates. Journal of Mathematical Analysis and Applications, 40(2):369–
+     372, 1972.
+
+[29] H. Iiduka. Mini-Batch Stochastic Krasnosel’ski\uı-Mann Algorithm for Nonexpansive Fixed Point Problems, Apr. 2026.
+     arXiv preprint arXiv:2604.06909.
+
+[30] A. Khaled and P. Richtárik. Better Theory for SGD in the Nonconvex World. Transactions on Machine Learning
+     Research, 2023.
+
+[31] M. A. Krasnosel’skii. Two remarks on the method of successive approximations. Uspekhi Matematicheskikh Nauk,
+     10(1(63)):123–127, 1955.
+
+[32] W. R. Mann. Mean value methods in iteration. Proceedings of the American Mathematical Society, 4:506–510, 1953.
+
+[33] J. J. Maulén, I. Fierro, and J. Peypouquet. Inertial Krasnoselskii-Mann Iterations. Set-Valued and Variational Analysis,
+     32(2):10, 2024.
+
+[34] D. Needell, N. Srebro, and R. Ward. Stochastic gradient descent, weighted sampling, and the randomized Kaczmarz
+     algorithm. Mathematical Programming, 155(1):549–573, Jan. 2016.
+
+[35] L. Nguyen, P. H. Nguyen, M. Dijk, P. Richtarik, K. Scheinberg, and M. Takac. SGD and Hogwild! Convergence Without
+     the Bounded Gradients Assumption. In Proceedings of the 35th International Conference on Machine Learning, pages
+     3750–3758, July 2018.
+
+[36] Z. Opial. Weak convergence of the sequence of successive approximations for nonexpansive mappings. Bulletin of the
+     American Mathematical Society, 73(4):591–597, 1967.
+
+[37] H. Robbins and D. Siegmund. A convergence theorem for non negative almost supermartingales and some applications.
+     In Optimizing Methods in Statistics, pages 233–257. Elsevier, 1971.
+
+[38] H. H. Schaefer. Über die Methode sukzessiver Approximationen. Jahresbericht Der Deutschen Mathematiker-vereinigung,
+     59:131–140, 1957.
+
+[39] Q. Tran-Dinh. VFOSA: Variance-Reduced Fast Operator Splitting Algorithms for Generalized Equations. Journal of
+     Machine Learning Research, 26:1–68, 2025.
+
+[40] A. Yurtsever, A. Gu, and S. Sra. Three Operator Splitting with Subgradients, Stochastic Gradients, and Adaptive
+     Learning Rates. In Advances in Neural Information Processing Systems, volume 34, 2021.
+
+[41] A. Yurtsever, B. C. Vu, and V. Cevher. Stochastic Three-Composite Convex Minimization. In Advances in Neural
+     Information Processing Systems, volume 29, 2016.
+
+
+
+
+                                                             21
+

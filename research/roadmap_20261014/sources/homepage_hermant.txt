@@ -1,0 +1,21 @@
+Julien Hermant
+Julien Hermant
+Resume
+Publications
+Events
+Teaching
+Julien Hermant
+PhD student in applied mathematics at University of Bordeaux
+I am a PhD student at the Institute of Mathematics of Bordeaux (IMB), in the team Image, Optimization, and Probabilities (IOP), under the supervision of Jean-Francois Aujol, Charles Dossal and Aude Rondepierre,
+and falls within the PEPR PDE-AI project funded by the ANR.
+My PhD research focuses on mathematical optimization. More specifically, I study the theoretical aspects of acceleration with momentum-based algorithms for minimizing nonconvex functions and for stochastic optimization settings. More broadly, I am interested in the connections between machine learning and optimization.
+Email me
+Google Scholar
+GitHub
+LinkedIn
+ORCID
+Julien Hermant
+•
+2026
+Powered by
+Beautiful Jekyll

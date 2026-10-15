@@ -1,0 +1,1868 @@
+                                          STOCHASTIC HALPERN ITERATION IN NORMED SPACES AND APPLICATIONS
+                                                           TO REINFORCEMENT LEARNING
+
+
+
+
+arXiv:2403.12338v4 [math.OC] 9 May 2025
+                                                                            MARIO BRAVO AND JUAN PABLO CONTRERAS
+
+
+                                                 Abstract. We analyze the oracle complexity of the stochastic Halpern iteration with minibatch, where we
+                                                 aim to approximate fixed-points of nonexpansive and contractive operators in a normed finite-dimensional
+                                                 space. We show that if the underlying stochastic oracle has uniformly bounded variance, our method exhibits
+                                                 an overall oracle complexity of Õ(ε−5 ), to obtain ε expected fixed-point residual for nonexpansive operators,
+                                                 improving recent rates established for the stochastic Krasnoselskii-Mann iteration. Also, we establish a
+                                                 lower bound of Ω(ε−3 ) which applies to a wide range of algorithms, including all averaged iterations even
+                                                 with minibatching. Using a suitable modification of our approach, we derive a O(ε−2 (1 − γ)−3 ) complexity
+                                                 bound in the case in which the operator is a γ-contraction to obtain an approximation of the fixed-point.
+                                                 As an application, we propose new model-free algorithms for average and discounted reward MDPs. For the
+                                                 average reward case, our method applies to weakly communicating MDPs without requiring prior parameter
+                                                 knowledge.
+
+
+
+
+                                                                                             1. Introduction
+
+                                             Fixed-point iterations are fundamental in mathematics and engineering, providing a systematic way
+                                          to approximate the solutions of several problems, including operator equations, nonlinear equations, and
+                                          optimization problems. These iterations form the backbone of many optimization algorithms, such as the
+                                          gradient descent or splitting methods, which are widely used in machine learning, control systems, and
+                                          scientific computing.
+                                             In recent years, stochastic variants of these problems have gained significant attention because of their
+                                          applicability in scenarios where the underlying operators are not known exactly or are subject to noise,
+                                          uncertainty, or randomness. Nevertheless, general stochastic fixed-point iterations have received little
+                                          attention compared to other related setups, such as stochastic monotone inclusions, stochastic variational
+                                          inequalities, or stochastic optimization which are mainly developed in the Euclidean setting.
+                                             The main goal of this work is then to study a simple stochastic version of the well-known Halpern
+                                          iteration, where we assume that the underlying operator is nonexpansive or contracting for some general
+                                          norm in finite dimension. Using a simple approach derived mainly from the construction of recursive
+                                          bounds and a simple minibatching technique, we study the overall oracle complexity of this algorithm
+                                          while showing applications that are intrinsically of a non-Euclidean nature.
+
+                                            2010 Mathematics Subject Classification. 47J25, 47J26, 65J15, 65K15.
+                                            Key words and phrases. stochastic fixed-point iterations, nonexpansive maps, error bounds, convergence rates, Q-learning.
+                                                                                                       1
+2                                       M. BRAVO AND J.P. CONTRERAS
+
+1.1. Problem setup. We consider Rd endowed with a general norm k · k, and denote by kxk2 the standard
+                            P
+Euclidean norm, i.e. kxk22 = di=1 x2i . In what follows, T : Rd → Rd is such that
+
+                                  kT x − T yk ≤ γ kx − yk ,            ∀x, y ∈ Rd .
+
+We say that T is a contraction if γ ∈ (0, 1), and that T is nonexpansive if γ = 1. We assume that in the
+nonexpansive case Fix T 6= ∅, where Fix T stands for the set of fixed-points of T . We are interested in
+computing an approximate solution of the fixed-point equation x = T x.
+  Our method is primarly inspired by the standard Halpern iteration [25]
+
+(H)                                xn = (1 − βn )x0 + βn T xn−1 ,        ∀ n ≥ 1,
+
+where (βn )n is a nondecreasing stepsize sequence satisfying 0 < βn < 1, limn→∞ βn = 1, and x0 ∈ Rd is an
+arbitrary initial condition. It is worth mentioning that the original Halpern iteration uses an arbitrary u
+called the anchoring point that can be different from the initial point x0 . In that case, the iteration reads
+xn = (1 − βn )u + βn T xn−1 . We assume here, without loss of generality, that the anchoring point is exactly
+x0 .
+   Naturally, iteration (H) is only implementable in the case where one has access to T x at any point x.
+In this paper, we assume that the vector T x is only accessible through T̃ which is a noisy version of T .
+Specifically, we consider the following
+
+Assumption 1.1. The access to the operator T occurs through a stochastic oracle T̃ : Rd × Ξ → Rd which
+is an unbiased approximation of T in the sense that
+
+                                     E(T̃ (x, ξ)) = T x     for all x ∈ Rd ,
+                                                                                                                   
+with ξ drawn from some distribution Dx over Ξ. Additionally, we assume that E               ||T̃ (x, ξ) − T x||22       is
+finite for every x ∈ Rd .
+
+  We say that the oracle T̃ has uniformly bounded variance (with bound σ 2 ) if there exists a positive
+constant σ 2 such that                                  
+                                                                   2
+                                       sup E     T̃ (x, ξ) − T x        ≤ σ2 .
+                                      x∈Rd                         2
+
+Uniformly bounded variance is evidently a stronger condition than the variance requirement in Assump-
+tion 1.1. Importantly, our results extend beyond the uniformly bounded case, permitting the variance to
+grow in a controlled manner with the state variable xn . This flexibility is crucial for the application to
+MDPs discussed in Section 5.
+   A first possible idea is to consider the iteration xn = (1 − βn )x0 + βn T̃ xn−1 . Intuitively, even if the
+term T̃ (x, ξ) − T x is with uniformly bounded variance, because βn goes to 1, the last iterate will inevitably
+contain some nonnegligible noise term. To address this issue, we adopt a simple increasing minibatch
+strategy designed to mitigate the variance of the error. This approach lead to the study of the following
+                                 STOCHASTIC HALPERN AND APPLICATIONS                                        3
+
+inexact version of the Halpern iteration (H),
+
+(iH)                          xn = (1 − βn )x0 + βn (T xn−1 + Un ),   ∀ n ≥ 1,
+
+where Un is such that E(Un ) = 0 and the term E(kUn k) can be controlled appropriately. It is worth noting
+that we do not assume further properties on the stochastic oracle in order to maintain our results as general
+as possible. See Section 2 for a precise definition and related discussions.
+   We are interested in the problem of estimating the oracle complexity to find an approximate fixed-point
+of T , which is measured as the number of calls to the vector stochastic oracle T̃ . In the case where T is
+nonexpansive, we estimate the oracle complexity to find a last-iterate approximate solution xn in the sense
+that the expected fixed-point residual E(kxn − T xn k) is smaller than a given tolerance. For a contracting
+operator T , we aim to find oracle complexity bounds for the expected distance of the last iterate xn to the
+unique fixed-point x∗ , i.e. the quantity E(kxn − x∗ k).
+Notation. Let us set some basic notation that we use in this paper. Given that all norms in Rd are
+equivalent, let µ > 0 be such that kxk ≤ µ kxk2 for all x ∈ Rd and we denote by kxksp = maxi xi − mini xi
+the so-called span seminorm of x.
+   We adopt the standard big-O notation, that is, for two real functions f, g : we say f (x) = O(g(x)) if
+there are two constants C and c such that f (x) ≤ Cg(x) for all x ≥ c. We use Õ if we ignore logarithmic
+factors. Analogously, f (x) = Ω(g(x)) if f (x) ≥ Cg(x) for all x ≥ c.
+
+1.2. Our contributions. In what follows, we briefly describe our main findings.
+Nonexpansive maps. We show that if T is nonexpansive and the stochastic oracle is with bounded
+variance, then our method achieves last-iterate oracle complexity of Õ(ε−5 ) for oracles with uniformly
+bounded variance (see Corollary 3.5). This result improves over the guarantee Õ(ε−6 ) established for
+the stochastic Krasnoselskii-Mann iteration in [13] also for the last-iterate. This is, to the best of our
+knowledge, the only general complexity result available at the moment for the non-Euclidean setting.
+   Additionally, we establish a lower bound of Ω(ε−3 ) for the overall oracle complexity for nonexpansive
+maps with uniformly bounded variance stochastic oracle and where the underlying operator has bounded
+range. In particular, this lower bound applies to every algorithm such that the iterations are a linear
+combination of the previous oracle calls, including well-known algorithms such as the Krasnoselskii-Mann
+and Halpern iteration. Our result is also true in the case where the use of minibatches is allowed (c.f.
+Theorem 3.7).
+   Finally, we extend classical results in [51] by proving that the iteration converges to a fixed point of T
+provided that the norm of the space is smooth (c.f. Theorem 3.10).
+Contractions. In the case where T is a contraction with parameter γ ∈ (0, 1), we prove that if the
+stochastic oracle is with uniformly bounded variance, then our method finds an ε−optimal solution after
+                          
+at most O ε−2 (1 − γ)−3 queries (Corollary 4.3). Given that this is a general result, the bound depends
+on the specific instance and can be refined if more structure is available. Indeed, the same holds for the
+nonexpansive case.
+4                                       M. BRAVO AND J.P. CONTRERAS
+
+   Nevertheless, it is worth noting that, as pointed out in recent work [36], little attention has been devoted
+to the study of stochastic fixed-point iterations for contracting operators without assuming some form of
+monotonicity for T associated with an underlying Bellman operator (see Remark 5.7 for details). Up to
+our knowledge, there is no result available in this generality showing explicit dependence on (1 − γ) and ε.
+Markov Decision Processes (MDPs). As an application of our approach, we present a new model-free
+algorithm for weakly communicating MDPs with average reward, assuming the use of a generative model
+that can sample the next state from any state-action pair. In Theorem 5.2 we show that, given ε > 0
+Algorithm 2 can find an iterate such that the Bellman error is at most ε with a sample complexity of
+Õ(|S × A|kh∗ k7sp ε−7 ), where S and A represent the state and action spaces, respectively, and h∗ denotes
+an optimal bias function. Our result on the Bellman error can be used to find an ε-optimal policy in
+expectation and with high probability with the same sample complexity, (see Corollary 5.5). Our procedure
+is without prior knowledge in the sense that it requires no parameter information as input but it does not
+provide a stopping rule to achieve ε precision, as it is the case for other related algorithms (see Section 1.3
+for details). We then extend our results to the discounted case, where the induced procedure outputs a
+                                                                                                      
+Q value with expected distance ε > 0 to the optimal Q∗ after at most Õ |S × A|ε−2 (1 − γ)−5 samples
+(see Theorem 5.6). This matches some well-known results in the literature (see e.g. [48]) in the context of
+model-free procedures.
+   Finally, we emphasize that, in both the average and discounted settings, our analysis does not rely on spe-
+cific structural properties of the Bellman operator, such as component-wise monotonicity (see Remark 5.7
+for a discussion).
+Our Approach. The techniques we use to obtain our results are mainly based on a recursive bound
+approach developed first to the study of the well-known Krasnoselskii-Mann iteration,
+
+(KM)                                xn = (1−αn )xn + αn T xn−1      n≥1
+
+in Banach spaces, where (αn )n ⊆ (0, 1) is a sequence of stepsizes [7, 12, 17]. Later, the analysis was
+extended to general averaged fixed-point iteration [11]. In the case of the Halpern iteration, being a
+particular case of an averaged iteration, the bounds developed are particularly explicit, giving way to an
+analysis that is simple yet effective. Roughly speaking, in the stochastic setting, we will adapt these ideas
+by compensating the effect of repeated calls to the oracle with the smooth contracting effect of the term
+βn < 1. Given that βn approaches one, we will take increasing minibatch sizes. It is worth mentioning that
+                                                      n
+our explicit results are obtained for the case βn = n+1 . The reason behind this particular choice is twofold.
+On the one hand, it is known that in the noiseless case this stepsize gives the best possible bounds in the
+Euclidean setting [35, 43] and, up to log factors, also in the Banach framework. On the other hand, as we
+shall see in what follows, this choice leads to clean estimates with computable constants when calculating
+fixed-point residuals.
+                                  STOCHASTIC HALPERN AND APPLICATIONS                                           5
+
+1.3. Related work.
+Deterministic setup. For nonexpansive maps in general normed spaces, recent efforts have been devoted
+to establish nonasymptotic convergence guarantees for the fixed-point residual kxn − T xn k of some classical
+iterations. For (KM), convergence rates were initially determined by [7, 8] for constant stepsizes αn ≡ α,
+                           √
+showing a rate of O(1/ n). Later, these results were extended by [17] to arbitrary steps in (0, 1). The
+sharpness of the bound in [17] was obtained in [12]. The first proof of the rate O(1/n) was established in
+                                                                           n
+[43] using the Halpern iteration (H) with the specific stepsize βn = n+2      . Later, in [11], it was shown that
+the traditional Halpern stepsize choice βn = n+1 only yields the rate O( logn n ), which is tight, while in [18]
+                                                   n
+
+the optimal coefficients for the Halpern iteration were determined, improving the constants involved.
+   For Euclidean spaces, the exact upper bounds were determined using the Performance Estimation Prob-
+lems (PEP) approach, originally proposed in [22]. However, the convergence rate does not show an im-
+                                                                                                               n
+provement compared to the general Banach setting. The classical Halpern iteration with stepsize βn = n+1
+was examined in [35] and the author proved the convergence rate O(1/n), which improves by a logarithmic
+factor compared to the convergence rate in general normed spaces.
+   Halpern iteration has also been successfully applied in the context of monotone inclusions, which is
+strongly connected to fixed-point iterations [9] in the Euclidean setup. In particular, using PEP, [30]
+determined an optimal inertial iteration to approximate the zeros of a cocoercive operator that was shown
+to be equivalent to the Halpern iteration in [18] and [42, Chapter 12.2]. Beyond PEP, convergence rates
+have also been established using a potential function approach [19, 20, 32, 46].
+Stochastic setup. In the Euclidean setting, Halpern-type iterations have been applied to approximate
+solutions of Minty variational inequalities for Lipschitz operators satisfying the negative comonotone prop-
+erty [32], as well as to find the zeros of a cocoercive operator [14]. The latter approach employs minibatches
+with linear growth, leveraging techniques developed for the deterministic setting of nonexpansive operators
+[19]. This strategy leads to an overall oracle complexity of O(ε−4 ) for obtaining an approximate solution in
+expectation within a tolerance ε. The authors also show that the rate O(ε−3 ) is achievable under further
+assumptions on the stochastic oracle, such as the multi-point oracle and Lipschitz in expectation proper-
+ties. Under the same enhanced stochastic oracle, [34] obtained similar results in the cocoercive setting.
+Recently, [4] studied a stochastic Halpern iteration for cohypomonotone operators [10], a condition that
+allows possible nonmonotonicity while including monotone maps. The authors establish, under no further
+assumptions on the oracle structure, a complexity of O(ε−4 ) for the fixed-point residual.
+   Up to our knowledge, the only work that studies convergence rates for stochastic fixed-point itera-
+tions of nonexpansive maps in general normed spaces is [13]. Here, the authors consider the stochastic
+Krasnoselskii-Mann iteration xn = (1−αn )xn + αn (T xn−1 + Un ), where Un is assumed to be a martingale
+difference sequence. The authors prove that if the variance of the noise is uniformly bounded, the stochastic
+Krasnoselskii-Mann iteration with constant stepsize requires at most O(ε−6 ) iterations to reach a solution
+whose expected fixed-point residual is less than ε. This is done using a well-chosen constant stepsize.
+6                                        M. BRAVO AND J.P. CONTRERAS
+
+   For contractive operators in general normed spaces, recent works have established an O(ε−2 ) convergence
+rate. In particular, [16] employs a Lyapunov function-based analysis, while [48] studies the problem under
+monotonicity and quasi-contractivity assumptions defined with respect to a partial order and gauge norms
+induced by an underlying cone. The optimality of the O(ε−2 ) rate can be justified through the connection
+between stochastic approximation and classical statistical theory. Under mild conditions, the sum of i.i.d.
+random variables in Banach spaces satisfies a central limit theorem. For a formal discussion, we refer the
+reader to [36] and [16].
+Lower bounds. In the noiseless scenario, the lower bound for fixed-point iterations was determined in
+[18] showing that the rate kxn − T xn k = O(1/n) is optimal for every averaged iteration. Moreover, this
+rate cannot be improved even in spaces with more structure, such as Hilbert spaces. In particular, [38]
+proved that no method such that xn belongs to the linear span of {x0 , T x0 , . . . , T xn−1 } can achieve a better
+convergence rate.
+   For stochastic convex optimization, the results date back to the information-based complexity developed
+in [37]. In this line, improvements in the dimension dependence were obtained in [2] for the setup of
+statistical estimation. Similar results were obtained in [40] with a different technique that yields lower
+bounds for a special class of descent methods that are not covered in [2]. Finding stationary points of
+convex functions relates to finding fixed-points of nonexpansive operators. In this context, the work [24]
+established the lower bounds for stochastic convex optimization problems in the local and global stochastic
+oracle model. For nonconvex problems, the lower bound was established for the first time in [23] for the
+sum of smooth functions, matching the upper bounds of the variance-reduced methods SPIDER [23] and
+SNVRG [52]. For further results and discussion, we refer the reader to [5, 21] and the references therein.
+Markov Decision Processes (MDPs). A significant part of the research on complexity for MDPs
+focuses on computing an approximately optimal policy or an aproximate value function, given access to a
+generative model. From an algorithmic perspective, there are two main approaches. The first is model-
+based methods, where transitions and rewards are sampled in advance in a full batch and then used to
+solve the model using dynamic programming techniques. In contrast, model-free algorithms estimate values
+directly from interactions with the environment [45].
+   For the γ-discounted reward case, [6] establish a Ω(|S × A|(1 − γ)−3 ε−2 ) complexity lower bound for
+obtaining an ε-optimal policy –also valid to compute almost optimal Q-factors. Algorithms with oracle
+complexity matching this lower bound has been obtained both in the model-base case (see, e.g [3] for
+policies) and by means of model-free procedures (e.g. [27, 49] for values and policies, respectively). The
+reader is referred to the discussion in [27] for a recent account on this and related matters.
+   For average reward MDPs, to compute ε-optimal policies, [29] established an Ω(|S × A|tmix ε−2 ) lower
+bound and designed a model-based algorithm achieving Õ(|S × A|tmix ε−3 ), under the assumption that there
+exists a finite bound tmix for the mixing time of all policies. A complexity lower bound of Ω(|S × A|kh∗ ksp ε−2 )
+for weakly communicating MDPs was established in [50]. Recently [53] studied a model-based algorithm
+achieving this complexity for weakly communicating and multichain MDPs, a broader class.
+                                 STOCHASTIC HALPERN AND APPLICATIONS                                         7
+
+
+   Regarding model-free procedures, [28] obtains a sample complexity of Õ(|S × A|tmix ε−2 ), assuming fi-
+nite mixing times. Using the same mixing hypothesis, [33] proposes a procedure with a sample complexity
+of O(|S × A|t3mix ε−2 ), which is valid for unichain MDPs, a smaller class than weakly communicating. It
+is worth noting that these works require prior knowledge to run the algorithm, often given by tmix or
+kh∗ ksp . A model-free algorithm without prior knowledge is studied in [26], where a sample complex-
+ity of Õ(|S × A|t8mix ε−8 ) is obtained, again under a finite tmix . Also, [13] establishes a complexity of
+O(|S × A|3/2 ε−a ), with a > 10, for the RVI-Q-learning algorithm [1], under the expected Bellman error
+metric E(kHQ − Qk∞ ) for unichain MDPs, where H is the Bellman operator. We stress that in both [26]
+and [13], as in our algorithm, there is no rule to stop the procedure at a given precision ε unless more
+information is available. Recently, during the first revision of this paper and the preparation of its revised
+version, a near-optimal complexity of Õ(|S × A| kh∗ k2sp ε−2 ) was obtained in [31]. This work addresses
+weakly communicating average reward MDPs and proposes a model-free algorithm that does not require
+prior knowledge of system parameters. The method builds on a variant of the stochastic Halpern iteration
+presented here by using a recursive sampling technique that exploits the specific structure of the Bellman
+operator. Also, it implements a stopping rule to achieve the prescribed precision. Another work that
+implements a stopping rule without prior knowledge is [47], where a model-based algorithm is proposed
+through the estimation of the diameter, and therefore only being applicable to communicating MDPs.
+
+1.4. Organization of the paper. The remainder of the paper is organized as follows. In Section 2 we
+present the precise definition of our method along with the minibatch variance reduction. Section 3 is
+devoted to the study of the case in which T is nonexpansive while in Section 4 we study the contracting
+case. In Section 5 we develop our applications to MDPs in the average and discounted setting. Finally,
+Appendix A gathers some deferred proofs.
+
+                                2. The Stochastic Halpern iteration
+
+  Algorithm 1 outlines the stochastic Halpern iteration with minibatches. At each iteration n ≤ N , a
+minibatch estimator is constructed with kn queries to T̃ at xn−1 using kn independent fresh samples from
+Dxn−1 . Using this estimate, the next iterate is calculated via the Halpern iteration.
+
+Algorithm 1 Stochastic Halpern method
+Require: Stochastic oracle T̃ , (kn )n minibatch size sequence, number of iterations N , initial point x0
+ 1: for n = 1, . . . , N do
+ 2:    Set the size of the minibatch kn
+ 3:    Sample kn independent queries at xn−1 : T̃ (xn−1 , ξ1n ), . . . , T̃ (xn−1 , ξknn ).
+                                                          
+                                       Xkn
+ 4:    Set xn ← (1 − βn )x0 + βn  k1n     T̃ (xn−1 , ξjn )
+                                       j=1
+ 5: end for
+ 6: Return xN
+8                                         M. BRAVO AND J.P. CONTRERAS
+
+    Notice that if we define the error term at the iteration n ≥ 1 by
+                                                   k
+                                                   n
+                                                 1X
+                                        Un :=        T̃ (xn−1 , ξjn ) − T xn−1 ,
+                                                kn
+                                                   j=1
+
+then Algorithm 1 can be cast in the form (iH). Indeed, we will refer to both procedures indistinctly when
+there is no confusion.
+   By construction, T xn−1 + Un is an unbiased estimator of T xn−1 and may have a reduced variance
+compared to the error computed with a single query. Let us introduce the following additional notation.
+For all i, n ∈ N:
+                       
+                       
+                        σn := E(kUn k) and σ0 = β0 = 0;
+                       
+                                 n
+(1)                             Y
+                        B
+                        i
+                       
+                           n
+                             :=    βj , with the convention Bin = 1 if 0 ≤ n < i.
+                                  j=i
+
+For the sake of completeness, we recall how a standard argument allows to transfer the variance reduction
+into a bound on σn .
+    For a given iteration n, let ξ1n , . . . , ξknn be kn independent samples of the distribution Dxn−1 and let
+e2n = E(||T̃ (xn−1 , ξ1n ) − T xn−1 ||22 ) be the variance of the error term of one query. Then
+                                                                                          !
+                                                                                        2
+                                               µ 2     X kn                                   µ2 2
+(2)                      σn2 = E(kUn k)2 ≤ 2 E                T̃ (xn−1 , ξjn ) − T xn−1     ≤   e ,
+                                               kn         j=1
+                                                                                        2     kn n
+
+where we have use Jensen’s inequality, sample independence, and the equivalence between the norms. We
+observe that E(kUn k) scales by a factor √µk compared to en .
+                                            n
+  As we already discussed, there exist more sophisticated variance reduction techniques to control σn .
+However, they often necessitate additional assumptions regarding the stochastic oracle’s nature or assume
+extra operator structure.
+
+                                         3. The nonexpansive case
+
+   In this section, we assume that T is a nonexpansive operator. As we mentioned, we are interested in
+the number of iterations and the overall oracle complexity required by iteration (iH) to obtain a solution
+xN such that E( xN − T xN ) ≤ ε for a given tolerance ε > 0. The following condition will be crucial for
+the results of this section, since it allows us to write some recursive bound for the expected fixed-point
+residual.
+
+(H1 )               There exists κ < +∞ such that supn≥0 E( T xn − x0 ) ≤ κ < +∞.
+
+3.1. Bounds for the expected fixed-point residual. The following proposition provides a bound for
+E(kxn − T xn k), valid for any increasing sequence of steps (βn )n ⊆ (0, 1).
+                                  STOCHASTIC HALPERN AND APPLICATIONS                                         9
+
+Proposition 3.1. Let (xn )n≥1 the sequence generated by the Halpern iteration (iH). Assume that (H1 )
+holds for some κ ≥ 0. Then, for all n ≥ 1
+                                                 n
+                                                 X
+                   n      n
+              E(kx − T x k) ≤ κ(1 − βn ) +             Bin (κ(βi − βi−1 ) + βi σi + βi−1 σi−1 ) + βn σn ,
+                                                 i=1
+
+where Bin and σi are defined in (1).
+
+Proof. Recall that σ0 = β0 = 0 and let κn = T xn − x0 . We start by observing that the (random)
+sequence (Pn )n defined inductively as P0 = 0 and
+
+                   Pn = κn−1 (βn − βn−1 ) + βn−1 Pn−1 + βn kUn k + βn−1 kUn−1 k , n ≥ 1,
+
+is such that xn − xn−1 ≤ Pn for all n ∈ N. Indeed, for the first term we write
+
+                       x1 − x0 = β1 x0 − T x0 + U1 ≤ κ0 (β1 − β0 ) + β1 kU1 k = P1 .
+
+From the definition of (iH), using again the triangular inequality, the nonexpansivity of T , and the induction
+hypothesis, we have that for n ≥ 2,
+
+           xn −xn−1 = (1−βn )x0 + βn (T xn−1 + Un ) − (1−βn−1 )x0 −βn−1 (T xn−2 + Un−1 )
+                       = (βn −βn−1 )(T xn−1 −x0 )+βn−1 (T xn−1− T xn−2 )+βn Un −βn−1 Un−1
+                       ≤ (βn − βn−1 ) T xn−1 −x0 +βn−1 xn−1 −xn−2 +βn kUn k+βn−1 kUn−1 k
+                       ≤ κn−1 (βn − βn−1 ) + βn−1 Pn−1 + βn kUn k+βn−1 kUn−1 k = Pn .
+
+  Then, it follows that Pn can be computed explicitly as
+                                n
+                                X
+                         Pn =         Bin−1 (κi−1 (βi − βi−1 ) + βi kUi k + βi−1 kUi−1 k) .
+                                i=1
+
+where we used the convention Bnn−1 = 1. Now, casting (iH) as
+
+                   xn − T xn = (1 − βn )(x0 − T xn ) + βn (T xn−1 − T xn + Un ),          ∀ n ≥ 1,
+
+we get that
+
+                  kxn −T xn k= (1−βn )(x0 − T xn ) + βn (T xn−1 − T xn + Un )
+                              ≤ κn (1 − βn ) + βn xn − xn−1 + βn kUn k
+                              ≤ κn (1 − βn ) + βn Pn + βn kUn k ,
+(3)
+                              = κn (1 −βn )+
+                                  n
+                                  X
+                              +         Bin (κi−1 (βi − βi−1 )+βi kUi k+βi−1 kUi−1 k) + βn kUn k
+                                  i=1
+10                                        M. BRAVO AND J.P. CONTRERAS
+
+where we used that Bin = βn Bin−1 for every i = 1, ..., n and that Bnn−1 = 1. Taking expectations in the
+expression above, and using that σi = E(kUi k), we obtain
+                                                 n
+                                                 X
+                 n    n
+            E(kx −T x k) ≤ E(κn )(1 −βn ) +            Bin (E(κi−1 )(βi − βi−1 )+βi σi + βi−1 σi−1)+βn σn .
+                                                 i=1
+
+The conclusion follows from the fact that supn≥0 E(κn ) ≤ κ.                                                  
+
+  We complement the result in Proposition 3.1 with the following lemma, which provides two simple
+independent and sufficient conditions for (H2 ) to hold.
+
+Lemma 3.2. Let T be nonexpansive and (xn )n be the sequence generated by (iH). Recalling the notation
+(1), it holds:
+       (i) If T has bounded range i.e. there exist a constant M > 0 such that kT xk ≤ M for all x ∈ Rd , then
+           the condition (H1 ) holds with κ̄ = M + x0 .
+      (ii) If the sequences (βn )n and (σn )n satisfies
+                                                    n
+                                                    X
+(H2 )                                         sup       Bin σi ≤ S < +∞, ,
+                                              n≥1 i=1
+
+
+          for some S ≥ 0, then condition (H1 ) holds with κ̄ = 2 dist(x0 , Fix(T )) + S.
+                              P
+             In particular, if n σn < +∞ then (H2 ) holds.
+
+Proof. Part (i) follows from the triangular inequality. For part (ii), let us fix x∗ ∈ Fix(T ). Using the fact
+that T is nonexpansive we have
+
+                          kxn − x∗ k = (1 − βn )(x0 − x∗ ) + βn (T xn−1 − x∗ ) + βn Un
+                                    ≤ (1 − βn ) x0 − x∗ + βn xn−1 − x∗ + βn kUn k
+                                        n
+                                        X
+                                               n
+                                    =         Bi+1 ( x0 − x∗ (1 − βi ) + βi kUn k)
+                                        i=0
+                                                         n
+                                                         X
+(4)                                 = x0 − x∗ +                Bin kUi k ,
+                                                         i=1
+                     Pn     n                                     n
+     where we used     i=0 Bi+1 (1 − βi ) = 1 and the convention Bn+1 = 1. Taking expectations, we have
+
+                          E( T xn − x0 ) ≤ E(kT xn − T x∗ k) + x∗ − x0
+                                                                  n
+                                                                  X
+                                          ≤ 2 x∗ − x0 +                 Bin σi ≤ 2 x∗ − x0 + S.
+                                                                  i=1
+
+Finally, supn≥0 E( T xn − x0 ) ≤ 2 inf x∗ ∈Fix T x∗ − x0 + S.                                                 
+                                   STOCHASTIC HALPERN AND APPLICATIONS                                       11
+
+   The following result establishes a general convergence rate for the expected residual of the Halpern
+                                          n
+iteration in the special case where βn = n+1 . This stepsize is easy to handle and, more importantly, leads
+to optimal residual estimations in the noiseless case in the Hilbert setting, and near-optimal for general
+Banach spaces.
+
+Theorem 3.3. Let (xn )n be the sequence generated by the Halpern iteration (iH) with the stepsize βn =
+ n                                                                                 PN
+n+1 . Assume that (H1 ) holds for some κ ≥ 0 and that σn = E(kUn k) is such that      n=1 nσn = Õ(1).
+                       N       N                          −1
+Then, given ε > 0, E( x − T x ) ≤ ε for all N ≥ N̄ = Õ(ε ) iterations.
+                                                              i
+Proof. For this particular choice of βn , we have that Bin = n+1 for all 1 ≤ i ≤ n. Then
+                                          N                         N
+                                          X                    1 X
+                               S = sup          BnN σn = sup           nσn < ∞,
+                                    N ≥1 n=1            N ≥1 N + 1 n=1
+            PN
+given that      n=1 nσn = Õ(1) and we conclude that (H2 ) holds and (H1 ) is satisfied with κ̄ = S +
+        0
+2 dist(x , Fix T ). Now, invoking the estimates given by Proposition 3.1
+                                                 N                            
+                    N      N        κ̄       1 X       κ̄    n2                     N
+               E( x − T x ) ≤           +                 +      σn +(n−1)σn−1 +        σN
+                                  N +1 N +1          n+1 n+1                       N +1
+                                                n=1
+                                              N         N            N
+                                                                                         !
+                                     1       X    1    X   n2       X
+(5)                             =         κ̄         +         σn +     (n−1)σn−1 + N σN
+                                  N +1          n+1       n+1
+                                                n=0      n=1                 n=2
+                                          N                    N                   N
+                                    κ̄    X      1    2        X               1 X
+                               ≤                   +                 nσn −         σn ,
+                                   N +1         n+1 N +1                     N +1
+                                          n=0                  n=1                 n=1
+
+where we have used in the second line that σ0 = 0. We observe that the first term Õ(1/N ) and the
+second also is by hypothesis. Therefore, E( xN − T xN ) = Õ(1/N ), and E( xN − T xN ) ≤ ε, for all
+N ≥ N̄ = Õ(ε−1 ) iterations as claimed.                                                         
+
+   As we already mentioned the rate O(1/N ) has been established in the noiseless case for Hilbert and
+Banach spaces. We are not aware of a result that establish a rate Õ(1/N ) in the case of general normed
+spaces for the inexact setup. The convergence rate above is expressed in terms of the number of iterations.
+It is important to note that the number of queries to the stochastic oracle may not be proportional to the
+number of iterations due to the use of increasing minibatches.
+                       n
+   The choice βn = n+1    in our analysis results in a clean and simple bound but introduces a logarithmic
+                                                                                             n
+factor. In the noiseless case, this logarithmic factor can be avoided by using βn = n+2         . However, in
+                                             PN
+the stochastic setting, where we require n=1 nσn to be Õ(1), the logarithmic factor inevitably arises.
+                                                P
+While imposing a stronger condition, such as ∞     n=1 nσn < ∞, could eliminate this factor, doing so would
+necessitate larger minibatch sizes, ultimately leading to a deterioration in the convergence rate. Moreover,
+it is indeed possible to write a recursive scheme for the optimal choice of the stepsize βn as in the noiseless
+case (see [18, Theorem 2] for precise details). This is, we can attempt to optimize the bound on βn in
+12                                           M. BRAVO AND J.P. CONTRERAS
+
+Proposition 3.1 for given values of σn . Numerical experiences seem to show that the bounds improve only
+by a logarithmic factor.
+  The following result, whose proof is provided in Appendix A.1, establishes explicit bounds for the sample
+                                        P
+complexity when a precise estimate of N   n=1 nσn is available. Despite its simplicity, this bound is useful in
+various contexts discussed later, where slight concessions in the bounds, affecting only logarithmic terms,
+are made to keep the constants as explicit as possible.
+
+Lemma 3.4. Under the assumptions of Theorem 3.3, let us suppose additionally that there exists C ≥ 0
+          P
+such that N  n=1 nσn ≤ C ln(N + 1) for all N ≥ 1. Let ρ ≥ 0 such that 3κ̄ + 2C ≤ ρ. Then, for all ε > 0,
+          −1
+if ε/ρ < e , then
+                                                                        
+                             E( xN − T xN ) ≤ ε for all N ≥ 2 ρε ln ρε .
+When ε/ρ ≥ e−1 , then N = 1 iteration is sufficient.
+
+   The following corollary provides an upper bound on the number of queries for the stochastic Halpern
+iteration with minibatching when the stochastic oracle has uniformly bounded variance. Due to Lemma 3.4,
+the constants involved can be explicitly estimated in this case. For the sake of simplicity, we assume in
+what follows that ε > 0 is sufficiently small.
+Corollary 3.5. Assume that T̃ has uniformly bounded variance σ 2 . Let (xn )n be the sequence generated
+                                                      n
+by the Halpern iteration (iH) with the stepsize βn = n+1  and batch size kn = n4 . Then, given ε > 0,
+the Algorithm 1 finds xN such that E( xN − T xN ) ≤ ε using at most Õ(L5 ε−5 ) queries to the stochastic
+oracle, where L = max{µσ, dist(x0 , Fix T )}.
+Proof. Equation (2) guarantees that σn ≤ µσn−2 , which readily implies that
+                                       N                  N
+                                       X                  X 1      3
+                                             nσn ≤ µσ             ≤ µσ ln(N + 1).
+                                                                n  2
+                                       n=1                n=1
+                                                         i
+Recalling that for this particular choice of βn , Bin = n+1 , i = 1, . . . , n, we have that
+                               n                         n                  n
+                               X                 1 X           1 X1   µσ
+                                     Bin σi =        iσi ≤ µσ       ≤    .
+                                                n+1           n+1 i    2
+                               i=1                       i=1               i=1
+
+Therefore, condition (H2 ) holds with S = µσ/2 and, from Lemma 3.2(ii), (H1 ) is verified with κ̄ =
+µσ/2 + 2 dist(x0 , Fix T ). Then, using Lemma 3.4 with C = 23 µσ implies that E( xN − T xN ) ≤ ε for all
+                             
+N larger that N̄ = 2 ρε ln ρε , with
+                          9
+                            µσ + 6 dist(x0 , Fix T ) ≤ 12 max{µσ, dist(x0 , Fix T )} := ρ.
+                          2
+Finally, as each iteration n = 1, ..., N̄ requires n4 queries to the stochastic oracle, the overall oracle
+complexity to achieve precision ε > 0 is
+                               N̄           N̄
+                               X            X            (N̄ + 1)5   32  ρ  ρ    5
+                                     kn =         n4 ≤             ≤       ln     +1 .                      
+                                                             5       5 ε      ε
+                               n=1          n=1
+                                     STOCHASTIC HALPERN AND APPLICATIONS                                             13
+
+   Although we have examined in detail the special case of uniformly bounded variances, Theorem 3.3 also
+accommodates scenarios where E(||T̃ (xn , ξ) − T xn ||) can grow in a controlled manner. This flexibility is
+important in the context of average reward MDPs, where rough estimates for the single-sample error are
+used to determine the minibatch size and derive overall oracle complexity bounds. The reader is referred
+to Remark 5.3 for further comments.
+
+Remark 3.6. There is a simple reason behind the particular choice of kn in Corollary 3.5. We want to
+find some N (ε) such that (5) is smaller than ε. Roughly speaking, if one assumes that kn = na , then
+                     P
+σn = O(n−a/2 ) and N    n=1 nσn = O(N
+                                       2−a/2 ), where we impose a ≥ 2 in order to verify condition (H ).
+                                                                                                         2
+                                 PN
+The overall oracle complexity is n=1 kn = O(N 1+a ). For a ≥ 4, the dominating term in (5) is ln(N )/N ,
+implying that N = Õ(ε−1 ), and leading then to a complexity of Õ(ε−(1+a) ). For 2 ≤ a < 4, the term
+PN                1−a/2 ) becomes dominant in (5). To achieve a precision of ε, we require N = Õ(ε−2/(a−2) )
+   n=1 nσn = Õ(N
+                                2(a+1)
+with oracle complexity Õ(ε− a−2 ). In summary, for this type of minibatch sizes, the oracle complexity is
+Õ(ε−ω(a) ) with
+                                           
+                                            2(1 + a) if 2 < a ≤ 4
+                                           
+                                    ω(a) =    a−2
+                                           
+                                           1 + a       if a ≥ 4,
+attaining its minimum at a = 4.
+
+3.2. Lower bound. In this section, we establish a lower bound on the number of queries required by any
+algorithm whose iterates xn are generated as linear combinations of previous iterates and oracle evaluations
+of the nonexpansive map T at xn−1 , potentially using minibatches. Our result applies to deterministic
+algorithms, meaning those that do not introduce additional randomness in their update steps [37]. That
+is, if the oracle were noiseless, the algorithm would produce a fully deterministic sequence.
+                                                                       
+   We denote by span v 1 , v 2 , ..., v k the linear span of the vectors v 1 , v 2 , ..., v k ⊆ Rd . The construction of
+the operator is inspired by [38], while the stochastic oracle relies on the idea of resistant oracle, introduced
+in [5].
+
+Theorem 3.7. Let σ, κ̄ > 0, (kn )n ⊆ N a sequence of minibatch sizes, and 0 < ε < σ2 a given tolerance.
+Then, there exists a normed space (Rd , k·k) (with d depending on ε and κ̄), an operator T (depending on
+                                                                                          
+ε), a stochastic oracle T̃ , an initial point x0 ∈ Rd and a natural number N = Ω κ̄σ 2 ε−3 such that:
+      • T is nonexpansive and has bounded range κ̄, i.e. kT xk ≤ κ̄ for every x ∈ Rd ,
+      • T̃ is unbiased and have uniformly bounded variance σ 2 ,
+      • for any sequence (xn )n such that
+                               n                        P n                   o
+(6)                  xn ∈ span x0 , x1 , ..., xn−1 , k1n kj=1 T̃ (xn−1 , ξjn ) , for all n ≥ 1
+
+        we have
+                                                                             Pn
+                           E(kxn − T xn k) > ε,     for every n such that       i=1 ki ≤ N .
+14                                         M. BRAVO AND J.P. CONTRERAS
+                                                                                       κ̄ 
+  In order to prove the Theorem, let us first define λ = 2ε, and d =                    λ      . We consider Rd endowed with
+                 P
+the norm kxk1 = di=1 |xi |. Let the map Q : Rd → Rd be given by
+
+                                Q(x1 , x2 , . . . , xd ) = (λ − xd , x1 , x2 , . . . , xd−1 ).
+
+    It is easy to check that Q is nonexpansive (in fact, it is distance preserving). Moreover, Q has a unique
+                                      ⊤
+fixed-point x∗ = λ2 , λ2 , . . . , λ2    ∈ Rd .
+    Let us define C = {x ∈ R : kx − x∗ k∞ ≤ λ2 } the ball for the infinity norm centered on x∗ with radius
+                                    d
+
+λ/2. Let PC : Rd → C be the function defined by (PC (x))i = P[0,λ] (xi ) for every i = 1, . . . , d, where P[0,λ]
+is the one-dimensional projection onto the interval [0, λ]. Explicitly, P[0,λ] (t) equals t if t ∈ [0, λ], equals 0
+if t < 0, and equals λ if t > λ.
+    Let T : Rd → Rd defined by T = Q ◦ PC . One can easily check that T is nonexpansive for the norm k·k1 ,
+and Fix T = {x∗ }. Indeed,
+                                                            d
+                                                            X                                        d
+                                                                                                     X
+               kT x − T yk1 = kPC (x) − PC (y)k1 =                |P[0,λ] (xi ) − P[0,λ] (yi )| ≤          |xi − yi |.
+                                                            i=1                                      i=1
+
+Here we have used the fact that |P[0,λ] (t) − P[0,λ] (t′ )| ≤ |t − t′ | for all t ∈ R.
+  Furthermore, for every x ∈ Rd , we have T x ∈ C. Indeed, let y = PC (x), then y ∈ C and therefore
+                                                                                               λ
+                                kT x − x∗ k∞ = kQy − x∗ k∞ = ky − x∗ k∞ ≤                        .
+                                                                                               2
+Using the triangular inequality we have
+
+                                      kT xk∞ ≤ kT x − x∗ k∞ + kx∗ k∞ ≤ λ,
+
+so T has bounded range with kT xk1 ≤ dλ ≤ κ̄.
+   Now we will construct a stochastic oracle for T . For this, we define the progress of x ∈ Rd similarly to
+[5],
+                      prog(x) = max{i ∈ {1, . . . , d} : |xi | > 0},           and     prog(0Rd ) = 0.
+Let ξ be a random variable with a Bernoulli distribution of parameter p ∈ (0, 1). We define the stochastic
+oracle T̃ (x, ξ) component-wise as
+                                              
+                                              (T x)i
+                                                      if i 6= prog(x) + 1,
+                                (T̃ (x, ξ))i = ξ
+                                               (T x)i if i = prog(x) + 1,
+                                              
+                                                p
+when prog(x) < d, and
+                    T̃ (x, ξ) = T (x)    if prog(x) = d. It is easy to check that E(T̃ (x, ξ)) = T x. Now, if
+prog(x) = d, then E ||T̃ (x, ξ) − T x||2 = 0 and for all x ∈ Rd with 0 ≤ prog(x) < d
+                                       2
+
+                                                                      !
+                                                                  ξ 2        1−p   λ2
+                                       2                    2
+                  E ||T̃ (x, ξ) − T x||2 ≤ ((T x)prog(x)+1 ) E   1−       ≤ λ2     ≤    ,
+                                                                    p           p    p
+                                    STOCHASTIC HALPERN AND APPLICATIONS                                            15
+
+                                                 2
+                                                                                      
+where we used that kT xk∞ ≤ λ. Now, taking p = σλ2 we have that E ||T x − T̃ (x, ξ)||22 ≤ σ 2 for all
+x ∈ Rd . Finally, the following lemma will be relevant to prove the lower bound. We leave its proof to
+Appendix A.3.
+
+Lemma 3.8. For all x ∈ Rd such that prog(x) < d, we have kx − T xk1 ≥ λ.
+
+  Now we have collected all the ingredients to complete the proof.
+Proof. (of Theorem 3.7)
+                                                                                 κ̄   κ̄              2
+   Let N ∈ N such that N < 2p  d
+                                 ≤ N +1. Recalling that λ = 2ε, d = 2λ                = 4ε , and p = σλ2 , we obtain
+that N = Ω(κσ 2 ε−3 ).
+                                      P
+   To conclude, we will prove that if ni=1 ki ≤ N then E(kxn − T xn k) > ε.
+   Let x0 = 0Rd , so prog(x0 ) = 0. We observe that the stochastic oracle unveils a new coordinate in
+iteration n if one or more of the samples ξ1n , . . . , ξknn takes the value 1. Therefore, if prog(xn−1 ) < d, and xn
+were constructed according to (6), we have prog(xn ) = prog(xn−1 ) + 1 with probability pn = 1 − (1 − p)kn ,
+and prog(xn ) = prog(xn−1 ) with probability 1 − pn . As a result, the random variable prog(xn ) is the
+sum of n independent Bernoulli random variables with parameters p1 , . . . , pn . In particular, the expected
+value of prog(xn ) is given by the sum of the probabilities. Now, using the Taylor expansion and Cauchy’s
+remainder, one can verify that (1 − p)ki ≥ 1 − pki for every ki ≥ 1. Hence, we have the estimate
+                                n             n                       n
+                                X             X                       X                  d
+                                       pi =         1 − (1 − p)ki ≤         pki ≤ pN <     .
+                                                                                         2
+                                 i=1          i=1                     i=1
+                                                                              Pn
+                                                                                   p
+ Using Markov’s inequality, we have P(prog(xn ) < d) ≥ 1 − i=1    d
+                                                                    i
+                                                                      > 12 . Now, using Lemma 3.8 and
+Markov’s inequality for the random variable kxn − T xn k1 we have
+                   1                                              1
+                     < P (prog(xn ) < d) ≤ P (kxn − T xn k1 ≥ λ) ≤ E(kxn − T xn k1 ),
+                   2                                              λ
+                      n      n
+and therefore ε < E(kx − T x k1 ).                                                                                 
+   Our lower bound depends on ε, κ̄, and σ, all of which are also involved in the upper bound (5). Addition-
+ally, our results apply directly to both the Halpern iteration with minibatch discussed in this paper and the
+stochastic Krasnoselskii-Mann (sKM) iteration discussed in [13], which does not use variance reduction. In
+particular, this result reveals a gap of Õ(ε−3 ) compared to the upper bound Õ(ε−6 ) established for (sKM),
+as well as a gap of Õ(ε−2 ) compared to the rate Õ(ε−5 ) of the stochastic Halpern iteration. This prompts
+the consideration of improving the analysis or exploring alternative approaches to bridge the gap.
+
+Remark 3.9. In [14], a rate of O(ε−3 ) was established for a modified stochastic Halpern iteration within
+the Euclidean framework, specifically for monotone inclusions. This result relies on additional assumptions
+on the oracle T̃ , requiring both a multi-point structure and a Lipschitz in expectation condition. As a result,
+our lower bound does not directly apply to this specialized oracle, leaving the optimality of the approach in
+[14] an open question.
+16                                      M. BRAVO AND J.P. CONTRERAS
+
+3.3. Convergence of the iterates. Even if we are mainly interested in establishing nonasymptotic
+bounds for the expected error term E(kxn − T xn k), it is interesting to write an almost sure convergence
+result for the Halpern iteration (iH) for nonexpansive operators. The proof arguments are quite standard
+and rely on general results available for the noiseless iteration in Banach spaces (see [41]). We refer the
+reader to the technical details in Appendix A.2.
+                                                                                           P
+Theorem 3.10. Let (xn )n be the sequence generated by (iH) where T is nonexpansive, and ∞     n=1 σn < +∞.
+Assume also that the sequence (βn )n ⊆ (0, 1) is non-decreasing and such that
+                             ∞
+                             X                              n
+                                                            X
+                               (1 − βj ) = +∞,        and     (βj − βj−1 ) < +∞.
+                              j=1                           j=1
+
+Then
+     (a) The fixed-point residual kxn − T xn k goes to zero almost surely and any accumulation point of (xn )n
+         is a fixed-point of T .
+                      
+     (b) If Rd , k · k is a smooth space in the sense that the limit
+                                                    kx + λ yk − kxk
+                                              lim
+                                              λ→0          λ
+         exists for all x, y in the unit sphere, then (xn )n converges almost surely to some x∗ ∈ Fix T .
+
+Remark 3.11. Simple examples of smooth finite-dimensional Banach spaces covered by Theorem 3.10 are
+                                    P
+Rd endowed with the ℓp norm kxkp = ( i |xi |p )1/p for 1 < p < ∞.
+
+                                         4. The contracting case
+
+   Let T be a contraction with parameter γ ∈ (0, 1), where x∗ is the unique fixed-point of T . We are
+interested in the number of iterations and the overall oracle complexity required to obtain a solution xn
+such that E(kxn − x∗ k) ≤ ε for a given tolerance ε > 0.
+   Our recursive bound approach here is slightly different from the one in the nonexpansive case. We take
+increasing batch sizes that depend on the contraction parameter γ, allowing for a sensible decrease in the
+oracle complexity. The following result is the analogue of Proposition 3.1 in the contracting setting.
+
+Proposition 4.1. Let T be a contraction with parameter γ ∈ (0, 1), (βn )n ⊆ (0, 1) an increasing sequence
+of stepsizes, and (xn )n≥1 be the sequence generated by (iH). Then, for every n ≥ 1, the following estimate
+holds                                   n
+                                       X
+(7)                       kxn − x∗ k ≤     γ n−i Bi+1
+                                                  n
+                                                      ((1 − βi ) x0 − x∗ + βi kUi k).
+                                        i=0
+
+Proof. We proceed by induction. For n = 1, recalling that U0 = 0, one has that
+                       x1 −x∗ = (1 − β1 )(x0 − x∗ ) + β1 (T x0 − x∗ ) + β1 U1
+                                    ≤ β1 γ x0 − x∗ + (1 − β1 ) x0 − x∗ + β1 kU1 k .
+                                  STOCHASTIC HALPERN AND APPLICATIONS                                        17
+
+Now, assuming that it holds for n − 1, we have
+                   kxn −x∗ k = (1 − βn )(x0 − x∗ ) + βn (T xn−1 − x∗ ) + βn Un
+                              ≤ (1 − βn ) x0 − x∗ + γβn xn−1 − x∗ + βn kUn k
+                              ≤ (1 − βn ) x0 − x∗ + βn kUn k +
+                                        n−1
+                                                                                        !
+                                        X
+                                  γβn         γ n−1−i Bi+1
+                                                       n−1
+                                                           ((1 − βi ) x0 − x∗ + βi kUi k) .
+                                        i=0
+                                                     n−1    n        n
+The result follows by reordering and noting that βn Bi+1 = Bi+1 and Bn+1 = 1.                                
+                                                                                                      n
+  The next result makes explicit bounds for the expected fixed-point residual in the case where βn = n+1
+while shedding light on the appropriate minibatch size in this case.
+                                                                                               n
+Theorem 4.2. Let N ∈ N be fixed and xN be the output generated by the sequence (iH) with βn = n+1 .
+                                                 2
+Assume that there exists some positive constant σ such that
+                                                 µ2 σ 2
+                                        σn2 ≤             ,   1 ≤ n ≤ N,
+                                                n2 γ N −n
+where σn = E(kUn k). Then,
+                                                      4 max{ x0 − x∗ , µσ}
+                                  E( xN − x∗ ) ≤                           .
+                                                         (1 − γ)(N + 1)
+                                                              i
+Proof. Taking expectations in (7) and recalling that Bin = n+1    and σ0 = 0, we have
+                                           N                                             
+                       N     ∗       1 X N −i                   1      0     ∗       i
+                 E( x − x ) ≤                 γ    (i + 1)           x −x +            σi
+                                   N +1                      i+1                   i+1
+                                          i=0
+                                                        N                 N
+                                                                                   !
+                                     1                 X                 X     N−i
+(8)                              ≤            x0 − x∗      γ N −i + µσ       γ 2
+                                   N +1
+                                                       i=0               i=1
+                                                                   !
+                                               0
+                                              x −x  ∗
+                                     1                       µσ
+                                 ≤                      +       √     ,
+                                   N +1        1−γ         1− γ
+                                                                                                          N−i
+where the first inequality follows from Proposition 4.1. The second inequality uses the bound σi ≤ σiγ − 2 .
+                                                                  P
+For the two terms in the third inequality, we apply the fact that N i=0 θ
+                                                                          N −i ≤ 1 with θ = γ and θ = θ 1/2 ,
+                                                                                1−θ
+respectively. The result follows by noticing that 1−1√γ ≤ 1−γ  2
+                                                                  for all γ ∈ (0, 1) and x0 − x∗ + 2µσ ≤
+4 max{ x0 − x∗ , µσ}.                                                                                        
+  The following corollary serves as the counterpart to Corollary 3.5 as it covers the special case of uniformly
+bounded variance for contractive operators.
+Corollary 4.3. Let ε > 0 be given, assume that thel stochastic
+                                                           m    oracle T̃ has uniformly bounded variance
+  2                       0     ∗                       4L
+σ and let L = max{ x − x , µσ}. Define N = ε(1−γ) . Then Algorithm 1 with minibatches of size
+                                                                                                
+kn = ⌈n2 γ N −n ⌉ returns a solution xN such that E( xN − x∗ ) ≤ ε in at most O L2 (1 − γ)−3 ε−2 queries
+to the stochastic oracle.
+18                                           M. BRAVO AND J.P. CONTRERAS
+
+Proof. The estimate (2) guarantees that σn = E(kUn k) ≤ µ √σk . Therefore, for minibatches of size kn =
+                                                                            n
+                                      N−n
+⌈n2 γ N −n ⌉, we have σ   n ≤ µσ(nγ    2    )−1 .
+                                              Theorem 4.2 implies that E( xN − x∗ ) ≤ ε. Now, as every
+iteration n = 1, ..., N requires kn queries to the stochastic oracle, the precision is attained using at most
+                                  N                 N
+                                  X                 X                        N2
+                                        kn ≤            (n2 γ N −n + 1) ≤       + N.
+                                                                            1−γ
+                                  n=1               n=1
+
+calls to the stochastic oracle.                                                                             
+
+   The overall oracle complexity described in the corollary depends on several factors: tolerance, contraction
+parameter, initial distance to the unique fixed point, and noise variance, which may not be readily known
+in advance. However, in the case of the Halpern Q-learning algorithm for discounted reward MDPs (c.f.
+Section 5.2), the key parameters x0 − x∗ and µσ 2 can be estimated as functions of (1 − γ). As a result,
+we obtain a more precise estimate Õ(ε−2 (1 − γ)−5 ) in that setting (c.f. Theorem 5.6).
+
+                                             5. Application to MDPs
+
+   Consider an infinite-horizon Markov Decision Process (MDP) with state space S and action set A, both
+assumed to be finite. Let p(· | s, a) ∈ ∆(S) be the probability distribution of the next state s′ ∈ S when
+one chooses the action a ∈ A in state s ∈ S. The function r : S × A → [0, 1] is the reward function, i.e.
+r(s, a) is the reward obtained when the process is in state s and the action a is chosen and we denote
+rmax := max(s,a)∈S×A r(s, a). Let π : S → ∆(A) be a possible randomized policy in the sense that π(s) is
+the distribution of the action selected when the state is s ∈ S. We say that a policy π is deterministic if
+π : S → A. Notice that the policies that we consider are stationary in the sense that they do not depend
+on time.
+
+5.1. Average Reward Halpern Q-learning. In this part, we consider the so-called average reward
+setting, where one looks for a policy π that maximizes the average reward
+                                             N −1
+                                                                    !
+                                           1 X
+                       Vπ (s) = lim Eπ            r(sk , ak ) s0 = s , for all s ∈ S,
+                                N →∞       N
+                                                      k=0
+
+where the trajectory (sk , ak )k is induced by π. Throughout this section, we assume that the MDP at hand
+is weakly communicating, that is,
+                    
+                    
+                     There is a set S ′ ⊆ S such that for all s, s′ ∈ S ′ there exists a
+                    
+(WCom)                policy for which s′ can be accessed from s. Also, every state in
+                    
+                    
+                    S \ S ′ is transient under any policy.
+
+If there is no transient states, the MDP is said to be communicating. If any deterministic policy induces
+a unique recurrent class (with possible transient states), the MDP is unichain. Both communicating and
+unichain MDPs are weakly communicating [39]. It is well-known that under (WCom), the optimal value
+                                     STOCHASTIC HALPERN AND APPLICATIONS                                      19
+
+v ∗ = maxπ Vπ (s) does not depend on the initial state and that there exists a determinitic policy π ∗ achieving
+its value, Vπ∗ (s) = v ∗ for all s ∈ S. For every deterministic policy π, one can always define the bias vector
+                                             N −1
+                                                                               !
+                                              X
+                          π
+                         h (s) = C-lim Eπ         (r(sk , ak ) − Vπ (s)) s0 = s , ∀ s ∈ S,
+                                    N →∞
+                                                   k=0
+
+where C-lim stands for the Cesàro limit. Then, from [39, Chapter 9], one knows that the bias vector
+                                                    ∗
+corresponding to an optimal policy π ∗ , h∗ := hπ , is a solution of the following Bellman (or optimal bias)
+equation
+                                    X                                 
+(9)                     h(s) = max        p(s′ |s, a) r(s, a) + h(s′ ) − v ∗ , ∀ s ∈ S,
+                                     a∈A
+                                           s′ ∈S
+
+and that any solution h allows to obtain an optimal policy by taking the action that attains the max at
+the right-hand-side in (9). Notice that if some vector h ∈ RS is a solution of (9), then h + c u also is for
+all c ∈ R, where u ∈ R is a vector of all-ones.
+   To address the fact that transitions are unknown, one approach is to define the so-called Q-factors as
+                                   X                               
+                        Q(s, a) =      p(s′ |s, a) r(s, a) + h(s′ ) , ∀(s, a) ∈ S × A.
+                                      s′ ∈S
+
+Hence, from equation (9), h(s′ ) = maxa′ ∈A Q(s′ , a′ ) and then the equation can be rewritten as
+                          X                                       
+                                  ′
+(QAV )         Q(s, a) =       p(s |s, a) r(s, a) + max   Q(s , a ) − v ∗ , ∀ (s, a) ∈ S × A.
+                                                              ′ ′
+                                                       ′ a ∈A
+                            s′ ∈S
+
+Additionally ([39, Chapter 9]), an optimal policy π can be obtained as π(s) = argmaxa∈A Q(s, a) for any
+solution Q of (QAV ). Observe that, as with bias functions, if Q is a solution, then Q + c e is also a solution
+for any c ∈ R, where e ∈ RS×A is a matrix of ones.
+   Naturally, solving (QAV ) reduces to finding a fixed point of the Bellman operator H : RS×A → RS×A
+defined as                                                       
+                             X
+                                   ′
+(10)            HQ(s, a) :=     p(s |s, a) r(s, a) + max Q(s , a ) − v ∗ , ∀ (s, a) ∈ S × A.
+                                                              ′ ′
+                                                      ′   a ∈A
+                             s′ ∈S
+
+   It is well known that H is nonexpansive for the infinity norm k · k∞ . Although, at first glance, the
+problem of computing the Q-factors fits within our framework, one must address the important issue that
+the optimal value v ∗ is unknown. To address this, we adopt an approach inspired by the RVI-Q learning
+procedure, which is based on a stochastic Krasnoselskii-Mann iteration and originally introduced in [1] for
+unichain MDPs, a stronger assumption than weakly communicating MDPs. Convergence guarantees and
+nonasymptotic bounds on the expected error for the RVI-Q learning were later established in [13] through
+the analysis of a related stochastic KM iteration and using similar ideas as the one decribed below.
+   Intuitively, the approach is to define a function f : RS×A → R such that f (Qn ) serves as an estimate
+of the optimal value v ∗ , preventing the state variable from diverging due to the noncompactness of the set
+Fix H. Specifically, f is choosen such that for any c ∈ R and Q ∈ RS×A , f (Q + c e) = f (Q) + c, where
+e ∈ RS×A is a matrix filled with ones. Typical examples of such functions are f (Q) = max(s,a)∈S×A Q(s, a),
+20                                              M. BRAVO AND J.P. CONTRERAS
+
+                                        1                P
+f (Q) = min(s,a)∈S×A Q(s, a), f (Q) = |S×A|                  (s,a)∈S×A Q(s, a),   and f (Q) = Q(s0 , a0 ) for some fixed
+(s0 , a0 ) ∈ S × A.
+
+Algorithm 2 Halpern Q-learning (Average reward)
+Require: Sequence (βn )n ∈ (0, 1), (kn )n minibatch size sequence, initial point Q0 , function f such that
+    f (Q + c e) = f (Q) + c.
+ 1: for n = 1, . . . , N do
+ 2:     compute
+                                                            n k
+                                                          1 X
+                       Ĥn Q   n−1
+                                     (s, a) := r(s, a) +      max   Qn−1 (sni (s, a), a′ ) − f (Qn−1 )
+                                                         kn   a′ ∈A
+                                                     i=1
+           n
+    where si (s, a) ∼ p(·|s, a) for every (s, a) ∈ S × A.
+ 3:   set Qn = (1 − βn )Q0 + βn Ĥn Qn−1
+ 4: end for
+ 5: Return QN
+
+
+   One challenge in analyzing Algorithm 2 is that the underlying operator may not be nonexpansive due
+to the choice of f . Consequently, we consider an alternative approach, which we refer to as the Benchmark
+Halpern Q-learning Algorithm 3, with state variable Qnv . It is important to emphasize that Algorithm 3 is
+intended solely for theoretical analysis and is not practically implementable, as it explicitly relies on the
+optimal value v ∗ . Notice that the use of f does not affect the overall complexity since it is evaluated once
+at every iteration.
+
+Algorithm 3 Benchmark Halpern Q-learning (Average reward)
+Require: Sequence (βn )n ∈ (0, 1), initial point Q0 , (kn )n minibatch size sequence.
+ 1: for n = 1, . . . , N do
+ 2:    compute
+                                                           kn
+                                                         1 X
+                          H̃n Qvn−1 (s, a) := r(s, a) +       max   Qvn−1 (sni (s, a), a′ ) − v ∗
+                                                        kn    a′ ∈A
+                                                                  i=1
+    where sni (s, a) ∼ p(·|s, a) for every (s, a) ∈ S × A.
+ 3:    set Qnv = (1 − βn )Q0 + βn H̃n Qvn−1
+ 4: end for
+ 5: Return QN
+
+
+
+  Let us consider the sequences (Qn )n and (Qnv )n generated by Algorithms 2 and 3, respectively, using the
+same samples and initialized at a common point Q0 . The following Lemma is crucial for what follows.
+                                       STOCHASTIC HALPERN AND APPLICATIONS                                                   21
+
+Lemma 5.1. Let e be a matrix of size |S| × |A| full of ones. Then, there exists a sequence of real numbers
+(cn )n≥0 such that for every n ≥ 0, Qn − Qnv = cn e. Moreover, for every n ≥ 0, E(kHQnv − Qnv k∞ ) =
+E(kHQn − Qn k∞ ), with H defined in (10).
+
+Proof. The case n = 0 is true by definition. Assume by induction that Qn−1 − Qvn−1 = cn−1 e for some
+cn−1 ∈ R. Now, for every (s, a) ∈ S × A and, from the induction hypothesis and the properties of the
+function f , we have that
+                                                                    
+  Qn (s, a)−Qnv (s, a) = βn Ĥn Qn−1 (s, a) − H̃n Qvn−1 (s, a)) ,
+               kn                                                k
+                                                                                                        !
+                                                                   n
+           1 X                                               1 X
+   = βn            max   Qn−1 (sni (s, a), a′ )−f (Qn−1 )−           max   Qvn−1 (sni (s, a), a′ ) + v ∗ ,
+          kn       a′ ∈A                                    kn       a′ ∈A
+              i=1                                               i=1
+               k                                                                        kn
+                                                                                                                               !
+                 n
+           1 X                                                                     1  X
+   = βn            max   (Qvn−1 (sni (s, a), a′ )+cn−1 )−f (Qvn−1 + cn−1 e) −              max    Qvn−1 (sni (s, a), a′ ) + v ∗
+          kn       a′ ∈A                                                          kn       a′ ∈A
+              i=1                                                                      i=1
+                        n−1                  ∗
+                                                       ∗       n−1
+                                                                      
+   = βn cn−1 − f (Qv ) − cn−1 + v = βn v − f (Qv ) := cn ,
+
+which is independent of (s, a). Finally, using that H satisfies that H(Q + c e) = HQ + c e for all Q ∈ RS×A
+and c ∈ R, we have E(kHQn −Qn k∞ ) = E(kH(Qnv +cn e)−(Qnv +cn e)k∞ ) = E(kHQnv −Qnv k∞ ).                 
+                                                                                                    n
+  The following result establishes nonasymptotic rates for E(kHQn − Qn k∞ ) in the case where βn = n+1 .
+As a consequence of Lemma 5.1, it is sufficient to obtain a convergence rate for the benchmark sequence
+E(kHQnv − Qnv k∞ ). Recall that h∗ ∈ RS stands for an optimal bias function for weakly communicating
+average reward MDPs.
+                                         n
+Theorem 5.2. Let ε > 0 and set βn = n+1     and minibatch sizes kn = ⌈n6 ln(n + 1)⌉. Let us assume
+that kh∗ ksp ≥ 1. Then the sequence (Qn )n generated by Algorithm 2 with Q0 = 0 produces an iter-
+                                   
+ate QN such that E HQN − QN ∞ ≤ ε with a number of calls to the sampling device of at most
+                      
+Õ |S × A| kh∗ k7sp ε−7 .
+   The proof of Theorem 5.2, which is deferred to Appendix A.4, essentially relies on the estimations
+obtained earlier for general nonexpansive maps, along with the application of classical concentration in-
+equalities to analyze Algorithm 3, and concludes through Lemma 5.1. We include a logarithmic in kn in
+order to precisely control the terms that appear when using concentration inequalities.
+   Let us briefly discuss why we set Q0 = 0 and assume that kh∗ ksp ≥ 1. Regarding the first point,
+when working with an arbitrary initial condition Q0 , the bounds we derive depend essentially on the term
+max{ Q0 ∞ , rmax }, where rmax ≤ 1. Therefore, there is an incentive to choose an initial condition with
+a small infinity norm. Regarding the second point, we recall that our complexity bounds also depend on
+dist(Q0 , Fix H) = dist(0, Fix H) ≤ rmax + kh∗ ksp (see Appendix A.4). Therefore, since our bound depends
+on some linear combination of rmax and kh∗ ksp , assuming kh∗ ksp ≥ 1 highlights, in a sense, the most
+relevant part of the sample complexity and allows us to compare our results to the existing literature.
+22                                      M. BRAVO AND J.P. CONTRERAS
+
+
+Remark 5.3. It is well known that the oracle used in the sampling process of Algorithm 2, H̃(·, ·), has a
+variance that can grow quadratically with respect to the norm of Q. To illustrate this, consider a trivial
+MDP where S = {s1 , s2 }, A = {a}, and all transition probabilities are equal to 1/2. If Q = (x, −x) with
+x ∈ R, then HQ = (0, 0) and E(kH̃(Q, ·) − HQk22 ) = x2 , showing that the variance is unbounded. The
+key property that enables Theorem 5.2 is that E(kH̃(Qnv , ·) − HQnv k∞ ) can be controlled as CkQnv k∞ at the
+iteration, rather than over the entire space. This highlights the flexibility of our general result, derived from
+bounds obtained in the noiseless case and appropriate minibatching.
+
+   The following result show how the sample complexity established in Theorem 5.2 can be also obtained
+in the form of PAC (Probably Approximately Correct) bounds to guaranteed small errors with arbitrarily
+high probability. The proof follows almost exactly the same ideas and then we provide a sketch of the main
+argument in Appendix A.5.
+
+Proposition 5.4. Let us assume that kh∗ ksp ≥ 1, take Q0 = 0, set a small precision ε > 0, and δ ∈ (0, 1).
+                n
+Then, for βn = n+1 , kn = ⌈n6 ln(n + 1)⌉, Algorithm 2 finds QN such that
+
+                            HQN − QN ∞ ≤ ε,       with probability at least 1 − δ,
+                                                                     
+with an overall sampling complexity of at most Õ |S × A| kh∗ k7sp ε−7 , where the complexity bound contains
+also terms of ln(1/δ).
+
+   Corollary 5.5 shows how our results can be translated to obtain ε-optimal policies which, as we discussed
+in Section 1.3.
+
+Corollary 5.5. Let us assume that kh∗ ksp ≥ 1, take Q0 = 0, and set precision ε > 0. Then, for
+         n
+βn = n+1     and kn = ⌈n6 ln(n + 1)⌉, Algorithm 2 finds QN such that the induced policy π N : S → A,
+π N (s) := argmaxa∈A QN (s, a), s ∈ S, verifies
+
+                                     E(v ∗ − VπN (s)) ≤ ε,   for all s ∈ S,
+
+after at most Õ(|S × A kh∗ k7sp ε−7 ) calls to the sampling device. Also, for δ ∈ (0, 1), the policy π N is such
+that for all s ∈ S
+                               v ∗ − VπN (s) ≤ ε, with probability at least 1 − δ,
+with the same order of sample complexity, including terms depending on ln(1/δ).
+
+Proof. The property that links the Bellman error to the induced policy error, with a proof available in [31],
+is as follows. For any weakly communicating average reward MDP and for every Q ∈ RS×A , the policy
+defined by π(s) = arg max Q(s, a), ∀s ∈ S, satisfies the bound
+
+                                    v ∗ − Vπ (s) ≤ kH(Q) − Qksp ,    ∀s ∈ S.
+
+Using thar kH(Q) − Qksp ≤ 2 kH(Q) − Qk∞ and running Algorithm 2 allows us to conclude after the
+application of Theorem 5.2 and Proposition 5.4.                                              
+                                      STOCHASTIC HALPERN AND APPLICATIONS                                     23
+
+5.2. Discounted Halpern Q-learning. In this part, we consider the so-called discounted setting, where
+the reward for a policy π is given by                        !
+                                       ∞
+                                       X
+                                          k
+                           Vπ (s) = Eπ   γ r(sk , ak ) s0 = s , for all s ∈ S,
+                                               k=0
+
+with γ ∈ (0, 1). The optimal value function V ∗ : S → R is defined as V ∗ (s) = maxπ Vπ (s). It is well-known
+that there exists an optimal deterministic policy π ∗ such that V ∗ = Vπ∗ and the optimal value function V ∗
+is the unique solution to the Bellman equations
+                                       X                                 
+                           V (s) = max     p(s′ |s, a) r(s, a) + γV (s′ ) , ∀ s ∈ S.
+                                      a∈ A
+                                             s′ ∈S
+                                                      P
+The Q-factors in this case are defined as Q(s, a) = s′ ∈S p(s′ |s, a) (r(s, a) + γV (s′ )) , and then the corre-
+sponding Bellman equation in the variable Q is
+                            X                                        
+(Qγ )             Q(s, a) =     p(s′ |s, a) r(s, a) + γ max Q(s ′ ′
+                                                                 , a )  , ∀ (s, a) ∈ S × A.
+                                                         a ∈A
+                                                         ′
+                              s′ ∈S
+
+In the discounted reward setting, the unique optimal value function Q∗ (s, a) is the maximum expected
+reward when starting from state s and taking action a. Any optimal policy can be obtained by selecting
+actions according to π ∗ (s) = argmaxa∈A Q∗ (s, a) for all s ∈ S. For this reason, estimating Q∗ has been a
+central problem in this field. Naturally, Q∗ is the unique solution of T Q = Q, where T : RS×A → RS×A
+is the γ-contracting Bellman operator defined by (Qγ ).
+   Algorithm 4 is the instance of the stochastic Halpern Algorithm 1 in this context.
+
+Algorithm 4 Halpern Q-learning (discounted case)
+Require: Sequence (βn )n ∈ (0, 1), (kn )n minibatch size sequence, initial point Q0 , discount factor γ,
+    number of iterations N .
+ 1: for n = 1, . . . , N do
+ 2:    compute
+                                                               kn
+                                                             1 X
+                            T̃n Q n−1
+                                      (s, a) := r(s, a) + γ       max   Qn−1 (sni (s, a), a′ )
+                                                            kn    a′ ∈A
+                                                             i=1
+    where sni (s, a) ∼ p(·|s, a) for every (s, a) ∈ S × A.
+ 3:    set Qn = (1 − βn )Q0 + βn T̃n Qn−1
+ 4: end for
+ 5: Return QN
+
+
+
+  Observe that the oracle involved in Algorithm 4 has uniformly bounded variance, allowing us to apply
+Corollary 4.3. We know that µ = 1 and that kQ0 − Q∗ k∞ ≤ C(1 − γ)−1 (see Appendix A.6). Roughly
+speaking, when bounding the variance in the Euclidean space, we get σ 2 ≤ C kQk22 ≤ C|S × A| kQk2∞ .
+24                                     M. BRAVO AND J.P. CONTRERAS
+
+This leads to an estimate of the form σ 2 ≤ C|S × A|(1 − γ)−2 . Therefore the constant L involved in
+                                 p
+Corollary 4.3 is such that L = O( |S × A|(1 − γ)−1 ) leading to an overall sample complexity of
+                                                           
+                                              |S × A|2 rmax
+                                                         2
+                                          O                   ,
+                                                ε2 (1 − γ)5
+which is worse than the rate stated in Theorem 5.6 below. Consequently, we need more precise estimations
+to obtain the correct dependence on the dimension |S × A|, up to logarithmic terms. The proof of the
+following theorem, similar to the one of Theorem 5.2, is presented in Appendix A.6. We assume that ε > 0
+is sufficiently small.
+                                                                                                      rmax
+Theorem 5.6. Let ε > 0 and set Q0 such that Q0 ∞ ≤ r1−γ   max
+                                                              . For M > 0 defined in (15), let ρ = M (1−γ) 2,
+           ρ    ρ                                    n                 2 N −n
+and N = 2 ε ln ε . Then, Algorithm 4 with βn = n+1 , and kn = ⌈n γ               ⌉, produces an iterate QN
+such that
+                                                           
+                                           E QN − Q∗ ∞ ≤ ε,
+                       2
+                            
+using at most Õ |S×A|r
+                    2
+                        max
+                   ε (1−γ)5   queries to the sampling device. Also, for any δ ∈ (0, 1),
+
+                              QN − Q∗ ∞ ≤ ε, with probability at least 1 − δ
+with the same complexity, where the bound contains also terms of ln(1/δ).
+
+Remark 5.7. Some final comments are in order.
+                                                                 2
+                                                                        p
+     • The constant M in Theorem 5.6 is such that M ≤ ln(2)         (1 + 8 ln(8|S × A|)).
+     • The result in Theorem 5.6 is essentially the same as the one obtained [48], while analyzing the
+       classical Q-leaning algorithm. This algorithm can be seen as a stochastic Krasnoselskii–Mann
+       iteration where one sample by iteration is performed. Interestingly, our analysis does not require the
+       monotonicity of the Bellman operator, specifically, the condition Q ≤ Q̄ ⇒ T Q ≤ T Q̄ component-
+       wise on which the argument of [49] relies. Also, we provide the precise number of iterations needed
+       to achieve the prescribed precision. As mentioned, the optimal complexity for approximate Q-values
+       was later achieved through variance reduction [49] applied to the Q-learning algorithm.
+     • In general, it is possible to derive an ε-optimal policy from an ε-optimal Q. It follows from the fact
+       that if kQ − Q∗ k∞ ≤ ε, then
+                                                                  ε
+                                           V ∗ (s) − Vπ (s) ≤ 2       ,
+                                                                1−γ
+       where π is the policy defined by π(s) = argmaxa∈A Q(s, a) (see for instance [44, Corollary 2]).
+       Then if one runs our algorithm until tolerance ε(1 − γ)/2, the policy induced by the output will be
+       ε-optimal. Of course, this affects the complexity by adding a factor 4(1 − γ)−2 .
+
+Acknowledgements. We sincerely thank two anonymous referees for their insightful comments, which
+significantly improved the quality of this paper. Mario Bravo gratefully acknowledges the support by
+FONDECYT grants 1191924 and 1241805 and the Anillo grant ACT210005. Juan Pablo Contreras was
+supported by Postdoctoral Fondecyt Grant 3240505.
+                                STOCHASTIC HALPERN AND APPLICATIONS                                      25
+
+                                              References
+
+ [1] Abounadi, J., Bertsekas, D.P., Borkar, V.S.: Learning algorithms for Markov decision processes with
+     average cost. SIAM Journal on Control and Optimization 40(3), 681–698 (2001)
+ [2] Agarwal, A., Bartlett, P.L., Ravikumar, P., Wainwright, M.J.: Information-theoretic lower bounds on
+     the oracle complexity of stochastic convex optimization. IEEE Transactions on Information Theory
+     58(5), 3235–3249 (2012)
+ [3] Agarwal, A., Kakade, S., Yang, L.F.: Model-based reinforcement learning with a generative model is
+     minimax optimal. In: Conference on Learning Theory. pp. 67–83. PMLR (2020)
+ [4] Alacaoglu, A., Kim, D., Wright, S.J.: Extending the reach of first-order algorithms for nonconvex
+     min-max problems with cohypomonotonicity. arXiv preprint arXiv:2402.05071 (2024)
+ [5] Arjevani, Y., Carmon, Y., Duchi, J.C., Foster, D.J., Srebro, N., Woodworth, B.: Lower bounds for
+     non-convex stochastic optimization. Mathematical Programming 199(1-2), 165–214 (2023)
+ [6] Azar, M.G., Munos, R., Kappen, H.J.: Minimax PAC bounds on the sample complexity of reinforce-
+     ment learning with a generative model. Machine Learning 91, 325–349 (2013)
+                                                                          √
+ [7] Baillon, J.B., Bruck, R.E.: The rate of asymptotic regularity is O(1/ n). Kartsatos A.G. (ed.) Theory
+     and Applications of Nonlinear Operators of Accretive and Monotone Types, Lecture Notes in Pure
+     and Applied Mathematics 178, 51–81 (1996)
+ [8] Baillon, J.B., Bruck, R.E.: Optimal rates of asymptotic regularity for averaged nonexpansive map-
+     pings. World Scientific Publishing Co. Pte. Ltd., PO Box 128, 27–66 (1992)
+ [9] Bauschke, H.H., Combettes, P.L.: Convex Analysis and Monotone Operator Theory in Hilbert Spaces.
+     CMS Books in Mathematics (2011)
+[10] Bauschke, H.H., Moursi, W.M., Wang, X.: Generalized monotone operators and their averaged resol-
+     vents. Mathematical Programming 189, 55–74 (2021)
+[11] Bravo, M., Champion, T., Cominetti, R.: Universal bounds for fixed point iterations via optimal
+     transport metrics. Applied Set-Valued Analysis and Optimization 4(3), 293–310 (2022)
+[12] Bravo, M., Cominetti, R.: Sharp convergence rates for averaged nonexpansive maps. Israel Journal of
+     Mathematics 227(1), 163–188 (2018)
+[13] Bravo, M., Cominetti, R.: Stochastic fixed-point iterations for nonexpansive maps: Convergence and
+     error bounds. SIAM Journal on Control and Optimization 62(1), 191–219 (2024)
+[14] Cai, X., Song, C., Guzmán, C., Diakonikolas, J.: Stochastic Halpern iteration with variance reduction
+     for stochastic monotone inclusions. In: Advances in Neural Information Processing Systems (2022)
+[15] Chatzigeorgiou, I.: Bounds on the Lambert function and their application to the outage analysis of
+     user cooperation. IEEE Communications Letters 17(8), 1505–1508 (2013)
+[16] Chen, Z., Maguluri, S.T., Shakkottai, S., Shanmugam, K.: Finite-sample analysis of stochastic ap-
+     proximation using smooth convex envelopes. arXiv preprint arXiv:2002.00874 (2020)
+[17] Cominetti, R., Soto, J.A., Vaisman, J.: On the rate of convergence of Krasnosel’skiı̆-Mann iterations
+     and their connection with sums of Bernoullis. Israel Journal of Mathematics 199(2), 757–772 (2014)
+26                                     M. BRAVO AND J.P. CONTRERAS
+
+[18] Contreras, J.P., Cominetti, R.: Optimal error bounds for non-expansive fixed-point iterations in
+     normed spaces. Mathematical Programming 199(1-2), 343–374 (2023)
+[19] Diakonikolas, J.: Halpern iteration for near-optimal and parameter-free monotone inclusion and strong
+     solutions to variational inequalities. In: Conference on Learning Theory (2020)
+[20] Diakonikolas, J., Wang, P.: Potential function-based framework for minimizing gradients in convex
+     and min-max optimization. SIAM Journal of Optimization 32(3), 1668–1697 (2022)
+[21] Drori, Y., Shamir, O.: The complexity of finding stationary points with stochastic gradient descent.
+     In: International Conference on Machine Learning (2020)
+[22] Drori, Y., Teboulle, M.: Performance of first-order methods for smooth convex minimization: a novel
+     approach. Mathematical Programming 145(1-2), 451–482 (2014)
+[23] Fang, C., Li, C.J., Lin, Z., Zhang, T.: SPIDER: Near-optimal non-convex optimization via stochastic
+     path-integrated differential estimator. In: Advances in Neural Information Processing Systems (2018)
+[24] Foster, D.J., Sekhari, A., Shamir, O., Srebro, N., Sridharan, K., Woodworth, B.: The complexity
+     of making the gradient small in stochastic convex optimization. In: Conference on Learning Theory
+     (2019)
+[25] Halpern, B.: Fixed points of nonexpanding maps. Bulletin of the American Mathematical Society
+     73(6), 957–961 (1967)
+[26] Jin, Y., Gummadi, R., Zhou, Z., Blanchet, J.: Feasible Q-learning for average reward reinforcement
+     learning. In: International Conference on Artificial Intelligence and Statistics. PMLR (2024)
+[27] Jin, Y., Karmarkar, I., Sidford, A., Wang, J.: Truncated variance reduced value iteration. In: Advances
+     in Neural Information Processing Systems (2024)
+[28] Jin, Y., Sidford, A.: Efficiently solving MDPs with stochastic mirror descent. In: International Con-
+     ference on Machine Learning. pp. 4890–4900. PMLR (2020)
+[29] Jin, Y., Sidford, A.: Towards tight bounds on the sample complexity of average-reward MDPs. In:
+     International Conference on Machine Learning. pp. 5055–5064. PMLR (2021)
+[30] Kim, D.: Accelerated proximal point method for maximally monotone operators. Mathematical Pro-
+     gramming 190(1), 57–87 (2021)
+[31] Lee, J., Bravo, M., Cominetti, R.: Near-optimal sample complexity for MDPs via anchoring. arXiv
+     preprint arXiv:2502.04477 (2025)
+[32] Lee, S., Kim, D.: Fast extra gradient methods for smooth structured nonconvex-nonconcave minimax
+     problems. In: Advances in Neural Information Processing Systems (2021)
+[33] Li, T., Wu, F., Lan, G.: Stochastic first-order methods for average-reward Markov decision processes.
+     Mathematics of Operations Research (2024)
+[34] Liang, L., Toh, K.C., Zhu, J.J.: An inexact Halpern iteration for with application to distributionally
+     robust optimization. arXiv preprint arXiv:2402.06033 (2024)
+[35] Lieder, F.: On the convergence rate of the Halpern-iteration. Optimization Letters 15(2), 405–418
+     (2021)
+                                 STOCHASTIC HALPERN AND APPLICATIONS                                      27
+
+[36] Mou, W., Khamaru, K., Wainwright, M.J., Bartlett, P.L., Jordan, M.I.: Optimal variance-reduced
+     stochastic approximation in Banach spaces. arXiv preprint arXiv:2201.08518 (2022)
+[37] Nemirovskij, A.S., Yudin, D.B.: Problem Complexity and Method Efficiency in Optimization. Wiley-
+     Interscience (1983)
+[38] Park, J., Ryu, E.K.: Exact optimal accelerated complexity for fixed-point iterations. In: International
+     Conference on Machine Learning (2022)
+[39] Puterman, M.L.: Markov Decision Processes: Discrete Stochastic Dynamic Programming. John Wiley
+     & Sons (2014)
+[40] Raginsky, M., Rakhlin, A.: Information-based complexity, feedback and dynamics in convex program-
+     ming. IEEE Transactions on Information Theory 57(10), 7036–7056 (2011)
+[41] Reich, S.: Strong convergence theorems for resolvents of accretive operators in Banach spaces. Journal
+     of Mathematical Analysis and Applications 75(1), 287–292 (1980)
+[42] Ryu, E.K., Yin, W.: Large-Scale Convex Optimization via Monotone Operators. Cambridge University
+     Press (2023)
+[43] Sabach, S., Shtern, S.: A first order method for solving convex bilevel optimization problems. SIAM
+     Journal on Optimization 27(2), 640–660 (2017)
+[44] Singh, S.P., Yee, R.C.: An upper bound on the loss from approximate optimal-value functions. Machine
+     Learning 16, 227–233 (1994)
+[45] Sutton, R.S., Barto, A.G.: Reinforcement Learning: An Introduction. MIT press (2018)
+[46] Tran-Dinh, Q., Luo, Y.: Halpern-type accelerated and splitting algorithms for monotone inclusions.
+     arXiv preprint arXiv:2110.08150 (2021)
+[47] Tuynman, A., Degenne, R., Kaufmann, E.: Finding good policies in average-reward Markov Decision
+     Processes without prior knowledge. In: Advances in Neural Information Processing Systems (2024)
+[48] Wainwright, M.J.: Stochastic approximation with cone-contractive operators: Sharp ℓ∞ -bounds for
+     Q-learning. arXiv preprint arXiv:1905.06265 (2019)
+[49] Wainwright, M.J.: Variance-reduced Q-learning is minimax optimal. arXiv preprint arXiv:1906.04697
+     (2019)
+[50] Wang, J., Wang, M., Yang, L.F.: Near sample-optimal reduction-based policy learning for average
+     reward MDP. arXiv preprint arXiv:2212.00603 (2022)
+[51] Xu, H.K.: Iterative algorithms for nonlinear operators. Journal of the London Mathematical Society
+     66(1), 240–256 (2002)
+[52] Zhou, D., Xu, P., Gu, Q.: Stochastic nested variance reduction for nonconvex optimization. Journal
+     of Machine Learning Research 21(1), 4130–4192 (2020)
+[53] Zurek, M., Chen, Y.: Span-based optimal sample complexity for weakly communicating and general
+     average reward MDPs. In: Advances in Neural Information Processing Systems (2024)
+28                                       M. BRAVO AND J.P. CONTRERAS
+
+                             Appendix A. Deferred proofs
+                                      P
+A.1. Proof of Lemma 3.4. Assuming that Nn=1 nσn ≤ C ln(N + 1), the bound (5) implies that
+
+                                          1                                    ln(N + 1)
+                  E( xN − T xN ) ≤           (3κ̄ + 2C) ln(N + 1) ≤ (3κ̄ + 2C)           ,
+                                        N +1                        | {z } N + 1
+                                                                            ≤ρ
+                                                          P +1 1
+where we have used the rough bound 3 ln(N + 1) ≥ N           n=1 n for all N ≥ 1, in order to keep the estimates
+simple at the expense of some small factor.
+   For ε > 0, let us call τ := ρε > 0. It is sufficient to find some N̄ ∈ N such that, for any N ≥ N ,
+                       ln(N + 1)
+                                 ≤ τ,     or, equivalently, − τ (N + 1)e−τ (N +1) ≥ −τ.
+                         N +1
+First, note that if τ ≥ e−1 then the inequality above holds for all N ≥ 0. We assume in what follows that
+τ < e−1 .
+   It is well-known that if we want to solve the equation −τ (x + 1)e−τ (x+1) = −τ , the solution is given
+by the relation −τ (x + 1) = W (−τ ), where W is the Lambert function. Given that τ > 0, there is two
+solutions of this equation, provided by the upper and lower branches of W , W0 and W−1 , respectively.
+We recall that both functions are continuous, defined in the interval [−e−1 , 0], and such that W0 (−e−1 ) =
+W−1 (−e−1 ) = −1, W0 increases to cero and W−1 decreases to −∞. This implies that for all τ ∈ (0, e−1 ),
+W0 (−τ ) ∈ (−1, 0) and that W−1 (−τ ) ∈ (−∞, −1). Let us pick the solution given by the lower branch, i.e.
+the one such that x + 1 ≥ τ −1 . In that case,
+                                                 1
+                                            x = − W−1 (−τ ) − 1.
+                                                 τ
+Therefore if we set m = ⌈− τ1 W−1 (−τ ) − 1⌉ ∈ N we obtain that
+                                 ln(N + 1)
+                                             ≤ τ, for all N ∈ N, N ≥ m.
+                                   N +1
+                                              
+Let us show that m ≤ ⌈2 ρε ln ρε ⌉ = ⌈ τ2 ln τ1 ⌉. For that purpose, we use following lower bound for the
+function W−1 (see [15, Theorem 1]):
+
+                                                       √
+                               W−1 (−e−u−1 ) ≥ −1 −        2u − u,   for all u > 0.
+  Taking u = − ln(τ ) − 1 > 0, we get that −e−u−1 = −τ and hence
+                                                                               
+                 1                       1       p
+               − W−1 (−τ ) − 1 ≤            1 + 2(− ln(τ ) − 1) + (− ln(τ ) − 1) − 1 ,
+                 τ                       τ
+                                                                                  
+                                         1 p                                    1    1
+                                    =          −2(ln(τ ) + 1) − ln(τ ) − 1 ≤ 2 ln      −1 ,
+                                         τ                                      τ    τ
+                                                             p
+where the last inequality follows from the trivial bound −2(u + 1) ≤ −u for any u ≤ −1. Observe that
+the last quantity is at least 1 for all τ ∈ (0, e−1 ).
+                                  STOCHASTIC HALPERN AND APPLICATIONS                                       29
+
+A.2. Proof of Theorem 3.10. (a) From (4), we have that
+                                                    n
+                                                    X                              n
+                                                                                   X
+                         kxn − x∗ k ≤ x0 − x∗ +           Bin kUi k ≤ x0 − x∗ +          kUi k .
+                                                    i=1                            i=1
+                                         P
+  Let us consider the random sequence ( ni=1 kUi k)n which, by definition, is positive, nondrecreasing and
+                                                          P∞
+converges to (the possibly inifite) random variable U :=    i=1 kUi k. Using the monotone convergence
+                                P∞
+theorem, we have that E (U ) = n=1 σn < ∞ and then U is almost surely finite.
+  Hence, given that kxn − x∗ k ≤ x0 − x∗ + U , (xn )n is almost surely bounded and consequently κ :=
+supn≥1 T xn − x0 also is.
+  Now, applying this estimation to (3), we obtain that
+                                       n
+                                       X
+             n       n
+           kx − T x k ≤ κ(1 − βn ) +         Bin (κ(βi − βi−1 ) + βi kUi k + βi−1 kUi−1 k) + βn kUn k ,
+                                       i=1
+
+almost surely. We aim to prove that each of the terms involved in the inequality above goes to zero almost
+surely. In that case, the conclusion of part (a) follows by noting that, since (xn )n is almost surely bounded
+and kxn − T xn k goes to zero, any cluster point of (xn )n belongs to Fix T .
+   Let us fix a trajectory on the event A = {U < +∞ and κ < ∞} . Recalling that we already proved that
+P(A) = 1, all what follows will hold almost surely.
+   First, given that limn→∞ βn = 1, one has that κ(1 − βn ) vanishes. Also, using that U is finite,
+limn→∞ kUn k = 0.
+                            P
+   Let us prove now that ni=1 Bin kUi k goes to zero as n goes to infinity. For this purpose, for all n ∈ N
+we define the function B•n : N → R as
+                                            
+                                            B n = Qn β , if 1 ≤ i ≤ n
+                                    n          i       j=i j
+                                   B• (i) =
+                                            0,                if n < i.
+
+Observe that B•n (i) ≤ 1 for every i ∈ N, and that, from the well-known exponential bound, one has
+                                                    n
+                                                    X
+                                  B•n (i) ≤ exp(−     (1 − βj )),     1 ≤ i ≤ n.
+                                                    j=i
+
+Hence,
+                                       lim B•n (i) = 0,       for all i ∈ N,
+                                       n→∞
+                     P
+from the fact that ∞                                  n
+                       j=1 (1 − βj ) = ∞ and that B• (i) = 0 for i > n. Now, let us interpret the sequence
+(kUi k)i≥1 as a finite measure ν on the set N, i.e. ν({i}) = kUi k for all i ∈ N. We have that the sequence
+of functions B•n is uniformly bounded (by the constant and ν-integrable function one) and convergent
+point-wise to the zero function. By invoking the dominated convergence theorem, we have that
+                                 X n              Z
+                                      Bin kUi k =   B•n d ν → 0, as n → ∞.
+                                 i=1              N
+30                                             M. BRAVO AND J.P. CONTRERAS
+
+     It remains to show that both
+                                       n
+                                       X                                  n
+                                                                          X
+                               un :=         Bin kUi−1 k   and vn :=              Bin κ(βi − βi−1 )
+                                       i=1                                 i=1
+
+vanish as n goes to infinity.
+   For both cases, the exact same analysis can be performed to conclude using the dominated convergence
+theorem. Recalling that U0 = 0 and that β0 = 0, for un the finite measure to consider is ν({i}) = kUi−1 k,
+for all i ∈ N, while for vn it suffices to set ν({i}) = κ(βi − βi−1 ), which is finite by hypothesis.
+
+(b) This part follows closely the arguments used by [51, Theorem 3.1] to study strong convergence in the
+noiseless case for general Banach spaces. For 0 < t < 1, let z t the unique solution of the fixed-point
+equation
+                                                   z t = (1 − t) x0 + t T z t .
+
+A direct application [41, Corollary 1] shows that z ∗ := limt→1 z t exists and is a fixed-point of T . Let
+J : (Rd , k·k) → (Rd , k·k∗ ) be the (standard) duality map defined as the subdifferential of the function
+1    2
+2 k·k , i.e.
+                                       J(x) = {x∗ ∈ Rd | hx, x∗ i = kxk2 = kx∗ k2∗ },
+
+where h·, ·i and k · k∗ are the duality pairing and the dual norm, respectively. Therefore, the subdifferential
+inequality holds kx + yk2 ≤ kxk2 + 2hy, J(x + y)i for all x, y ∈ Rd .
+   It is well known that a smooth finite-dimensional Banach space is uniformly smooth, and then J is
+single valued and continuous on bounded sets. Using the subdifferential inequality and following exactly
+the same lines as in the proof of [51, Theorem 3.1], we obtain that, for all n ≥ 1,
+                                                   2                                          
+               xn − z t ≤(1 + (1 − t)2 ) z t − xn + kxn − T xn k 2 z t − xn + kxn − T xn k +
+                             + 2(1 − t)hx0 − z t , J(xn − z t )i,
+
+and then,
+                                          (1 − t) t     2  kxn − T xn k                          
+            hx0 − z t , J(z t − xn )i ≤           z − xn +              2 z t − xn + kxn − T xn k .
+                                             2               2(1 − t)
+Let us fix again a trajectory on the event A, where we know from (a) that limn→∞ kxn − T xn k = 0. So,
+                                                                        (1 − t) t     2
+                             lim suphx0 − z t , J(z t − xn )i ≤ lim sup         z − xn .
+                             n→+∞                                  n→+∞    2
+Using the fact that (xn )n is bounded on A, that J is continuous, and taking the limit when t → 1 we
+obtain
+
+(11)                                         lim suphx0 − z ∗ , J(z ∗ − xn )i ≤ 0.
+                                              n→+∞
+                                       STOCHASTIC HALPERN AND APPLICATIONS                                             31
+
+Now, on the other hand, using again the subdifferential inequality
+                                                                                               2
+                    kxn − z ∗ k2 = (1 − βn )(x0 − z ∗ ) + βn (T xn−1 − z ∗ + Un )
+                                                                   2
+                                  ≤βn2 T xn−1 − z ∗ + Un     + 2(1 − βn )2 hx0 − z ∗ , J(xn − z ∗ )i,
+                                                                                           
+                                                     2
+                                  ≤βn      xn−1 − z ∗ + βn2 2 xn−1 − z ∗ kUn k + kUn k2
+                                                         + 2(1 − βn )hx0 − z ∗ , J(xn − z ∗ )i.
+Finally, noticing that
+
+                                     ∞
+                                     X                                   
+                                           βn2 2 xn−1 − z ∗ kUn k + kUn k2 < +∞
+                                     n=1
+along with (11) one can readily use [51, Lemma 2.5] to conclude that kxn − z ∗ k goes to zero, that is,
+xn → z as n → ∞ as claimed.
+
+A.3. Proof of Lemma 3.8. For n < d, let us define φn : Rd → R for
+                                                         n
+                                                         X
+                               φn (x) = |λ − x1 | +            |P[0,λ] (xi−1 ) − xi | + P[0,λ] (xn ).
+                                                         i=2
+
+  We will prove by induction over n that φn (x) ≥ λ for every x ∈ Rd . The result of the lemma follows by
+noticing that if prog(x) < d then kx − T xk1 = φprog(x) (x).
+  For n = 1, φ1 (x) = |λ − x1 | + P[0,λ] (x1 ). We have three cases:
+      • if x1 ∈ [0, 1] then φ1 (x1 ) = (λ − x1 ) + x1 = λ,
+      • if x1 > λ then φ1 (x1 ) = (x1 − λ) + λ = x1 > λ,
+      • if x1 < 0 then φ1 (x1 ) = (λ − x1 ) > λ,
+hence, the results is valid for n = 1.
+  Assume that φn−1 (x) ≥ λ for all x ∈ Rd . We can write
+                                                 n
+                                                 X
+                        φn (x) = |λ − x1 | +           |P[0,λ] (xi−1 ) − xi | + P[0,λ] (xn )
+                                                 i=1
+                                = φn−1 (x) + |P[0,λ] (xn−1 ) − xn | + P[0,λ] (xn ) − P[0,λ] (xn−1 )
+                                ≥ λ + |P[0,λ] (xn−1 ) − xn | + P[0,λ] (xn ) − P[0,λ] (xn−1 )
+
+  Therefore, it is sufficient to prove that the function η(z, z ′ ) := |P[0,λ] (z) − z ′ | + P[0,λ] (z ′ ) − P[0,λ] (z) is
+nonnegative for all (z, z ′ ) ∈ R2 . We analyze the following cases:
+      • if z ∈ [0, λ] then for the nonexpansiveness of P[0,λ] we have
+
+                    P[0,λ] (z) − P[0,λ] (z ′ ) ≤ |P[0,λ] (z) − P[0,λ] (z ′ )| ≤ |z − z ′ | = |P[0,λ] (z) − z ′ |,
+
+        which implies η(z, z ′ ) ≥ 0 for all z ′ ∈ R.
+32                                         M. BRAVO AND J.P. CONTRERAS
+
+      • If z > λ then η(z, z ′ ) = |λ − z ′ | + P[0,λ] (z ′ ) − λ which is nonnegative again for the nonexpansiveness
+        of P[0,λ] , namely
+                                 λ − P[0,λ] (z ′ ) = |P[0,λ] (λ) − P[0,λ] (z ′ )| ≤ |λ − z ′ |.
+      • Finally, if z < 0 we have η(z, z ′ ) = |z ′ | + P[0,λ] (z ′ ) which is clearly nonnegative.
+
+A.4. Proof of Theorem 5.2. Let us analyze the Benchmark Algorithm 3. Recall that rmax = max(s,a) r(s, a),
+                                                                                                 n
+and let ∆ := |rmax − v ∗ |. Given that Q0 = 0, the iteration takes the simple form Qnv = n+1       H̃n Qnv , so
+                                              n                   n                   
+                             kQnv k∞ ≤               H̃n Qnv   ≤        ∆ + Qvn−1 ∞ .
+                                           n+1               ∞   n+1
+Iterating the last inequality until n = 1, we find the bound
+                                                                    n
+                                                  kQnv k∞ ≤ Cn+1 := ∆.
+                                                                    2
+This shows that one can obtain a deterministic, rather rough, a priori estimate on the rate with which the
+state variable can increase.
+   Let F 0 be the trivial σ-field and consider the natural filtration (F n )n≥0 of the process (Qnv )n≥1 , that is,
+                           km
+F n = σ({sm = (sm                                            m
+                  i (·, ·))i=1 , m = 1, . . . , n}), where s is the collection of km samples at the m-th iteration
+                     m
+used to compute Qv in Algorithm 3.
+   For n ≥ 2, let F0n = Fn and, for 1 ≤ j ≤ kn , we consider the σ-field that includes information until the
+j-th sampling when computing Qnv , that is
+                                   Fjn = σ({sm , m = 1, . . . , n}, (sn+1
+                                                                      k   (·, ·))jk=1 ).
+Observe that with this definition Fknn = F0n+1 = F n+1 and that if we write
+                              kn
+                                                                                                                 !
+                              X  1                                       X
+                Un (s, a) =            max   Qvn−1 (sni (s, a), a′ ) −               ′
+                                                                                 p(s |s, a) max   Qvn−1 (s′ , a′ )   ,
+                                 k     a′ ∈A                                                a′ ∈A
+                              i=1 n                                      s′ ∈S
+                                 |                                       {z                                          }
+                                                                  :=Xin (s,a)
+                                                     P
+then Xin (s, a) is Fin−1 -measurable. Let Zjn = ji=1 Xin (s, a), j = 1, . . . , kn and Z0n = 0. By construction,
+(Zjn )kj=0
+        n
+           is a zero-mean martingale with respect to the filtration (Fjn−1 )kj=0      n
+                                                                                          where Zknn = Un (s, a). Also,
+for all j = 1, . . . , kn ,
+                                                                     Qvn−1 ∞      2Cn
+                                  |Zjn − Zj−1
+                                           n
+                                               | = |Xjn (s, a)| ≤ 2            ≤        .
+                                                                        kn          kn
+Observe that this implies that kUn k∞ ≤ 2Cn for all n ∈ N. Hence, using the classical (double-sided)
+Azuma-Hoeffding inequality for n ≥ 2 (since U1 = 0), for any t > 0 we have
+                                                                                                       
+                    n                                                      t2                       kn t2
+              P(|Zkn (s, a)| ≥ t) = P(|Un (s, a)| ≥ t) ≤ 2 exp −                        = 2 exp − 2 .
+                                                                     2kn (2Cn kn−1 )2               8Cn
+                                      p       √
+   Setting t = √Ckn θn , with θn = 8 ln(2 kn |S × A|), so that
+                       n
+                                                          
+                                                     kn t2            1
+                                          2 exp − 2 =                    √ ,
+                                                     8Cn         |S × A| kn
+                                      STOCHASTIC HALPERN AND APPLICATIONS                                    33
+
+  we get
+                                                                
+                                                      Cn                      1
+                                      P |Un (s, a)| ≥ √ θn           ≤√              .
+                                                       kn                 kn |S × A|
+Using a union bound over the state-action pairs S × A, we obtain that
+                                                       
+                                                   Cn          1
+                                    P kUn k∞ ≥ √ θn ≤ √ ,
+                                                    kn         kn
+or, equivalently,
+                                        Cn                                             1
+                               kUn k∞ ≤ √ θn            with probability at least 1 − √ .
+                                         kn                                            kn
+Now, from the law of total expectation
+                                                          Cn       Cn
+(12)                                         E(kUn k∞ ) ≤ √ θn + 2 √ ,
+                                                           kn       kn
+where we have used that kUn k∞ ≤ 2Cn for all n ≥ 2.
+  Recalling that σn = E(kUn k∞ ), the definition of Cn , σn = E(kUn k∞ ), and that kn = ⌈n6 ln(n + 1)⌉, from
+(12) we obtain the estimate
+                                        1
+                                        2p(n − 1)∆            ∆         θm + 2
+                              nσn ≤                (θn + 2) ≤   · sup p        ,
+                                       2
+                                      n ln(n + 1)             n m≥2 ln(m + 1)
+                                                                       |         {z      }
+                                                                               :=M <∞
+                                       p
+where M is finite,1 only depending on ln(|S × A|). Notice that for n = 1, σ1 = 0 since Q0 = 0 but we
+include the bound in what follows for simplicity.
+                           Q
+   So, recalling that Bin = nj=1 βj = n+1
+                                       i
+                                          for our specific choice of βn , we get
+                          n                         n                      n
+                          X                 1 X             1 X ∆ θi + 2       1
+(13)                sup       Bin σi = sup      iσi ≤ sup        2
+                                                                   p          ≤ M ∆.
+                    n≥1 i=1           n≥1 n + 1    i=1n≥1 n + 1 i   ln(i + 1)
+                                                                        i=1
+                                                                               2
+
+   Let us see now that dist(0, Fix H) ≤ kh∗ ksp . Recall that u ∈ R is a vector of ones. Given that
+h∗ is a solution to the optimal bias equation (9), we have that h̄ = h∗ − mins h∗ (s)u ∈ RS is also
+a solution, with kh∗ ksp = ||h̄||∞ and positive entries. By definition, Q̄ ∈ RS×A , where Q̄(s, a) :=
+P          ′                     ′
+                                   
+  s′ ∈S p(s |s, a) r(s, a) + h̄(s ) , is a solution to the Bellman equation (QAV ), also with positive entries.
+Thus, Q̄ ∞ = maxs,a Q̄(s, a) ≤ rmax + maxs h̄(s) = rmax + kh∗ ksp and dist(0, Fix H) ≤ 2kh∗ ksp .
+   Now let us compute the constants involved in terms of the parameter kh∗ ksp . From (13) show that the
+assumption of Lemma 3.2(ii) hold with S = 12 M ∆ and therefore, using that ∆ ≤ rmax , (H1 ) holds with
+                                                                             
+                   1                              1             ∗      1
+                     M ∆ + 2 dist(0, Fix H) ≤ M rmax + 4kh ksp ≤         M + 4 kh∗ ksp := κ,
+                   2                              2                    2
+
+  1Numerically, we obtain that M ≤ 5.93392
+                                             p
+                                                 ln(|S × A|).
+34                                       M. BRAVO AND J.P. CONTRERAS
+
+where we have used that rmax ≤ 1 ≤ kh∗ ksp . On the other hand,
+                       N                 N                    N
+                       X                 X 1                  X 1        3
+                             nσn ≤ M ∆             ≤ M rmax             ≤ M kh∗ ksp ln(N + 1).
+                                               n                    n    2
+                       n=1               n=1                  n=1
+
+   This shows that we can use Lemma 3.4 with C = 32 M kh∗ ksp , we conclude that Algorithm 3 finds a
+solution QN                 N     N
+          v such that E( HQv − Qv ∞ ) ≤ ε in at most
+                              l ρ  ρ m                         
+                                                        9
+                         N = 2 ln        , with ρ =       M + 12 kh∗ ksp
+                                ε   ε                   2
+iterations and the bound continues to hold afterwards. Note that if ε/ρ ≥ e−1 then one iteration is sufficient
+and the complexity is |S × A|. To conclude, assuming that ε/ρ < e−1 we observe that for each iteration
+                                                    p
+n = 1, ..., N our algorithm uses a total of |S ×A|n6 ln(n + 1) sample calls and then, the overall complexity
+is
+                         N                           l ρ  ρ m        l ρ  ρ m       7
+                        X                  1
+               |S × A|     n6 ln(n + 1) ≤ |S × A| ln 2 ln          +1       2 ln       +1 .
+                                           7             ε     ε             ε    ε
+                      n=1
+
+A.5. Sketch of Proof of Proposition 5.4. Again, we analyze Algorithm 3 and we conserve all the
+notation introduced there. The key idea is that, given that we have large minibatches, it is possible to
+obtain a bound that holds for all n ≥ 1 with arbitrary high probability.
+  More precisely, and following exactly the lines in the proof of Theorem 5.2, we have that for all t > 0
+                                                                     
+                                                                kn t2
+                                   P(|Un (s, a)| ≥ t) ≤ 2 exp −         .
+                                                                16Cn2
+Now, given δ ∈ (0, 1), we can pick t = in order to have that
+
+                                                              δ
+                                   P(|Un (s, a)| ≥) ≤            √ := δn ,
+                                                         K|S × A| kn
+           P                                   P
+where K = n≥1 √1k < +∞. This implies that n≥1 δn = |S×A|     δ
+                                                                .
+                     n
+  Therefore, using a simple union bound over the state-action pairs and then over all n ∈ N we get that,
+with probability at least 1 − δ
+                                                   s          √          
+                                               Cn           2K kn |S × A|
+(14)                        (∀n ≥ 1) kUn k∞ ≤ √      8 ln                   .
+                                                kn                δ
+Therefore, we can work on the event E defined by (14) knowing that P(E) ≥ 1 − δ. The bounds that
+follow are exactly the same ideas developed in this paper, but estimating now directly kUn k∞ and not its
+                                                                                        P
+expectation. For instance, from (14) we can bound exactly as before the quantity supn≥1 ni=1 Bin kUi k∞ ≤
+S < +∞, and then find κ̄ = S + 2 dist(Q0 , Fix H) such that supn∈N HQn − Q0 ≤ κ̄ by following line by
+line the proof Lemma 3.2(ii). The conclusion follows by the exact same estimations given in the proof of
+Theorem 5.2 that hold now on the event E.
+                                     STOCHASTIC HALPERN AND APPLICATIONS                                                            35
+
+A.6. Proof of Theorem 5.6. First of all, the value of M in the statement of the theorem is
+                                                           p
+                                                     1+        8 ln (4|S × A|(N + 1))
+(15)                                 M = 2 sup                                        .
+                                             N ≥1                  ln(N + 1)
+
+Let us write
+                                         kn
+                                         X  γ
+                 Qn (s, a) = r(s, a) +              max Qn−1 (sni (s, a), a′ ) ≤ rmax + γ Qn−1 ∞ .
+                                                 kn a′ ∈A
+                                           i=1
+
+A simple induction shows that if Q0 ∞ ≤ r1−γ
+                                          max
+                                              , then kQn k∞ ≤ r1−γ
+                                                                max
+                                                                    for all n ≥ 1. Moreover, kQ∗ k ≤ γr1−γ
+                                                                                                        max
+
+
+([48, Lemma 1]). Observing that
+
+                             kn
+                                                                                                                        !
+                             X  γ                n−1
+                                                                             X
+               Un (s, a) =            max Q            (sni (s, a), a′ ) −              ′
+                                                                                     p(s |s, a) max Q   n−1     ′   ′
+                                                                                                              (s , a ) ,
+                                k     a ∈A
+                                       ′                                                        a ∈A
+                                                                                                 ′
+                             i=1 n                                           s′ ∈S
+                                |                                            {z                                         }
+                                                                      :=Xin (s,a)
+
+
+we get that |Xin (s, a)| ≤ 2 kγn Qn−1 ∞ ≤ 2 kγn (1−γ)
+                                                 rmax
+                                                      . Notice that this implies that kUn k∞ ≤ 2 γr max
+                                                                                                 (1−γ) . Recall
+that kn = ⌈γ N −n n2 ⌉ and define n(γ) the first n for which kn ≥ 2, i.e. n(γ) = inf{1 ≤ n ≤ N : kn ≥ 2}. If
+such n does not exists, we set n(γ) = N + 1 by convention. This means that the algorithm takes only one
+sample matrix at each state. As in the proof of Theorem 5.2, based on the Azuma-Hoeffding inequality,
+we have that for all t > 0 and for all n ≥ n(γ),
+                                                                                                                         
+                                                    t2                                                kn t2 (1 − γ)2
+           P(|Un (s, a)| ≥ t) ≤ 2 exp −                                                     = 2 exp −                           ,
+                                        2kn (2γ(1 − γ)−1 rmax kn−1 )2                                   8γ 2 rmax
+                                                                                                               2
+
+
+                                         −1/2
+                                                 p                √
+  Let us choose t = γ(1 − γ)−1 rmax kn               8 ln(2|S × A| kn ) so that
+                                                                   
+                                             kn t2 (1 − γ)2                           1
+                                     2 exp −                            =√                   .
+                                               8γ 2 rmax
+                                                      2                           kn |S × A|
+                                                  p               √       p
+Recall that kn = ⌈γ N −n n2 ⌉ and observe that 0 < 8 ln(2|S × A| kn ) ≤ 8 ln(2|S × A|(N + 1)) := θN
+for all n ≥ n(γ). From a union bound over the state-action pairs, we obtain that
+
+                                       γrmax                                                1
+                       kUn k∞ ≤ √                θN          with probability at least 1 − √ .
+                                      kn (1 − γ)                                            kn
+
+Then, from the law of total expectation, using that kUn k∞ ≤ 2γr max
+                                                              1−γ , we have that for all n ≥ n(γ)
+
+                                        γrmax          2γrmax 1     2rmax
+(16)           E(kUn k∞ ) = σn ≤ √                θN +       √ ≤   N−n        (θN + 1) .
+                                       kn (1 − γ)       1 − γ kn nγ 2 (1 − γ)
+36                                      M. BRAVO AND J.P. CONTRERAS
+
+
+Observe that for all 1 ≤ n < n(γ) we have simply that E(kUn k∞ ) ≤ 2γr max
+                                                                    1−γ and the inequality (16) holds
+                       N−n
+when kn = 1 since nγ    2    ≤ 1. Therefore, (8) imply that
+                                                  N                       N
+                                                                                                !
+                                        1         X                       X         N−n
+                     E( QN − Q∗ ∞ ) ≤                   γ N −n kQ∗ k∞ +         γ    2    nσn
+                                      N +1
+                                                  n=0                     n=1
+                                                                                      
+                                         1       2rmax            2rmax
+                                     ≤                    +             √ (θN + 1)
+                                       N + 1 (1 − γ)2 (1 − γ)(1 − γ)
+                                             4rmax
+                                     ≤                   (θN + 1)
+                                       (N + 1)(1 − γ)2
+                                             rmax ln(N + 1)         ln(N + 1)
+                                     ≤ 4M          2
+                                                               := ρ           .
+                                           (1 − γ) N + 1              N +1
+                                                                                   P
+In the second line we used that kQ∗ k∞ ≤ Q0 ∞ + kQ∗ k∞ ≤ 2rmax /(1 − γ), that N       n=1 γ
+                                                                                            N −n ≤ (1 − γ)−1 ,
+                                              √                                         √ −1
+and the same for the sum involving powers of γ. In the third line we used that (1 − γ) ≤ 2(1 − γ)−1
+and that γ ≤ 1.
+                                                                                                      
+   Therefore, using the argument in Lemma 3.4, we have that E( QN − Q∗ ∞ ) ≤ ε if N = 2 ρε ln ρε and
+the claimed bound for QN holds. Finally, the total sample complexity can be bounded as
+                N                N                                                             2
+                                                                                                   
+                X               X
+                                     2 N −n          |S × A|(N 2 + (1 − γ)N )         |S × A|rmax
+        |S × A|    kn ≤ |S × A|    (n γ     + 1) ≤                             = Õ                  .
+                                                             (1 − γ)                   ε2 (1 − γ)5
+               n=1                n=1
+Finally, the result with high probability follows the same modifications described in the average reward
+case.
+
+  (M.B.) Universidad Adolfo Ibáñez, Facultad de Ingenierı́a y Ciencias, Diagonal Las Torres 2640, Santiago,
+Chile
+  Email address:  mario.bravo@uai.cl
+
+  (J.P.C.) Escuela de Ingenierı́a Industrial, Universidad Diego Portales, Av. Ejército Libertador 441, Santi-
+ago, Chile
+  Email address:   juan.contreras@udp.cl
+

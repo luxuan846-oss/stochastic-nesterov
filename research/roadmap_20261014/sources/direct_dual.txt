@@ -1,0 +1,1008 @@
+Direct Acceleration of Stochastic Root-FindingWithout Variance Reduction and Regularization
+Report GitHub Issue
+×
+Title:
+Content selection saved. Describe the issue below:
+Description:
+Submit without GitHub
+Submit in GitHub
+arXiv is now an independent nonprofit!
+Learn more
+×
+Back to arXiv
+Why HTML?
+Report Issue
+Back to Abstract
+Download PDF
+Abstract
+1 Introduction
+Contributions.
+2 Related Work
+Fixed-point problems, Halpern iteration and acceleration.
+Acceleration of minimax optimization and monotone inclusion.
+Residual-reducing algorithms for stochastic fixed-point and monotone inclusion problems.
+Broader view of extending acceleration to stochastic settings.
+3 Preliminaries and Assumptions
+3.1 Monotonicity, cocoercivity, and nonexpansiveness of operators
+3.2 Stochastic oracle models
+3.3 Known acceleration in fixed-point problems and its extension
+4 Stochastic Dual-Anchor Acceleration
+4.1 Proof outline for
+4.1.1 Intuition for why S-Dual-OHM is stable under noise
+4.2 Faster convergence under strong monotonicity
+5 Numerical Experiments
+Baseline algorithms.
+Experiment 1: Worst-case nonexpansive operator.
+Experiment 2: Finite-sum cocoercive operator.
+Experiment 3: SCSC minimax problem with Huber-type regularizers.
+6 Conclusion and Open Questions
+References
+A Missing Proofs
+A.1 Proof of
+A.2 Proof of
+A.3 Proof of
+A.4 Proof of
+A.5 Proof of
+B Additional Experiments
+License: CC BY 4.0
+arXiv:2608.12043v1 [math.OC] 12 Aug 2026
+11footnotetext: Department of Applied Mathematics and Statistics & Mathematical Institute for Data Science, Johns Hopkins University.
+{tyoon7, nloizou}@jhu.edu
+Direct Acceleration of Stochastic Root-Finding
+Without Variance Reduction and Regularization
+TaeHo Yoon*
+Nicolas Loizou*
+Abstract
+Acceleration for deterministic root-finding problems has been extensively studied in recent years; specifically, the anchor-based, or Halpern-type methods achieve optimal convergence rates with respect to the operator norm.
+However, acceleration via these methods does not directly carry over to stochastic setting due to accumulation of errors, unless one enforces diminishing variance via increasing batch sizes or variance reduction techniques.
+In this work, we show that another class of acceleration, namely the dual-anchor mechanism, extends to the stochastic setting without such error accumulation, in contrast to anchor-based algorithms.
+Consequently, we cleanly achieve ${\mathcal{O}}(\epsilon^{-3})$ complexity with iteration-independent batch size, without any variance reduction or double-loop recursive regularization, for stochastic root-finding (resp. fixed-point) problems with cocoercivity (resp. square-nonexpansivity) in expectation.
+For strongly monotone operators, the same algorithm attains a sharper $\widetilde{\mathcal{O}}(\epsilon^{-2})$ complexity, nearly matching the lower bound in terms of $\epsilon$ -dependence.
+1 Introduction
+Root-finding problems for an operator ${\mathbb{F}}\colon\mathbb{R}^{d}\to\mathbb{R}^{d}$ , stated as
+$\displaystyle\underset{x\in\mathbb{R}^{d}}{\text{find}}\quad{\mathbb{F}}(x)=0,$
+(1)
+generalize minimization problems and have been studied under distinct formulations including monotone inclusion [36, 42, 3, 43], minimax optimization [38, 19, 33, 13, 35, 31], equilibrium search [47, 17, 46], or fixed-point problems [24, 34, 21, 51, 45].
+In the past few years, there have been significant developments in accelerated algorithms for reducing the squared operator/residual norm with the optimal $\left\|{\mathbb{F}}(x_{k})\right\|^{2}={\mathcal{O}}(1/k^{2})$ rate [29, 16, 22, 40, 56, 27].
+A recurring message from the optimization literature, however, is that deterministic acceleration is often brittle under oracle errors; in the stochastic setting where ${\mathbb{F}}(x)=\mathbb{E}\left[\widehat{\mathbb{F}}(x;\xi)\right]$ and the algorithm uses $\widehat{\mathbb{F}}(x;\xi)$ , error may accumulate quickly with these accelerated methods and break their fast convergence from the noiseless setting.
+Consequently, for stochastic optimization problems, taking advantage of the study of acceleration was not straightforward—it required decaying oracle inexactness, variance reduction, restart mechanisms, or stronger assumptions on the problem [15, 18, 28, 10].
+Specifically for stochastic monotone inclusion problems, stochastic Halpern iteration and accelerated (anchored) extragradient type analyses suffered precisely from these issues [27, 10, 9].
+We take a different viewpoint toward handling stochastic instability.
+Recent work [54] showed that the acceleration mechanism in fixed-point and minimax problems is not unique: besides anchor-based algorithms [29, 22, 56, 27, 49], there exist their H-dual algorithms, which display materially different update rules but share exactly the same deterministic last-iterate rate with the optimal anchor-based acceleration.
+Hence, the deterministic worst-case complexity alone does not identify a single preferred accelerated method.
+In this paper, we demonstrate that the stochastic extension can break this tie: the Stochastic Dual Optimal Halpern Method (S-Dual-OHM) attains $\mathbb{E}\left[\left\|{\mathbb{F}}(x_{N-1})\right\|\right]\leq\epsilon$ with ${\mathcal{O}}(\epsilon^{-3})$ oracle complexity, with iteration complexity $N={\mathcal{O}}(\epsilon^{-1})$ and with constant mini-batch size ${\mathcal{O}}(\epsilon^{-2})$ .
+This is done cleanly and more directly without assuming diminishing variance or using variance reduction techniques, which is not what stochastic anchoring methods were capable of [27, 10, 9].
+In our view, this result has a conceptual implication beyond simply providing another efficient stochastic algorithm.
+It challenges the folklore view that acceleration, as studied in deterministic optimization, is brittle and incompatible with stochastic noise.
+Equivalently, optimal deterministic methods can behave very differently under stochastic perturbations, and selecting the right representation of acceleration may enable the design of efficient stochastic algorithms.
+Contributions.
+We summarize our main contributions as follows.
+Table 1: Comparison of stochastic algorithms for finding an $\epsilon$ -approximate solution with $\mathbb{E}\!\left[\|{\mathbb{F}}(x)\|\right]\leq\epsilon$ for $\nicefrac{{1}}{{L}}$ -cocoercive operator ${\mathbb{F}}$ .
+Algorithms
+Complexity
+Last-
+iterate
+Variance-
+reduction free
+Single-
+loop
+Algorithm
+parameters
+Theory
+requirements
+SGDA/SEG [20]
+${\mathcal{O}}(\epsilon^{-4})$ $\dagger$
+✗
+✓
+✓
+$L,B$
+$D,\sigma$
+S-Halpern-PAGE [10]
+${\mathcal{O}}(\epsilon^{-3})$
+✓
+✗
+✓
+$L,p_{k},S_{1}^{(k)},S_{2}^{(k)}$
+$D,\sigma$
+S-Halpern-VR-Finite [9]
+$\widetilde{{\mathcal{O}}}(n+\sqrt{n}\,\epsilon^{-1})$ $\ddagger$
+✓
+✗
+✓
+$L,B,\lambda_{k};\,p_{k}$ or $M_{k}$
+$D,n$
+RAIN [12]
+$\widetilde{{\mathcal{O}}}(\epsilon^{-2})$
+✓
+✓
+✗*
+$L,\lambda,\gamma,N_{s},K_{s}$
+$D,\sigma$
+S-Dual-OHM (This work)
+${\mathcal{O}}(\epsilon^{-3})$
+✓
+✓
+✓
+$L,B,N$
+$D,\sigma$
+SGDA denotes Stochastic Gradient Descent-Ascent $x_{k+1}=x_{k}-\alpha{\mathbb{F}}(x_{k};\xi_{k})$ and SEG denotes stochastic version of Extragradient [23].
+“Last-iterate” indicates whether the stated guarantee is for the final iterate and not the averaged, best, or uniform random iterate. “Variance-reduction free” indicates whether the algorithm avoids using variance reduction techniques. “Single-loop” indicates whether the algorithm avoids using outer–inner loop structure (e.g., regularization techniques).
+“Algorithm parameters” lists the hyperparemeters whose values should be specified for the run,
+where the cocoercivity/Lipschitzness parameter $L$ is used for determining the step-sizes of the algorithm.
+“Theory requirements” lists the information of problem-related parameters that are needed for selecting the hyperparameters that theoretically guarantee $\mathbb{E}\!\left[\|{\mathbb{F}}(x)\|\right]\leq\epsilon$ .
+Here $N$ is the total number of algorithm iterations, $D=\left\|x_{0}-x_{\star}\right\|$ , $\sigma$ is a bound on the operator variance, and $n$ is the number of component operators in the case where the problem has a finite-sum structure.
+The $\widetilde{{\mathcal{O}}}(\cdot)$ notation hides logarithmic factors.
+$\dagger$ [20, Corollary E.4] shows this for uniform random iterate of SEG, and a similar proof for SGDA can be derived.
+$\ddagger$ Works only for finite-sum problems where ${\mathbb{F}}(\cdot)=\frac{1}{n}\sum_{i=1}^{n}{\mathbb{F}}(\cdot;\xi_{i})$ .
+*[12] presents a single-loop version of RAIN for numerical experiments (which we use in our experiments for comparison), but their theoretical convergence analysis still requires a nontrivial double-loop structure.
+$\diamond$
+We show that under cocoercivity of ${\mathbb{F}}$ in expectation, our proposed S-Dual-OHM with mini-batching over $\widehat{\mathbb{F}}(\cdot;\xi)$ with constant step-size $\alpha\in\left(0,\frac{2}{L}\right]$ and constant batch size $B={\mathcal{O}}(\epsilon^{-2})$ achieves the bound $\mathbb{E}\left[\left\|{\mathbb{F}}(x_{N-1})\right\|\right]\leq\epsilon$ within $N={\mathcal{O}}(\epsilon^{-1})$ iterations.
+The resulting total oracle complexity ${\mathcal{O}}(\epsilon^{-3})$ , to the best of our knowledge, has not been achieved in prior work without variance reduction or double-loop regularization techniques (Table 1).
+$\diamond$
+We show that when ${\mathbb{F}}$ is additionally strongly monotone, the same S-Dual-OHM algorithm can be early-stopped in $k=\widetilde{\mathcal{O}}(\nicefrac{{L}}{{\mu}}\log\epsilon^{-1})$ iterations to attain $\mathbb{E}\left[\left\|{\mathbb{F}}(x_{k})\right\|\right]\leq\epsilon$ .
+This yields the oracle complexity $\widetilde{\mathcal{O}}(\epsilon^{-2})$ , which has near-optimal dependence on $\epsilon$ .
+$\diamond$
+We provide numerical experiments demonstrating that Dual-OHM is indeed more robust to stochastic noise than Halpern iteration, and that S-Dual-OHM can effectively solve stochastic root-finding problems.
+2 Related Work
+Fixed-point problems, Halpern iteration and acceleration.
+For fixed-point problems
+$\displaystyle\underset{x\in\mathbb{R}^{d}}{\text{find}}\quad x={\mathbb{T}}(x),$
+(2)
+with a nonexpansive operator ${\mathbb{T}}\colon\mathbb{R}^{d}\to\mathbb{R}^{d}$ , the Halpern iteration $x_{k+1}=\beta_{k}x_{0}+(1-\beta_{k}){\mathbb{T}}x_{k}$ has been studied over a long history in the literature [21, 51], and has been found to provide accelerated worst-case convergence rate $\left\|x_{k}-{\mathbb{T}}(x_{k})\right\|={\mathcal{O}}(1/k)$ with $\beta_{k}={\mathcal{O}}(1/k)$ [45, 16, 29, 22, 26].
+The best choice $\beta_{k}=\frac{1}{k+2}$ , due to [29, 22], was later shown to yield an optimal rate $\left\|x_{k}-{\mathbb{T}}(x_{k})\right\|^{2}\leq\frac{4\left\|x_{0}-x_{\star}\right\|^{2}}{(k+1)^{2}}$ , exactly matching the lower bound [40].
+More recently, it was discovered that the same exact optimal rate for a fixed finite horizon $N$ can be achieved by distinct types of acceleration forming an infinite family of algorithms [55] including Dual-OHM [54], the basis of this work.
+Acceleration of minimax optimization and monotone inclusion.
+Minimax optimization with convex-concave objective can be recast into monotone inclusion, i.e., root-finding problem (1) with saddle gradient operator ${\mathbb{F}}$ , which is a monotone operator [42, 17].
+Some early works including [44, 16] first connected Halpern acceleration to these problems, and [16] achieved near-optimal complexity for Lipschitz continuous monotone inclusions.
+The remaining logarithmic gap was removed by the Extra Anchored Gradient algorithm [56], and the so-called anchor acceleration for minimax optimization and monotone inclusion has been studied extensively since then [27, 49, 57, 48, 11, 5, 1, 25].
+Several works proposed its extension via distinct interpretation in connection with Nesterov momentum [6, 50].
+On the other hand, the dual-anchor acceleration analogous to Dual-OHM from fixed-point problems is achievable in this setting as well [54].
+Residual-reducing algorithms for stochastic fixed-point and monotone inclusion problems.
+The Fast Extragradient algorithm [27], an anchor-based accelerated minimax algorithm, was proposed with its stochastic extension under the assumption that the operator’s variance at $k$ -th iteration diminishes at the order of ${\mathcal{O}}(1/k)$ .
+Then [10] showed that stochastic Halpern iteration and its minimax variants, combined with PAGE variance reduction [28] can reduce the complexity of achieving $\mathbb{E}\left[\left\|{\mathbb{F}}(x_{k})\right\|\right]\leq\epsilon$ to ${\mathcal{O}}(\epsilon^{-3})$ , which could be further improved to $\widetilde{\mathcal{O}}(n+\sqrt{n}\epsilon^{-1})$ [9] in the finite-sum setting where ${\mathbb{F}}$ is the average of $n=o(\epsilon^{-3})$ sample operators.
+Near-optimal complexity of $\widetilde{\mathcal{O}}(\epsilon^{-2})$ for stochastic monotone inclusion has been achieved in [12] with the matching $\Omega(\epsilon^{-2})$ lower bound via more sophisticated recursive anchoring (regularization) algorithm.
+On another line of work, [7, 41, 8] studied stochastic Krasnosel’skiĭ–Mann or Halpern iterations in general normed spaces, where the lower bound of $\Omega(\epsilon^{-3})$ was established [8].
+Broader view of extending acceleration to stochastic settings.
+In smooth convex minimization, it is now standard that accelerated methods are fragile to persistent oracle error: preserving acceleration under stochasticity typically requires either variance reduction or catalyst-type outer–inner regularization [15, 30, 2].
+A similar viewpoint has been adopted for monotone root-finding problems in prior works [10, 9, 12].
+Our approach departs from this line of work.
+Rather than stabilizing Halpern-type acceleration by additional variance-reduction or regularization, we leverage the fact that deterministic acceleration is not unique, and there exist distinct optimal accelerated algorithms with the same worst-case deterministic rate.
+We deliver the new observation that among them, Dual-OHM is intrinsically less sensitive to stochastic perturbations than Halpern-type algorithms, enabling direct stochastic extension.
+3 Preliminaries and Assumptions
+In this section, we establish some necessary preliminary concepts for subsequent analysis.
+3.1 Monotonicity, cocoercivity, and nonexpansiveness of operators
+We say that an operator ${\mathbb{F}}\colon\mathbb{R}^{d}\to\mathbb{R}^{d}$ is
+-
+Monotone if $\left\langle{\mathbb{F}}(x)-{\mathbb{F}}(y),x-y\right\rangle\geq 0$ for all $x,y\in\mathbb{R}^{d}$
+-
+$\mu$ -strongly monotone if $\left\langle{\mathbb{F}}(x)-{\mathbb{F}}(y),x-y\right\rangle\geq\mu\left\|x-y\right\|^{2}$ for all $x,y\in\mathbb{R}^{d}$
+-
+$M$ -Lipschitz if $\left\|{\mathbb{F}}(x)-{\mathbb{F}}(y)\right\|\leq M\left\|x-y\right\|$ for all $x,y\in\mathbb{R}^{d}$
+-
+$\nicefrac{{1}}{{L}}$ -Cocoercive if $\left\langle{\mathbb{F}}(x)-{\mathbb{F}}(y),x-y\right\rangle\geq\frac{1}{L}\left\|{\mathbb{F}}(x)-{\mathbb{F}}(y)\right\|^{2}$ for all $x,y\in\mathbb{R}^{d}$
+where $\mu,M,L>0$ .
+In particular, $\nicefrac{{1}}{{L}}$ -cocoercivity implies monotonicity and $L$ -Lipschitzness, but not vice versa.
+If ${\mathbb{F}}$ is $M$ -Lipschitz and $\mu$ -strongly monotone, then it is $\nicefrac{{1}}{{L}}$ -cocoercive with $L=\nicefrac{{M^{2}}}{{\mu}}$ [17].
+When ${\mathbb{F}}$ is $\nicefrac{{1}}{{L}}$ -cocoercive, the problem (1) can be recast into a fixed-point problem (2) where ${\mathbb{T}}={\mathbb{I}}-\alpha{\mathbb{F}}\colon\mathbb{R}^{d}\to\mathbb{R}^{d}$ is nonexpansive, i.e., $1$ -Lipschitz for $0<\alpha\leq\frac{2}{L}$ [3, Proposition 4.39], where ${\mathbb{I}}\colon\mathbb{R}^{d}\to\mathbb{R}^{d}$ is the identity operator.
+This is because
+$\mathrm{Zer}\,({\mathbb{F}}):=\{x\in\mathbb{R}^{d}\,|\,{\mathbb{F}}(x)=0\}=\{x\in\mathbb{R}^{d}\,|\,{\mathbb{T}}(x)=x\}:=\mathrm{Fix}\,({\mathbb{T}}).$
+Given an unconstrained minimax problem
+$\displaystyle\underset{u\in\mathbb{R}^{m}}{\text{minimize}}\,\,\underset{v\in\mathbb{R}^{n}}{\text{maximize}}\,\,\Phi(u,v)$
+(3)
+with a convex-concave (resp. $\mu$ -strongly-convex-strongly-concave) and $M$ -smooth $\Phi\colon\mathbb{R}^{m}\times\mathbb{R}^{n}\to\mathbb{R}$ , its saddle operator
+${\mathbb{F}}(u,v)=(\nabla_{u}\Phi(u,v),-\nabla_{v}\Phi(u,v))$
+is monotone (resp. $\mu$ -strongly monotone) and $M$ -Lipschitz [17].
+3.2 Stochastic oracle models
+We consider an unbiased stochastic operator oracle with bounded variance.
+3.1Stochastic operator oracle.
+Given $x\in\mathbb{R}^{d}$ , one can query $\widehat{\mathbb{F}}(x;\xi)$ such that
+$\mathbb{E}\left[\widehat{\mathbb{F}}(x;\xi)\right]={\mathbb{F}}(x),\qquad\mathbb{E}\left[\left\|\widehat{\mathbb{F}}(x;\xi)-{\mathbb{F}}(x)\right\|^{2}\right]\leq\sigma^{2}.$
+For our main result (Theorem 4.1), we additionally assume the following condition.
+3.2Cocoercivity in expectation.
+For any $x,y\in\mathbb{R}^{d}$ , we have
+$\left\langle{\mathbb{F}}(x)-{\mathbb{F}}(y),x-y\right\rangle\geq\mathbb{E}\left[\frac{1}{L}\left\|\widehat{\mathbb{F}}(x;\xi)-\widehat{\mathbb{F}}(y;\xi)\right\|^{2}\right].$
+This condition holds for some natural cases, including: (i) stochastic oracle with additive noise $\widehat{{\mathbb{F}}}(x;\xi)={\mathbb{F}}(x)+\zeta(\xi)$ , where the noise $\zeta(\xi)$ is independent of $x$ , (ii) finite sum or expectation models where each sample operator is $\nicefrac{{1}}{{L}}$ -cocoercive, and as its special case, (iii) sample operators that are each $\mu$ -strongly monotone ( $\mu>0$ ) and $M$ -Lipschitz, which implies sample-wise cocoercivity [17].
+Note that 3.2 does not capture general monotone and Lipschitz sample operators or the cases where the noise $\zeta(\xi)$ depends on $x$ .
+Similar assumptions or even stronger samplewise cocoercivity have been commonly used in stochastic optimization [39, 2, 32, 37, 4, 58, 52, 14, 9].
+Given batch size $B\geq 1$ , we denote ${\mathbb{F}}_{\mathcal{B}}(x)=\frac{1}{B}\sum_{b=1}^{B}\widehat{\mathbb{F}}(x;\xi_{b})$ , where $\xi_{b}$ are conditionally independent samples given $x$ and ${\mathcal{B}}=\{\xi_{1},\dots,\xi_{B}\}$ .
+Then ${\mathbb{F}}_{\mathcal{B}}(x)$ is an unbiased estimator of ${\mathbb{F}}(x)$ with $\mathbb{E}\left[\left\|{\mathbb{F}}_{\mathcal{B}}(x)-{\mathbb{F}}(x)\right\|^{2}\right]\leq\frac{\sigma^{2}}{B}$ and $\left\langle{\mathbb{F}}(x)-{\mathbb{F}}(y),x-y\right\rangle\geq\mathbb{E}\left[\frac{1}{L}\left\|{\mathbb{F}}_{\mathcal{B}}(x)-{\mathbb{F}}_{\mathcal{B}}(y)\right\|^{2}\right]$ by Jensen’s inequality.
+For $0<\alpha\leq\frac{2}{L}$ , if we let $\widehat{\mathbb{T}}(\cdot;\xi)={\mathbb{I}}-\alpha\widehat{\mathbb{F}}(\cdot;\xi)$ and ${\mathbb{T}}_{\mathcal{B}}(\cdot)=\frac{1}{B}\sum_{b=1}^{B}\widehat{\mathbb{T}}(\cdot;\xi_{b})$ , then these are unbiased estimators of the nonexpansive ${\mathbb{T}}={\mathbb{I}}-\alpha{\mathbb{F}}$ with variance bounds $\alpha^{2}\sigma^{2}$ and $\frac{\alpha^{2}\sigma^{2}}{B}$ , respectively.
+Furthermore, we have: $\mathbb{E}\left[\left\|{\mathbb{T}}_{\mathcal{B}}(x)-{\mathbb{T}}_{\mathcal{B}}(y)\right\|^{2}\right]\leq\left\|x-y\right\|^{2}$ (square-nonexpansivity in expectation).
+3.3 Known acceleration in fixed-point problems and its extension
+Our general strategy is to reformulate (1) with cocoercive ${\mathbb{F}}$ into (2) with ${\mathbb{T}}={\mathbb{I}}-\alpha{\mathbb{F}}$ and build upon deterministic acceleration results.
+Consider the following algorithms: given $y_{0}\in\mathbb{R}^{d}$ ,
+$\displaystyle y_{k+1}=\frac{1}{k+2}y_{0}+\frac{k+1}{k+2}{\mathbb{T}}y_{k}$
+(OHM)
+and, with the convention ${\mathbb{T}}y_{-1}=y_{0}$ ,
+$\displaystyle y_{k+1}=y_{k}+\frac{N-k-1}{N-k}\left({\mathbb{T}}y_{k}-{\mathbb{T}}y_{k-1}\right)$
+(Dual-OHM)
+Here, OHM is an anytime algorithm whose update is defined for all $k=0,1,\dots$ , while for Dual-OHM, the terminal iteration number $N$ is fixed, and the update is defined only for $k=0,\dots,N-2$ .
+This is a substantive distinction that makes the two algorithms behave differently under stochastic extension (see the discussion in Section 4.1.1 for further details).
+3.3Deterministic acceleration [29, 22, 54].
+For a nonexpansive operator ${\mathbb{T}}\colon\mathbb{R}^{d}\to\mathbb{R}^{d}$ with a fixed point $y_{\star}\in\mathrm{Fix}\,{\mathbb{T}}$ and $N\geq 2$ , both OHM and Dual-OHM exhibit the rate
+$\left\|y_{N-1}-{\mathbb{T}}(y_{N-1})\right\|^{2}\leq\frac{4\left\|y_{0}-y_{\star}\right\|^{2}}{N^{2}}.$
+With ${\mathbb{T}}={\mathbb{I}}-\alpha{\mathbb{F}}$ and $\alpha=\frac{1}{L}$ , Proposition 3.3 shows that $\left\|{\mathbb{F}}(y_{N-1})\right\|=\frac{\left\|y_{N-1}-{\mathbb{T}}(y_{N-1})\right\|}{\alpha}\leq\epsilon$ is achieved in ${\mathcal{O}}\left(\frac{LD}{\epsilon}\right)$ iterations, where $D=\left\|y_{0}-y_{\star}\right\|$ .
+3.4Cai et al. [10], Informal.
+Stochastic OHM (S-OHM), which has the update rule $x_{k+1}=\frac{1}{k+2}x_{0}+\frac{k+1}{k+2}{\mathbb{T}}_{{\mathcal{B}}_{k}}(x_{k})$ , maintains the deterministic iteration bound $N={\mathcal{O}}(L\left\|x_{0}-x_{\star}\right\|/\epsilon)$ if $\mathbb{E}\left\|{\mathbb{F}}_{{\mathcal{B}}_{k}}(x_{k})-{\mathbb{F}}(x_{k})\right\|^{2}\lesssim\frac{\epsilon^{2}}{k}$ .
+Simple mini-batching with $|{\mathcal{B}}_{k}|=\Theta(k\epsilon^{-2})$ yields ${\mathcal{O}}(\epsilon^{-4})$ stochastic oracle complexity, and using PAGE variance reduction, this can be reduced to ${\mathcal{O}}(\epsilon^{-3})$ .
+4 Stochastic Dual-Anchor Acceleration
+In this section, we analyze Stochastic Dual-OHM (S-Dual-OHM): with ${\mathbb{T}}_{{\mathcal{B}}_{-1}}(x_{-1})=x_{0}$ ,
+$\displaystyle x_{k+1}=x_{k}+\frac{N-k-1}{N-k}\left({\mathbb{T}}_{{\mathcal{B}}_{k}}(x_{k})-{\mathbb{T}}_{{\mathcal{B}}_{k-1}}(x_{k-1})\right)$
+(S-Dual-OHM)
+for $k=0,\dots,N-2$ , and present the following main result of this paper.
+4.1.
+Consider the root-finding problem (1) with a solution $x_{\star}$ , satisfying Assumptions 3.1 and 3.2.
+Then for $0<\alpha\leq\frac{2}{L}$ , S-Dual-OHM with ${\mathbb{T}}_{{\mathcal{B}}_{k}}={\mathbb{I}}-\alpha{\mathbb{F}}_{{\mathcal{B}}_{k}}$ with $|{\mathcal{B}}_{k}|\equiv B$ satisfies
+$\displaystyle\mathbb{E}\left[\left\|{\mathbb{F}}(x_{N-1})\right\|\right]^{2}\leq\mathbb{E}\left[\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}\right]\leq\frac{4\left\|x_{0}-x_{\star}\right\|^{2}}{\alpha^{2}N^{2}}+\frac{6\sigma^{2}}{B}.$
+This shows that we will have $\mathbb{E}\left[\left\|{\mathbb{F}}(x_{N-1})\right\|\right]\leq\epsilon$ with $N=\Theta(1/\epsilon)$ and $B=\Theta(1/\epsilon^{2})$ , so in total, ${\mathcal{O}}(1/\epsilon^{3})$ oracle complexity.
+This also proves an equivalent bound on the expected fixed-point residual $\mathbb{E}\left[\left\|x_{N-1}-{\mathbb{T}}(x_{N-1})\right\|\right]^{2}\leq\frac{4\left\|x_{0}-x_{\star}\right\|^{2}}{N^{2}}+\frac{6\alpha^{2}\sigma^{2}}{B}$ .
+While we defer technical details to Appendix A, we provide the outline of key arguments below.
+Then, we show that with the additional assumption of strong monotonicity of ${\mathbb{F}}$ , the total complexity can be reduced to $\widetilde{\mathcal{O}}(1/\epsilon^{2})$ with early stopping.
+4.1 Proof outline for Theorem 4.1
+We start with showing the identity characterizing the S-Dual-OHM algorithm.
+4.2.
+For S-Dual-OHM with ${\mathbb{T}}_{{\mathcal{B}}_{k}}={\mathbb{I}}-\alpha{\mathbb{F}}_{{\mathcal{B}}_{k}}$ , the following identity holds:
+$\displaystyle 0$
+$\displaystyle=\frac{(N-1)\alpha^{2}}{4}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}+\frac{\alpha}{2}\left\langle{\mathbb{F}}(x_{N-1}),x_{N-1}-x_{0}\right\rangle+\sum_{j=1}^{N-1}\lambda_{N,j}{\mathcal{Q}}_{N,j}$
+where for $j=1,\dots,N-1$ , $\lambda_{N,j}=\frac{N\alpha}{2(N-j)(N-j+1)}$ and
+${\mathcal{Q}}_{N,j}=\left\langle x_{j-1}-x_{N-1},{\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})-{\mathbb{F}}(x_{N-1})\right\rangle-\frac{\alpha}{2}\left\|{\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})-{\mathbb{F}}(x_{N-1})\right\|^{2}.$
+Here, when the problem is deterministic so that ${\mathbb{F}}_{{\mathcal{B}}_{k}}={\mathbb{F}}$ for all $k=0,\dots,N-1$ and $0<\alpha\leq\frac{2}{L}$ , then by cocoercivity ${\mathcal{Q}}_{N,j}\geq 0$ for all $j=1,\dots,N-1$ , so $\sum_{j=1}^{N-1}\lambda_{N,j}{\mathcal{Q}}_{N,j}\geq 0$ .
+The resulting inequality, together with Young’s inequality and one more application of cocoercivity: $\left\langle{\mathbb{F}}(x_{N-1}),x_{N-1}-x_{\star}\right\rangle\geq\frac{1}{L}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}\geq\frac{\alpha}{2}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}$ , yields
+$\displaystyle 0$
+$\displaystyle\geq\frac{(N-1)\alpha^{2}}{4}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}+\frac{\alpha}{2}\left\langle{\mathbb{F}}(x_{N-1}),x_{N-1}-x_{0}\right\rangle$
+(4)
+$\displaystyle\geq\frac{N\alpha^{2}}{4}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}-\frac{N\alpha^{2}}{8}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}-\frac{1}{2N}\left\|x_{\star}-x_{0}\right\|^{2}$
+(5)
+which implies $\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}\leq\frac{4\left\|x_{0}-x_{\star}\right\|^{2}}{\alpha^{2}N^{2}}$ .
+On the other hand, in the stochastic setting, we do not have ${\mathcal{Q}}_{N,j}\geq 0$ due to noise, and these quantities are not local as in typical stochastic analyses, making the convergence proof seemingly much harder.
+However, we can isolate the dependence on stochastic errors at each iteration and control them through the following two lemmas.
+These key results allow us to follow the reasoning similar to the deterministic case above.
+4.3.
+Under the setting of Theorem 4.1, let $e_{k}={\mathbb{F}}_{{\mathcal{B}}_{k}}(x_{k})-{\mathbb{F}}(x_{k})$ for $k=0,\dots,N-2$ . Then
+$\displaystyle\begin{aligned} 0&\geq\mathbb{E}\left[\frac{(N-1)\alpha^{2}}{4}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}+\frac{\alpha}{2}\left\langle{\mathbb{F}}(x_{N-1}),x_{N-1}-x_{0}\right\rangle\right]-\sum_{j=1}^{N-1}\lambda_{N,j}\left(\frac{\alpha\sigma^{2}}{2B}+\mathbb{E}\left[\left\langle e_{j-1},{\mathbb{T}}x_{N-1}\right\rangle\right]\right).\end{aligned}$
+(6)
+4.4.
+Under the setting of Theorem 4.1, $\mathbb{E}\left[\left\langle e_{j-1},{\mathbb{T}}x_{N-1}\right\rangle\right]\leq\frac{\alpha\sigma^{2}}{B}$ for $j=1,\dots,N-1$ .
+Lemma 4.4 states that the amount by which the error $e_{j-1}$ propagates to the last iterate and affects the analysis is uniformly bounded by a constant independent of $N$ .
+Combining Lemmas 4.3 and 4.4, and using $\sum_{j=1}^{N-1}\lambda_{N,j}=\frac{\alpha(N-1)}{2}$ , we can proceed as in (4) to obtain
+$\displaystyle 0$
+$\displaystyle\geq\mathbb{E}\left[\frac{N\alpha^{2}}{4}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}+\frac{\alpha}{2}\left\langle{\mathbb{F}}(x_{N-1}),x_{\star}-x_{0}\right\rangle\right]-\frac{3(N-1)\alpha^{2}\sigma^{2}}{4B}$
+$\displaystyle\geq\mathbb{E}\left[\frac{N\alpha^{2}}{4}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}-\frac{N\alpha^{2}}{8}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}-\frac{1}{2N}\left\|x_{0}-x_{\star}\right\|^{2}\right]-\frac{3(N-1)\alpha^{2}\sigma^{2}}{4B}.$
+Rearranging, we have the desired bound of Theorem 4.1.
+4.1.1 Intuition for why S-Dual-OHM is stable under noise
+The previous analysis shows that the net accumulation of error in S-Dual-OHM is proportional to $\sum_{j=1}^{N-1}\lambda_{N,j}=\frac{\alpha(N-1)}{2}={\mathcal{O}}(N)$ .
+On the other hand, stochastic OHM satisfies the similar identity
+$\displaystyle 0$
+$\displaystyle=\frac{(N-1)\alpha^{2}}{4}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}+\frac{\alpha}{2}\left\langle{\mathbb{F}}(x_{N-1}),x_{N-1}-x_{0}\right\rangle+\sum_{j=1}^{N-1}\nu_{j+1,j}{\mathcal{Q}}_{j+1,j}$
+where ${\mathcal{Q}}_{j+1,j}=\left\langle x_{j-1}-x_{j},{\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})-{\mathbb{F}}_{{\mathcal{B}}_{j}}(x_{j})\right\rangle-\frac{\alpha}{2}\left\|{\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})-{\mathbb{F}}_{{\mathcal{B}}_{j}}(x_{j})\right\|^{2}$ but with $\nu_{j+1,j}=\frac{\alpha j(j+1)}{2N}$ .
+Here each ${\mathcal{Q}}_{j+1,j}$ is not nonnegative, but contributes a negative lower bound proportional to $\sigma^{2}$ in expectation, which then gets multiplied with $\sum_{j=1}^{N-1}\nu_{j+1,j}=\Theta(N^{2})$ and the resulting error term is no longer controllable as in Theorem 4.1.
+This is a central difference that makes the dual-anchor mechanism more amenable to stochastic extension than anchoring.
+A concurrent work [53] has also provided a related theory that the sum of weights associated with inequalities used in the convergence proof measures a fixed-point algorithm’s robustness to oracle noise, albeit in deterministic setting.
+A complementary interpretation is that OHM is an anytime optimal algorithm, achieving the rate $\left\|{\mathbb{F}}(x_{k-1})\right\|^{2}\leq\frac{4\left\|x_{0}-x_{\star}\right\|^{2}}{\alpha^{2}k^{2}}$ for all $k=1,2,\dots$ .
+This means that OHM must maintain the optimal guarantee at every iteration, forcing it to exploit the geometric property of ${\mathbb{F}}$ , i.e. cocoercivity, throughout the trajectory.
+Its analysis is therefore more tightly tuned to the exact problem class and is more easily disrupted by oracle noise.
+Dual-OHM, by contrast, is optimized only for the prescribed last iterate and does not suffer from the same accumulation of errors.
+4.2 Faster convergence under strong monotonicity
+In this section, we show that if ${\mathbb{F}}$ is additionally strongly monotone, then S-Dual-OHM can achieve the desired accuracy $\mathbb{E}\left[\left\|{\mathbb{F}}(x_{k})\right\|\right]\leq\epsilon$ much earlier than the prescribed horizon $N$ .
+Suppose that ${\mathbb{F}}$ is $\mu$ -strongly monotone and $\nicefrac{{1}}{{L}}$ -cocoercive.
+Then, with $0<\alpha<\frac{2}{L}$ , ${\mathbb{T}}={\mathbb{I}}-\alpha{\mathbb{F}}$ is $\gamma$ -contractive (i.e., $\gamma$ -Lipschitz) with $\gamma=\sqrt{1-\alpha\mu(2-\alpha L)}$ because
+$\displaystyle\left\|{\mathbb{T}}(x)-{\mathbb{T}}(y)\right\|^{2}$
+$\displaystyle=\left\|x-y\right\|^{2}-2\alpha\left\langle x-y,{\mathbb{F}}(x)-{\mathbb{F}}(y)\right\rangle+\alpha^{2}\left\|{\mathbb{F}}(x)-{\mathbb{F}}(y)\right\|^{2}$
+$\displaystyle\leq\left\|x-y\right\|^{2}-\alpha(2-\alpha L)\left\langle x-y,{\mathbb{F}}(x)-{\mathbb{F}}(y)\right\rangle\leq\left(1-\alpha\mu(2-\alpha L)\right)\left\|x-y\right\|^{2}.$
+4.5.
+Consider the root-finding problem (1) with $\nicefrac{{1}}{{L}}$ -cocoercive and $\mu$ -strongly monotone ${\mathbb{F}}$ and a solution $x_{\star}$ , satisfying Assumption 3.1.
+Let $0<\alpha<\frac{2}{L}$ and $\gamma=\sqrt{1-\alpha\mu(2-\alpha L)}\in[0,1)$ .
+Let $y_{k}$ be the iterates from deterministic Dual-OHM using true evaluations of ${\mathbb{T}}$ , with $x_{0}=y_{0}$ .
+Then, for $k=0,\dots,N-1$ , S-Dual-OHM with ${\mathbb{T}}_{{\mathcal{B}}_{k}}={\mathbb{I}}-\alpha{\mathbb{F}}_{{\mathcal{B}}_{k}}$ satisfies
+$\mathbb{E}\left[\left\|x_{k}-y_{N-1}\right\|^{2}\right]\leq 2\left(\frac{1+\gamma}{1-\gamma}\right)^{2}\gamma^{2k}\left\|x_{0}-x_{\star}\right\|^{2}+\frac{2\alpha^{2}\sigma^{2}}{B(1-\gamma^{2})}.$
+(7)
+In particular, when $\alpha=\frac{1}{L}$ , we have
+$\displaystyle\mathbb{E}\left[\left\|{\mathbb{F}}(x_{k})\right\|^{2}\right]$
+$\displaystyle\leq\frac{8L^{2}\left\|x_{0}-x_{\star}\right\|^{2}}{N^{2}}+\frac{64L^{4}}{\mu^{2}}e^{-k\frac{\mu}{L}}\left\|x_{0}-x_{\star}\right\|^{2}+\frac{L}{\mu}\frac{4\sigma^{2}}{B}.$
+(8)
+Notably, Theorem 4.5 uses only 3.1 and cocoercivity of ${\mathbb{F}}$ , but not 3.2.
+The reason why this result holds is two-fold.
+First, when ${\mathbb{T}}$ is contractive, S-Dual-OHM does not deviate far from deterministic Dual-OHM (Lemma 4.6).
+Second, deterministic Dual-OHM achieves the designated terminal accuracy quickly as it linearly converges to its final iterate $y_{N-1}$ (Lemma 4.7).
+Because Dual-OHM has a small residual norm guarantee at $y_{N-1}$ , this implies that $x_{k}$ also attains the comparably small residual quickly.
+4.6.
+Under the conditions of Theorem 4.5,
+$\mathbb{E}\left[\left\|x_{k}-y_{k}\right\|^{2}\right]\leq\frac{\alpha^{2}\sigma^{2}}{B(1-\gamma^{2})}$ for $k=0,\dots,N-1$ .
+4.7.
+Under the conditions of Lemma 4.6, we have $\left\|y_{k}-y_{N-1}\right\|\leq\left(\frac{1+\gamma}{1-\gamma}\right)\gamma^{k}\left\|x_{0}-x_{\star}\right\|$ for $k=0,\dots,N-1$ and $x_{\star}\in\mathrm{Fix}\,{\mathbb{T}}$ .
+Proof of Theorem 4.5.
+Note that $\mathbb{E}\left[\left\|x_{k}-y_{N-1}\right\|^{2}\right]\leq 2\mathbb{E}\left[\left\|x_{k}-y_{k}\right\|^{2}\right]+2\mathbb{E}\left[\left\|y_{k}-y_{N-1}\right\|^{2}\right]$ .
+Then, by Lemmas 4.6 and 4.7, $\mathbb{E}\left[\left\|x_{k}-y_{N-1}\right\|^{2}\right]\leq\frac{2\alpha^{2}\sigma^{2}}{B(1-\gamma^{2})}+2\left(\frac{1+\gamma}{1-\gamma}\right)^{2}\gamma^{2k}\left\|x_{0}-x_{\star}\right\|^{2}$ , which proves (7).
+With $\alpha=\frac{1}{L}$ , we have $1-\gamma^{2}=\frac{\mu}{L}$ , so combining (7) with Proposition 3.3 we obtain
+$\displaystyle\mathbb{E}\left[\left\|{\mathbb{F}}(x_{k})\right\|^{2}\right]$
+$\displaystyle\leq 2\mathbb{E}\left[\left\|{\mathbb{F}}(y_{N-1})\right\|^{2}\right]+2\mathbb{E}\left[\left\|{\mathbb{F}}(x_{k})-{\mathbb{F}}(y_{N-1})\right\|^{2}\right]$
+$\displaystyle\leq 2\mathbb{E}\left[\left\|{\mathbb{F}}(y_{N-1})\right\|^{2}\right]+2L^{2}\mathbb{E}\left[\left\|x_{k}-y_{N-1}\right\|^{2}\right]$
+$\displaystyle\leq\frac{8L^{2}\left\|x_{0}-x_{\star}\right\|^{2}}{N^{2}}+2L^{2}\left[\frac{2\sigma^{2}}{\mu LB}+2\left(\frac{1+\gamma}{1-\gamma}\right)^{2}\gamma^{2k}\left\|x_{0}-x_{\star}\right\|^{2}\right].$
+where the second inequality uses $L$ -Lipschitzness of ${\mathbb{F}}$ .
+Rearranging and using $\gamma<1$ , $(1-\gamma)^{2}\geq\frac{(1-\gamma)^{2}(1+\gamma)^{2}}{4}=\frac{\mu^{2}}{4L^{2}}$ and $\gamma^{2k}=\left(1-\frac{\mu}{L}\right)^{k}\leq e^{-k\frac{\mu}{L}}$ , we obtain (8).
+∎
+Let $\left\|x_{0}-x_{\star}\right\|=D$ . The bound (8) shows that if one chooses, e.g., $N\geq\frac{4LD}{\epsilon},k\geq\frac{L}{\mu}\log\frac{256L^{4}D^{2}}{\mu^{2}\epsilon^{2}}$ and $B\geq\frac{16L\sigma^{2}}{\mu\epsilon^{2}}$ , then $\mathbb{E}\left[\left\|{\mathbb{F}}(x_{k})\right\|\right]^{2}\leq\mathbb{E}\left[\left\|{\mathbb{F}}(x_{k})\right\|^{2}\right]\leq\epsilon^{2}$ .
+If we run S-Dual-OHM with these choices of $N$ and $B$ , we will achieve the accuracy $\epsilon$ in ${\mathcal{O}}\left(\frac{L}{\mu}\log\epsilon^{-1}\right)$ iterations without the need to run all $N$ iterations.
+With this early stopping, S-Dual-OHM has improved ${\mathcal{O}}\left(\frac{L^{2}\sigma^{2}}{\mu^{2}\epsilon^{2}}\log\frac{1}{\epsilon}\right)$ oracle complexity for strongly monotone ${\mathbb{F}}$ ,
+which has near-optimal dependence on $\epsilon$ [12].
+The dependence on condition number, however, is still suboptimal, and improving it based on the Dual-OHM mechanism remains an open question.
+5 Numerical Experiments
+We provide numerical evaluations to demonstrate that the dual-anchor mechanism is indeed preferable to anchoring (Halpern algorithms) under stochasticity, and compare the empirical performance of S-Dual-OHM with prior algorithms for stochastic monotone inclusions/fixed-point problems.
+We consider three distinct problems: the worst-case nonexpansive fixed-point operator designed by [40], a finite-sum cocoercive operator using uniform random vectors from the unit sphere, and a strongly-convex–strongly-concave minimax problem with Huber-type regularizers following [56, 12].
+All experiments were run on a MacBook Air with Apple M3 Chip and 24GB Memory.
+Baseline algorithms.
+We consider the simple algorithm $x_{k+1}=x_{k}-\alpha{\mathbb{F}}_{{\mathcal{B}}_{k}}(x_{k})$ , which we call Stochastic Gradient Descent-Ascent (SGDA) following the nomenclature of the minimax optimization literature.
+We consider the Stochastic Extragradient (SEG) with the update rule
+$x_{k+1/2}=x_{k}-\alpha{\mathbb{F}}_{{\mathcal{B}}_{k}}(x_{k}),\quad x_{k+1}=x_{k}-\alpha{\mathbb{F}}_{{\mathcal{B}}_{k+1/2}}(x_{k+1/2}).$
+Next, we consider the naive stochastic extension of OHM: $x_{k+1}=\frac{1}{k+2}x_{0}+\frac{k+1}{k+2}\left(x_{k}-\alpha{\mathbb{F}}_{{\mathcal{B}}_{k}}(x_{k})\right)$ , using the same constant mini-batch size as S-Dual-OHM. We refer to this algorithm as S-OHM (with constant $B$ ). This is included to isolate the effect of using the dual-anchor update rather than the usual anchor acceleration and directly contrast the two mechanisms.
+We also include the algorithms carefully designed for reducing the expected last-iterate residual.
+First, the Halpern-PAGE algorithm from [10] uses the S-OHM update but replaces ${\mathbb{F}}_{{\mathcal{B}}_{k}}(x_{k})$ by a PAGE-type estimator which uses a larger batch size $s_{1}$ with probability $p_{k}=\min\left\{1,\frac{2}{k+2}\right\}$ and otherwise uses a sample operator difference with batch size $s_{2}$ .
+Second, we use the single-loop simplification of RAIN algorithm from [12] used in their experiments, which can be written as
+$z_{k+1/2}=z_{k}-\eta\bigl(\widehat{{\mathbb{F}}}(z_{k};\xi_{k})+r_{k}(z_{k})\bigr),\qquad z_{k+1}=z_{k}-\eta\bigl(\widehat{{\mathbb{F}}}(z_{k+1/2};\xi_{k+1/2})+r_{k}(z_{k+1/2})\bigr)$
+where $r_{k}(x)=\lambda\gamma(S_{k}x-m_{k}),S_{k}=\sum_{t0$ are hyperparameters.
+Finally, Halpern-VR-Finite from [9] is similar to Halpern-PAGE but applicable only to finite sum problems of the form ${\mathbb{F}}=\frac{1}{n}\sum_{i=1}^{n}{\mathbb{F}}(\cdot;\xi_{i})$ and uses either full-batch (true) operator ${\mathbb{F}}$ or batches of size $\lceil\sqrt{n}\rceil$ .
+We tune all baseline algorithms and S-Dual-OHM under the same total sample budget $Q=NB$ via grid search, where computing ${\mathbb{F}}_{{\mathcal{B}}_{k}}$ with $|{\mathcal{B}}_{k}|=B$ counts as $B$ operator evaluations.
+The only hyperparameter $B$ for S-Dual-OHM is tuned over $B\in\{1,10,20,50,100\}$ , and S-OHM (Constant $B$ ) is then run with the same selected $B$ .11
+1
+While this emphasizes the distinction between the anchor and the dual-anchor updates, for fully controlled comparison, we additionally provide experiments where $B$ for S-OHM is tuned separately in Appendix B.
+The Halpern-PAGE parameters are tuned over $s_{1}\in\{1,10,20,50,100\}$ and $s_{2}\in\{1,5,10,20\}$ , and RAIN hyperparameters are tuned over $\eta\in\{0.005,0.01,0.05,0.1,1\}$ , $\lambda\in\{0.001,0.01,0.1,1\}$ , and $\gamma\in\{0.001,0.01,0.1,1\}$ .
+SGDA and SEG step-sizes were tuned over $\alpha\in\{0.005,0.01,0.05,0.1,1\}$ , the same step-size grid as RAIN.
+We run each experiment with 10 independent random seeds and report the average residual norm $\left\|{\mathbb{F}}(x_{k})\right\|$ together with the shaded region indicating the empirical 5th–95th percentile band.
+Figure 1: Plot of residual norm versus stochastic samples.
+(Left) Worst-case nonexpansive operator construction (Experiment 1).
+(Right) Finite-sum random cocoercive operator construction (Experiment 2).
+Solid curves indicate means over 10 independent runs, and shaded bands denote empirical 5th–95th
+percentiles.
+Experiment 1: Worst-case nonexpansive operator.
+We use the affine lower-bound construction of [40]: define ${\mathbb{H}}\colon\mathbb{R}^{d}\to\mathbb{R}^{d}$ by ${\mathbb{H}}(x_{1},\dots,x_{d})=\left(x_{d}-\frac{2}{\sqrt{d}},-x_{1},-x_{2},\dots,-x_{d-1}\right)$ , and after choosing a shift vector $s\in\mathbb{R}^{d}$ , let ${\mathbb{F}}(x)={\mathbb{H}}(x-s)+(x-s)$ and ${\mathbb{T}}={\mathbb{I}}-{\mathbb{F}}$ .
+Then ${\mathbb{F}}$ is $\frac{1}{2}$ -cocoercive and ${\mathbb{T}}$ is nonexpansive.
+We use Gaussian noise oracle $\widehat{\mathbb{F}}(x;\xi)={\mathbb{F}}(x)+\xi$ with $\xi\sim{\mathcal{N}}\left(0,\frac{\sigma^{2}}{d}I_{d}\right)$ , and use a budget of $2000$ samples.
+We set $d=2001$ , $x_{0}=0$ , $\alpha=1$ , $\sigma=0.1$ and $s\sim{\mathcal{N}}(0,I_{d})$ .
+The left panel of Figure 1 illustrates that S-Dual-OHM is not an anytime algorithm, so its intermediate residuals can be worse than those of the other algorithms; however, in the end, it achieves the smallest last-iterate residual among all algorithms compared.
+This is in sharp contrast with S-OHM with constant $B$ , which fails to converge and exhibits diverging residual.
+This demonstrates that Halpern-type algorithms can indeed be prone to accumulation of stochastic errors.
+However, with variance reduction (Halpern-PAGE) or recursively adjusted anchor (RAIN), the residual convergence gets stabilized.
+Finally, SEG and SGDA converge steadily although they were not specifically designed for residual minimization.
+Experiment 2: Finite-sum cocoercive operator.
+We consider a finite-sum problem
+${\mathbb{F}}(x)=\frac{1}{n}\sum_{i=1}^{n}{\mathbb{F}}_{i}(x),\qquad{\mathbb{F}}_{i}(x)=\begin{pmatrix}q_{i}(q_{i}^{\top}x_{1:r})\\
+0\end{pmatrix}\in\mathbb R^{d},$
+where each $q_{i}\in\mathbb R^{r}$ is sampled uniformly from the unit sphere.
+Here each ${\mathbb{F}}_{i}$ is $1$ -cocoercive and linear, and therefore ${\mathbb{F}}$ is cocoercive with $L\leq 1$ but not strongly monotone when $rS-Dual-OHM is also fairly competent, and importantly, outperforms its primal counterpart S-OHM.
+Notably, Halpern-VR-Finite makes very small progress because the total sample budget 2000 is restrictive with our choice $n=200$ , even though it has the best asymptotic dependence on $\epsilon$ in theory.
+Figure 2: Plot of residual norm versus stochastic samples for SCSC Huber-type minimax problem (Experiment 3).
+(Left) Low-variance regime $\sigma=0.05$ .
+(Right) High-variance regime $\sigma=1.5$ .
+Solid curves are means over 10 independent runs, and shaded bands indicate empirical 5th–95th
+percentiles.
+Experiment 3: SCSC minimax problem with Huber-type regularizers.
+We consider
+$\Phi(x,y)=(1-\delta)\sum_{i}g_{\nu}(x_{i})+\delta x^{\top}y-(1-\delta)\sum_{i}g_{\nu}(y_{i})+\frac{\mu}{2}\left\|x\right\|^{2}-\frac{\mu}{2}\left\|y\right\|^{2},$
+for $z=(x,y)\in\mathbb{R}^{d}\times\mathbb{R}^{d}$ , where $g_{\nu}(u)=\begin{cases}\frac{1}{2}u^{2},&|u|\leq\nu\\
+\nu|u|-\frac{1}{2}\nu^{2},&|u|>\nu\end{cases}$ .
+The saddle operator ${\mathbb{F}}(z)=(\nabla_{x}\Phi(x,y),-\nabla_{y}\Phi(x,y))$ is then given as ${\mathbb{F}}(z)=\begin{pmatrix}(1-\delta)\operatorname{clip}(x,-\nu,\nu)+\delta y+\mu x\\
+-\delta x+(1-\delta)\operatorname{clip}(y,-\nu,\nu)+\mu y\end{pmatrix}$ ,
+which is $\mu$ -strongly monotone and $M$ -Lipschitz with $M=1+\mu$ .
+We use the Gaussian noise oracle $\widehat{\mathbb{F}}(z;\xi)={\mathbb{F}}(z)+\xi$ with $\xi\sim{\mathcal{N}}\left(0,\frac{\sigma^{2}}{2d}I_{2d}\right)$ , and use a budget of 10000 stochastic samples.
+We set $d=50$ , $\delta=10^{-2}$ , $\nu=5\times 10^{-5}$ , $\mu=0.1$ , $L=\frac{M^{2}}{\mu}$ and $z_{0}=(x_{0},y_{0})$ is a uniform random unit vector.
+We use $\alpha=\frac{1}{L}$ for S-Dual-OHM, S-OHM and Halpern-PAGE.
+We simulate both low noise ( $\sigma=0.05$ ) and high noise ( $\sigma=1.5$ ) regimes.
+When $\sigma=0.05$ , we observe rapid progression in earlier iterations of S-Dual-OHM, but then it stagnates (Figure 2).
+This is because the noise term is small, so the best batch size choice is $B^{*}=1$ , i.e., mini-batching does not benefit the final convergence.
+In this regime, RAIN, SGDA, SEG converges more steadily than S-Dual-OHM, although we still observe that S-OHM is inferior to S-Dual-OHM.
+With larger noise with $\sigma=1.5$ , we observe that mini-batching becomes effective and $B^{*}=10$ is selected; in this case, dual-anchor with mini-batching exhibits comparable performance to classical methods and deliberately designed near-optimal algorithm RAIN.
+6 Conclusion and Open Questions
+We demonstrate that dual-anchor acceleration from deterministic root-finding or fixed-point problems admits a direct stochastic extension, unlike anchor-type accelerated algorithms.
+This is based on the observation that distinct deterministic accelerations are intrinsically different in their behavior under stochasticity.
+We believe that our work enables interesting future work on acceleration and optimal complexities for stochastic optimization.
+Two immediate limitations of our work, which thus remain as open questions, are: (1) whether the dual-anchor mechanism extends to root-finding problems with monotone and Lipschitz operators ${\mathbb{F}}$ and (2) whether we can further improve the complexity to the optimal level [12] ${\mathcal{O}}(\epsilon^{-2}\log\epsilon^{-1})$ via dual-anchor acceleration.
+As the dual-anchor acceleration also exists in the monotone Lipschitz inclusion setting [54], we believe that the extension would be possible with novel insights not relying on nonexpansivity of ${\mathbb{I}}-\alpha{\mathbb{F}}$ .
+We also expect our result to serve as a baseline that can be combined with broader techniques in stochastic optimization for potentially achieving the optimal complexity.
+Acknowledgments
+TaeHo Yoon’s contribution to this work was supported by NSF CCF 2504626.
+Nicolas Loizou’s contribution to this work was supported by NSF CCF 2504626 and NSF CAREER 2542902.
+References
+[1]
+J. K. Alcala, Y. T. Chow, and M. Sunkula (2023)
+Moving anchor extragradient methods for smooth structured minimax problems.
+arXiv:2308.12359.
+External Links: 2308.12359
+Cited by: §2.
+[2]
+Z. Allen-Zhu (2018)
+Katyusha: The first direct acceleration of stochastic gradient methods.
+Journal of Machine Learning Research 18 (221), pp. 1–51.
+Cited by: §2,
+§3.2.
+[3]
+H. H. Bauschke and P. L. Combettes (2017)
+Convex Analysis and Monotone Operator Theory in Hilbert Spaces.
+2nd edition, Springer International Publishing.
+Cited by: §1,
+§3.1.
+[4]
+A. Beznosikov, E. Gorbunov, H. Berard, and N. Loizou (2023)
+Stochastic gradient descent-ascent: Unified theory and new efficient methods.
+International Conference on Artificial Intelligence and Statistics.
+Cited by: §3.2.
+[5]
+R. I. Boţ and E. Chenchene (2026)
+Extragradient method with flexible anchoring: Strong convergence and fast residual decay.
+SIAM Journal on Optimization 36 (3), pp. 1420–1445.
+External Links: https://doi.org/10.1137/24M1703562
+Cited by: §2.
+[6]
+R. I. Boţ, E. R. Csetnek, and D. Nguyen (2023)
+Fast Optimistic Gradient Descent Ascent (OGDA) method in continuous and discrete time.
+Foundations of Computational Mathematics.
+Cited by: §2.
+[7]
+M. Bravo and R. Cominetti (2024)
+Stochastic fixed-point iterations for nonexpansive maps: Convergence and error bounds.
+SIAM Journal on Control and Optimization 62 (1), pp. 191–219.
+External Links: https://doi.org/10.1137/22M1515550
+Cited by: §2.
+[8]
+M. Bravo and J. P. Contreras (2026)
+Stochastic Halpern iteration in normed spaces and applications to reinforcement learning.
+Mathematical Programming.
+Cited by: §2.
+[9]
+X. Cai, A. Alacaoglu, and J. Diakonikolas (2024)
+Variance reduced halpern iteration for finite-sum monotone inclusions.
+International Conference on Learning Representations.
+Cited by: Table 1,
+§1,
+§1,
+§2,
+§2,
+§3.2,
+§5.
+[10]
+X. Cai, C. Song, C. A. Guzmán, and J. Diakonikolas (2022)
+Stochastic halpern iteration with variance reduction for stochastic monotone inclusions.
+Neural Information Processing Systems.
+Cited by: Table 1,
+§1,
+§1,
+§2,
+§2,
+3.4,
+§5.
+[11]
+Y. Cai and W. Zheng (2023)
+Accelerated single-call methods for constrained min-max optimization.
+International Conference on Learning Representations.
+Cited by: §2.
+[12]
+L. Chen and L. Luo (2024)
+Near-optimal algorithms for making the gradient small in stochastic minimax optimization.
+Journal of Machine Learning Research 25 (387), pp. 1–44.
+Cited by: Table 1,
+Table 1,
+§2,
+§2,
+§4.2,
+§5,
+§5,
+§6.
+[13]
+C. Daskalakis, A. Ilyas, V. Syrgkanis, and H. Zeng (2018)
+Training GANs with optimism.
+International Conference on Learning Representations.
+Cited by: §1.
+[14]
+D. Davis (2023)
+Variance reduction for root-finding problems.
+Mathematical Programming 197 (1), pp. 375–410.
+Cited by: §3.2.
+[15]
+O. Devolder, F. Glineur, and Y. Nesterov (2014)
+First-order methods of smooth convex optimization with inexact oracle.
+Mathematical Programming 146 (1), pp. 37–75.
+Cited by: §1,
+§2.
+[16]
+J. Diakonikolas (2020)
+Halpern iteration for near-optimal and parameter-free monotone inclusion and strong solutions to variational inequalities.
+Conference on Learning Theory.
+Cited by: §1,
+§2,
+§2.
+[17]
+F. Facchinei and J. Pang (2003)
+Finite-Dimensional Variational Inequalities and Complementarity Problems.
+Springer-Verlag.
+Cited by: §1,
+§2,
+§3.1,
+§3.1,
+§3.2.
+[18]
+S. Ghadimi and G. Lan (2016)
+Accelerated gradient methods for nonconvex nonlinear and stochastic programming.
+Mathematical Programming 156 (1), pp. 59–99.
+Cited by: §1.
+[19]
+I. Goodfellow, J. Pouget-Abadie, M. Mirza, B. Xu, D. Warde-Farley, S. Ozair, A. Courville, and Y. Bengio (2014)
+Generative adversarial nets.
+Neural Information Processing Systems.
+Cited by: §1.
+[20]
+E. Gorbunov, H. Berard, G. Gidel, and N. Loizou (2022)
+Stochastic extragradient: General analysis and improved rates.
+International Conference on Artificial Intelligence and Statistics.
+Cited by: Table 1,
+Table 1.
+[21]
+B. Halpern (1967)
+Fixed points of nonexpanding maps.
+Bulletin of the American Mathematical Society 73 (6), pp. 957–961.
+Cited by: §1,
+§2.
+[22]
+D. Kim (2021)
+Accelerated proximal point method for maximally monotone operators.
+Mathematical Programming 190 (1–2), pp. 57–87.
+Cited by: §1,
+§1,
+§2,
+3.3.
+[23]
+G. M. Korpelevich (1976)
+The extragradient method for finding saddle points and other problems.
+Ekonomika i Matematicheskie Metody 12 (4), pp. 747–756.
+Cited by: Table 1.
+[24]
+M. A. Krasnosel’skii (1955)
+Two remarks on the method of successive approximations.
+Uspekhi Matematicheskikh Nauk 10 (1), pp. 123–127.
+Cited by: §1.
+[25]
+J. Lee, M. Bravo, and R. Cominetti (2025)
+Near-optimal sample complexity for MDPs via anchoring.
+Proceedings of the 42nd international conference on machine learning.
+Cited by: §2.
+[26]
+J. Lee and E. K. Ryu (2023)
+Accelerating value iteration with anchoring.
+Neural Information Processing Systems.
+Cited by: §2.
+[27]
+S. Lee and D. Kim (2021)
+Fast extra gradient methods for smooth structured nonconvex–nonconcave minimax problems.
+Neural Information Processing Systems.
+Cited by: §1,
+§1,
+§2,
+§2.
+[28]
+Z. Li, H. Bao, X. Zhang, and P. Richtarik (2021)
+PAGE: a simple and optimal probabilistic gradient estimator for nonconvex optimization.
+International Conference on Machine Learning.
+Cited by: §1,
+§2.
+[29]
+F. Lieder (2021)
+On the convergence rate of the Halpern-iteration.
+Optimization Letters 15 (2), pp. 405–418.
+Cited by: §1,
+§1,
+§2,
+3.3.
+[30]
+H. Lin, J. Mairal, and Z. Harchaoui (2015)
+A universal catalyst for first-order optimization.
+Neural Information Processing Systems.
+Cited by: §2.
+[31]
+T. Lin, C. Jin, and M. I. Jordan (2020)
+Near-optimal algorithms for minimax optimization.
+Conference on Learning Theory 125.
+Cited by: §1.
+[32]
+N. Loizou, H. Berard, G. Gidel, I. Mitliagkas, and S. Lacoste-Julien (2021)
+Stochastic gradient descent-ascent and consensus optimization for smooth games: Convergence analysis under expected co-coercivity.
+Neural Information Processing Systems.
+Cited by: §3.2.
+[33]
+A. Madry, A. Makelov, L. Schmidt, D. Tsipras, and A. Vladu (2018)
+Towards deep learning models resistant to adversarial attacks.
+International Conference on Learning Representations.
+Cited by: §1.
+[34]
+W. R. Mann (1953)
+Mean value methods in iteration.
+Proceedings of the American Mathematical Society 4 (3), pp. 506–510.
+Cited by: §1.
+[35]
+P. Mertikopoulos, B. Lecouat, H. Zenati, C.-S. Foo, V. Chandrasekhar, and G. Piliouras (2019)
+Optimistic mirror descent in saddle-point problems: Going the extra (gradient) mile.
+International Conference on Learning Representations.
+Cited by: §1.
+[36]
+G. J. Minty (1962)
+Monotone (nonlinear) operators in Hilbert space.
+Duke Mathematical Journal 29 (3), pp. 341–346.
+Cited by: §1.
+[37]
+M. Morin and P. Giselsson (2022)
+Cocoercivity, smoothness and bias in variance-reduced stochastic gradient methods.
+Numerical Algorithms 91 (2), pp. 749–772.
+Cited by: §3.2.
+[38]
+A. Nemirovski (2004)
+Prox-method with rate of convergence $O(1/t)$ for variational inequalities with Lipschitz continuous monotone operators and smooth convex-concave saddle point problems.
+SIAM Journal on Optimization 15 (1), pp. 229–251.
+Cited by: §1.
+[39]
+L. M. Nguyen, J. Liu, K. Scheinberg, and M. Takáč (2017)
+SARAH: a novel method for machine learning problems using stochastic recursive gradient.
+International Conference on Machine Learning.
+Cited by: §3.2.
+[40]
+J. Park and E. K. Ryu (2022)
+Exact optimal accelerated complexity for fixed-point iterations.
+International Conference on Machine Learning.
+Cited by: §1,
+§2,
+§5,
+§5.
+[41]
+N. Pischke and T. Powell (2026)
+Asymptotic Regularity of a Generalised Stochastic Halpern Scheme.
+Journal of Optimization Theory and Applications 210 (1), pp. 3.
+Cited by: §2.
+[42]
+R. T. Rockafellar (1976)
+Monotone operators and the proximal point algorithm.
+SIAM Journal on Control and Optimization 14 (5), pp. 877–898.
+External Links: https://doi.org/10.1137/0314056
+Cited by: §1,
+§2.
+[43]
+E. K. Ryu and W. Yin (2022)
+Large-Scale Convex Optimization via Monotone Operators.
+Cambridge University Press.
+Cited by: §1.
+[44]
+E. K. Ryu, K. Yuan, and W. Yin (2019)
+ODE analysis of stochastic gradient methods with optimism and anchoring for minimax problems and GANs.
+arXiv:1905.10899.
+External Links: 1905.10899
+Cited by: §2.
+[45]
+S. Sabach and S. Shtern (2017)
+A first order method for solving convex bilevel optimization problems.
+SIAM Journal on Optimization 27 (2), pp. 640–660.
+Cited by: §1,
+§2.
+[46]
+G. Scutari, F. Facchinei, J. Pang, and D. P. Palomar (2014)
+Real and complex monotone communication games.
+IEEE Transactions on Information Theory 60 (7), pp. 4197–4231.
+Cited by: §1.
+[47]
+G. Stampacchia (1964)
+Formes bilineaires coercitives sur les ensembles convexes.
+Comptes Rendus Hebdomadaires Des Seances De L Academie Des Sciences 258 (18), pp. 4413.
+Cited by: §1.
+[48]
+J. J. Suh, J. Park, and E. K. Ryu (2023)
+Continuous-time analysis of anchor acceleration.
+Neural Information Processing Systems.
+Cited by: §2.
+[49]
+Q. Tran-Dinh and Y. Luo (2021)
+Halpern-type accelerated and splitting algorithms for monotone inclusions.
+arXiv:2110.08150.
+External Links: 2110.08150
+Cited by: §1,
+§2.
+[50]
+Q. Tran-Dinh (2024)
+From Halpern’s fixed-point iterations to Nesterov’s accelerated interpretations for root-finding problems.
+Computational Optimization and Applications 87 (1), pp. 181–218.
+Cited by: §2.
+[51]
+R. Wittmann (1992)
+Approximation of fixed points of nonexpansive mappings.
+Archiv der Mathematik 58 (5), pp. 486–491.
+Cited by: §1,
+§2.
+[52]
+T. Yoon, S. Choudhury, and N. Loizou (2026)
+Multiplayer federated learning: reaching equilibrium with less communication.
+Advances in Neural Information Processing Systems.
+Cited by: §3.2.
+[53]
+T. Yoon and B. Grimmer (2026)
+A Theory of Composition and Duality of Extremal Optimal Fixed-Point Algorithms.
+arXiv:2605.02231.
+External Links: 2605.02231
+Cited by: §4.1.1.
+[54]
+T. Yoon, J. Kim, J. J. Suh, and E. K. Ryu (2024)
+Optimal acceleration for minimax and fixed-point problems is not unique.
+International Conference on Machine Learning.
+Cited by: §1,
+§2,
+§2,
+3.3,
+§6.
+[55]
+T. Yoon, E. K. Ryu, and B. Grimmer (2025)
+H-invariance theory: A complete characterization of minimax optimal fixed-point algorithms.
+Accepted for publication in Mathematical Programming.
+Cited by: §2.
+[56]
+T. Yoon and E. K. Ryu (2021)
+Accelerated algorithms for smooth convex-concave minimax problems with $\mathcal{O}(1/k^{2})$ rate on squared gradient norm.
+International Conference on Machine Learning.
+Cited by: §1,
+§1,
+§2,
+§5.
+[57]
+T. Yoon and E. K. Ryu (2025)
+Accelerated minimax algorithms flock together.
+SIAM Journal on Optimization 35 (1), pp. 180–209.
+Cited by: §2.
+[58]
+S. Zhang, S. Choudhury, S. Stich, and N. Loizou (2024)
+Communication-efficient gradient descent-accent methods for distributed variational inequalities: unified analysis and local updates.
+International Conference on Learning Representations.
+Cited by: §3.2.
+Appendix
+Contents
+1 Introduction
+2 Related Work
+3 Preliminaries and Assumptions
+3.1 Monotonicity, cocoercivity, and nonexpansiveness of operators
+3.2 Stochastic oracle models
+3.3 Known acceleration in fixed-point problems and its extension
+4 Stochastic Dual-Anchor Acceleration
+4.1 Proof outline for
+4.1.1 Intuition for why S-Dual-OHM is stable under noise
+4.2 Faster convergence under strong monotonicity
+5 Numerical Experiments
+6 Conclusion and Open Questions
+References
+A Missing Proofs
+A.1 Proof of
+A.2 Proof of
+A.3 Proof of
+A.4 Proof of
+A.5 Proof of
+B Additional Experiments
+Appendix A Missing Proofs
+We denote by ${\mathcal{F}}_{1}\subseteq{\mathcal{F}}_{2}\subseteq\dots$ the natural filtration generated by each iteration of the algorithm (selection of batches ${\mathcal{B}}_{i}$ ), i.e., ${\mathcal{F}}_{k}=\sigma\left({\mathcal{B}}_{0},{\mathcal{B}}_{1},\dots,{\mathcal{B}}_{k-1}\right)$ .
+A.1 Proof of Lemma 4.2
+Proof.
+The proof is purely algebraic, and does not use any property of ${\mathbb{F}}$ as an operator or stochastic property of the mini-batches ${\mathcal{B}}_{j}$ .
+The case $N=1$ is immediate (we have the vacuous identity $0=0$ ), so assume $N\geq 2$ .
+For $j=1,\dots,N$ , define
+$G_{j}={\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1}),\qquad g_{j}=\frac{\alpha}{2}G_{j},\qquad u_{j}=x_{j-1}-g_{j}.$
+Here, ${\mathcal{B}}_{N-1}$ is a ghost (auxiliary) batch introduced only for the analysis, and is not used by the algorithm update; in fact, one may ignore this ghost batch (i.e., safely assume that ${\mathcal{B}}_{N-1}$ is the full batch) and simply let $G_{N}={\mathbb{F}}(x_{N-1})$ .
+With this notation, we have
+${\mathbb{T}}_{{\mathcal{B}}_{j-1}}(x_{j-1})=x_{j-1}-\alpha G_{j}=x_{j-1}-2g_{j}.$
+Because ${\mathbb{T}}_{{\mathcal{B}}_{-1}}(x_{-1})=x_{0}$ , the $k=0$ update of S-Dual-OHM is
+$x_{1}=x_{0}+\frac{N-1}{N}\bigl({\mathbb{T}}_{{\mathcal{B}}_{0}}(x_{0})-x_{0}\bigr).$
+Let
+$a_{k}=\frac{N-k-1}{N-k},\qquad z_{0}=0,\qquad z_{k+1}={\mathbb{T}}_{{\mathcal{B}}_{k}}(x_{k})-x_{k+1}$
+for $k=0,\dots,N-2$ . Then, from the update rule,
+$\displaystyle z_{k+1}$
+$\displaystyle={\mathbb{T}}_{{\mathcal{B}}_{k}}(x_{k})-x_{k}-a_{k}\bigl({\mathbb{T}}_{{\mathcal{B}}_{k}}(x_{k})-{\mathbb{T}}_{{\mathcal{B}}_{k-1}}(x_{k-1})\bigr)$
+$\displaystyle=(1-a_{k})(x_{k}-2g_{k+1})-x_{k}+a_{k}{\mathbb{T}}_{{\mathcal{B}}_{k-1}}(x_{k-1})$
+$\displaystyle=a_{k}\left({\mathbb{T}}_{{\mathcal{B}}_{k-1}}(x_{k-1})-x_{k}\right)-2(1-a_{k})g_{k+1}$
+$\displaystyle=\frac{N-k-1}{N-k}z_{k}-\frac{2}{N-k}g_{k+1}.$
+(9)
+Then, by definition of $z_{k+1}$ ,
+$\displaystyle x_{k+1}={\mathbb{T}}_{{\mathcal{B}}_{k}}(x_{k})-z_{k+1}=x_{k}-2g_{k+1}-z_{k+1}.$
+(10)
+Now define, for $k=0,\dots,N-1$ ,
+$V_{k}=-\frac{N-k-1}{N-k}\left\|z_{k}+2g_{N}\right\|^{2}+\frac{2}{N-k}\left\langle z_{k}+2g_{N},x_{k}-x_{N-1}\right\rangle.$
+Note that $V_{N-1}=0$ .
+Next, we analyze $V_{k}-V_{k+1}$ . To simplify the notations, fix $k\in\{0,\dots,N-2\}$ , and write
+$m=N-k,\qquad w_{k}=z_{k}+2g_{N},\qquad d_{k}=g_{k+1}-g_{N},\qquad p_{k}=x_{k}-x_{N-1}.$
+From (9), we have
+$w_{k+1}-2g_{N}=\frac{N-k-1}{N-k}(w_{k}-2g_{N})-\frac{2}{N-k}g_{k+1}\implies w_{k+1}=\frac{m-1}{m}w_{k}-\frac{2}{m}d_{k}$
+and (10) yields
+$p_{k+1}=x_{k+1}-x_{N-1}=(x_{k}-x_{N-1})-(z_{k+1}+2g_{N})-2(g_{k+1}-g_{N})=p_{k}-w_{k+1}-2d_{k}.$
+Plugging the last identity into the expansion of $V_{k}-V_{k+1}$ below, we proceed as
+$\displaystyle V_{k}-V_{k+1}$
+$\displaystyle=-\frac{m-1}{m}\left\|w_{k}\right\|^{2}+\frac{2}{m}\left\langle w_{k},p_{k}\right\rangle+\frac{m-2}{m-1}\left\|w_{k+1}\right\|^{2}-\frac{2}{m-1}\left\langle w_{k+1},p_{k+1}\right\rangle$
+$\displaystyle=-\frac{m-1}{m}\left\|w_{k}\right\|^{2}+\frac{m}{m-1}\left\|w_{k+1}\right\|^{2}+\left\langle\frac{2}{m}w_{k}-\frac{2}{m-1}w_{k+1},p_{k}\right\rangle+\frac{4}{m-1}\left\langle w_{k+1},d_{k}\right\rangle$
+$\displaystyle=\frac{4}{m(m-1)}\left\langle p_{k},d_{k}\right\rangle-\frac{4}{m(m-1)}\left\|d_{k}\right\|^{2}$
+$\displaystyle=\frac{4}{(N-k)(N-k-1)}\left\langle u_{k+1}-u_{N},g_{k+1}-g_{N}\right\rangle,$
+where in the third equality we substituted
+$w_{k+1}=\frac{m-1}{m}w_{k}-\frac{2}{m}d_{k}$ and canceled out the terms, and in the last equality we used
+$p_{k}-d_{k}=x_{k}-x_{N-1}-(g_{k+1}-g_{N})=u_{k+1}-u_{N}.$
+Summing over $k=0,\dots,N-2$ and using $V_{N-1}=0$ yields
+$V_{0}=\sum_{j=1}^{N-1}\frac{4}{(N-j+1)(N-j)}\left\langle u_{j}-u_{N},g_{j}-g_{N}\right\rangle.$
+On the other hand, since $z_{0}=0$ ,
+$V_{0}=-\frac{N-1}{N}\left\|2g_{N}\right\|^{2}+\frac{2}{N}\left\langle 2g_{N},x_{0}-x_{N-1}\right\rangle=-\frac{4}{N}\left((N-1)\left\|g_{N}\right\|^{2}+\left\langle g_{N},x_{N-1}-x_{0}\right\rangle\right).$
+Therefore, equating the two expressions for $V_{0}$ and multiplying $\frac{N}{4}$ throughout, we obtain
+$\displaystyle 0=(N-1)\left\|g_{N}\right\|^{2}+\left\langle g_{N},x_{N-1}-x_{0}\right\rangle+\sum_{j=1}^{N-1}\frac{N}{(N-j)(N-j+1)}\left\langle u_{j}-u_{N},g_{j}-g_{N}\right\rangle.$
+(11)
+Finally, substituting $u_{j}=x_{j-1}-g_{j}$ and $g_{j}=\frac{\alpha}{2}G_{j}$ , we have
+$\displaystyle\left\langle u_{j}-u_{N},g_{j}-g_{N}\right\rangle$
+$\displaystyle=\left\langle x_{j-1}-x_{N-1},g_{j}-g_{N}\right\rangle-\left\|g_{j}-g_{N}\right\|^{2}$
+$\displaystyle=\frac{\alpha}{2}\left(\left\langle x_{j-1}-x_{N-1},G_{j}-G_{N}\right\rangle-\frac{\alpha}{2}\left\|G_{j}-G_{N}\right\|^{2}\right),$
+and
+$(N-1)\left\|g_{N}\right\|^{2}=\frac{(N-1)\alpha^{2}}{4}\left\|G_{N}\right\|^{2},\qquad\left\langle g_{N},x_{N-1}-x_{0}\right\rangle=\frac{\alpha}{2}\left\langle G_{N},x_{N-1}-x_{0}\right\rangle.$
+Hence, recalling $G_{j}={\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})$ and $\lambda_{N,j}=\frac{N\alpha}{2(N-j)(N-j+1)}$ , (11) is exactly the claimed identity.
+∎
+A.2 Proof of Lemma 4.3
+We can rewrite Lemma 4.2 as
+$\displaystyle\begin{aligned} 0&\geq\mathbb{E}\left[\frac{(N-1)\alpha^{2}}{4}\left\|{\mathbb{F}}(x_{N-1})\right\|^{2}+\frac{\alpha}{2}\left\langle{\mathbb{F}}(x_{N-1}),x_{N-1}-x_{0}\right\rangle\right]\\
+&\quad+\sum_{j=1}^{N-1}\lambda_{N,j}\mathbb{E}\left[\left\langle x_{j-1}-x_{N-1},{\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})-{\mathbb{F}}(x_{N-1})\right\rangle-\frac{\alpha}{2}\left\|{\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})-{\mathbb{F}}(x_{N-1})\right\|^{2}\right].\end{aligned}$
+(12)
+Now let $e_{j-1}={\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})-{\mathbb{F}}(x_{j-1})$ be the error term at iteration $j-1$ .
+Then we can write
+$\displaystyle\mathbb{E}\left[\left\langle x_{j-1}-x_{N-1},{\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})-{\mathbb{F}}(x_{N-1})\right\rangle-\frac{\alpha}{2}\left\|{\mathbb{F}}_{{\mathcal{B}}_{j-1}}(x_{j-1})-{\mathbb{F}}(x_{N-1})\right\|^{2}\right]$
+$\displaystyle=\mathbb{E}\left[\left\langle x_{j-1}-x_{N-1},{\mathbb{F}}(x_{j-1})-{\mathbb{F}}(x_{N-1})\right\rangle-\frac{\alpha}{2}\left\|{\mathbb{F}}(x_{j-1})-{\mathbb{F}}(x_{N-1})\right\|^{2}\right]$
+$\displaystyle\quad+\mathbb{E}\left[\left\langle x_{j-1}-x_{N-1},e_{j-1}\right\rangle-\alpha\left\langle{\mathbb{F}}(x_{j-1})-{\mathbb{F}}(x_{N-1}),e_{j-1}\right\rangle-\frac{\alpha}{2}\left\|e_{j-1}\right\|^{2}\right]$
+$\displaystyle\geq\mathbb{E}\left[\left\langle-x_{N-1}+\alpha{\mathbb{F}}(x_{N-1}),e_{j-1}\right\rangle\right]-\frac{\alpha\sigma^{2}}{2B}$
+where the last inequality uses cocoercivity of ${\mathbb{F}}$ , $\mathbb{E}\left[e_{j-1}\,\middle|\,{\mathcal{F}}_{j-1}\right]=0$ and $x_{j-1}-\alpha{\mathbb{F}}(x_{j-1})$ is deterministic on ${\mathcal{F}}_{j-1}$ , and $\mathbb{E}\left[\left\|e_{j-1}\right\|^{2}\,\middle|\,{\mathcal{F}}_{j-1}\right]\leq\frac{\sigma^{2}}{B}$ .
+Substituting the above into (12) and using ${\mathbb{T}}={\mathbb{I}}-\alpha{\mathbb{F}}$ , we obtain (6).
+A.3 Proof of Lemma 4.4
+A.1.
+For $k=1,\dots,N-1$ , the S-Dual-OHM iterates can be expressed as
+$x_{k}=\frac{1}{N}x_{0}+\sum_{t=0}^{k-2}\frac{1}{(N-t-1)(N-t)}{\mathbb{T}}_{{\mathcal{B}}_{t}}(x_{t})+\frac{N-k}{N-k+1}{\mathbb{T}}_{{\mathcal{B}}_{k-1}}(x_{k-1}).$
+(13)
+Proof.
+We use induction on $k$ . For $k=1$ , $x_{1}=x_{0}+\frac{N-1}{N}\bigl({\mathbb{T}}_{{\mathcal{B}}_{0}}(x_{0})-x_{0}\bigr)=\frac{1}{N}x_{0}+\frac{N-1}{N}{\mathbb{T}}_{{\mathcal{B}}_{0}}(x_{0})$ , which agrees with (13).
+Now assume (13) holds for some $k\in\{1,\dots,N-2\}$ .
+Then, by induction hypothesis,
+$\displaystyle x_{k+1}$
+$\displaystyle=x_{k}+\frac{N-k-1}{N-k}\Bigl({\mathbb{T}}_{{\mathcal{B}}_{k}}(x_{k})-{\mathbb{T}}_{{\mathcal{B}}_{k-1}}(x_{k-1})\Bigr)$
+$\displaystyle=\frac{1}{N}x_{0}+\sum_{t=0}^{k-2}\frac{1}{(N-t-1)(N-t)}{\mathbb{T}}_{{\mathcal{B}}_{t}}(x_{t})+\left(\frac{N-k}{N-k+1}-\frac{N-k-1}{N-k}\right){\mathbb{T}}_{{\mathcal{B}}_{k-1}}(x_{k-1})$
+$\displaystyle\quad+\frac{N-k-1}{N-k}{\mathbb{T}}_{{\mathcal{B}}_{k}}(x_{k}).$
+The induction (hence the proof) is then complete, as $\frac{N-k}{N-k+1}-\frac{N-k-1}{N-k}=\frac{1}{(N-k)(N-k+1)}$ .
+∎
+A.2Leave-one-out stability.
+For $s\in\{0,\dots,N-2\}$ , let $\big\{x_{k}^{(s)}\big\}_{k=0}^{N-1}$ be the trajectory obtained from S-Dual-OHM by replacing only the minibatch ${\mathcal{B}}_{s}$ by an independent copy ${\mathcal{B}}_{s}^{\prime}$ , while keeping all other minibatches the same in the two runs.
+Then, for every $k=s+1,\dots,N-1$ ,
+$\mathbb{E}\left[\left\|x_{k}-x_{k}^{(s)}\right\|^{2}\right]\leq\frac{\alpha^{2}\sigma^{2}}{B}\left(1+\frac{(N-k)(N-k-1)}{(N-s)(N-s-1)}\right).$
+(14)
+In particular,
+$\mathbb{E}\left[\left\|x_{N-1}-x_{N-1}^{(s)}\right\|^{2}\right]\leq\frac{\alpha^{2}\sigma^{2}}{B}.$
+(15)
+Proof.
+Define $w_{k,t}=\begin{cases}\dfrac{1}{(N-t-1)(N-t)},&0\leq t\leq k-2,\\[5.69054pt]
+\dfrac{N-k}{N-k+1},&t=k-1\end{cases}$ so that by Lemma A.1,
+$x_{k}=\frac{1}{N}x_{0}+\sum_{t=0}^{k-1}w_{k,t}{\mathbb{T}}_{{\mathcal{B}}_{t}}(x_{t}),\qquad x_{k}^{(s)}=\frac{1}{N}x_{0}+\sum_{t=0}^{k-1}w_{k,t}{\mathbb{T}}_{{\mathcal{B}}_{t}^{(s)}}(x_{t}^{(s)}),$
+where ${\mathcal{B}}_{t}^{(s)}={\mathcal{B}}_{t}$ for $t\neq s$ , and ${\mathcal{B}}_{s}^{(s)}={\mathcal{B}}_{s}^{\prime}$ .
+Since $\sum_{t=0}^{k-1}w_{k,t}=1-\frac{1}{N}$ , by Jensen’s inequality,
+$\displaystyle\begin{aligned} d_{k}^{(s)}&:=\mathbb{E}\left[\left\|x_{k}-x_{k}^{(s)}\right\|^{2}\right]\leq\mathbb{E}\left[\sum_{t=0}^{k-1}w_{k,t}\left\|{\mathbb{T}}_{{\mathcal{B}}_{t}}(x_{t})-{\mathbb{T}}_{{\mathcal{B}}_{t}^{(s)}}\big(x_{t}^{(s)}\big)\right\|^{2}\right]\\
+&=\sum_{t=s}^{k-1}w_{k,t}\mathbb{E}\left[\left\|{\mathbb{T}}_{{\mathcal{B}}_{t}}(x_{t})-{\mathbb{T}}_{{\mathcal{B}}_{t}^{(s)}}\big(x_{t}^{(s)}\big)\right\|^{2}\right].\end{aligned}$
+(16)
+Let $\nu^{2}=\frac{\alpha^{2}\sigma^{2}}{B}$ for simplicity. We will show by induction on $k$ that
+$\displaystyle d_{k}^{(s)}\leq\nu^{2}\left(1+\frac{(N-k)(N-k-1)}{(N-s)(N-s-1)}\right).$
+(17)
+For $k=s+1$ , from (16) we have
+$\displaystyle d_{s+1}^{(s)}\leq w_{s+1,s}\mathbb{E}\left[\left\|{\mathbb{T}}_{{\mathcal{B}}_{s}}(x_{s})-{\mathbb{T}}_{{\mathcal{B}}_{s}^{\prime}}\big(x_{s}\big)\right\|^{2}\right]\leq\frac{N-s-1}{N-s}\cdot 2\nu^{2}$
+which agrees with (17). Here we used the fact that ${\mathbb{T}}_{{\mathcal{B}}_{s}}(x_{s})$ and ${\mathbb{T}}_{{\mathcal{B}}_{s}^{\prime}}(x_{s})$ are estimators of ${\mathbb{T}}(x_{s})$ of variance $\leq\frac{\alpha^{2}\sigma^{2}}{B}=\nu^{2}$ , and they are conditionally independent on ${\mathcal{F}}_{s}$ .
+Next, let $s+2\leq\ell\leq N-1$ , and suppose (17) holds for all $t=s+1,\dots,\ell-1$ .
+Note that in (16), we have ${\mathcal{B}}_{t}^{(s)}={\mathcal{B}}_{t}$ for $t>s$ , so by 3.2,
+$\displaystyle\mathbb{E}\left[\left\|{\mathbb{T}}_{{\mathcal{B}}_{t}}(x_{t})-{\mathbb{T}}_{{\mathcal{B}}_{t}^{(s)}}\big(x_{t}^{(s)}\big)\right\|^{2}\right]$
+$\displaystyle=\mathbb{E}\left[\mathbb{E}\left[\left\|{\mathbb{T}}_{{\mathcal{B}}_{t}}(x_{t})-{\mathbb{T}}_{{\mathcal{B}}_{t}}\big(x_{t}^{(s)}\big)\right\|^{2}\,\middle|\,{\mathcal{G}}_{t}^{(s)}\right]\right]$
+$\displaystyle\leq\mathbb{E}\left[\mathbb{E}\left[\left\|x_{t}-x_{t}^{(s)}\right\|^{2}\,\middle|\,{\mathcal{G}}_{t}^{(s)}\right]\right]=\mathbb{E}\left[\left\|x_{t}-x_{t}^{(s)}\right\|^{2}\right]=d_{t}^{(s)}$
+where ${\mathcal{G}}_{t}^{(s)}=\sigma({\mathcal{B}}_{0},\dots,{\mathcal{B}}_{t-1},{\mathcal{B}}_{s}^{\prime})$ is the $\sigma$ -algebra enlarged from ${\mathcal{F}}_{t}$ to make $x_{t}^{(s)}$ measurable.
+Applying this to (16) with the induction hypothesis, we obtain
+$\displaystyle d_{\ell}^{(s)}$
+$\displaystyle\leq 2w_{\ell,s}\nu^{2}+\sum_{t=s+1}^{\ell-1}w_{\ell,t}d_{t}^{(s)}$
+(18)
+$\displaystyle\leq 2w_{\ell,s}\nu^{2}+\sum_{t=s+1}^{\ell-1}w_{\ell,t}\nu^{2}\left(1+\frac{(N-t)(N-t-1)}{(N-s)(N-s-1)}\right)$
+$\displaystyle=\nu^{2}\left[2w_{\ell,s}+\sum_{t=s+1}^{\ell-1}w_{\ell,t}\right]+\frac{\nu^{2}}{(N-s)(N-s-1)}\sum_{t=s+1}^{\ell-1}w_{\ell,t}(N-t)(N-t-1).$
+Now using the explicit formula for $w_{\ell,t}$ , we can directly verify
+$2w_{\ell,s}+\sum_{t=s+1}^{\ell-1}w_{\ell,t}=1-\frac{1}{N-s}+\frac{1}{(N-s)(N-s-1)},$
+and
+$\displaystyle\sum_{t=s+1}^{\ell-1}w_{\ell,t}(N-t)(N-t-1)=\sum_{t=s+1}^{\ell-2}1+\frac{N-\ell}{N-\ell+1}(N-\ell+1)(N-\ell)$
+$\displaystyle=\ell-s-2+(N-\ell)^{2}=N-s-2+(N-\ell)(N-\ell-1).$
+Hence
+$\displaystyle d_{\ell}^{(s)}$
+$\displaystyle\leq\nu^{2}\left(1-\frac{1}{N-s}\right)+\frac{\nu^{2}}{(N-s)(N-s-1)}\Bigl(N-s-1+(N-\ell)(N-\ell-1)\Bigr)$
+$\displaystyle=\nu^{2}\left(1+\frac{(N-\ell)(N-\ell-1)}{(N-s)(N-s-1)}\right),$
+which completes the induction, proving (14).
+Then (15) follows immediately by setting $k=N-1$ .
+∎
+Now we are ready to prove Lemma 4.4.
+Fix $j\in\{1,\dots,N-1\}$ , and let $x_{N-1}^{(j-1)}$ denote the leave-one-out terminal iterate from Lemma A.2, obtained by replacing only the minibatch ${\mathcal{B}}_{j-1}$ by an independent copy.
+By the fact that $x_{N-1}^{(j-1)}$ is conditionally independent with $e_{j-1}$ (which depends only on ${\mathcal{B}}_{j-1}$ ) on ${\mathcal{F}}_{j-1}$ and the tower property, we have $\mathbb{E}\left[\left\langle{\mathbb{T}}\big(x_{N-1}^{(j-1)}\big),e_{j-1}\right\rangle\right]=0$ .
+Hence
+$\displaystyle\mathbb{E}\left[\left\langle e_{j-1},{\mathbb{T}}x_{N-1}\right\rangle\right]$
+$\displaystyle=\mathbb{E}\left[\left\langle e_{j-1},{\mathbb{T}}(x_{N-1})-{\mathbb{T}}\big(x_{N-1}^{(j-1)}\big)\right\rangle\right]$
+$\displaystyle\leq\sqrt{\mathbb{E}\left[\left\|e_{j-1}\right\|^{2}\right]\,\mathbb{E}\left[\left\|{\mathbb{T}}(x_{N-1})-{\mathbb{T}}\big(x_{N-1}^{(j-1)}\big)\right\|^{2}\right]}$
+$\displaystyle\leq\sqrt{\frac{\sigma^{2}}{B}\mathbb{E}\left[\left\|x_{N-1}-x_{N-1}^{(j-1)}\right\|^{2}\right]}$
+$\displaystyle\leq\sqrt{\frac{\sigma^{2}}{B}\cdot\frac{\alpha^{2}\sigma^{2}}{B}}=\frac{\alpha\sigma^{2}}{B}.$
+A.4 Proof of Lemma 4.6
+Let
+$s_{k}=\mathbb E\left\|x_{k}-y_{k}\right\|^{2},\qquad M_{k}=\max_{0\leq i\leq k}s_{i}.$
+It suffices to show that $M_{k}\leq\frac{\alpha^{2}\sigma^{2}}{B(1-\gamma^{2})}$ .
+For $k=0$ , we have $x_{0}=y_{0}$ , so we have $s_{0}=M_{0}=0$ and the result is trivial.
+Let $k\geq 1$ . Applying Lemma A.1 for both S-Dual-OHM and its full-batch version (Dual-OHM), we obtain
+$x_{k}-y_{k}=\sum_{t=0}^{k-1}w_{k,t}\left[{\mathbb{T}}(x_{t})-{\mathbb{T}}(y_{t})+e_{t}\right]$
+where $e_{t}={\mathbb{T}}_{{\mathcal{B}}_{t}}(x_{t})-{\mathbb{T}}(x_{t})$ and $w_{k,t}=\begin{cases}\dfrac{1}{(N-t-1)(N-t)},&0\leq t\leq k-2\\
+\dfrac{N-k}{N-k+1},&t=k-1\end{cases}$ .
+Note that here $\mathbb{E}\left[e_{t}\,\middle|\,{\mathcal{F}}_{t}\right]=0$ and $\mathbb{E}\left[\left\|e_{t}\right\|^{2}\,\middle|\,{\mathcal{F}}_{t}\right]\leq\nu^{2}:=\frac{\alpha^{2}\sigma^{2}}{B}$ .
+Using $\sum_{t=0}^{k-1}w_{k,t}=1-\frac{1}{N}<1$ and Jensen’s inequality gives
+$\displaystyle s_{k}=\mathbb{E}\left[\left\|x_{k}-y_{k}\right\|^{2}\right]\leq\sum_{t=0}^{k-1}w_{k,t}\mathbb{E}\left[\left\|{\mathbb{T}}(x_{t})-{\mathbb{T}}(y_{t})+e_{t}\right\|^{2}\right]$
+$\displaystyle\leq\sum_{t=0}^{k-1}w_{k,t}\left(\mathbb{E}\left[\left\|{\mathbb{T}}(x_{t})-{\mathbb{T}}(y_{t})\right\|^{2}+\left\|e_{t}\right\|^{2}\right]\right)\leq\sum_{t=0}^{k-1}w_{k,t}\left(\gamma^{2}\mathbb{E}\left[\left\|x_{t}-y_{t}\right\|^{2}\right]+\nu^{2}\right)\leq\gamma^{2}M_{k-1}+\nu^{2}$
+where for the second inequality, we used conditional unbiasedness together with the tower property:
+$\mathbb{E}\left[\left\langle e_{t},{\mathbb{T}}(x_{t})-{\mathbb{T}}(y_{t})\right\rangle\right]=\mathbb{E}\left[\mathbb{E}\left[\left\langle e_{t},{\mathbb{T}}(x_{t})-{\mathbb{T}}(y_{t})\right\rangle\,\middle|\,{\mathcal{F}}_{t}\right]\right]=0$
+which holds because ${\mathbb{T}}(x_{t})-{\mathbb{T}}(y_{t})$ is deterministic conditioned on ${\mathcal{F}}_{t}$ and $\mathbb{E}\left[e_{t}\,\middle|\,{\mathcal{F}}_{t}\right]=0$ .
+Now starting with $M_{0}=0$ and using induction on $k$ , the above shows that
+$M_{k}\leq\max\left\{M_{k-1},\gamma^{2}M_{k-1}+\nu^{2}\right\}\leq\max\left\{M_{k-1},\gamma^{2}\frac{\nu^{2}}{1-\gamma^{2}}+\nu^{2}\right\}=\frac{\nu^{2}}{1-\gamma^{2}}.$
+A.5 Proof of Lemma 4.7
+Observe that for $k=1,2,\dots$ ,
+$\displaystyle\left\|y_{k+1}-y_{k}\right\|=\frac{N-k-1}{N-k}\left\|{\mathbb{T}}(y_{k})-{\mathbb{T}}(y_{k-1})\right\|\leq\gamma\left\|y_{k}-y_{k-1}\right\|$
+$\displaystyle\implies\left\|y_{k+1}-y_{k}\right\|\leq\gamma^{k}\left\|y_{1}-y_{0}\right\|=\gamma^{k}\left\|\frac{N-1}{N}({\mathbb{T}}(y_{0})-y_{0})\right\|\leq\gamma^{k}(1+\gamma)\left\|y_{0}-x_{\star}\right\|$
+where the last inequality uses $\left\|{\mathbb{T}}(y_{0})-y_{0}\right\|\leq\left\|{\mathbb{T}}(y_{0})-x_{\star}\right\|+\left\|x_{\star}-y_{0}\right\|\leq(1+\gamma)\left\|y_{0}-x_{\star}\right\|$ (recall that we assume $x_{0}=y_{0}$ ).
+Thus
+$\displaystyle\left\|y_{N-1}-y_{k}\right\|$
+$\displaystyle\leq\sum_{j=k}^{N-2}\left\|y_{j+1}-y_{j}\right\|\leq(1+\gamma)\left\|y_{0}-x_{\star}\right\|\sum_{j=k}^{N-2}\gamma^{j}\leq\frac{1+\gamma}{1-\gamma}\gamma^{k}\left\|x_{0}-x_{\star}\right\|.$
+Appendix B Additional Experiments
+In the experiments of Section 5, we used for S-OHM the same batch size $B$ selected for S-Dual-OHM.
+This was designed to isolate the effect of replacing the anchor update by the dual-anchor update while
+keeping all the other configurations identical.
+However, to verify that the observed empirical advantage of S-Dual-OHM is not an artifact of this experiment design, we repeat all four experiments while separately tuning the batch size of S-OHM over the same grid $B\in\{1,10,20,50,100\}$ , under the same total sample budget $Q=NB$ .
+All the other experimental settings are unchanged.
+For simplicity, we only compare the results from S-Dual-OHM with tuned $B$ and runs of S-OHM using the shared and tuned batch sizes.
+Figure 3: Comparison after independently tuning the constant batch size $B$ of S-OHM.
+(Top left) Worst-case nonexpansive operator (Experiment 1).
+(Top right) Finite-sum cocoercive operator (Experiment 2).
+(Bottom left) SCSC Huber-type minimax problem (Experiment 3), in the low-variance regime with $\sigma=0.05$ .
+(Bottom right) The same minimax problem from Experiment 3 in the high-variance
+regime with $\sigma=1.5$ .
+The plots labeled as S-OHM (Tuned $B$ ) use the best $B\in\{1,10,20,50,100\}$ selected under the given total sample budget.
+Solid curves are means over 10 independent runs, and shaded bands denote empirical
+5th–95th percentiles.
+As shown in Figure 3, independent
+tuning selects the same batch size for S-OHM and
+S-Dual-OHM in Experiment 2 and the low-variance regime in Experiment 3.
+In Experiment 1 and the high-variance regime in Experiment 3, the batch sizes independently chosen for S-OHM differ.
+Nevertheless, even with its own optimized batch size, the final residual attained by S-OHM remains strictly larger than that of S-Dual-OHM.
+These results from controlled experiments further supports the empirical benefit/robustness of the dual-anchor mechanism over anchoring in stochastic settings.
+Experimental support, please
+view the build logs
+for errors. Generated by
+L
+A
+T
+E
+xml
+.
+Instructions for reporting errors
+We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+methods listed below:
+Click the "Report Issue" (
+) button, located in the page header.
+Tip: You can select the relevant text first, to include it in your report.
+Our team has already identified the following issues. We appreciate your time reviewing and reporting rendering errors we
+may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+all.
+Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a list of packages that need conversion, and welcome developer contributions.
+We gratefully acknowledge support from
+our major funders,
+member institutions, ,
+and all contributors.
+About
+·
+Help
+·
+Contact
+·
+Subscribe
+·
+Copyright
+·
+Privacy
+·
+Accessibility
+·
+Operational Status (opens in new tab)
+Major funding support from

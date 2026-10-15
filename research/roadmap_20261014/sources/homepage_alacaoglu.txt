@@ -1,0 +1,12 @@
+Ahmet Alacaoglu's Homepage
+Ahmet Alacaoglu
+Home
+Publications
+Research Group
+Teaching
+Service
+Links
+I am an assistant professor in the Department of Mathematics at the University of British Columbia, as part of the AI Methods for Scientific Impact (AIM-SI) cluster. I am also an associate member in the Department of Computer Science and a member of the Institute of Applied Mathematics. Previously, I was a postdoctoral researcher, working with Stephen J. Wright at the University of Wisconsin–Madison. I received my PhD from EPFL in 2021 and my undergraduate degree from Bilkent University in 2016.
+My research interests are in optimization, machine learning and reinforcement learning. I especially focus on understanding the theoretical properties of practical optimization algorithms and improving them.
+Email: ahmet dot alacaoglu at ubc dot ca
+Prospective students/postdocs: If you are interested in the graduate programs at UBC, or if you are an undergraduate student at UBC, and want to work with me, feel free to apply and send me an email. To learn about the activities at UBC on ML/AI, data science and applied mathematics, check out CAIDA, AIM-SI, ML@UBC, IAM, MILD and DSI. If you are looking for a postdoc opportunity and our research interests are a good match, please get in touch.

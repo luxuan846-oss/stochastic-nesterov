@@ -1,0 +1,874 @@
+The iterates of FISTA converge even underinexact computations and stochastic gradients
+Report GitHub Issue
+×
+Title:
+Content selection saved. Describe the issue below:
+Description:
+Submit without GitHub
+Submit in GitHub
+arXiv is now an independent nonprofit!
+Learn more
+×
+Back to arXiv
+Why HTML?
+Report Issue
+Back to Abstract
+Download PDF
+Abstract
+1 Introduction
+1.1 Our contribution
+1.2 Organization of the paper
+1.3 Notation and definition of the algorithms
+2 The basic facts
+3 Analysis of the convergence
+3.1 The acceleration parameters
+3.2 Three preparatory lemmas
+3.3 The two main theorems
+References
+A Appendix
+A.1 Proofs of Section
+License: CC BY 4.0
+arXiv:2511.12665v3 [math.OC] 30 Jul 2026
+The iterates of FISTA converge even under
+inexact computations and stochastic gradients
+Saverio Salzo
+††thanks: Sapienza Università di Roma, Via Ariosto 25,
+00185, Roma, Italy
+(saverio.salzo@uniroma1.it)††thanks: Istituto Italiano di Tecnologia, Via E.˜Melen 83, 16152, Genova, Italy
+Abstract
+Very recently, the papers “Point Convergence of Nesterov’s Accelerated Gradient Method: An AI-Assisted Proof” by Jang and Ryu, and “The Iterates of Nesterov’s Accelerated Algorithm Converge in the Critical Regimes” by Boţ, Fadili, and Nguyen have simultaneously resolved a long-standing open problem concerning Nesterov’s accelerated gradient method. These works show that the iterates of the algorithm (known in its composite form as FISTA) indeed converge to an optimal solution. In this work, we extend these results and prove that, in infinite dimensional Hilbert spaces, the iterates of such an algorithm still converge (in the weak sense)
+even when the proximity operator and the gradient are computed inexactly, with the latter possibly stochastic.
+Keywords. Convex optimization, accelerated proximal gradient algorithms,
+inexact algorithms, stochastic optimization, convergence of the iterates, convergence rates.
+AMS Mathematics Subject Classification: 65K05, 90C25, 90C15, 49M27
+1 Introduction
+In this paper, we address the composite convex optimization problem
+$\min_{x\in\mathcal{H}}f(x)+g(x)=:F(x),$
+(1.1)
+under the following assumption.
+Assumption 1.
+$\mathcal{H}$ is a real Hilbert space, the function $f\colon\mathcal{H}\to\mathbb{R}$ is convex and differentiable
+with Lipschitz continuous gradient, with constant $L>0$ ,
+the function $g\colon\mathcal{H}\to\left]-\infty,+\infty\right]$ is extended real-valued, proper, convex and lower semicontinuous, and the set of minimizers of $F:=f+g$ is nonempty.
+This framework covers a wide range of problems in signal processing, machine learning, and inverse problems, and is classically addressed by first-order proximal algorithms.
+Among them, the Fast Iterative Shrinkage-Thresholding Algorithm (FISTA), introduced by Beck and Teboulle in [10] and rooted in Nesterov’s seminal acceleration technique [21] and its extension to the proximal point algorithm given by Güler in [18], stands out for achieving the optimal $O(1/k^{2})$ convergence rate in objective values in the convex setting. FISTA and its continuous-time analogues have been the subject of intense study in recent years (see, e.g., [2, 4, 5, 3, 6, 14, 28] and references therein), due to both their practical efficiency and the long-standing theoretical question concerning the convergence of the iterates themselves.
+Originally, Nesterov [21] established convergence rates for the objective values, but not for the iterates. The first substantial progress in this direction was achieved by Chambolle and Dossal [14], who proved the convergence of the iterates in the noncritical regime—that is, under specific constraints on the acceleration parameters. Subsequent works such as [6, 5, 12] further investigate rates of convergence and connections with other acceleration schemes such as the Heavy Ball method by Polyak [23].
+On the other hand, several studies have focused on the analysis of inexact versions of the method [7, 8, 11, 27, 29], where both the gradient and the proximity operator may be computed only approximately, allowing for numerical truncation and/or inner iterative schemes.
+This line of research was initiated in [29, 27], where convergence rates in objective values were derived. Subsequently,
+the work [7] extended this analysis to the convergence of the iterates, but only in the noncritical regime.
+As a result, understanding the behaviour of the iterates in the original Nesterov’s accelerated method (the critical regime) has
+eluded researchers
+for more than a decade.
+Very recently, two independent works, by Jang and Ryu [19], and by Boţ, Fadili, and Nguyen [13], have simultaneously resolved this long-standing open problem. They proved that the iterates of Nesterov’s accelerated algorithm converge even in the critical regime—[19] covers the smooth finite dimensional case, while [13] addresses the nonsmooth case, thus FISTA, in infinite dimensional Hilbert spaces. The proof is surprisingly simple and was originally triggered by Ryu [25] who announced on X that he had proved the convergence of the trajectory of the corresponding continuous-time accelerated dynamics, relying heavily on ChatGPT.
+1.1 Our contribution
+Building upon the recent advances mentioned above, we establish the weak convergence of the iterates of an inexact version of FISTA in infinite-dimensional Hilbert spaces.
+In addition, we prove the almost-sure weak convergence of the iterates when the inexact gradient is stochastic, thereby extending the deterministic theory to a stochastic setting.
+The deterministic algorithm allows for errors both in the computation of the gradient and in the evaluation of the proximity operator, modeled through the inexactness criterion given in [26, 27]. In contrast, the stochastic algorithm, beyond the above cited type of errors in the proximity operator, also permits gradient evaluations corrupted by random noise, provided the noise has uniformly bounded variance.
+The analysis covers the critical regime, matching the strength of the exact results in [19, 13], while encompassing earlier partial results such as those in [7]. In particular, compared to this latter work, our proof takes advantage of the ideas in [19] and ultimately is both simpler and more general, removing also the spurious assumption of coercivity of $F$ .
+The argument relies on: (1) the analysis of a recursive numerical inequality that (via a discrete version of the Bihari-La Salle Lemma) allows to control the errors while ensuring convergence of the Lyapunov function (even though it is no longer decreasing), (2) an adaptation of Opial’s Lemma suitable for accelerated schemes, which is also extended to random sequences, and (3) following [19], a Lemma originally given in [12], that yields a representation of the iterates as convex combinations. Finally, similarly to [7], we highlight the balance between the required decay of the error terms and the chosen acceleration parameter, thereby bridging the gap between the classical proximal gradient method and its fully accelerated counterpart.
+1.2 Organization of the paper
+The rest of the paper is organized as follows. In Section 1.3, we set the notation and present the two algorithms that are the focus of this study. Section 2 collects the basic facts needed for the convergence analysis. In Section 3, after presenting several properties of the acceleration parameters of FISTA and providing some additional preparatory lemmas, we state the two main theorems of the paper. Finally, for reader’s convenience and for completeness we provide in Appendix A some proofs of the facts presented in Section 2.
+1.3 Notation and definition of the algorithms
+We denote by $\mathbb{N}$ the set of natural numbers, including zero, and by $\mathbb{R}_{+}=\{x\in\mathbb{R}\,|\,x\geq 0\}$
+and $\mathbb{R}_{++}=\{x\in\mathbb{R}\,|\,x>0\}$ the set of positive and strictly positive real numbers, respectively.
+We denote by $\langle{\,\cdot\,,\,\cdot\,}\rangle$ and $\left\|{\cdot}\right\|$ the scalar product and the norm of the Hilbert space $\mathcal{H}$ . We denote by $\mathcal{H}\oplus\mathcal{H}$ the direct sum of $\mathcal{H}$ with itself, meaning
+the vector space $\mathcal{H}\times\mathcal{H}$ endowed with the scalar product
+$((x_{1},x_{2}),(y_{1},y_{2}))\mapsto\langle{x_{1},y_{1}}\rangle+\langle{x_{2},y_{2}}\rangle$ .
+Let $\varphi\colon\mathcal{H}\to\left]-\infty,+\infty\right]$ be a proper convex and lower semicontinuous function. We denote by $\argmin\varphi$ the set of minimizers of $\varphi$ .
+Given $\varepsilon\geq 0$ , the $\varepsilon$ -subdifferential of $\varphi$ is the set-valued mapping
+$\partial_{\varepsilon}\varphi\colon\mathcal{H}\to 2^{\mathcal{H}}\colon x\mapsto\{u\in\mathcal{H}\,|\,(\forall\,y\in\mathcal{H})\ \varphi(y)\geq\varphi(x)+\langle{y-x,u}\rangle-\varepsilon\}.$
+When $\varepsilon=0$ , we simply write $\partial\varphi$ , which is called the subdifferential of $\varphi$ .
+The proximity operator of $\varphi$ is defined as
+$\prox_{\varphi}\colon\mathcal{H}\to\mathcal{H}\colon x\mapsto\argmin\Big\{\varphi+\frac{1}{2}\left\|{\,\cdot\,-x}\right\|^{2}\Big\},$
+and, for every $x,z\in\mathcal{H}$ we have $z=\prox_{\varphi}(x)\ \Leftrightarrow\ x-z\in\partial\varphi(z)$ .
+Moreover, the proximity operator is nonexpansive, meaning that $\left\|{\prox_{\varphi}(x)-\prox_{\varphi}(y)}\right\|\leq\left\|{x-y}\right\|$ , for every $x,y\in\mathcal{H}$ (see [9]).
+A numerical sequence $(\alpha_{k})_{k\in\mathbb{N}}$ is increasing (resp. decreasing) if $\alpha_{k}\leq\alpha_{k+1}$ (resp. $\alpha_{k}\geq\alpha_{k+1}$ ), for every $k\in\mathbb{N}$ . If $(x_{k})_{k\in\mathbb{N}}$ is a sequence in $\mathcal{H}$ and $\bar{x}\in\mathcal{H}$ , the strong converge and weak convergence of $(x_{k})_{k\in\mathbb{N}}$ to $\bar{x}$ is denoted by $x_{k}\to\bar{x}$ and $x_{k}\rightharpoonup\bar{x}$ , respectively.
+A sequential weak cluster point of a sequence $(x_{k})_{k\in\mathbb{N}}$ is the limit of any weakly converging subsequence. We recall that in a Hilbert space any bounded sequence always admits a weakly converging subsequence, so it has at least a sequential weak cluster point [9]. We conclude this paragraph, by setting the notation for random variables and their (conditional) expectations.
+The underlying probability space will be denoted by $(\Omega,\mathfrak{A},\mathbb{P})$ .
+If $\mathcal{H}$ is separable, $v$ is a $\mathcal{H}$ -valued random variable which is integrable, and $\mathfrak{F}\subset\mathfrak{A}$ is a sub- $\sigma$ -algebra of $\mathfrak{A}$ , the (conditional) expectation of $v$ (given $\mathfrak{F}$ ) is denoted by $\mathbb{E}[v]$ (resp. $\mathbb{E}[v\,|\,\mathfrak{F}]$ ). We recall that if $w$ is another random vector which is measurable w.r.t. $\mathfrak{F}$ , then $\mathbb{E}[\langle{v,w}\rangle\,|\,\mathfrak{F}]=\langle{\mathbb{E}[v\,|\,\mathfrak{F}],w}\rangle$ . The conditional expectation can be also defined for positive real-valued random variable, without any integrability condition.
+In what follows, we present two versions of FISTA, one with deterministic errors and one with stochastic errors. Both rely on the following notion of an inexact proximity operator, introduced and analyzed in detail in [26] and subsequently used, among others, in [27, 29, 7].
+Definition 1.1.
+Let $g\colon\mathcal{H}\to\left]-\infty,+\infty\right]$ be a proper convex and lower semicontinuous function, $y,z\in\mathcal{H}$ , and $\delta\in\mathbb{R}_{+}$ . Then $z\simeq_{\delta}\prox_{g}(y)$
+means
+$g(z)+\frac{1}{2}\left\|{z-y}\right\|^{2}\leq\min\Big\{g+\frac{1}{2}\left\|{\,\cdot-y}\right\|^{2}\!\Big\}+\frac{\delta^{2}}{2}.$
+Proposition 1.2 (Lemma 2.4 [26]).
+Let $g\colon\mathcal{H}\to\left]-\infty,+\infty\right]$ be a proper convex and lower semicontinuous function, $y,z\in\mathcal{H}$ , and $\delta\in\mathbb{R}_{+}$ .
+Let $\gamma>0$ and suppose that $z\simeq_{\delta}\prox_{\gamma g}(y)$ . Then the following hold.
+(i)
+$\left\|{z-\prox_{\gamma g}(y)}\right\|\leq\delta$
+(ii)
+$\exists\,\delta_{1},\delta_{2}>0,\,\exists\,e\in\mathcal{H}$ such that
+$\delta_{1}^{2}+\delta_{2}^{2}\leq\delta^{2}$ , $\left\|{e}\right\|\leq\delta_{2}$ and $(y+e-z)/\gamma\in\partial_{\delta_{1}^{2}/(2\gamma)}g(z)$ .
+The algorithm below tolerates only deterministic errors in the computation of the gradient and of the proximity operator.
+Algorithm 1.3 (Inexact FISTA).
+Let $0<\gamma\leq 1/L$ and let
+$(t_{k})_{k\in\mathbb{N}}\in\mathbb{R}_{+}^{\mathbb{N}}$ be such that $t_{0}=1$ ,
+and for every integer $k\geq 1$ , $t_{k}\geq 1$ and $t_{k}^{2}-t_{k}\leq t_{k-1}^{2}$ .
+Let $(\delta_{k})_{k\in\mathbb{N}}$ be a sequence in $\mathbb{R}_{+}$ and $(b_{k})_{k\in\mathbb{N}}$ be a sequence in $\mathcal{H}$ .
+Let $x_{0}=y_{0}\in\mathcal{H}$ and define
+$\begin{array}[]{l}\text{for}\;k=0,1,\ldots\\
+\left\lfloor\begin{array}[]{l}x_{k+1}\simeq_{\delta_{k}}\prox_{\gamma g}(y_{k}-\gamma(\nabla f(y_{k})+b_{k}))\\[6.45831pt]
+\beta_{k+1}=\dfrac{t_{k}-1}{t_{k+1}}\\[6.45831pt]
+y_{k+1}=x_{k+1}+\beta_{k+1}(x_{k+1}-x_{k}).\end{array}\right.\\
+\end{array}$
+(1.2)
+Next, we present a version of FISTA that incorporates a stochastic oracle for the evaluation of the gradient of $f$ , satisfying the properties stated in the following assumption.
+Assumption 2.
+(i)
+$\zeta\colon\Omega\to\mathcal{Z}$ is a random variable with values in
+the measurable space $(\mathcal{Z},\mathfrak{C})$ and defined on the
+probability space $(\Omega,\mathfrak{A},\mathbb{P})$ .
+(ii)
+$\mathcal{H}$ is separable11
+1
+The separability of $\mathcal{H}$ serves for the validity of the subsequent Lemma 3.5, but also to avoid complications with the definition of measurability of vector-valued functions (see e.g. [15, Appendix E]) and $\hat{u}\colon\mathcal{H}\times\mathcal{Z}\to\mathcal{H}$ is a function which is measurable w.r.t. the product $\sigma$ -algebra $\mathfrak{B}(\mathcal{H})\otimes\mathfrak{C}$ , where $\mathfrak{B}(\mathcal{H})$ is the Borel $\sigma$ -algebra of $\mathcal{H}$ .
+(iii)
+$\forall\,x\in\mathcal{H}\colon$ $\hat{u}(x,\zeta)$ is square summable and
+$\mathbb{E}[\hat{u}(x,\zeta)]=\nabla f(x)\quad\text{and}\quad\mathbb{E}[\left\|{\hat{u}(x,\zeta)-\nabla f(x)}\right\|^{2}]\leq\sigma^{2},$
+for some $\sigma\in\mathbb{R}_{+}$ .
+Algorithm 1.4 (Inexact stochastic FISTA).
+Let $(\gamma_{k})_{k\in\mathbb{N}}$ be a sequence in $\mathbb{R}_{++}$ such that $\gamma_{k+1}\leq\gamma_{k}$ and $\gamma_{k}\leq 1/L$ , for every $k\in\mathbb{N}$ , and let
+$(t_{k})_{k\in\mathbb{N}}\in\mathbb{R}_{+}^{\mathbb{N}}$ be such that $t_{0}=1$ ,
+and for every integer $k\geq 1$ , $t_{k}\geq 1$ and $t_{k}^{2}-t_{k}\leq t_{k-1}^{2}$ .
+Let $(\delta_{k})_{k\in\mathbb{N}}$ be a sequence in $\mathbb{R}_{+}$ and $(\zeta_{k})_{k\in\mathbb{N}}$ be a sequence of independent copies of $\zeta$ .
+Let $x_{0}=y_{0}\in\mathcal{H}$ and define
+$\begin{array}[]{l}\text{for}\;k=0,1,\ldots\\
+\left\lfloor\begin{array}[]{l}x_{k+1}\simeq_{\delta_{k}}\prox_{\gamma_{k}g}(y_{k}-\gamma_{k}\hat{u}(y_{k},\zeta_{k}))\\[6.45831pt]
+\beta_{k+1}=\dfrac{t_{k}-1}{t_{k+1}}\\[6.45831pt]
+y_{k+1}=x_{k+1}+\beta_{k+1}(x_{k+1}-x_{k}).\end{array}\right.\\
+\end{array}$
+(1.3)
+2 The basic facts
+In this section, we present some fundamental facts upon which the main proof is built. Some of them are well-known in the related literature, while others are more recent and possibly less familiar.
+Fact 2.1.
+Let $(\alpha_{k})_{k\in\mathbb{N}}$ and $(\varepsilon_{k})_{k\in\mathbb{N}}$ be sequences in $\mathbb{R}_{+}$ such that
+$\sum_{k\in\mathbb{N}}\varepsilon_{k}<+\infty$ and
+$(\forall\,k\in\mathbb{N})\quad\alpha_{k+1}-\alpha_{k}\leq\varepsilon_{k}.$
+(2.1)
+Then $(\alpha_{k})_{k\in\mathbb{N}}$ is convergent.
+Remark 2.2.
+In the above result, the sequence $(\alpha_{k})_{k\in\mathbb{N}}$ can be seen as decreasing up to summable errors.
+Thus, Fact 2.1 establishes that such sequences are convergent.
+The next fact is a discrete version of a special case of the classical Bihari–LaSalle Lemma. To the best of our knowledge it first appeared in the literature related to convex optimization in [27], in the study of rates of convergence for the inexact FISTA—although it was not explicitly linked to the Bihari–LaSalle Lemma. In Appendix A we provide a proof that is more direct of the one in [27] and follows the same ideas of the continuous version.
+Fact 2.3 (Bihari–LaSalle Lemma, discrete version).
+Let $(\mu_{k})_{k\in\mathbb{N}}$ and $(\lambda_{k})_{k\in\mathbb{N}}$ be two sequences in $\mathbb{R}_{+}$ and $(\sigma_{k})_{k\in\mathbb{N}}$
+be an increasing sequence in $\mathbb{R}_{+}$ such that
+$\forall\,k\in\mathbb{N}\colon\mu_{k}\leq\sigma_{k}+\sum_{i=0}^{k}\lambda_{i}\sqrt{\mu_{i}}.$
+Then, for every $k\in\mathbb{N}$ , $\displaystyle\max_{0\leq i\leq k}\sqrt{\mu_{i}}\leq\frac{1}{2}\sum_{i=0}^{k}\lambda_{i}+\bigg(\Big(\frac{1}{2}\sum_{i=0}^{k}\lambda_{i}\Big)^{2}+\sigma_{k}\bigg)^{1/2}\leq\sum_{i=0}^{k}\lambda_{i}+\sqrt{\sigma_{k}}$ .
+The following result is known as Opial’s Lemma (see e.g., [9, Lemma 2.47]). We include its proof here, since in the subsequent remark we slightly weaken the assumptions to make it more useful for our purposes.
+Later, in Lemma 3.5 we will give also a stochastic version. This is one of the points in which the analysis of convergence of the iterates of Nesterov’s accelerated method diverges from the classical analysis of fixed-point iterations of a nonexpansive operator—which includes that of the (nonaccelerated) proximal gradient algorithm.
+Fact 2.4 (Opial Lemma).
+Let $S\subset\mathcal{H}$ be nonempty.
+Let $(x_{k})_{k\in\mathbb{N}}$ be a sequence in $\mathcal{H}$ and suppose that
+the sequential weak cluster points of $(x_{k})_{k\in\mathbb{N}}$ belong to $S$ and that
+for any $y\in S$ , $(\left\|{x_{k}-y}\right\|)_{k\in\mathbb{N}}$
+is convergent. Then $(x_{k})_{k\in\mathbb{N}}$
+weakly converges to a point in $S$ .
+Proof.
+The assumptions ensure that $(x_{k})_{k\in\mathbb{N}}$ is bounded.
+Therefore, the set of sequential weak cluster points of
+$(x_{k})_{k\in\mathbb{N}}$ is nonempty. Let $y_{1},y_{2}\in\mathcal{H}$
+be two sequential weak cluster points of $(x_{k})_{k\in\mathbb{N}}$ , so that there exist
+two subsequences $(x_{k}^{1})_{k\in\mathbb{N}}$ and $(x_{k}^{2})_{k\in\mathbb{N}}$ , of $(x_{k})_{k\in\mathbb{N}}$ , such that $x_{k}^{1}\rightharpoonup y_{1}$
+and $x_{k}^{2}\rightharpoonup y_{2}$ . Then, for every $k\in\mathbb{N}$ ,
+$\left\|{x_{k}-y_{1}}\right\|^{2}-\left\|{x_{k}-y_{2}}\right\|^{2}=2\langle{x_{k},y_{2}-y_{1}}\rangle+\left\|{y_{1}}\right\|^{2}-\left\|{y_{2}}\right\|^{2}.$
+(2.2)
+Since $y_{1}$ and $y_{2}$ are sequential weak cluster points of $(x_{k})_{k\in\mathbb{N}}$ , by assumptions,
+$y_{1},y_{2}\in S$ and $(\left\|{x_{k}-y_{1}}\right\|)_{k\in\mathbb{N}}$ and $(\left\|{x_{k}-y_{2}}\right\|)_{k\in\mathbb{N}}$
+are convergent.
+Therefore by (2.2), we obtain
+that there exists $\beta\in\mathbb{R}$ such that $\langle{x_{k},y_{2}-y_{1}}\rangle\to\beta$ .
+Now, since $x_{k}^{i}\rightharpoonup y_{i}$ , $i=1,2$ , we have
+$\langle{x_{k}^{i},y_{2}-y_{1}}\rangle\to\langle{y_{i},y_{2}-y_{1}}\rangle$ , which implies
+$\langle{y_{1},y_{2}-y_{1}}\rangle=\beta=\langle{y_{2},y_{2}-y_{1}}\rangle$
+and hence $\left\|{y_{2}-y_{1}}\right\|^{2}=0$ . This proves that the set of sequential weak cluster points of the sequence $(x_{k})_{k\in\mathbb{N}}$
+is a singleton contained in $S$ . So, the sequence $(x_{k})_{k\in\mathbb{N}}$ is weakly convergent to a point in $S$ .
+∎
+Remark 2.5.
+It is clear from the proof above that
+Opial’s Lemma remains true if the condition that $(\left\|{x_{k}-y}\right\|^{2})_{k\in\mathbb{N}}$
+is convergent for any $y\in S$ , is replaced by the following two:
+•
+$(x_{k})_{k\in\mathbb{N}}$ is bounded
+•
+$\forall\,y_{1},y_{2}\in S\colon(\langle{x_{k},y_{2}-y_{1}}\rangle)_{k\in\mathbb{N}}$ is convergent.
+The next result is the second pivotal ingredient to handle the convergence of the iterates of Nesterov’s accelerated method.
+Fact 2.6 ([12], Lemma A.4).
+Let $(a_{k})_{k\in\mathbb{N}}$ be sequence of real numbers and let $(\lambda_{k})_{k\in\mathbb{N}}$
+be a sequence in $\mathbb{R}_{++}$ . Let $\ell\in\mathbb{R}$ and suppose that $\sum_{k=0}^{+\infty}1/\lambda_{k}=+\infty$ . Then
+$a_{k+1}+\lambda_{k}(a_{k+1}-a_{k})\to\ell\ \Rightarrow\ a_{k}\to\ell.$
+Proof (Sketch).
+Set $b_{k}=a_{k+1}+\lambda_{k}(a_{k+1}-a_{k})$ .
+The crux of the proof is to show that each $a_{k}$ can be seen as weighted sum of the terms
+$a_{0},b_{0},\dots,b_{k-1}$ for certain weights $w_{i}$ ’s such that $\sum_{i=0}^{k}w_{i}\to+\infty$ as $k\to+\infty$ . Then the conclusion follows from the Cesàro mean theorem. Full details are given in Appendix A.
+∎
+We conclude by presenting the classical Robbins–Siegmund Theorem on almost supermartingales, that will be at the basis of the analysis of the stochastic version of FISTA.
+Fact 2.7 (Robbins–Siegmund Theorem [24]).
+Let $(\mathfrak{F}_{k})_{k\in\mathbb{N}}$ be a filtration on $(\Omega,\mathfrak{A},\mathbb{P})$ and let
+$(\xi_{k})_{k\in\mathbb{N}}$ , $(\chi_{k})_{k\in\mathbb{N}}$ , $(\varepsilon_{k})_{k\in\mathbb{N}}$ , and $(\zeta_{k})_{k\in\mathbb{N}}$
+be sequences of positive real-valued random variables which are adapted to $(\mathfrak{F}_{k})_{k\in\mathbb{N}}$ . Suppose that
+(i)
+$\sum_{k=0}^{+\infty}\chi_{k}<+\infty$ and $\sum_{k=0}^{+\infty}\varepsilon_{k}<+\infty$ a.s.
+(ii)
+for every $k\in\mathbb{N}$ , $\mathbb{E}[\xi_{k+1}\,|\,\mathfrak{F}_{k}]\leq(1+\chi_{k})\xi_{k}+\varepsilon_{k}-\zeta_{k}$ .
+Then there exists a positive real-valued random variable $\xi$ such that $\xi_{k}\to\xi$ a.s. and $\sum_{k=0}^{+\infty}\zeta_{k}<+\infty$ a.s.
+3 Analysis of the convergence
+Throughout the rest of the paper we make Assumption 1 and we set
+$F_{*}=\min_{x\in\mathcal{H}}F(x)\quad\text{and}\quad S_{*}=\argmin_{x\in\mathcal{H}}F(x).$
+3.1 The acceleration parameters
+We start by clarifying the condition
+$t_{0}=1\quad\text{and}\quad\forall\,k\in\mathbb{N},\,k\geq 1\colon\ \ 1\leq t_{k}\ \ \text{and}\ \ t_{k}^{2}-t_{k}-t_{k-1}^{2}\leq 0,$
+(3.1)
+on the parameters $t_{k}$ ’s in Algorithms 1.3 and 1.4. A numerical sequence $(t_{k})_{k\in\mathbb{N}}$ satisfying (3.1) will be called a sequence of admissible parameters for FISTA.
+We note that, by solving the above quadratic inequality in $t_{k}$ , condition (3.1) can be equivalently written as
+$t_{0}=1\quad\text{and}\quad\forall\,k\in\mathbb{N},\,k\geq 1\colon\ \ 1\leq t_{k}\leq\frac{1+\sqrt{1+4t_{k-1}^{2}}}{2}=:\varphi(t_{k-1}),$
+(3.2)
+where $\varphi\colon\left[1,+\infty\right[\to\left[1,+\infty\right[\colon t\mapsto\big(1+\sqrt{1+4t^{2}}\big)/2$ . It is easy to see that the function $\varphi$ satisfies the following properties
+(i)
+$\forall\,t\geq 1$ , $\varphi(t)-t>1/2$
+(ii)
+$\varphi(t)-t\downarrow 1/2$ as $t\uparrow+\infty$ .
+Below we collect the main properties of sequences of admissible parameters for FISTA.
+Proposition 3.1.
+Let $(t_{k})_{k\in\mathbb{N}}$ is a sequence in $\mathbb{R}_{+}$ . The following hold.
+(i)
+If $(t_{k})_{k\in\mathbb{N}}$ is a sequence of admissible parameters for FISTA,
+then $t_{k}\leq t_{k-1}+1$ , and hence $t_{k}\leq 1+k$ , for every integer $k\geq 1$ .
+(ii)
+$(t_{k})_{k\in\mathbb{N}}$ is an increasing sequence of admissible parameters for FISTA iff
+$t_{0}=1\quad\text{and}\quad\forall\,k\in\mathbb{N},\,k\geq 1\colon t_{k}\in[t_{k-1},\varphi(t_{k-1})].$
+(3.3)
+Also, if (3.3) holds and $t_{1}>1$ , then
+$0<\beta_{k}<1$ , for all $k\in\mathbb{N}$ , and $1-\beta_{k}\asymp 1/t_{k}$ .
+(iii)
+Given $a\in\left[2,+\infty\right[$ , suppose that $(t_{k})_{k\in\mathbb{N}}$ satisfies the stronger condition22
+2
+Recall that the length of the interval $[t_{k-1},\varphi(t_{k-1})]$ is strictly greater then $1/2$ .
+$t_{0}=1\quad\text{and}\quad\forall\,k\in\mathbb{N}\colon k\geq 1\colon t_{k}\in[t_{k-1}+1/a,\varphi(t_{k-1})].$
+(3.4)
+Then, $\forall\,k\in\mathbb{N},\,k\geq 1$ , $t_{k}-t_{k-1}\geq 1/a$ and hence $\frac{k+a}{a}\leq t_{k}\leq k+1$ ,
+so that $t_{k}\asymp k$ .
+(iv)
+Given $\alpha\in\left]0,1\right[$ , if $(s_{k})_{k\in\mathbb{N}}$ is a sequence of admissible parameters for FISTA, then $(t_{k})_{k\in\mathbb{N}}\equiv(s_{k}^{\alpha})_{k\in\mathbb{N}}$
+is a sequence of admissible parameters for FISTA too.
+Proof.
+(i): If $(t_{k})_{k\in\mathbb{N}}$ is a sequence of admissible parameters for FISTA, it follows from (3.2) and the fact that $\sqrt{a+b}\leq\sqrt{a}+\sqrt{b}$ , for any $a,b\in\mathbb{R}_{+}$ , that
+$\forall\,k\in\mathbb{N},\,k\geq 1\colon t_{k}\leq\frac{1+1+2t_{k-1}}{2}=1+t_{k-1}.$
+Hence, $t_{k}-1=\sum_{i=1}^{k}(t_{i}-t_{i-1})\leq k$ , which yields that
+$t_{k}\leq 1+k$ , for every $k\in\mathbb{N}$ .
+(ii): The first part is immediate since in (3.3), the condition $t_{k}\geq t_{k-1}$
+says that $(t_{k})_{k\in\mathbb{N}}$ is increasing while we already noted that the condition $t_{k}\leq\varphi(t_{k-1})$ is equivalent to the quadratic inequality in (3.1). The second part of the statement follows from the following inequality: for every integer $k\geq 1$
+$\frac{1}{t_{k}}\leq\underbrace{\frac{t_{k}-t_{k-1}+1}{t_{k}}}_{1-\beta_{k}}\leq\frac{2}{t_{k}}.$
+(iii): By the second condition in (3.4), it is clear that $t_{k}-t_{k-1}\geq 1/a$ and hence that $t_{k}-1=\sum_{i=1}^{k}(t_{i}-t_{i-1})\geq k/a$ .
+(iv): Let $\alpha\in\left]0,1\right[$ and suppose that, for every $k\in\mathbb{N}$ ,
+with $k\geq 1$ , $s_{k}^{2}-s_{k}-s_{k-1}^{2}\leq 0$ and $s_{0}=1$ . Then, for every integer $k\geq 1$
+$s_{k}(s_{k}-1)\leq s_{k-1}^{2}\ \Rightarrow\ s_{k}^{\alpha}(s_{k}-1)^{\alpha}\leq s_{k-1}^{2\alpha}\ \Rightarrow\ s_{k}^{\alpha}(s_{k}^{\alpha}-1)\leq(s_{k}^{\alpha})^{2},$
+where we used that, for every $u>1$ , $(u-1)^{\alpha}>u^{\alpha}-1$ (which in turn follows from the concavity of $u\mapsto u^{\alpha}$ on $\mathbb{R}_{+}$ ).
+∎
+Remark 3.2.
+(i)
+Two special increasing sequences of admissible parameters for FISTA are
+$t_{k}=\frac{k+a}{a}\quad(a\geq 2)\quad\text{and}\quad t_{k}=\frac{1+\sqrt{1+4t_{k-1}^{2}}}{2}\ (\text{with}\ t_{0}=1),$
+(3.5)
+and, in the second case, $(k+2)/2\leq t_{k}\leq k+1$ , for every $k\in\mathbb{N}$ .
+(ii)
+Proposition 3.1(iii)-(iv) shows that, for any $\alpha\in[0,1]$ , it is always possible to define a sequence $(t_{k})_{k\in\mathbb{N}}$ which is admissible for FISTA and satisfies
+$t_{k}\asymp k^{\alpha}$ , so that $1-\beta_{k}\asymp 1/k^{\alpha}$ . In particular, in view of (i), we can choose, for every $k\in\mathbb{N}$ ,
+$t_{k}=\bigg(\frac{k+2}{2}\bigg)^{\!\alpha}\quad\text{or}\quad s_{k}=\frac{1+\sqrt{1+4s^{2}_{k-1}}}{2}\ (\text{with}\ s_{0}=1)\quad\text{and}\quad t_{k}=s_{k}^{\alpha}.$
+(3.6)
+(iii)
+If $(t_{k})_{k\in\mathbb{N}}$ is a sequence of admissible parameters for FISTA which is increasing, then we have that $t_{k}\to\bar{t}\in[1,+\infty]$ and three possibilities may occur: (1) $\bar{t}=1$ , which means that $t_{k}=t_{0}=1$ , for every $k\in\mathbb{N}$ , so that $\beta_{k+1}=0$ , turning Algorithm 1.3 into the classical (nonaccelerated) proximal gradient algorithm; (2) $1<\bar{t}<+\infty$ ,
+and in such that $\beta_{k}\to(\bar{t}-1)/\bar{t}<1$ ; (3) $\bar{t}=+\infty$ , which yields, thanks to Proposition 3.1(ii), $\beta_{k}\to 1$ .
+3.2 Three preparatory lemmas
+We now present a perturbed version of the basic inequality of the proximal gradient descent algorithm.
+This result was essentially given in [27] (see also [7]).
+Lemma 3.3.
+Let $f\colon\mathcal{H}\to\mathbb{R}$ be convex and Lipschitz smooth with constant $L>0$ and let $g\colon\mathcal{H}\to\left]-\infty,+\infty\right]$ be proper convex and lower semicontinuous. Let $x,x_{+},b\in\mathcal{H}$ , $\gamma,\delta>0$ , and suppose that
+$x_{+}\simeq_{\delta}\prox_{\gamma g}(x-\gamma(\nabla f(x)+b)).$
+Then, there exists $\delta_{1},\delta_{2}>0$ and $e\in\mathcal{H}$ such that $\left\|{e}\right\|\leq\delta_{2}$ ,
+$\delta_{1}^{2}+\delta_{2}^{2}\leq\delta^{2}$
+and
+$\displaystyle(\forall\,z\in\mathcal{H})\quad 2\gamma(F(x_{+})-F(z))$
+$\displaystyle\leq\left\|{x-z}\right\|^{2}-\left\|{x_{+}-z}\right\|^{2}-(1-\gamma L)\left\|{x-x_{+}}\right\|^{2}$
+$\displaystyle\hskip 86.11084pt+2{\langle{{x_{+}-z},{e-\gamma b}}\rangle}+\delta_{1}^{2}.$
+Proof.
+It follows from Proposition 1.2(ii), that there exists $\delta_{1},\delta_{2}>0$ and $e\in\mathcal{H}$ such that
+$\left\|{e}\right\|\leq\delta_{2}\quad\text{and}\quad(x-x_{+}+e)/\gamma-\nabla f(x)-b\in\partial_{\delta_{1}^{2}/(2\gamma)}g(x_{+})$
+and hence
+$\displaystyle g(z)-g(x_{+})$
+$\displaystyle\geq{\langle{{z-x_{+}},{\gamma^{-1}(x-x_{+}+e)-\nabla f(x)-b}}\rangle}-\frac{\delta_{1}^{2}}{2\gamma}$
+$\displaystyle=\gamma^{-1}{\langle{{z-x_{+}},{x-x_{+}}}\rangle}-{\langle{{z-x_{+}},{\nabla f(x)+b}}\rangle}+\frac{{\langle{{z-x_{+}},{e}}\rangle}}{\gamma}-\frac{\delta_{1}^{2}}{2\gamma}$
+Multiplying both side by $-2\gamma$ we have
+$2\gamma(g(x_{+})-g(z))\leq 2{\langle{{x_{+}-z},{x-x_{+}}}\rangle}+2\gamma{\langle{{z-x_{+}},{\nabla f(x)+b}}\rangle}+2{\langle{{x_{+}-z},{e}}\rangle}+\delta_{1}^{2}$
+Now we note that
+$\left\|{x-z}\right\|^{2}=\left\|{x-x_{+}}\right\|^{2}+\left\|{x_{+}-z}\right\|^{2}+2{\langle{{x-x_{+}},{x_{+}-z}}\rangle}.$
+Hence
+$\displaystyle 2\gamma(g(x_{+})-g(z))$
+$\displaystyle\leq\left\|{x-z}\right\|^{2}-\left\|{x_{+}-z}\right\|^{2}-\left\|{x-x_{+}}\right\|^{2}$
+$\displaystyle\qquad\qquad+2\gamma{\langle{{z-x_{+}},{\nabla f(x)}}\rangle}+2\gamma{\langle{{z-x_{+}},{b}}\rangle}+2{\langle{{x_{+}-z},{e}}\rangle}+\delta_{1}^{2}.$
+and, using the convexity of $f$
+$\displaystyle{\langle{{z-x_{+}},{\nabla f(x)}}\rangle}$
+$\displaystyle={\langle{{z-x},{\nabla f(x)}}\rangle}+{\langle{{x-x_{+}},{\nabla f(x)}}\rangle}$
+$\displaystyle\leq f(z)-f(x_{+})+f(x_{+})-f(x)-{\langle{{x_{+}-x},{\nabla f(x)}}\rangle}.$
+Thus,
+$2\gamma{\langle{{z-x_{+}},{\nabla f(x)}}\rangle}\leq 2\gamma(f(z)-f(x_{+}))+2\gamma(f(x_{+})-f(x)-{\langle{{x_{+}-x},{\nabla f(x)}}\rangle})$
+and hence
+$\displaystyle 2\gamma(F(x_{+})-F(z))$
+$\displaystyle\leq\left\|{x-z}\right\|^{2}-\left\|{x_{+}-z}\right\|^{2}-\left\|{x-x_{+}}\right\|^{2}$
+$\displaystyle\qquad\qquad+2\gamma(f(x_{+})-f(x)-{\langle{{x_{+}-x},{\nabla f(x)}}\rangle})$
+$\displaystyle\qquad\qquad+2{\langle{{x_{+}-z},{e-\gamma b}}\rangle}+\delta_{1}^{2}.$
+Finally since $f$ is $L$ -Lipschitz smooth we have
+$f(x_{+})-f(x)-{\langle{{x_{+}-x},{\nabla f(x)}}\rangle}\leq(L/2)\left\|{x_{+}-x}\right\|^{2}$
+and the statement follows.
+∎
+Next, we prove a general bound concerning a recursive inequality that
+is encoutered
+in the convergence analysis of Algorithm 1.3 and Algorithm 1.4. This result will allow to control the errors along the iterations while keeping the underlying Lyapunov function converging, although it does not decrease anymore.
+Lemma 3.4.
+Let $(\alpha_{k})_{k\in\mathbb{N}},(\lambda_{k})_{k\in\mathbb{N}}$ and $(\xi_{k})_{k\in\mathbb{N}}$ be sequences in $\mathbb{R}_{+}$ such that
+$\displaystyle\forall k\in\mathbb{N}\colon\alpha_{k+1}\leq\alpha_{k}+\lambda_{k}\sqrt{\alpha_{k+1}}+\xi_{k}.$
+(3.7)
+Then the following hold for every $k\in\mathbb{N}$
+(i)
+$\displaystyle\max_{0\leq i\leq k+1}\sqrt{\alpha_{i}}\leq\sum_{i=0}^{k}\lambda_{i}+\sqrt{\alpha_{0}+\sum_{i=0}^{k}\xi_{i}}$ .
+(ii)
+$\displaystyle\alpha_{k+1}\leq\frac{10}{9}\bigg(\alpha_{0}+\sum_{i=0}^{k}\xi_{i}\bigg)+\bigg(\sum_{i=0}^{k}\lambda_{i}\bigg)^{\!2}$ .
+Moreover, if $(\lambda_{k})_{k\in\mathbb{N}}$ and $(\xi_{k})_{k\in\mathbb{N}}$ are summable,
+then $(\alpha_{k})_{k\in\mathbb{N}}$ is convergent
+Proof.
+(i):
+By summing the inequality $\alpha_{i+1}-\alpha_{i}\leq\lambda_{i}\sqrt{\alpha_{i+1}}+\xi_{i}$ from $i=0$ to $i=k$ , we obtain
+$\alpha_{k+1}\leq\alpha_{0}+\sum_{i=0}^{k}\xi_{i}+\sum_{i=0}^{k}\lambda_{i}\sqrt{\alpha_{i+1}}.$
+(3.8)
+Thus, setting $\sigma_{k}=\alpha_{0}+\sum_{i=0}^{k}\xi_{i}$ , we have
+$\forall k\in\mathbb{N}\colon\ \alpha_{k+1}\leq\sigma_{k}+\sum_{i=0}^{k}\lambda_{i}\sqrt{\alpha_{i+1}}.$
+Hence, (i) follows directly from the Bihari–LaSalle Lemma (Fact 2.3)
+applied to the sequence $\mu_{k}=\alpha_{k+1}$ .
+(ii):
+Setting $A_{k}=\max_{0\leq i\leq k}\sqrt{\alpha_{i+1}}$ ,
+we derive from (i), that, for every $\varepsilon,\delta>0$
+$\displaystyle\sum_{i=0}^{k}\lambda_{i}\sqrt{\alpha_{i+1}}\leq A_{k}\sum_{i=0}^{k}\lambda_{i}$
+$\displaystyle\leq\frac{1}{2\varepsilon}A^{2}_{k}+\frac{\varepsilon}{2}\bigg(\sum_{i=0}^{k}\lambda_{i}\bigg)^{2}$
+$\displaystyle\leq\frac{1}{4\varepsilon\delta}\bigg(\sum_{i=0}^{k}\lambda_{i}\bigg)^{2}+\frac{\delta}{4\varepsilon}\bigg(\alpha_{0}+\sum_{i=0}^{k}\xi_{i}\bigg)+\frac{\varepsilon}{2}\bigg(\sum_{i=0}^{k}\lambda_{i}\bigg)^{2}.$
+In the end, recalling (3.8), we have
+$\alpha_{k+1}\leq\bigg(1+\frac{\delta}{4\varepsilon}\bigg)\bigg(\alpha_{0}+\sum_{i=0}^{k}\xi_{i}\bigg)+\frac{1}{2}\bigg(\frac{1}{2\varepsilon\delta}+\varepsilon\bigg)\bigg(\sum_{i=0}^{k}\lambda_{i}\bigg)^{2}$
+Now, assuming $\varepsilon\in\left]0,2\right[$ ,
+$\frac{1}{2\varepsilon\delta}+\varepsilon=2\ \Rightarrow\ \delta=\frac{1}{2\varepsilon(2-\varepsilon)}$
+and with such $\delta$ we have
+$\alpha_{k+1}\leq\bigg(1+\frac{1}{8\varepsilon^{2}(2-\varepsilon)}\bigg)\bigg(\alpha_{0}+\sum_{i=0}^{k}\xi_{i}\bigg)+\bigg(\sum_{i=0}^{k}\lambda_{i}\bigg)^{2}.$
+Optimizing $\varepsilon$ , we get $\varepsilon=4/3$
+and the statement follows.
+Concerning the final part of the statement we note that, thanks to (ii),
+if $(\lambda_{k})_{k\in\mathbb{N}}$ and $(\xi_{k})_{k\in\mathbb{N}}$ are summable, then
+$(\sqrt{\alpha_{k+1}})_{k\in\mathbb{N}}$ is bounded, say by $M\geq 0$ and hence the recursive inequality
+(3.7) yields $\alpha_{k+1}\leq\alpha_{k}+(\lambda_{k}M+\xi_{k})$ and the statement follows from
+Fact 2.1.
+∎
+We conclude the section by giving a stochastic version of the Opial’s Lemma that will be critical for the analysis of Algorithm 1.4.
+This is a generalization of [17, Proposition 2.3] in the spirit of Remark 2.5 above.
+Lemma 3.5 (Stochastic Opial’s Lemma).
+Let $\mathcal{H}$ be a separable real Hilbert space, let $S\subset\mathcal{H}$ be nonempty and let $(x_{k})_{k\in\mathbb{N}}$
+be a sequence of random vectors on the probability space $\left(\Omega,\mathfrak{A},\mathbb{P}\right)$ with values in $\mathcal{H}$ .
+Suppose that the following two conditions hold.
+(a)
+$(x_{k})_{k\in\mathbb{N}}$ is bounded a.s.
+(b)
+for every $y_{1},y_{2}\in S$ , there exists $\Omega_{y_{1},y_{2}}\in\mathfrak{A}$ , with $\mathbb{P}(\Omega_{y_{1},y_{2}})=1$ ,
+such that, for every $\omega\in\Omega_{y_{1},y_{2}}$ , the sequence $(\langle{x_{k}(\omega),y_{1}-y_{2}}\rangle)_{k\in\mathbb{N}}$ converges.
+Then, there exists $\tilde{\Omega}\in\mathfrak{A}$ , with $\mathbb{P}(\tilde{\Omega})=1$ , such that, for every $\omega\in\tilde{\Omega}$ , $(x_{k}(\omega))_{k\in\mathbb{N}}$ is bounded and
+for every $y_{1},y_{2},\in S$ ,
+$(\langle{x_{k}(\omega),y_{1}-y_{2}}\rangle)_{k\in\mathbb{N}}$
+is convergent. Moreover, if the following additional condition hold
+(c)
+the set of sequential weak cluster points of $(x_{k})_{k\in\mathbb{N}}$ is contained in $S$ almost surely,
+then there exists an $S$ -valued random vector $\bar{x}$ such that $x_{k}\rightharpoonup\bar{x}$ a.s.
+Proof.
+We prove the first part of the statement.
+Since $S$ is a subset of a separable metric space, it is separable.
+Let $D\subset S$ be countable and dense in $S$ and let $\tilde{\Omega}_{1}=\bigcap_{z_{1},z_{2}\in D}\Omega_{z_{1},z_{2}}$ .
+Then $\tilde{\Omega}_{1}\in\mathfrak{A}$ and $\mathbb{P}(\tilde{\Omega}_{1})=1$ , and, for every $\omega\in\tilde{\Omega}_{1}$ and for every $z_{1},z_{2}\in D$ ,
+$(\langle{x_{k}(\omega),z_{1}-z_{2}}\rangle)_{k\in\mathbb{N}}\ \text{is convergent.}$
+Let $\tilde{\Omega}_{2}\subset\Omega$ be such that $\mathbb{P}(\tilde{\Omega}_{2})=1$ and
+for every $\omega\in\tilde{\Omega}_{2}$ , $(x_{k}(\omega))_{k\in\mathbb{N}}$ is bounded.
+Fix $\omega\in\tilde{\Omega}:=\tilde{\Omega}_{1}\cap\tilde{\Omega}_{2}$ and let, for every $k\in\mathbb{N}$ , $f_{k}\colon\mathcal{H}\oplus\mathcal{H}\to\mathbb{R}\colon(y_{1},y_{2})\mapsto\langle{x_{k}(\omega),y_{1}-y_{2}}\rangle$ . Clearly $f_{k}$ is linear and continuous and, since $(x_{k}(\omega))_{k\in\mathbb{N}}$ is bounded, we have
+$(\forall\,k\in\mathbb{N})(\forall\,(y_{1},y_{2})\in\mathcal{H}\oplus\mathcal{H})\ \ \lvert{f_{k}(y_{1},y_{2})}\rvert\leq M\left\|{(y_{1},y_{2})}\right\|,$
+(3.9)
+for some $M>0$ .
+Thus, $(f_{k}(y_{1},y_{2}))_{k\in\mathbb{N}}$ is bounded, for every $(y_{1},y_{2})\in\mathcal{H}\oplus\mathcal{H}$ , and hence the functions $\liminf_{k}f_{k}$ and $\limsup_{k}f_{k}$ are real valued.
+We show that the set
+$C=\big\{(y_{1},y_{2})\in\mathcal{H}\oplus\mathcal{H}\,\big|\,\liminf_{k}f_{k}(y_{1},y_{2})=\limsup_{k}f_{k}(y_{1},y_{2})\big\}$
+is closed. Once we have proved that, we would clearly have $D\times D\subset C\ \Rightarrow\ S\times S\subset\overline{\smash{D}\vphantom{\phi}}\times\overline{\smash{D}\vphantom{\phi}}\subset C$ and the claim will follow.
+In order to prove that $C$ is closed, we observe that, by (3.9) we have,
+for every $(y_{1},y_{2}),(z_{1},z_{2})\in\mathcal{H}\oplus\mathcal{H}$ ,
+$\lvert{f_{k}(y_{1},y_{2})-f_{k}(z_{1},z_{2})}\rvert\leq M\left\|{(y_{1},y_{2})-(z_{1},z_{2})}\right\|.$
+(3.10)
+Thus, it follows that, for every $(y_{1},y_{2}),(z_{1},z_{2})\in\mathcal{H}\oplus\mathcal{H}$ ,
+$f_{k}(z_{1},z_{2})-M\left\|{(y_{1},y_{2})-(z_{1},z_{2})}\right\|\leq f_{k}(y_{1},y_{2})\leq f_{k}(z_{1},z_{2})+M\left\|{(y_{1},y_{2})-(z_{1},z_{2})}\right\|$
+and hence, taking $\liminf$ ,
+$\displaystyle\liminf_{k}f_{k}(z_{1},z_{2})-M\left\|{(y_{1},y_{2})-(z_{1},z_{2})}\right\|$
+$\displaystyle\leq\liminf_{k}f_{k}(y_{1},y_{2})$
+$\displaystyle\leq\liminf_{k}f_{k}(z_{1},z_{2})+M\left\|{(y_{1},y_{2})-(z_{1},z_{2})}\right\|.$
+Therefore, we obtain that, for every $(y_{1},y_{2}),(z_{1},z_{2})\in\mathcal{H}\oplus\mathcal{H}$ ,
+$\big\lvert\liminf_{k}f_{k}(y_{1},y_{2})-\liminf_{k}f_{k}(z_{1},z_{2})\big\rvert\leq M\left\|{(z_{1},z_{2})-(y_{1},y_{2})}\right\|,$
+meaning that $\liminf_{k}f_{k}$ is Lipschitz continuous and hence continuous. Similarly $\limsup_{k}f_{k}$ ,
+is Lipschitz continuous
+and the closedness of $C$ follows. Concerning the second part of the statement,
+if we additionally assume that (c) holds, then there exists
+$\tilde{\Omega}_{3}\in\mathfrak{A}$ , with $\mathbb{P}(\tilde{\Omega}_{3})=1$ such that,
+for every $\omega\in\tilde{\Omega}_{3}$ , the set of sequential weak cluster points of $(x_{k}(\omega))_{k\in\mathbb{N}}$ is contained in $S$ . Thus, if we take $\omega\in\tilde{\Omega}\cap\tilde{\Omega}_{3}$ , we have that the sequence $(x_{k}(\omega))_{k\in\mathbb{N}}$
+satisfies all the assumptions required by the deterministic Opial’s Lemma (Fact 2.4) in the form mentioned in Remark 2.5. Therefore, $(x_{k}(\omega))_{k\in\mathbb{N}}$ weakly converges to a point in $S$ and the statement follows.33
+3
+Note that the function $\bar{x}\colon\Omega\to\mathcal{H}$ , defined by $x_{k}(\omega)\rightharpoonup\bar{x}(\omega)$ , if $\omega\in\tilde{\Omega}\cap\tilde{\Omega}_{3}$ , and $0$ otherwise is weakly measurable, and hence, being $\mathcal{H}$ separable, measurable (see e.g. [15, Theorem E.9]).
+∎
+3.3 The two main theorems
+Finally, we are ready to provide the first main result of the paper.
+Theorem 3.6.
+Under Assumption 1,
+let $(x_{k})_{k\in\mathbb{N}}$ be defined as in Algorithm 1.3.
+Then, for every integer $k\geq 1$
+$F(x_{k})-F_{*}\leq\frac{1}{2\gamma t^{2}_{k-1}}\bigg[\frac{10}{9}\bigg(\left\|{x_{0}-x_{*}}\right\|^{2}+\sum_{i=0}^{k-1}t_{i}^{2}\delta_{1,i}^{2}\bigg)+4\bigg(\sum_{i=0}^{k-1}t_{i}\delta_{2,i}+\gamma\sum_{i=0}^{k-1}t_{i}\left\|{b_{i}}\right\|\bigg)^{\!2}\bigg],$
+where $(\delta_{1,k})_{k\in\mathbb{N}}$ and $(\delta_{2,k})_{k\in\mathbb{N}}$ are two sequences in $\mathbb{R}_{+}$ such that
+$\delta_{1,k}^{2}+\delta_{2,k}^{2}\leq\delta^{2}$ , for every $k\in\mathbb{N}$ .
+Moreover, suppose that
+$t_{k}\to+\infty$ , and that $(t_{k}\delta_{k})_{k\in\mathbb{N}}$ and $(t_{k}\left\|{b_{k}}\right\|)_{k\in\mathbb{N}}$ are summable.
+Then $F(x_{k})-F_{*}=O(1/t^{2}_{k-1})$ and
+there exists $x_{*}\in S_{*}$
+such that $x_{k}\rightharpoonup x_{*}$ and $y_{k}\rightharpoonup x_{*}$ .
+Proof.
+It follows from the definition of $y_{k+1}$ in Algorithm 1.3 that,
+for every $k\in\mathbb{N}$ ,
+$y_{k+1}=\bigg(1-\frac{1}{t_{k+1}}\bigg)x_{k+1}+\frac{1}{t_{k+1}}\big(\underbrace{x_{k}+t_{k}(x_{k+1}-x_{k})}_{=:v_{k+1}}\big).$
+Therefore, for every $k\in\mathbb{N}$ ,
+$y_{k}=\bigg(1-\frac{1}{t_{k}}\bigg)x_{k}+\frac{1}{t_{k}}v_{k}\qquad(v_{0}:=y_{0}).$
+(3.11)
+Let $k\in\mathbb{N}$ . The definition of $v_{k+1}$ yields that
+$v_{k+1}-x_{k}=t_{k}(x_{k+1}-x_{k})$ and hence
+$x_{k+1}=x_{k}+\frac{1}{t_{k}}(v_{k+1}-x_{k})=\bigg(1-\frac{1}{t_{k}}\bigg)x_{k}+\frac{1}{t_{k}}v_{k+1}.$
+(3.12)
+Applying Lemma 3.3, with $x=y_{k}$ (noting that $\gamma L\leq 1$ ), we obtain
+$(\forall\,z\in\mathcal{H})\quad 2\gamma F(x_{k+1})+\left\|{x_{k+1}-z}\right\|^{2}\\
+\leq 2\gamma F(z)+\left\|{z-y_{k}}\right\|^{2}+2\langle x_{k+1}-z,e_{k}-\gamma b_{k}\rangle+\delta_{1,k}^{2},$
+(3.13)
+where $\delta_{1,k},\delta_{2,k},\delta_{k}>0$ and $e_{k}\in\mathcal{H}$ are such that
+$\delta_{1,k}^{2}+\delta_{2,k}^{2}\leq\delta_{k}^{2}$ and $\left\|{e_{k}}\right\|\leq\delta_{2,k}$ .
+Now, let $x_{*}\in S_{*}$ and set
+$z=\bigg(1-\frac{1}{t_{k}}\bigg)x_{k}+\frac{1}{t_{k}}x_{*}.$
+Then, we derive from (3.11) and (3.12) that
+$x_{k+1}-z=\frac{1}{t_{k}}(v_{k+1}-x_{*})\quad\text{and}\quad y_{k}-z=\frac{1}{t_{k}}(v_{k}-x_{*}).$
+Substituting these expressions into (3.13) and using the convexity of $F$ (considering that $z$ is a convex combination of $x_{k}$ and $x_{*}$ ), we obtain
+$\displaystyle 2\gamma F(x_{k+1})+\frac{\left\|{v_{k+1}-x_{*}}\right\|^{2}}{t_{k}^{2}}$
+$\displaystyle\leq 2\gamma F(z)+\frac{\left\|{v_{k}-x_{*}}\right\|^{2}}{t_{k}^{2}}+\frac{2}{t_{k}}\langle v_{k+1}-x_{*},e_{k}-\gamma b_{k}\Big\rangle+\delta_{1,k}^{2}.$
+$\displaystyle\leq 2\gamma\bigg[\bigg(1-\frac{1}{t_{k}}\bigg)F(x_{k})+\frac{1}{t_{k}}F(x_{*})\bigg]+\frac{\left\|{v_{k}-x_{*}}\right\|^{2}}{t_{k}^{2}}$
+$\displaystyle\qquad\qquad+\frac{2}{t_{k}}(\delta_{2,k}+\gamma\left\|{b_{k}}\right\|)\left\|{v_{k+1}-x_{*}}\right\|+\delta_{1,k}^{2}.$
+Subtracting $2\gamma F_{*}$ from both sides and setting $r_{k}=F(x_{k})-F_{*}$ , we get
+$2\gamma r_{k+1}+\frac{\left\|{v_{k+1}-x_{*}}\right\|^{2}}{t_{k}^{2}}\leq\bigg(1-\frac{1}{t_{k}}\bigg)2\gamma r_{k}+\frac{\left\|{v_{k}-x_{*}}\right\|^{2}}{t_{k}^{2}}+\frac{2(\delta_{2,k}+\gamma\left\|{b_{k}}\right\|)}{t_{k}}\left\|{v_{k+1}-x_{*}}\right\|+\delta_{1,k}^{2}$
+and hence, multiplying by $t_{k}^{2}$ ,
+$\displaystyle 2\gamma t_{k}^{2}r_{k+1}+\left\|{v_{k+1}-x_{*}}\right\|^{2}$
+$\displaystyle\leq 2\gamma t_{k}(t_{k}-1)r_{k}+\left\|{v_{k}-x_{*}}\right\|^{2}$
+$\displaystyle\qquad+2t_{k}\big(\delta_{2,k}+\gamma\left\|{b_{k}}\right\|\big)\left\|{v_{k+1}-x_{*}}\right\|+t_{k}^{2}\delta_{1,k}^{2}.$
+(3.14)
+Now, we set $t_{-1}=0$ and define, for every $k\in\mathbb{N}$ ,
+$\mathcal{E}_{k}(x_{*}):=2\gamma t_{k-1}^{2}r_{k}+\left\|{v_{k}-x_{*}}\right\|^{2}$ . Then,
+(3.14) becomes
+$\displaystyle\mathcal{E}_{k+1}(x_{*})$
+$\displaystyle\leq[t_{k}(t_{k}-1)-t^{2}_{k-1}]2\gamma r_{k}+\mathcal{E}_{k}(x_{*})$
+$\displaystyle\qquad+2t_{k}(\delta_{2,k}+\gamma\left\|{b_{k}}\right\|)\left\|{v_{k+1}-x_{*}}\right\|+t_{k}^{2}\delta_{1,k}^{2},$
+which also holds for $k=0$ .
+Since $t^{2}_{k}-t_{k}-t^{2}_{k-1}\leq 0$ by assumption,
+and $\left\|{v_{k+1}-x_{*}}\right\|\leq\sqrt{\mathcal{E}_{k+1}(x_{*})}$ we conclude that, for every $k\in\mathbb{N}$ ,
+$\mathcal{E}_{k+1}(x_{*})\leq\mathcal{E}_{k}(x_{*})+\underbrace{2t_{k}(\delta_{2,k}+\gamma\left\|{b_{k}}\right\|)}_{=:\lambda_{k}}\sqrt{\mathcal{E}_{k+1}(x_{*})}+\underbrace{t_{k}^{2}\delta_{1,k}^{2}}_{=:\xi_{k}}.$
+Therefore, we obtained an inequality which is in the form considered in Lemma 3.4.
+Hence, since $\mathcal{E}_{0}(x_{*})=\left\|{v_{0}-x_{*}}\right\|^{2}=\left\|{x_{0}-x_{*}}\right\|^{2}$ ,
+we have, for every $k\in\mathbb{N}$ ,
+$\mathcal{E}_{k}(x_{*})\leq\frac{10}{9}\bigg(\left\|{x_{0}-x_{*}}\right\|^{2}+\sum_{i=0}^{k-1}t_{i}^{2}\delta_{1,i}^{2}\bigg)+4\bigg(\sum_{i=0}^{k-1}t_{i}\delta_{2,i}+\gamma\sum_{i=0}^{k-1}t_{i}\left\|{b_{i}}\right\|\bigg)^{\!2},$
+(3.15)
+and the inequality in the statement follows.
+Now, suppose that
+$t_{k}\to+\infty$ , and that $(t_{k}\delta_{k})_{k\in\mathbb{N}}$ and $(t_{k}\left\|{b_{k}}\right\|)_{k\in\mathbb{N}}$ are summable.
+Then, $(\lambda_{k})_{k\in\mathbb{N}}$ and $(\xi_{k})_{k\in\mathbb{N}}$ defined above are summable, so, again
+by Lemma 3.4, we derive that the sequence
+$(\mathcal{E}_{k}(x_{*}))_{k\in\mathbb{N}}$ converges.
+Also, since $(\mathcal{E}_{k}(x_{*}))_{k\in\mathbb{N}}$ is bounded, there exists $M>0$ such that
+$\forall\,k\in\mathbb{N}\colon 2\gamma t_{k-1}^{2}r_{k}+\left\|{v_{k}-x_{*}}\right\|^{2}=\mathcal{E}_{k}(x_{*})\leq M.$
+Thus, as $t_{k}\to+\infty$ , it follows that $F(x_{k})-F_{*}\to 0$ . Moreover, recalling (3.12), we have that, for every $k\in\mathbb{N}$ ,
+$\left\|{x_{k+1}-x_{*}}\right\|\leq\bigg(1-\frac{1}{t_{k}}\bigg)\left\|{x_{k}-x_{*}}\right\|+\frac{1}{t_{k}}\left\|{v_{k+1}-x_{*}}\right\|\leq\max\{\left\|{x_{k}-x_{*}}\right\|,\sqrt{M}\big\}.$
+Hence, by induction $\left\|{x_{k}-x_{*}}\right\|\leq\sqrt{M}$ , for every $k\in\mathbb{N}$ , and hence $(x_{k})_{k\in\mathbb{N}}$ is bounded.
+Now, in order to prove the convergence of the sequence $(x_{k})_{k\in\mathbb{N}}$ , we
+invoke Opial’s Lemma (Fact 2.4) and the subsequent remark. We first prove that the sequential weak cluster points of $(x_{k})_{k\in\mathbb{N}}$ belong to $S_{*}$ .
+Let $(x_{k_{n}})_{n\in\mathbb{N}}$ be any weakly convergent subsequence with $x_{k_{n}}\rightharpoonup x_{*}$ .
+Since $F$ is weakly lower semicontinuous, we have $F(x_{*})\leq\liminf_{n}F(x_{k_{n}})=\lim_{k}F(x_{k})=F_{*}$
+and hence $x_{*}\in S_{*}$ . Next, for any $x^{1}_{*},x^{2}_{*}\in S_{*}$ ,
+we show that the sequence $(\langle{x_{k},x^{2}_{*}-x^{1}_{*}}\rangle)_{k\in\mathbb{N}}$ is convergent.
+Indeed, because $(\mathcal{E}_{k}(x^{1}_{*}))_{k\in\mathbb{N}}$ and $(\mathcal{E}_{k}(x^{2}_{*}))_{k\in\mathbb{N}}$
+both converge, we have that
+$\displaystyle\mathcal{E}_{k}(x^{1}_{*})-\mathcal{E}_{k}(x^{2}_{*})$
+$\displaystyle=\left\|{v_{k}-x^{1}_{*}}\right\|^{2}-\left\|{v_{k}-x^{2}_{*}}\right\|^{2}$
+$\displaystyle=2\langle{v_{k},x^{2}_{*}-x^{1}_{*}}\rangle+\left\|{x^{1}_{*}}\right\|^{2}-\left\|{x^{2}_{*}}\right\|^{2}$
+is convergent as $k\to+\infty$ , hence $(\langle{v_{k},x^{2}_{*}-x^{1}_{*}}\rangle)_{k\in\mathbb{N}}$ converges.
+Finally, recalling (3.12) we derive that, for every $k\in\mathbb{N}$ ,
+$v_{k+1}=t_{k}x_{k+1}-(t_{k}-1)x_{k}=t_{k}(x_{k+1}-x_{k})+x_{k}=x_{k+1}+(t_{k}-1)(x_{k+1}-x_{k})$
+and hence that
+$\langle{v_{k+1},x^{2}_{*}-x^{1}_{*}}\rangle=\langle{x_{k+1},x^{2}_{*}-x^{1}_{*}}\rangle+(t_{k}-1)\big(\langle{x_{k+1},x^{2}_{*}-x^{1}_{*}}\rangle-\langle{x_{k},x^{2}_{*}-x^{1}_{*}}\rangle\big).$
+Since $1/(t_{k}-1)\geq 1/k$ , an application of Fact 2.6 shows that $(\langle{x_{k},x^{2}_{*}-x^{1}_{*}}\rangle)_{k\in\mathbb{N}}$ converges. The weak convergence of $(x_{k})_{k\in\mathbb{N}}$ to a point $x_{*}\in S_{*}$ follows from Opial’s Lemma (Fact 2.4) and Remark 2.5, while, the weak convergence of $(y_{k})_{k\in\mathbb{N}}$ to $x_{*}$ follows from (3.11), together with the facts that $1/t_{k}\to 0$ and $(v_{k})_{k\in\mathbb{N}}$ is bounded.
+∎
+Remark 3.7.
+(i)
+Depending on the asymptotic behavior of the sequence $(t_{k})_{k\in\mathbb{N}}$ , the summability conditions
+on the errors may be more or less demanding: in particular, if $t_{k}$ is defined by any of the two choices
+in (3.6)
+with $\alpha\in\left]0,1\right]$ (recall Proposition 3.1(iii)-(iv)), then they become
+$\sum_{k=0}^{+\infty}k^{\alpha}\delta_{k}<+\infty\quad\text{and}\quad\sum_{k=0}^{+\infty}k^{\alpha}\left\|{b_{k}}\right\|<+\infty,$
+(3.16)
+which are ensured if both $\delta_{k}$ and $\left\|{b_{k}}\right\|$ are $O(1/k^{p})$ with $p>1+\alpha$ ; and in such case $1-\beta_{k}\asymp 1/k^{\alpha}$ and $F(x_{k})-F_{*}=O(1/k^{2\alpha})$ . We stress that in all the spectrum of values $\alpha\in[0,1]$ the iterates of Algorithm 1.3 are ensured to weakly converge to a solution of problem (1.1).
+Moreover, concerning the speed of convergence in objective values the same remarks given in [7]
+fully apply here too.
+Thus, we have full acceleration when $\alpha=1$ , but this corresponds to the strongest assumptions on the error decay. Conversely, if we slowdown the acceleration by choosing $\alpha\in\left]0,1\right[$ , the requirements on the error decay become less stringent. Finally, we note that if $\alpha=0$ , $(t_{k})_{k\in\mathbb{N}}\equiv 1$ , Algorithm 1.3 turns to the (nonaccelerated) proximal gradient algorithm and the conditions (3.16) just state the summability of the error sequences $(\delta_{k})_{k\in\mathbb{N}}$ and $(\left\|{b_{k}}\right\|)_{k\in\mathbb{N}}$ . This is in full agreement with well-known facts about the inexact proximal gradient algorithm (see e.g. [16]).
+(ii)
+The condition $t_{k}\to+\infty$ is ensured if the $t_{k}$ ’s satisfy (3.4)
+and in particular if they are defined according to any of the two choices in (3.5).
+Remark 3.8.
+Theorem 3.6 guarantees that if $t_{k}$ is defined by any of the two choices
+in (3.6) with $\alpha=1$ ,
+we have $t_{k}\geq(k+2)/2$ and hence
+$F(x_{k})-F_{*}\leq\frac{2}{\gamma(k+1)^{2}}\bigg[\frac{10}{9}\bigg(\left\|{x_{0}-x_{*}}\right\|^{2}+\sum_{i=0}^{k-1}t_{i}^{2}\delta_{1,i}^{2}\bigg)+4\bigg(\sum_{i=0}^{k-1}t_{i}\delta_{2,i}+\gamma\sum_{i=0}^{k-1}t_{i}\left\|{b_{i}}\right\|\bigg)^{\!2}\bigg].$
+Moreover, both $(x_{k})_{k\in\mathbb{N}}$ and $(y_{k})_{k\in\mathbb{N}}$ weakly converge to an $x_{*}\in S_{*}$ .
+Remark 3.9.
+A weaker notion of inexactness in the computation of the proximity operator was proposed in [29].
+In this case, we actually have $e_{k}=0$ (so that $\delta_{2,k}=0$ and $\delta_{1,k}=\delta_{k}$ ). Then inequality (3.15) becomes
+$\mathcal{E}_{k}(x_{*})\leq\frac{10}{9}\bigg(\frac{\left\|{x_{0}-x_{*}}\right\|^{2}}{2\gamma}+\frac{1}{2\gamma}\sum_{i=0}^{k-1}t_{i}^{2}\delta_{i}^{2}\bigg)+2\gamma\bigg(\sum_{i=0}^{k-1}t_{i}\left\|{b_{i}}\right\|\bigg)^{\!2}.$
+Thus, it is clear that, in this case, the conclusion of Theorem 3.6 remains true under the following weaker condition on the errors related to the proximity operator
+$\sum_{k=0}^{+\infty}t_{k}^{2}\delta^{2}_{k}<+\infty.$
+For instance if $t_{k}\asymp k^{\alpha}$ , with $\alpha\in\left]0,1\right]$ and
+$\delta_{k}=O(1/k^{p})$ , then the condition above is ensured if $p>1/2+\alpha$ (instead of the previous $p>1+\alpha$ ).
+The above result is in agreement with [29] and, in relation to the convergence of the iterates, was proved with a more involved proof in [7, Corollary 4.2] only for
+$t_{k}$ defined as in the first formula in (3.5), with $a>2$ , and with the additional assumption that $F$ is coercive.
+The following is the second main result of the paper and concerns the convergence of Algorithm 1.4.
+Theorem 3.10.
+Under Assumptions 1 and 2,
+let $(x_{k})_{k\in\mathbb{N}}$ be defined as in Algorithm 1.4. Then, for every
+integer $k\geq 1$ ,
+$\mathbb{E}[F(x_{k})]-F_{*}\leq\frac{1}{2\gamma_{k}t_{k-1}^{2}}\bigg[\frac{10}{9}\bigg(\left\|{x_{0}-x_{*}}\right\|^{2}+\sum_{i=0}^{k-1}\big(2\gamma_{i}t_{i}^{2}\delta_{i}\sigma+2\sigma^{2}\gamma^{2}_{i}t_{i}^{2}+t_{i}^{2}\delta_{1,i}^{2}\big)\bigg)+4\bigg(\sum_{i=0}^{k-1}t_{i}\delta_{2,i}\bigg)^{2}\bigg].$
+Moreover, suppose that $\gamma_{k}t^{2}_{k-1}\to+\infty$ and that $(\gamma_{k}t_{k})_{k\in\mathbb{N}}$ is square summable and $(\delta_{k}t_{k})_{k\in\mathbb{N}}$ is summable. Then there exists a
+$S_{*}$ -valued random vector $x_{*}$
+such that $x_{k}\rightharpoonup x_{*}$ and $y_{k}\rightharpoonup x_{*}$ almost surely.
+Proof.
+We define the filtration $\mathfrak{F}_{k}=\sigma(\zeta_{0},\dots,\zeta_{k-1})$ , for every $k\in\mathbb{N}$ .
+Thus, by the true definition of $y_{k}$ , we have that $y_{k}$ is $\mathfrak{F}_{k}$ -measurable.
+We set $\hat{b}_{k}=\hat{u}(y_{k},\zeta_{k})-\nabla f(y_{k})$ , so that, as before,
+$\hat{u}(y_{k},\zeta_{k})=\nabla f(y_{k})+\hat{b}_{k},$
+where the error $\hat{b}_{k}$ is now random. Applying
+Lemma 3.3, we obtain, for every $k\in\mathbb{N}$ and $z\in\mathcal{H}$ ,
+$2\gamma_{k}(F(x_{k+1})-F(z))\leq\left\|{y_{k}-z}\right\|^{2}-\left\|{x_{k+1}-z}\right\|^{2}+2\underbrace{\langle{x_{k+1}-z,e_{k}-\gamma_{k}\hat{b}_{k}}\rangle}_{=:A_{k}}+\delta_{1,k}^{2}.$
+(3.17)
+Let $k\in\mathbb{N}$ and set $\tilde{x}_{k+1}=\prox_{\gamma_{k}g}(y_{k}-\gamma_{k}\nabla f(y_{k}))$ . Using the nonexpansivity of the proximity operator, we have
+$\displaystyle\left\|{x_{k+1}-\tilde{x}_{k+1}}\right\|$
+$\displaystyle\leq\left\|{x_{k+1}-\prox_{\gamma_{k}g}(y_{k}-\gamma_{k}\hat{u}(x_{k},\zeta_{k}))}\right\|+\left\|{\prox_{\gamma_{k}g}(y_{k}-\gamma_{k}\hat{u}(x_{k},\zeta_{k}))-\tilde{x}_{k+1}}\right\|$
+$\displaystyle\leq\delta_{k}+\gamma_{k}\lVert\hat{b}_{k}\rVert$
+and hence
+$\displaystyle A_{k}$
+$\displaystyle=\langle{x_{k+1}-z,e_{k}}\rangle+\langle{x_{k+1}-\tilde{x}_{k+1},-\gamma_{k}\hat{b}_{k}}\rangle+\langle{\tilde{x}_{k+1}-z,-\gamma_{k}\hat{b}_{k}}\rangle$
+$\displaystyle\leq\langle{x_{k+1}-z,e_{k}}\rangle+\gamma_{k}\lVert\hat{b}_{k}\rVert(\delta_{k}+\gamma_{k}\lVert\hat{b}_{k}\rVert)-\gamma_{k}\langle{\tilde{x}_{k+1}-z,\hat{b}_{k}}\rangle.$
+Then, proceeding as in the proof of Theorem 3.6, we let $x_{*}\in S_{*}$ and set
+$z=\bigg(1-\frac{1}{t_{k}}\bigg)x_{k}+\frac{1}{t_{k}}x_{*}$
+and we have $x_{k+1}-z=t_{k}^{-1}(v_{k+1}-x_{*})$ and $y_{k}-z=t_{k}^{-1}(v_{k}-x_{*})$ . Hence,
+thanks to the convexity of $F$ , (3.17) yields
+$\displaystyle 2\gamma_{k}F(x_{k+1})$
+$\displaystyle\leq 2\gamma_{k}\bigg[\bigg(1-\frac{1}{t_{k}}\bigg)F(x_{k})+\frac{1}{t_{k}}F_{*}\bigg]+\frac{\left\|{v_{k}-x_{*}}\right\|^{2}}{t_{k}^{2}}-\frac{\left\|{v_{k+1}-x_{*}}\right\|^{2}}{t_{k}^{2}}$
+$\displaystyle\qquad+\frac{2}{t_{k}}\langle{v_{k+1}-x_{*},e_{k}}\rangle+2\gamma_{k}\delta_{k}\lVert\hat{b}_{k}\rVert+2\gamma^{2}_{k}\lVert\hat{b}_{k}\rVert^{2}-2\gamma_{k}\langle{\tilde{x}_{k+1}-z,\hat{b}_{k}}\rangle+\delta_{1,k}^{2}.$
+Subtracting $2\gamma_{k}F_{*}$ to both sides, defining $r_{k}=F(x_{k})-F_{*}$ , and using the fact that $\gamma_{k+1}\leq\gamma_{k}$ we obtain
+$\displaystyle 2\gamma_{k+1}r_{k+1}$
+$\displaystyle\leq\bigg(1-\frac{1}{t_{k}}\bigg)2\gamma_{k}r_{k}+\frac{\left\|{v_{k}-x_{*}}\right\|^{2}}{t_{k}^{2}}-\frac{\left\|{v_{k+1}-x_{*}}\right\|^{2}}{t_{k}^{2}}$
+$\displaystyle\qquad+\frac{2}{t_{k}}\langle{v_{k+1}-x_{*},e_{k}}\rangle+2\gamma_{k}\delta_{k}\lVert\hat{b}_{k}\rVert+2\gamma^{2}_{k}\lVert\hat{b}_{k}\rVert^{2}-2\gamma_{k}\langle{\tilde{x}_{k+1}-z,\hat{b}_{k}}\rangle+\delta_{1,k}^{2}.$
+Multiplying by $t^{2}_{k}$ we get
+$\displaystyle 2t^{2}_{k}\gamma_{k+1}r_{k+1}$
+$\displaystyle\leq[t_{k}^{2}-t_{k}-t_{k-1}^{2}]2\gamma_{k}r_{k}+2t_{k-1}^{2}\gamma_{k}r_{k}+\left\|{v_{k}-x_{*}}\right\|^{2}-\left\|{v_{k+1}-x_{*}}\right\|^{2}$
+$\displaystyle\qquad+2t_{k}\langle{v_{k+1}-x_{*},e_{k}}\rangle+2\gamma_{k}t_{k}^{2}\delta_{k}\lVert\hat{b}_{k}\rVert+2\gamma^{2}_{k}t_{k}^{2}\lVert\hat{b}_{k}\rVert^{2}$
+$\displaystyle\qquad-2\gamma_{k}t_{k}^{2}\langle{\tilde{x}_{k+1}-z,\hat{b}_{k}}\rangle+t_{k}^{2}\delta_{1,k}^{2}.$
+Now, let $t_{-1}=0$ and define, for every $k\in\mathbb{N}$ , $\mathcal{E}_{k}(x_{*})=2t_{k-1}^{2}\gamma_{k}r_{k}+\left\|{v_{k}-x_{*}}\right\|^{2}$ . Since $t_{k}^{2}-t_{k}-t_{k-1}^{2}\leq 0$ ,
+we obtain
+$\displaystyle\mathcal{E}_{k+1}(x_{*})$
+$\displaystyle\leq\mathcal{E}_{k}(x_{*})+2t_{k}\delta_{2,k}\left\|{v_{k+1}-x_{*}}\right\|$
+$\displaystyle\qquad+2\gamma_{k}t_{k}^{2}\delta_{k}\lVert\hat{b}_{k}\rVert+2\gamma^{2}_{k}t_{k}^{2}\lVert\hat{b}_{k}\rVert^{2}-2\gamma_{k}t_{k}^{2}\langle{\tilde{x}_{k+1}-z,\hat{b}_{k}}\rangle+t_{k}^{2}\delta_{1,k}^{2}.$
+(3.18)
+Now, taking the conditional expectation $\mathbb{E}[\,\cdot\,|\,\mathfrak{F}_{k}]$ and using that
+$\tilde{x}_{k+1}-z$ is $\mathfrak{F}_{k}$ -measurable and that $\mathbb{E}[\hat{b}_{k}|\,\mathfrak{F}_{k}]=\mathbb{E}[\hat{u}(y_{k},\zeta_{k})-\nabla f(y_{k})|\ \mathfrak{F}_{k}]=0$ ,
+we have
+$\displaystyle\mathbb{E}[\mathcal{E}_{k+1}(x_{*})\,|\,\mathfrak{F}_{k}]$
+$\displaystyle\leq\mathcal{E}_{k}(x_{*})+2t_{k}\delta_{2,k}\mathbb{E}[\left\|{v_{k+1}-x_{*}}\right\|\,|\,\mathfrak{F}_{k}]$
+$\displaystyle\qquad+2\gamma_{k}t_{k}^{2}\delta_{k}\mathbb{E}[\lVert\hat{b}_{k}\rVert\,|\,\mathfrak{F}_{k}]+2\gamma^{2}_{k}t_{k}^{2}\mathbb{E}[\lVert\hat{b}_{k}\rVert^{2}\,|\,\mathfrak{F}_{k}]+t_{k}^{2}\delta_{1,k}^{2}$
+$\displaystyle\leq\mathcal{E}_{k}(x_{*})+2t_{k}\delta_{2,k}\mathbb{E}[\left\|{v_{k+1}-x_{*}}\right\|\,|\,\mathfrak{F}_{k}]$
+$\displaystyle\qquad+2\gamma_{k}t_{k}^{2}\delta_{k}\sigma+2\gamma^{2}_{k}t_{k}^{2}\sigma^{2}+t_{k}^{2}\delta_{1,k}^{2}.$
+(3.19)
+Taking the total expectation and using the tower rule and Jensen’s inequality we obtain
+$\displaystyle\mathbb{E}[\mathcal{E}_{k+1}(x_{*})]$
+$\displaystyle\leq\mathbb{E}[\mathcal{E}_{k}(x_{*})]+2t_{k}\delta_{2,k}\mathbb{E}[\left\|{v_{k+1}-x_{*}}\right\|]+2\gamma_{k}t_{k}^{2}\delta_{k}\sigma+2\gamma^{2}_{k}t_{k}^{2}\sigma^{2}+t_{k}^{2}\delta_{1,k}^{2}$
+$\displaystyle\leq\mathbb{E}[\mathcal{E}_{k}(x_{*})]+2t_{k}\delta_{2,k}\sqrt{\mathbb{E}[\left\|{v_{k+1}-x_{*}}\right\|^{2}]}+2\gamma_{k}t_{k}^{2}\delta_{k}\sigma+2\gamma^{2}_{k}t_{k}^{2}\sigma^{2}+t_{k}^{2}\delta_{1,k}^{2}$
+$\displaystyle\leq\mathbb{E}[\mathcal{E}_{k}(x_{*})]+2t_{k}\delta_{2,k}\sqrt{\mathbb{E}[\mathcal{E}_{k+1}(x_{*})]}+2\gamma_{k}t_{k}^{2}\delta_{k}\sigma+2\gamma^{2}_{k}t_{k}^{2}\sigma^{2}+t_{k}^{2}\delta_{1,k}^{2}.$
+Thus, applying Lemma 3.4 with
+$\displaystyle\alpha_{k}$
+$\displaystyle=\mathbb{E}[\mathcal{E}_{k}(x_{*})]$
+$\displaystyle\lambda_{k}$
+$\displaystyle=2t_{k}\delta_{2,k}$
+$\displaystyle\xi_{k}$
+$\displaystyle=2\gamma_{k}t_{k}^{2}\delta_{k}\sigma+2\gamma^{2}_{k}t_{k}^{2}\sigma^{2}+t_{k}^{2}\delta_{1,k}^{2},$
+we have, for every $k\in\mathbb{N}$ ,
+$\mathbb{E}[\mathcal{E}_{k}(x_{*})]\leq\frac{10}{9}\bigg(\left\|{x_{0}-x_{*}}\right\|^{2}+\sum_{i=0}^{k-1}\big(2\gamma_{i}t_{i}^{2}\delta_{i}\sigma+2\sigma^{2}\gamma^{2}_{i}t_{i}^{2}+t_{i}^{2}\delta_{1,i}^{2}\big)\bigg)+4\bigg(\sum_{i=0}^{k-1}t_{i}\delta_{2,i}\bigg)^{2}.$
+Concerning the second part of the statement, assume that $(t_{k}\gamma_{k})_{k\in\mathbb{N}}$ is square summable and that
+$(t_{k}\delta_{k})_{k\in\mathbb{N}}$ is summable. Then, recalling that $\ell^{1}(\mathbb{N})\subset\ell^{2}(\mathbb{N})$ and
+$\ell^{2}(\mathbb{N})\cdot\ell^{2}(\mathbb{N})\subset\ell^{1}(\mathbb{N})$ , we have that the sequences $(t^{2}_{k}\delta^{2}_{1,k})_{k\in\mathbb{N}}$ , $(t_{k}\delta_{2,k})_{k\in\mathbb{N}}$ , $(\gamma_{k}^{2}t_{k}^{2})_{k\in\mathbb{N}}$ , and $(\gamma_{k}t_{k}\cdot\delta_{k}t_{k})_{k\in\mathbb{N}}$ are summable,
+and hence Lemma 3.4 also ensures that the sequence
+$(\mathbb{E}[\mathcal{E}_{k}(x_{*})])_{k\in\mathbb{N}}$ converges. Moreover, since $\mathbb{E}[\left\|{v_{k}-x_{*}}\right\|]\leq\sqrt{\mathbb{E}[\mathcal{E}_{k}(x_{*})]}$ , the sequence $(\mathbb{E}[\left\|{v_{k}-x_{*}}\right\|])_{k\in\mathbb{N}}$
+is bounded, say by $M$ , and hence in (3.19) if we set, for every $k\in\mathbb{N}$ ,
+$\varepsilon_{k}=2t_{k}\delta_{2,k}\mathbb{E}[\left\|{v_{k+1}-x_{*}}\right\|\,|\,\mathfrak{F}_{k}],$
+then, we have
+$\mathbb{E}\bigg[\sum_{k=0}^{+\infty}\varepsilon_{k}\bigg]=\sum_{k=0}^{+\infty}2t_{k}\delta_{2,k}\mathbb{E}[\left\|{v_{k+1}-x_{*}}\right\|]\leq 2M\sum_{k=0}^{+\infty}t_{k}\delta_{2,k}<+\infty,$
+so that $\sum_{k=0}^{+\infty}\varepsilon_{k}<+\infty$ a.s. Therefore, Robbins-Siegmund theorem (Fact 2.7) now ensures that the sequence
+$(\mathcal{E}_{k}(x_{*}))_{k\in\mathbb{N}}$ converges almost surely. This also implies that
+there exists a finite measurable function
+$M_{1}\colon\Omega\to\mathbb{R}$ such that
+$\sup_{k\in\mathbb{N}}\big[2\gamma_{k}t^{2}_{k-1}(F(x_{k})-F_{*})+\left\|{v_{k}-x_{*}}\right\|^{2}\big]=\sup_{k\in\mathbb{N}}\mathcal{E}_{k}(x_{*})\leq M_{1}\ \text{a.s.},$
+which yields that $(v_{k})_{k\in\mathbb{N}}$ is almost surely bounded.
+Thus, since $\gamma_{k}t^{2}_{k-1}\to+\infty$ , we have $F(x_{k})-F_{*}\to 0$ a.s.
+and hence, as before, the sequential weak cluster points of $(x_{k})_{k\in\mathbb{N}}$
+are contained in $S_{*}$ a.s.
+On the other hand, recalling (3.12), we have that, for every $k\in\mathbb{N}$ ,
+$\left\|{x_{k+1}-x_{*}}\right\|\leq\bigg(1-\frac{1}{t_{k}}\bigg)\left\|{x_{k}-x_{*}}\right\|+\frac{1}{t_{k}}\left\|{v_{k+1}-x_{*}}\right\|\leq\max\{\left\|{x_{k}-x_{*}}\right\|,\sqrt{M_{1}}\big\},$
+so by induction, $\left\|{x_{k}-x_{*}}\right\|\leq\sqrt{M_{1}}$ a.s., and hence $(x_{k})_{k\in\mathbb{N}}$ is bounded a.s.
+Since, for every $x_{*}^{1},x_{*}^{2}\in S_{*}$ ,
+$\mathcal{E}_{k}(x_{*}^{1})-\mathcal{E}_{k}(x_{*}^{2})=2\langle{v_{k},x_{*}^{2}-x_{*}^{1}}\rangle+\left\|{x_{*}^{1}}\right\|^{2}-\left\|{x_{*}^{2}}\right\|^{2}$ is almost surely convergent,
+the sequence $(\langle{v_{k},x_{*}^{1}-x_{*}^{2}}\rangle)_{k\in\mathbb{N}}$ converges almost surely too.
+Thus, continuing following the same line of arguments as in the proof of Theorem 3.6 and relying on
+(3.12) and Fact 2.6, one proves that
+$(\langle{x_{k},x_{1}^{*}-x_{2}^{*}}\rangle)_{k\in\mathbb{N}}$ converges almost surely, for every $x_{1}^{*},x_{2}^{*}\in S_{*}$ .
+The conclusion about the almost-sure weak convergence of $(x_{k})_{k\in\mathbb{N}}$ to a $S_{*}$ -valued random vector $x_{*}$ now follows from the stochastic Opial’s Lemma 3.5, while the corresponding convergence of $(y_{k})_{k\in\mathbb{N}}$ to $x_{*}$ follows again from (3.11), considering that $1/t_{k}\to 0$ and $(v_{k})_{k\in\mathbb{N}}$ is bounded a.s.
+∎
+Remark 3.11.
+Assume that $t_{k}\asymp k^{\alpha}$ , with $\alpha\in\left]0,1\right]$ . Then the conditions guaranteeing the almost surely weak convergence of the iterates in Theorem 3.10 become
+$\gamma_{k}k^{2\alpha}\to+\infty,\quad\sum_{k=0}^{+\infty}\gamma_{k}^{2}k^{2\alpha}<+\infty,\quad\text{and}\quad\sum_{k=0}^{+\infty}\delta_{k}k^{\alpha}<+\infty.$
+(3.20)
+Thus, suppose that, for every $k\in\mathbb{N}$ ,
+$\gamma_{k}=\frac{\gamma}{k^{q}(1+\log k)^{r}}\quad(q>0,r\geq 0)\quad\text{and}\quad\delta_{k}=O\bigg(\frac{1}{k^{p}}\bigg)\quad(p>0).$
+(3.21)
+Then (3.20) translates into the following conditions on the exponents44
+4
+The convergence of the series can be easily analyzed by the Cauchy’s condensation test [20]. $p,q,r$
+$\bigg[\bigg(\alpha+\frac{1}{2}\frac{1}{2}\bigg)\bigg]\quad\text{and}\quad p>\alpha+1,$
+and, if they are satisfied, Algorithm 1.4 features the following rate of converge in expectation for the objective values
+$\mathbb{E}[F(x_{k})]-F_{*}=O\bigg(\frac{(1+\log k)^{r}}{k^{2\alpha-q}}\bigg),$
+(3.22)
+which, when $\alpha=1$ , $q=3/2$ , and $r>1/2$ , becomes
+$\mathbb{E}[F(x_{k})]-F_{*}=O\bigg(\frac{(1+\log k)^{r}}{k^{1/2}}\bigg).$
+(3.23)
+Remark 3.12.
+When $\alpha=1$ and $q=3/2$ in (3.21), we have, for every $k\in\mathbb{N}$ ,
+$\sum_{i=0}^{k}\gamma_{i}^{2}i^{2\alpha}=\sum_{i=1}^{k}\frac{\gamma}{i(1+\log i)^{2r}}\leq\gamma\cdot\begin{cases}1+\log k&\text{if}\ r=0\\[4.30554pt]
+1+\dfrac{1}{1-2r}\big((1+\log k)^{1-2r}-1\big)&\text{if}\ 01/2.\end{cases}$
+Hence, the best rate in (3.22) is achieved when $r=1/2$ ,
+yielding
+$\mathbb{E}[F(x_{k})]-F_{*}=O\bigg(\frac{(1+\log k)^{1/2}(1+\log(1+\log k))}{k^{1/2}}\bigg),$
+(3.24)
+although, in such setting, the iterates are no longer ensured to converge.
+We finally observe that
+the rates (3.23) and (3.24) essentially match the analogue rates of the stochastic (nonaccelerated) proximal gradient algorithm under the same assumptions on the noise.
+References
+[2]
+V. Apidopoulos, J.-F. Aujol, and Ch. Dossal,
+The differential inclusion modeling FISTA algorithm and optimality of convergence rate in the case
+$b\leq 3$ ,
+SIAM J. Optim., 28(1), 551–574, 2018.
+[3]
+H. Attouch, Z. Chbani, J. Peypouquet, and P. Redont,
+Fast convergence of inertial dynamics and algorithms with asymptotic
+vanishing viscosity. Math. Program. B., 168, 123–175, 2018.
+[4]
+H. Attouch, R. I. Boţ, D. A. Hulett, and D.-K. Nguyen,
+Recovering Nesterov accelerated dynamics from Heavy Ball dynamics via time rescaling,
+SIAM J. Control Optim., 64(3), 1040–1067, 2026.
+[5]
+H. Attouch and A. Cabot,
+Convergence rates of inertial forward-backward algorithms.
+SIAM J. Optim., 28(1), 849–874, 2018.
+[6]
+H. Attouch and J. Peypouquet,
+The rate of convergence of Nesterov’s accelerated forward-backward method is actually faster then $1/k^{2}$ .
+SIAM J. Optim., 26(3), 1824–1834, 2016.
+[7]
+J.-F. Aujol and Ch. Dossal,
+Stability of over-relaxations for the forward-backward
+algorithm, application to FISTA,
+SIAM J. Optim., 25(4), 2408–2433, 2015.
+[8]
+M. Barré, A. B. Taylor, and F. Bach,
+Principled analyses and design of first-order methods with inexact proximal operators,
+Math. Program. B., 201, 185–230, 2023.
+[9]
+H. H. Bauschke and P. L. Combettes
+Convex Analysis and Monotone Operator Theory in Hilbert spaces, 2nd ed. Springer, New York,
+2017.
+[10]
+A. Beck and M. Teboulle,
+A Fast Iterative Shrinkage-Thresholding Algorithm for linear inverse problems,
+SIAM J. Imaging Sci., 2(1), 183–202, 2009.
+[11]
+Y. Bello-Cruz, M.K.N. Gonçalves, and N. Krislock
+On FISTA with relative error rule
+Comput. Optim. Appl., 84, 295–318, 2023.
+[12]
+R. I. Boţ, E. Chenchene, E.R. Csetnek, and D. A. Hulett,
+Accelerating Diagonal Methods for Bilevel Optimization: Unified Convergence via Continuous-Time Dynamics,
+Math. Program., 2026. https://doi.org/10.1007/s10107-026-02376-8
+[13]
+R. I. Boţ, J. Fadili, and D.-K. Nguyen
+The iterates of Nesterov’s accelerated algorithm converge in the critical regime, arXiv, 2025. https://arxiv.org/abs/2510.22715v2
+[14]
+A. Chambolle and C. Dossal,
+On the convergence of the iterates of the “Fast Iterative Shrinkage/Thresholding Algorithm”.
+J. Optim. Theory Appl., 166, 968–982, 2015.
+[15]
+D. L. Cohn,
+Measure Theory, 2nd ed.
+Birkhäuser, New York, 2013.
+[16]
+P. L. Combettes, S. Salzo and S. Villa,
+Consistent learning by composite proximal thresholding.
+Math. Program. B., 167, 99–127, 2018.
+[17]
+P. L. Combettes, J-C. Pesquet,
+Stochastic quasi-Fejér block-coordinate fixed point iterations with random sweeping.
+SIAM J. Optim. 25(2), 1221–1248, 2015.
+[18]
+O. Güler,
+New proximal point algorithms for convex minimization.
+SIAM J. Optim. 2(4), 649–664, 1992.
+[19]
+U. Jang and E.K. Ryu,
+Point convergence of Nesterov’s Accelerated Gradient Method: an AI-assisted proof,
+arXiv, 2025. https://arxiv.org/abs/2510.23513
+[20]
+K. Knopp,
+Infinite Sequences and Series,
+Dover Publications, New York, 1956.
+[21]
+Y. Nesterov,
+A method of solving a convex programming problem with convergence rate $O(1/{k^{2}})$ ,
+Dokl. Akad. Nauk SSSR, 27, 372–376, 1983.
+[22]
+Z. Opial,
+Weak convergence of the sequence of successive approximations for nonexpansive mappings,
+Bull. Amer. Math. Soc., 73(4), 591–597, 1967.
+[23]
+B.T. Polyak,
+Some methods of speeding up the convergence of iteration methods,
+USSR Comput. Math. & Math. Phys., 4(5), 1–17, 1964.
+[24]
+H. Robbins and D. Siegmund,
+A convergence theorem for nonnegative almost supermartingales and some applications, in:
+Optimization Methods in Statistics, J. S. Rustagi, ed., pp. 233–257, Academic Press, New York, London, 1971.
+[25]
+E. Ryu, https://x.com/ernestryu/status/1980759528984686715?s=43, 2025.
+[26]
+S. Salzo and S. Villa
+Inexact and accelerated proximal point algorithms,
+J. Convex Anal., 19(4), 1167–1192, 2012.
+[27]
+M. Schmidt, N. Le Roux, and F. Bach,
+Convergence Rates of Inexact Proximal-Gradient Methods for Convex Optimization,
+arXiv, 2011. https://arxiv.org/abs/1109.2415v2
+[28]
+W. Su, S. Boyd, E J. Candes
+A differential equation for modeling Nesterov’s accelerated gradient method: theory and insights,
+JMLR, 17(153), 1–43, 2016.
+[29]
+S. Villa, S. Salzo, L. Baldassarre, A. Verri
+Accelerated and inexact forward-backward algorithms,
+SIAM J. Optim., 23(3), 1607–1633, 2013.
+Appendix A Appendix
+A.1 Proofs of Section 2
+For reader’s convenience we give the proofs of some of the results presented in the preliminary section.
+Proof of Fact 2.1.
+Since $0\leq b_{k}\leq\alpha_{k}-a_{k+1}+\varepsilon_{k}$ the summability of $(b_{k})_{k\in\mathbb{N}}$ is immediate.
+Define $u_{k}=\alpha_{k}+\sum_{i=k}^{+\infty}\varepsilon_{i}$ . Then it follows from (2.1) that
+$u_{k+1}=a_{k+1}+\sum_{i={k+1}}^{+\infty}\varepsilon_{i}\leq\alpha_{k}+\sum_{i={k}}^{+\infty}\varepsilon_{i}=u_{k}$ ,
+so that $(u_{k})_{k\in\mathbb{N}}$ is decreasing and hence convergent. Then, by definition of $u_{k}$ ,
+$\alpha_{k}=u_{k}-\sum_{i=k}^{+\infty}\varepsilon_{i}$ and hence $(\alpha_{k})_{k\in\mathbb{N}}$ is convergent too.
+∎
+Proof of Fact 2.3.
+Set $\gamma_{k}=\sigma_{k}+\sum_{i=0}^{k}\lambda_{i}\sqrt{\mu_{i}}$ , with $\gamma_{k}\geq 0$ . Then clearly $(\gamma_{k})_{k\in\mathbb{N}}$ is increasing and $\sqrt{\mu_{k}}\leq\sqrt{\gamma_{k}}$ , for every $k\in\mathbb{N}$ . Therefore,
+$\forall\,k\in\mathbb{N}\colon\gamma_{k}=\sigma_{k}+\sum_{i=0}^{k}\lambda_{i}\sqrt{\mu_{i}}\leq\sigma_{k}+\sum_{i=0}^{k}\lambda_{i}\sqrt{\gamma_{i}}\leq\sigma_{k}+\gamma_{k}\sum_{i=0}^{k}\sqrt{\lambda_{i}}.$
+Thus, for every $k\in\mathbb{N}$ , $\sqrt{\gamma_{k}}$ is a positive solution solution of the quadratic equation
+$t^{2}-\bigg(\sum_{i=0}^{k}\lambda_{i}\bigg)t-\sigma_{k}\leq 0$
+and hence
+$\sqrt{\gamma_{k}}\leq\frac{1}{2}\sum_{i=0}^{k}\lambda_{i}+\bigg(\Big(\frac{1}{2}\sum_{i=0}^{k}\lambda_{i}\Big)^{2}+\sigma_{k}\bigg)^{1/2}.$
+(A.1)
+The statement follows by recalling that $\sqrt{a+b}\leq\sqrt{a}+\sqrt{b}$ (for any $a,b\in\mathbb{R}_{+}$ )
+and noting that $\sqrt{\mu_{i}}\leq\sqrt{\gamma_{i}}\leq\sqrt{\gamma_{k}}$ , for every $i=1,\dots,k$ .
+∎
+Proof of Fact 2.6.
+Let $b_{k}=a_{k+1}+\lambda_{k}(a_{k+1}-a_{k})$ . We will prove that $a_{k}$
+can be written as a weighted sum of $b_{k}$ ’s terms. Let $(\mu_{k})_{k\in\mathbb{N}}$
+be sequence in $\mathbb{R}_{++}$ (to be defined). Then, by the definition of $b_{k}$ , we have
+$\mu_{k}b_{k}=\mu_{k}a_{k+1}+\mu_{k}\lambda_{k}(a_{k+1}-a_{k})=(\mu_{k}\lambda_{k}+\mu_{k})a_{k+1}-\mu_{k}\lambda_{k}a_{k}.$
+Suppose now that
+$(\forall\,k\in\mathbb{N})\quad\mu_{k+1}\lambda_{k+1}=\mu_{k}\lambda_{k}+\mu_{k}.$
+(A.2)
+Note that the above identity actually defines the sequence $(\mu_{k})_{k\in\mathbb{N}}$
+recursively as $\mu_{k+1}=\mu_{k}(1+\lambda_{k})/\lambda_{k+1}$ ,
+starting from any $\mu_{0}>0$ .
+Then we have
+$\mu_{k}b_{k}=\mu_{k+1}\lambda_{k+1}a_{k+1}-\mu_{k}\lambda_{k}a_{k}\quad\text{and}\quad\mu_{k}=\mu_{k+1}\lambda_{k+1}-\mu_{k}\lambda_{k}$
+(A.3)
+and hence, summing
+$\sum_{i=0}^{k}\mu_{i}b_{i}=\mu_{k+1}\lambda_{k+1}a_{k+1}-\mu_{0}\lambda_{0}a_{0}\quad\text{and}\quad\sum_{i=0}^{k}\mu_{i}=\mu_{k+1}\lambda_{k+1}-\mu_{0}\lambda_{0}.$
+Thus, we have
+$\mu_{k+1}\lambda_{k+1}a_{k+1}=\mu_{0}\lambda_{0}a_{0}+\sum_{i=0}^{k}\mu_{i}b_{i}\quad\text{and}\quad\mu_{k+1}\lambda_{k+1}=\mu_{0}\lambda_{0}+\sum_{i=0}^{k}\mu_{i}$
+which yield
+$a_{k+1}=\frac{\mu_{0}\lambda_{0}a_{0}+\sum_{i=0}^{k}\mu_{i}b_{i}}{\mu_{0}\lambda_{0}+\sum_{i=0}^{k}\mu_{i}}=\sum_{i=0}^{k+1}\frac{w_{i}}{\sum_{j=0}^{k+1}w_{j}}\tilde{b}_{i},$
+where $\tilde{b}_{0}=a_{0}$ , $w_{0}=\mu_{0}\lambda_{0}$ , and for $k\geq 1$ , $\tilde{b}_{k}=b_{k-1}$
+and $w_{k}=\mu_{k-1}\lambda_{k-1}$ . Now, we prove that $\mu_{k+1}\lambda_{k+1}=\sum_{i=0}^{k+1}w_{i}\to+\infty$ as $k\to+\infty$ . Indeed it follows from the second identity in (A.3) that
+$\mu_{k+1}\lambda_{k+1}=\mu_{k}\lambda_{k}\bigg(1+\frac{1}{\lambda_{k}}\bigg)$
+and hence by recursion we have $\mu_{k+1}\lambda_{k+1}=\mu_{0}\lambda_{0}\prod_{i=0}^{k}\big(1+1/\lambda_{i}\big)$ . Finally, we note that
+$\prod_{k=0}^{+\infty}\bigg(1+\frac{1}{\lambda_{k}}\bigg)=+\infty\ \Leftrightarrow\ \sum_{k=0}^{+\infty}\frac{1}{\lambda_{k}}=+\infty$
+and hence, recalling the assumptions, $\sum_{k=0}^{+\infty}w_{k}=+\infty$ as claimed.
+The statement follows from the Cesàro theorem.
+∎
+Experimental support, please
+view the build logs
+for errors. Generated by
+L
+A
+T
+E
+xml
+.
+Instructions for reporting errors
+We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+methods listed below:
+Click the "Report Issue" (
+) button, located in the page header.
+Tip: You can select the relevant text first, to include it in your report.
+Our team has already identified the following issues. We appreciate your time reviewing and reporting rendering errors we
+may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+all.
+Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a list of packages that need conversion, and welcome developer contributions.
+We gratefully acknowledge support from
+our major funders,
+member institutions, ,
+and all contributors.
+About
+·
+Help
+·
+Contact
+·
+Subscribe
+·
+Copyright
+·
+Privacy
+·
+Accessibility
+·
+Operational Status (opens in new tab)
+Major funding support from

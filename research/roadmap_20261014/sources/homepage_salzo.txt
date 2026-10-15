@@ -1,0 +1,80 @@
+Saverio Salzo | Dipartimento di Ingegneria informatica, automatica e gestionale
+Salta al contenuto principale
+English
+Italiano
+legibility: standard | enhanced
+Dipartimento di Ingegneria informatica, automatica e gestionale
+Toggle navigation
+Dipartimento
+Chi siamo
+Governo
+Pianificazione strategica
+Assicurazione qualità
+Dove siamo
+Uffici e servizi
+Persone
+Trasparenza
+Bandi
+Commissioni
+Strutture
+Laboratori
+Aule
+Biblioteca
+Didattica
+Ricerca
+Panoramica
+Aree di ricerca
+Gruppi di ricerca
+Eventi e seminari
+Progetti di ricerca
+Keyword search
+Visiting professors
+Research Reports
+DIAG Reports
+Technical Reports
+Centri interdipartimentali
+Spin-off
+Frequentatori esterni
+Terza missione
+Notizie
+DIAG sui media
+Seminars & events
+Home »
+Users »
+Saverio Salzo
+Saverio Salzo
+Professore associato
+stanza:
+A119
+email uniroma1:
+saverio.salzo@uniroma1.it
+Biografia
+Saverio Salzo si laurea con lode in Matematica (indirizzo Generale) nel 2001, presso l'Università degli Studi di Bari.Successivamente lavora in azienda occupandosi di ricerca e di sviluppo software in ambito spaziale, collaborando a progetti dell'agenzia spaziale italiana e dell'agenzia spaziale europea. Nel 2012 consegue il dottorato di ricerca in Computer Science presso l'Università degli studi di Genova. Dal 2013 al 2015 è titolare di assegni di ricerca presso il dipartimento di Informatica e di Matematica dell'Università degli Studi di Genova. Dal 2016 al 2017 è postdoc presso il Laboratory for Computational and Statistical Learning dell'Istituto Italiano di Tecnologia. Dal 2018 al 2021 è ricercatore presso l'Istituto Italiano di Tecnologia nel gruppo di Computational Statistics and Machine Learning.E' stato visiting scholar presso la KU Leuven in Belgio e da Ottobre 2020 è Honorary Lecturer presso University College London.Nel 2021 ha conseguito l'abilitazione scientifica nazionale come Professore di II fascia in Ricerca Operativa e Analisi Numerica.Dal 1° Luglio 2025 è Professore associato presso il DIAG, Dipartimento di ingegneria informatica automatica e gestionale della Sapienza Università di Roma.
+I suoi interessi di ricerca si focalizzano sui metodi di ottimizzazione convessa e non liscia, metodi di splitting prossimale, algoritmi stocastici, ottimizzazione di iperparametri per il machine learning, ottimizzazione bilievello, ottimizzazione in spazi di probabilità, support vector machines in spazi di Banach e metodi kernel tensoriali.
+Ha insegnato introduzione all'ottimizzazione convessa nel programma di dottorato in Ingegneria Informatica e Matematica all'Università di Genova e Introduction to Convex Optimization for Machine Learning per il Master in Machine Learning, Computer Science Department. University College London. UK.
+Al momento insegna il corso di base di Fondamenti di Matematica per il corso di laurea in Ingegneria Informatica e Automatica presso la Sapienza di Roma.
+Interessi di ricerca
+Analisi e Ottimizzazione convessa
+Ottimizzazione stocastica
+Machine Learning
+Ottimizzazione di iperparametri
+Ottimizzazione in spazi di probabilità
+Membro di
+Continuous Optimization
+Ultime pubblicazioni
+Relax and penalize: a new bilevel approach to mixed-binary hyperparameter optimization in TRANSACTIONS ON MACHINE LEARNING RESEARCH
+2025
+High Probability Bounds for Stochastic Subgradient Schemes with Heavy Tailed Noise in SIAM JOURNAL ON MATHEMATICS OF DATA SCIENCE
+2024
+Nonsmooth Implicit Differentiation: Deterministic and Stochastic Convergence Rates in Proceedings of the 41st International Conference on Machine Learning
+2024
+Variance Reduction Techniques for Stochastic Proximal Point Algorithms in JOURNAL OF OPTIMIZATION THEORY AND APPLICATIONS
+2024
+Bilevel Optimization with a Lower-level Contraction: Optimal Sample Complexity without Warm-Start in JOURNAL OF MACHINE LEARNING RESEARCH
+2023
+Convergence of an asynchronous block-coordinate forward-backward algorithm for convex composite optimization in COMPUTATIONAL OPTIMIZATION AND APPLICATIONS
+2023
+Batch Greenkhorn Algorithm for Entropic-Regularized Multimarginal Optimal Transport: Linear Rate of Convergence and Iteration Complexity in Proceedings of the 39th International Conference on Machine Learning
+2022
+Last 50 publications
+© Università degli Studi di Roma "La Sapienza" - Piazzale Aldo Moro 5, 00185 Roma

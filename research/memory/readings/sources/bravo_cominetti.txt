@@ -1,0 +1,2065 @@
+                                             STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS:
+                                                          CONVERGENCE AND ERROR BOUNDS
+
+                                                                            MARIO BRAVO AND ROBERTO COMINETTI
+
+
+
+
+arXiv:2208.04193v3 [math.OC] 31 Mar 2023
+                                                   Abstract. We study a stochastically perturbed version of the well-known Krasnoselski–Mann it-
+                                                   eration for computing fixed points of nonexpansive maps in finite dimensional normed spaces. We
+                                                   discuss sufficient conditions on the stochastic noise and stepsizes that guarantee almost sure conver-
+                                                   gence of the iterates towards a fixed point, and derive non-asymptotic error bounds and convergence
+                                                   rates for the fixed-point residuals. Our main results concern the case of a martingale difference noise
+                                                   with variances that can possibly grow unbounded. This supports an application to reinforcement
+                                                   learning for average reward Markov decision processes, for which we establish convergence and as-
+                                                   ymptotic rates. We also analyze in depth the case where the noise has uniformly bounded variance,
+                                                   obtaining error bounds with explicit computable constants.
+
+
+
+
+                                                                                           1. Introduction
+
+                                             Consider a map T : Rd → Rd which is nonexpansive in some given norm k·k in Rd (not necessarily
+                                           Euclidean), and assume that its set of fixed points Fix(T ) is nonempty. Starting from an arbitrary
+                                           initial point x0 ∈ Rd , we investigate the convergence of the Stochastic Krasnoselskii-Mann iteration
+
+                                           (skm)                        (∀ n ≥ 1) xn = (1−αn ) xn−1 + αn (T xn−1 + Un )
+
+                                           where (αn )n≥1 is a sequence of averaging scalars, and (Un )n≥1 is a random process in Rd adapted
+                                           to some filtration (Fn )n≥1 on a probability space (Ω, F, P).
+                                             The iteration (skm) is a classical Robbins–Monro process in which the evaluation of T xn−1 is
+                                           subject to an additive random noise Un . It appears naturally when considering gradient-type and
+                                           decomposition methods in stochastic convex optimization, and in machine learning applications
+                                           where the objective function and its gradient are estimated by sampling from data.
+
+                                             2010 Mathematics Subject Classification. 47H09, 47J26, 62L20, 65Kxx, 68Q25.
+                                             Key words and phrases. Nonexpansive maps, fixed points, stochastic iterations, error bounds, convergence rates,
+                                           Q-learning, stochastic gradient descent .
+                                             Acknowledgements. The work of Mario Bravo was partially funded by FONDECYT grant No. 1191924 and Anillo
+                                           Grant ANID/ACT210005. Roberto Cominetti acknowledges the support of FONDECYT No.1171501.
+                                                                                                     1
+2                                     M. BRAVO AND R. COMINETTI
+
+    The stochastic approximation (SA) approach to study these type of iterations has a long history
+started with the landmark papers by Robbins–Monro [25] and Kiefer–Wolfowitz [18] in the context
+of statistical estimation and regression. For an historical perspective of the use of SA in stochastic
+optimization we refer to the influential paper by Nemirovskii et al. [21]. Closely related to stochastic
+optimization algorithms are operator splitting methods for maximal monotone inclusions, which can
+also be framed in forms similar to (skm) (cf. [11, 12]). While these works are mostly concerned
+with nonexpansive maps in Euclidean settings, (skm) is also a template that fits other discrete-
+time stochastic dynamics such as Q-learning iterations for average reward Markov decision processes
+[1, 16, 28], in which the relevant operator is nonexpansive in the infinity norm k · k∞ .
+
+1.1. Our contribution. In this paper we focus on the general framework described by (skm). We
+begin by establishing general conditions under which the sequences (xn )n∈N generated by (skm)
+are guaranteed to converge almost surely towards some random fixed point x∗ ∈ Fix(T ). Here
+and after, all equations and statements involving random elements must be understood to hold
+P-almost surely. We then proceed to derive explicit error bounds for the residuals kxn − T xn k, both
+in expectation and with high probability, with a special focus in the case where αn = 1/(n + 1)a
+with 21 ≤ a ≤ 1. These seem to be the first rates for the general (skm) iteration.
+    Our main results concern the case where Un is a martingale difference sequence in L2 , and under
+standard assumptions on the stepsizes αn , namely
+                                                      P∞
+(h0 )                  (∀n ≥ 1)     αn ∈ (0, 1) and    k=1 αk (1−αk ) = ∞,
+
+(h1 )                  (∀n ≥ 1)     E(Un | Fn−1 ) = 0 and θn2 , E(kUn k22 ) < ∞,
+
+where k · k2 denotes the standard L2 -norm in Rd . Although we will study in detail the special case
+of uniformly bounded variances, our general results allow θn2 to diverge in a controlled manner.
+This will prove very useful for the application to the RVI-Q-learning iteration presented in Section
+§3. We also consider the case where Un includes additional stochastic terms, not necessarily of
+martingale type nor adapted, but which vanish asymptotically as n grows. The following is a brief
+overview of our results.
+
+    Convergence and error bounds:
+
+        • Under mild conditions on αn and θn , Theorem 2.5 shows that the sequence (xn )n∈N generated
+          by (skm) converges almost surely to some point in Fix(T ). In particular, this applies when
+          the θn ’s are bounded and αn = 1/(n + 1)a with 32 < a ≤ 1.
+                  STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                            3
+
+      • Theorem 2.8 complements this result by showing that (xn )n∈N also converges to some point
+        in Fix(T ) when the noise Un converges to zero sufficiently fast.
+
+      • Theorems 2.10 and 2.11 then establish error bounds for the expected fixed-point residuals
+        E(kxn − T xn k), and Theorem 2.12 derives error bounds in high probability.
+
+  Special cases:
+
+      • Section §3 presents an application to average reward Markov decision processes, establishing
+        convergence and error bounds for the RVI-Q-learning algorithm.
+
+      • Section §4 studies in depth the case of uniformly bounded variances θn2 ≤ θ2 . For constant
+                                                                                                 √
+        stepizes αn ≡ α over a fixed horizon n0 , the best bound we get is E(kxn0 − T xn0 k) ≤ C/ 6 n0
+        with an explicit constant C. Similarly, for stepsizes αn = 1/(n + 1)a with 21 ≤ a ≤ 1 we
+        derive explicit error bounds whose best rate is attained when a = 32 with E(kxn − T xn k) ≤
+                 √
+        C ln(n)/ 6 n. We illustrate these results by an application to stochastic gradient descent.
+
+      • Section §5 presents an alternative direct analysis of error bounds in the case of Euclidean
+        spaces, and compares them with our results for arbitrary norms.
+
+1.2. Some notation. We distinguish the original norm k · k for which the map T is nonexpansive,
+from the standard Euclidean norm in Rd denoted by k · k2 . Since all norms in Rd are equivalent,
+throughout we denote µ > 0 a constant such that
+
+(1)                                  (∀x ∈ Rd )     kxk ≤ µkxk2 .
+
+  For any two positive sequences we write an ∼ bn when their quotient an /bn is bounded from
+above and bounded away from 0. We also write an ≈ bn when limn→∞ an /bn = 1.
+
+1.3. Related work. A classical iteration of the form (skm) is the stochastic gradient descent for
+minimizing an expected cost f (x) = E[F (x, ξ)], namely
+
+(sgd)                               xn = xn−1 − γn ∇x F (xn−1 , ξn )
+
+where the ξn ’s are i.i.d. samples of the random variable ξ. In a Euclidean setting and assuming
+that f (·) is convex with an L-Lipschitz gradient, the iteration (sgd) coincides with (skm) for the
+nonexpansive map T x = x − L2 ∇f (x), with αn = γn2L and Un = L2 [∇f (xn ) − ∇x F (xn , ξn )]. Under
+suitable conditions discussed later in §4.3, Bach and Moulines [4] gave explicit error bounds for the
+                                                                    √
+expected optimality gap E f (xn ) − min f , achieving a rate O(1/ 3 n) with stepsizes γn ∼ 1/n2/3 ,
+                                            
+4                                   M. BRAVO AND R. COMINETTI
+
+and faster rates when f (·) is strongly convex. Error bounds with faster rates were also obtained
+earlier in [22, Polyak and Judistky] and [21, Nemirovskii et al.], for gradient-projection methods in
+convex stochastic optimization over a compact set. Our results apply to general nonexpansive maps
+and do not assume the existence of a potential function, so that the optimality gap is no longer
+meaningful. We consider instead the expected fixed-point residual, which for (sgd) corresponds to
+E kxn − T xn k = L2 E k∇f (xn )k . As observed in [3], there are situations in which obtaining a
+                               
+
+small gradient is more relevant than attaining a small optimality gap. In §4.3 we apply our general
+results to obtain error bounds for the expected gradient norm, and compare with those derived from
+[4] as well as with more recent work.
+    Beyond the setting of stochastic optimization, Combettes and Pesquet [11, 12] studied a gen-
+eral class of stochastic iterations for monotone inclusions that include Eq. (skm) as a special case.
+Their analysis is restricted to Hilbert spaces and is based on the notion of quasi-Fejér sequences.
+The noise Un is required to vanish sufficiently fast as n → ∞, which unfortunately rules out the
+simplest but relevant case of an i.i.d. noise sequence. They establish the almost sure convergence
+of the iterates, but no error bounds nor convergence rates are presented. On the positive side, their
+results apply to more general stochastic versions of the Douglas-Rachford and forward-backward
+splitting methods for structured maximal monotone inclusions, in both synchronous and asynchro-
+nous implementations. Concurrently with [11, 12], Rosasco, Villa and Vu studied in [26] a stochastic
+forward-backward iteration for monotone inclusions involving a sum of a maximal monotone set-
+valued map and a co-coercive operator. Their results support more general noise sequences which
+can be state-dependent with a variance that may grow quadratically with the state. Under suitable
+conditions on the stepsizes and a uniform monotonicity condition, they prove the almost sure conver-
+gence of the iterates towards the unique solution x∗ of the problem. Also, under strong monotonicity,
+they provide non-asymptotic error bounds for the expected squared distance E(kxn − x∗ k2 ). Similar
+iterations, with state-dependent noise whose variance grows in a controlled manner, were studied
+for stochastic variational inequalities [15, Iusem et al.] and stochastic optimization [17, Jofré and
+Thomson], attaining near-optimal oracle complexity by using a variance reduction strategy based
+on mini-batches whose size grows superlinearly.
+    A classical approach to analyze iterations of the form (skm) is the well-known ODE method
+for stochastic approximation algorithms (see [6, 19] for a complete account and references). The
+main idea is to connect the asymptotic behavior of (skm) to the one of the continous dynamics
+ẋ = T x − x. Under suitable assumptions, the limit set of the process (xn )n∈N is contained almost
+                   STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                          5
+
+surely in an Internally Chain Transitive (ICT) set of this ODE, that is to say, a compact invariant
+set with no proper attractors. In the simplest case, when the ODE has a unique global attractor
+it is the only ICT set. However, in general ICT’s can have a complex structure and provide little
+information about the limit of the process. Convergence towards a single point can still be obtained
+under further structure of the underlying ODE, such as when the dynamics are cooperative [7,
+Benaı̈m and Faure]. Up to our knowledge, in our setting of a general nonexpansive map T , it is
+not even known whether Fix(T ) is an ICT set, nor whether this technique can yield convergence
+to a single point. The ODE approach was used by Abounadi et al. [2] to study the convergence of
+(skm), as well as an asynchronous version, although under more restrictive assumptions: the noise
+sequence Un is required to be uniformly bounded, and Fix(T ) = {x∗ } is assumed to be a singleton
+and a global attractor for the dynamics ẋ = T x − x (see [2, Assumption 3.2]). Moreover, [2] focuses
+mainly on the convergence towards x∗ and does not provide error bounds nor convergence rates.
+  Our paper departs from these previous trends. Instead of using the ODE approach for stochastic
+approximation, or restricting to Hilbert spaces and using quasi-Fejér convergence, we base our
+analysis on an explicit error bound for inexact Krasnoselskii-Mann iterations established in [8,
+Bravo, Cominetti, and Pavez]. This technique allows to prove the convergence of the (skm) iterates
+in general normed spaces, and provides error bounds and convergence rates for the fixed-point
+residual of the last-iterate.
+
+1.4. Structure of the paper. Section §2 presents our general results on the almost sure conver-
+gence of the iteration (skm) under martingale difference noise and vanishing stochastic perturba-
+tions, followed by the analysis of error bounds and convergence rates for the expected fixed-point
+residuals. Section §3 applies the general results in the context of Q-Learning for average reward
+Markov decision processes. Section §4 studies the case when the noise has uniformly bounded
+variance, presenting more explicit error bounds for the most common cases of constant stepsizes
+αn ≡ α and stepsizes of power form αn = 1/(n + 1)a , which are then illustrated through an appli-
+cation in stochastic optimization. Finally, Section §5 presents a short discussion of the Euclidean
+case, putting in perspective our results for general normed spaces. Appendices A and B collect the
+more technical estimates used in the proofs.
+6                                   M. BRAVO AND R. COMINETTI
+
+                      2. Almost sure convergence and error bounds
+
+    Our main tool for studying the convergence of (skm) is the estimate (2) below (taken from [8])
+for inexact Krasnoselskii–Mann iterations of the form
+                         (
+                           z0 = x0
+(ikm)
+                           zn = (1−αn ) zn−1 + αn (T zn−1 + en ) ∀n ≥ 1
+where en ∈ Rd is an additive perturbation of T zn−1 . For the rest of this paper we introduce the
+sequence τn and the real function σ : (0, ∞) → (0, ∞) defined as
+                                   
+                                    τn = n αk (1−αk ),
+                                            P
+                                              k=1
+                                    σ(y) = min{1, 1/√πy}.
+
+Theorem 2.1. If κ ≥ 0 is such that kT zn − x0 k ≤ κ for all n ≥ 1, then
+                                                 n
+                                                 X
+(2)                  kzn − T zn k ≤ κ σ(τn ) +         2 αk kek k σ(τn −τk ) + 2 ken+1 k.
+                                                 k=1
+                                                          P∞
+Moreover, if τn → ∞ and ken k → 0 with S ,                   n=1 αn ken k   < ∞, then (2) holds with κ =
+2 dist(x0 , Fix(T )) + S, and we have kzn − T zn k → 0 as well as zn → x∗ for some fixed point
+x∗ ∈ Fix(T ).
+
+Proof. The bound (2) was established in [8, Theorem 1]. Also, when τn → ∞, ken k → 0, and
+S < ∞, from [8, Proposition 2] we have that kT zn − x0 k ≤ κ holds for κ = 2 dist(x0 , Fix(T )) + S,
+and using [8, Theorem 1] again we get kzn − T zn k → 0. The convergence of zn follows by a
+standard argument. Namely, consider an arbitrary fixed point x̄ ∈ Fix(T ). The triangle inequality
+and non-expansivity of T yields
+
+                    kzn − x̄k = k(1−αn )(zn−1 − x̄) + αn (T zn−1 − T x̄ + en )k
+                               ≤ kzn−1 − x̄k + αn ken k.
+                P
+Adding εn =       k>n αk kek k on both sides it follows that kzn − x̄k + εn         is decreasing and hence
+convergent. Since εn → 0 we conclude that kzn − x̄k converges as well. Hence zn is bounded and
+has a cluster point x∗ . Now, kzn − T zn k → 0 implies that x∗ ∈ Fix(T ) and therefore kzn − x∗ k
+converges, so that in fact kzn − x∗ k → 0.                                                               
+
+Remark 2.2. The bound (2) is also trivially guaranteed when the operator T has a bounded range:
+just take any κ ≥ supx∈Rd kT x − x0 k.
+                  STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                             7
+
+2.1. A simple reduction trick. A direct application of Theorem 2.1 to (skm) would require
+              P
+kUn k → 0 and n≥1 αn kUn k < ∞, which is rather restrictive as it rules out even the simplest
+case where the Un ’s are i.i.d.. Fortunately, a reformulation of (skm) using an auxiliary averaged
+sequence U n yields convergence under much weaker conditions. Namely, let U 0 = 0 and defined
+recursively (U n )n∈N by
+
+(u)                                 U n = (1−αn ) U n−1 + αn Un .
+
+Substracting this from (skm) and denoting zn = xn − U n we get
+
+                                   zn = (1−αn ) zn−1 + αn T xn−1
+
+which is precisely of the form (ikm) with en = T xn−1 − T zn−1 satisfying
+
+                                  ken k ≤ kxn−1 − zn−1 k = kU n−1 k.
+
+  The advantage of this alternative form of the iteration is that, in contrast with the original noise
+Un , the averages U n may converge to zero fast enough so that the conditions of Theorem 2.1 are
+met with high probability or even almost surely. As an illustration, in the i.i.d. case with αn = 1/n
+                                                                                √
+we have U n = n1 nk=1 Uk and the Central Limit Theorem gives kU n k ∼ O(1/ n) almost surely. In
+                P
+
+what follows we identify conditions on the sequence (αn )n∈N which guarantee that kU n k → 0 and
+P
+  n≥1 αn kU n−1 k < ∞, implying the convergence of the iterates zn , and a fortiori of xn , towards
+some fixed point x∗ ∈ Fix(T ). We stress that, although our arguments exploit the averaged noise
+process U n , we derive the convergence of the original iterates xn , and not just ergodic convergence
+of some averaged iterates.
+
+Remark 2.3. The previous rewriting of (skm) in terms of the sequences (zn )n∈N and (U n )n∈N ,
+reveals that (skm) carries implicitly a form of variance reduction that operates automatically as the
+iterates evolve. We will come back to this issue in Theorem 4.3, after establishing our error bounds
+for the fixed-point residuals.
+
+2.2. Convergence of iterates for martingale difference noise. We proceed to state our first
+convergence result, which concerns the case where the noise Un is a martingale difference sequence
+satisfying (h1 ). For the rest of this paper, for each n ∈ N and 0 ≤ k ≤ n we define the quantities
+
+                                       πkn = αk ni=k+1 (1−αi ),
+                                                   Q
+
+                                                pPn
+                                                           n 2 2
+                                        νn =         k=1 (πk ) θk ,
+8                                      M. BRAVO AND R. COMINETTI
+
+and establish the following straightforward estimate with µ chosen as in (1).
+                                                 Pn
+                                                   k=1 πk Uk and E(kU n k) ≤ µ νn .
+                                                        n
+Lemma 2.4. Under (h1 ) we have U n =
+                               Pn     n
+Proof. The identity U n =        k=1 πk Uk is easily checked inductively, and then Jensen’s inequality
+gives                            q                 qP
+                                                     n
+                    E(kU n k) ≤ µ E(kU n k22 ) = µ   k=1 (πk ) E(kUk k2 ) = µ νn .
+                                                           n 2        2
+
+
+                                                                                                                  
+
+  Our first result on almost sure convergence requires the additional assumption
+                                     
+                                           P∞
+                                              k=1 αk νk−1 < ∞,
+                                     (a)
+                                     
+(h2 )
+                                     (b) P∞ α2 θ2 < ∞.
+                                     
+                                              k=1 k k
+
+Theorem 2.5. Assume (h0 ), (h1 ), and (h2 ). Then, the sequence (xn )n∈N generated by (skm)
+converges almost surely to some (random) point x∗ ∈ Fix(T ).
+                                                                             P∞
+Proof. We claim that, almost surely, the random variable X∞ ,                  k=1 αk kU k−1 k is finite and U n → 0.
+The convergence of xn then follows directly from Theorem                     2.1 which gives zn → x∗ for some
+x∗ ∈ Fix(T ), and therefore xn = zn + U n → x∗ .
+  To establish the previous claim, let Xn = nk=1 αk kU k−1 k. From Theorem 2.4 we have E(Xn ) ≤ ∆
+                                            P
+
+with ∆ = µ ∞
+              P
+                k=1 αk νk−1 , so that Lebesgue’s monotone convergence theorem and (h2 )(a) yield
+E(X∞ ) = limn→∞ E(Xn ) ≤ ∆ < ∞, which implies that X∞ is finite almost surely.
+    Next, we use a stochastic approximation argument to show that U n → 0, for which we rewrite
+the recursion (u) as
+                                                                  
+                                    U n+1 − U n = αn+1 −U n + Un+1 .
+                                                                                                        Pn
+We first show that kU n k is bounded almost surely. Indeed, consider the martingale Mn =                   k=1 αk Uk
+                       2
+which is bounded in L with
+                                            n
+                                            X                          ∞
+                                                                       X
+                           E   kMn k22 =           αk2 E   kUk k22 ≤         αk2 θk2 < ∞.
+                                                                 
+                                             k=1                       k=1
+
+Doob’s martingale convergence theorem implies that Mn converges to an almost surely finite random
+variable M∞ , hence kMn k remains bounded. Now, from (u) we have
+                           n
+                           X               n
+                                           X                                       n
+                                                                                   X
+                   Mn =          αk Uk =         U k − (1 − αk )U k−1 = U n +            αk U k−1
+                           k=1             k=1                                     k=1
+                   STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                         9
+
+and then a simple triangle inequality gives
+                                               Pn
+                             kU n k = kMn −       k=1 αk U k−1 k ≤ kMn k + X∞
+
+
+which implies that kU n k is bounded almost surely.
+  To complete our proof that U n → 0, we note that [6, Proposition 4.2] (applied with q = 2 and
+γn = αn ) remains valid under the assumption ∞ k=1 αk E(kUk k2 ) < ∞ which is precisely (h2 )(b).
+                                                    2        2
+                                             P
+
+This, combined with the Limit Set Theorem [6, Theorem 5.7] implies that the ω-limit set of (U n )n∈N
+is almost surely an Internally Chain Transitive set of the differential equation U̇ = −U . Since
+{0} ⊆ Rd is a global attractor, and hence the only ICT, we conclude that U n → 0 almost surely as
+required.                                                                                         
+
+Remark 2.6. Note that when Fix(T ) is not a singleton, the limit x∗ of the random sequence (xn )n∈N
+in Theorem 2.5, is itself a random point in Fix(T ) which depends on the specific realization of the
+full noise sequence (Un )n∈N .
+
+Example 2.7. For uniformly bounded variances θn2 ≤ θ2 and stepsizes of power form αn =
+                                                     √
+1/(n + 1)a , Theorem B.2 in Appendix B gives νn−1 ≤ θ αn and therefore both (h0 ) and (h2 )
+hold for all a ∈ ( 23 , 1]. Moreover, from [10, Theorem 3.1.1] we obtain the almost sure convergence
+rate nb kU n k → 0 for all b < a − 12 .
+
+2.3. Convergence of iterates for vanishing noise. Another setting that ensures the convergence
+of the iterates (xn )n∈N is when kUn k tends to zero in expectation compensating the divergence of
+           P
+the series k αk . Namely, suppose that
+                             P∞
+(h3 )                            k=1 αk E(kUk k | Fk−1 ) is finite almost surely.
+
+
+This excludes some simple situations covered by Theorem 2.5,such as when the Un ’s are i.i.d.,
+however it bypasses the need for (h1 ) and (h2 ). In particular it allows for nonvanishing αk ’s,
+provided however that we assume the stronger condition that E(kUk k | Fk−1 ) is summable.
+
+Theorem 2.8. Assume (h0 ) and (h3 ). Then, the sequence (xn )n∈N generated by (skm) converges
+almost surely to some (random) point x∗ ∈ Fix(T ).
+
+Proof. As in the proof of Theorem 2.5, it suffices to show that almost surely we have U n → 0 and
+P∞
+  k=1 αk kU k−1 k < ∞.
+10                                        M. BRAVO AND R. COMINETTI
+                   Pn
+     Denote Nn =     k=1 αk kUk k and ηn = αn E(kUn k | Fn−1 ) so that
+
+                        E(Nn | Fn−1 ) = Nn−1 + αn E(kUn k | Fn−1 ) = Nn−1 + ηn .
+
+From (h3 ) we have ∞
+                   P
+                     k=1 ηk < ∞ and [24, Theorem 1] implies that Nn has a finite limit. Thus,
+          P                                                                   P
+the series k≥1 αk Uk is absolutely convergent, and therefore its tail sum un = k>n αk Uk is well
+defined and converges to 0. Adding un on both sides of (u) and setting wn = U n + un we get
+
+                                        wn = (1 − αn ) wn−1 + αn un−1
+               Pn       n                                            n
+so that wn =       k=0 πk uk−1 . Now, for n → ∞ and k fixed we have πk → 0 since
+                                     Qn                            Pn
+                          πkn = αk      i=k+1 (1−αi ) ≤ αk exp(−      i=k+1 αi ) → 0.
+
+Since un → 0, using Toeplitz Lemma we get wn → 0 and therefore U n → 0 as well. Finally, from
+(u) we get kU k k ≤ (1 − αk )kU k−1 k + αk kUk k so that
+              P                     P                                          P
+                k≥1 αk kU k−1 k ≤       k≥1 (kU k−1 k − kU k k + αk kUk k) =       k≥1 αk kUk k < ∞,
+
+and the convergence xn → x∗ ∈ Fix(T ) follows as in the proof of Theorem 2.5.                          
+
+     Combining Theorems 2.5 and 2.8 we readily get the following
+
+Corollary 2.9. Assume (h0 ), (h2 ), and suppose that Un = Wn + Vn where Wn satisfies (h1 ) and
+Vn satisfies (h3 ). Then, the sequence (xn )n∈N generated by (skm) converges almost surely to some
+(random) point x∗ ∈ Fix(T ).
+
+     Theorem 2.8 is similar to Corollary 2.7 in [11, Combettes and Pesquet]. The latter holds in
+infinite dimension but is restricted to separable Hilbert spaces. It establishes the weak convergence
+xn * x∗ ∈ Fix(T ) under the assumption
+                       P∞
+                                  E(kUn k2 | Fn−1 ) is finite almost surely
+                                 p
+                          n=1 αn
+
+which is slightly stronger than (h3 ) as follows from Jensen’s inequality.
+
+2.4. Error bounds. The previous analysis not only guarantees the almost sure convergence of the
+iterates (xn )n∈N but can also be used to obtain estimates for the fixed-point residuals. Namely,
+since I − T is 2-Lipschitz, by considering the sequence zn = xn − U n as before, we have
+
+                    kxn − T xn k ≤ kzn − T zn k + 2kzn − xn k = kzn − T zn k + 2kU n k.
+                  STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                            11
+
+Now, Theorem 2.5 gives conditions under which the zn ’s are bounded so there exists a finite κ such
+that kT zn − x0 k ≤ κ for all n ≥ 1, and therefore (2) with ek = U k−1 yields the following pathwise
+estimate
+                                                n
+                                                X
+(3)                 kxn − T xn k ≤ κ σ(τn ) +         2αk σ(τn −τk )kU k−1 k + 4kU n k.
+                                                k=2
+
+  Notice that U 0 = 0 which explains why the term k = 1 in the sum was omitted.
+  Unfortunately, this bound is not explicit since κ is random and depends on the full realization
+of the trajectory. Moreover, the noise Un may occasionally produce large excursions and kU n k
+may become very large, so that (3) does not give a pathwise error bound with explicit constants.
+However, (3) combined with estimates for kU n k (see e.g. Theorem 2.7), still provides asymptotic
+rates that hold almost surely.
+  Hereafter we focus instead on the expected residuals E(kxn − T xn k), for which we obtain com-
+putable non-asymptotic error bounds. Markov’s inequality then yields explicit error bounds that
+hold pathwise with high probability. We will assume one of the following (non-excluding) conditions
+and choices for the constant κ̄
+                
+                 (i) either T has bounded range and κ̄ ≥ supx∈Rd kT x − x0 k,
+(h4 )
+                 (ii) or S , P∞ α ν
+                                k=2 k k−1 < ∞ and κ̄ ≥ 2 dist(x0 , Fix(T )) + µ S.
+
+Theorem 2.10. Under (h1 ) and (h4 ) we have
+                                                        n
+                                                        X
+(4)                 E(kxn − T xn k) ≤ κ̄ σ(τn ) + 2µ          αk σ(τn −τk ) νk−1 + 4µ νn .
+                                                        k=2
+
+Proof. Under (h4 ) (i) we have that (3) holds with κ = κ̄, and (4) follows by taking expectation in
+(3) and then using the estimate E(kU k k) ≤ µ νk in Theorem 2.4. For (h4 ) (ii), we observe that (3)
+holds with κ = 2 dist(x0 , Fix(T )) + ∞k=2 αk kU k−1 k. Using Theorem 2.4 we have E(κ) ≤ κ̄, and
+                                     P
+
+then we get (4) as before.                                                                           
+
+  In order to have a more manageable error bound, we note that νn can be sometimes estimated as
+a function of αn which in turn can be bounded as a function of τn . For instance, if αn = g(n) with
+                                        Rn
+g(·) positive and decreasing, then τn ≈ 1 g(x) dx , G(n) and we get αn ≈ g(G−1 (τn )). In such
+cases we may interpret the middle sum in (4) as a Riemann sum for a certain convolution integral.
+The following result formalizes this general principle, which will be used later to study in detail the
+stepsizes of power form αn = 1/(n + 1)a .
+12                                       M. BRAVO AND R. COMINETTI
+
+Theorem 2.11. Assume (h1 ), (h4 ), and suppose there exists a decreasing convex function h :
+(0, ∞) → (0, ∞) of class C 2 , and a constant γ ≥ 1, such that
+                                     
+                                      (a) νk−1 ≤ (1−αk ) h(τk ),
+(5)                     (∀k ≥ 2)
+                                      (b) α (1−α ) ≤ γ α (1−α ).
+                                              k     k       k+1   k+1
+
+Then, for all n ≥ 1 we have
+                                                             Z τn
+                                        κ̄   2µγ                  h(x)
+(6)            E(kxn − T xn k) ≤ Bn , √    + √                   √       dx + 2µ αn νn−1 + 4µ νn .
+                                       πτn     π              τ1   τn −x
+Proof. Consider the middle sum in (4). Since σ(0) = 1 the n-th term in the sum is 2µ αn νn−1 .
+Separating this last term, and bounding the other ones using the inequalities αk νk−1 ≤ αk (1 −
+                                                  p
+αk )h(τk ) = h(τk )(τk −τk−1 ) and σ(τn −x) ≤ 1/ π(τn −x), it suffices to show that
+                               n−1                           Z τn
+                               X    h(τk )                         h(x)
+(7)                                √         (τk −τk−1 ) ≤ γ      √       dx.
+                                    τ n − τk                  τ 1
+                                                                    τ n−x
+                               k=2
+                       √
+  Let f (x) = h(x)/ τn − x. We claim that there exists yn ∈ [τ1 , τn ) such that f decreases in the
+interval [τ1 , yn ] and increases in [yn , τn ]. Indeed, the derivative is
+                                                    h(x) + 2(τn − x)h0 (x)
+                                        f 0 (x) =
+                                                         2(τn − x)3/2
+whose numerator ψ(x) = h(x) + 2(τn − x)h0 (x) is non-decreasing as one can check by computing
+ψ 0 (x) = −h0 (x) + 2(τn − x)h00 (x) ≥ 0. Since ψ(τn ) = h(τn ) > 0, we either have ψ(τ1 ) < 0 and
+there exists some yn ∈ (τ1 , τn ) at which ψ(·), and thus also f 0 , changes from negative to positive, or
+ψ(τ1 ) ≥ 0 so that f 0 (x) ≥ 0 for all x ∈ [τ1 , τn ] and we may just take yn = τ1 .
+     Let kn be the largest k such that τk ≤ yn . Since f (·) decreases on [τ1 , yn ], we can bound the
+partial sum up to kn on the left of (7) by the integral, namely
+                       kn
+                       X                        Z τkn             Z τkn
+                          f (τk )(τk − τk−1 ) ≤      f (x) dx ≤ γ      f (x) dx.
+                            k=2                         τ1                   τ1
+
+For the rest of the sum we note (5) (b) gives (τk−τk−1 ) ≤ γ (τk+1−τk ) and since f increases in [yn , τn ]
+we can again bound the sum by an integral, that is
+              n−1
+              X                           n−1
+                                          X                          Z τn              Z τn
+                    f(τk )(τk −τk−1 ) ≤ γ     f (τk )(τk+1 −τk ) ≤ γ      f (x) dx ≤ γ    f (x) dx.
+             k=kn+1                      k=kn+1                         τkn+1            τkn
+
+Hence, (7) follows by summing both inequalities.                                                         
+                   STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                            13
+
+  Markov’s inequality readily gives error bounds that hold with high probability.
+
+Corollary 2.12. Under the assumptions of Theorem 2.11, for each p ∈ (0, 1) we have that the error
+bound kxn − T xn k ≤ Bn /p holds with probability at least 1 − p.
+
+Proof. This follows directly from the estimate in Theorem 2.11 by taking  = Bn /p in Markov’s
+inequality P(kxn − T xn k > ) ≤ E(kxn − T xn k)/ ≤ Bn /.                                           
+
+                3. An application to Q-learning for average reward MDPs
+
+  In this section we illustrate the previous results by an application to average reward Markov
+decision processes. As pointed out in [27, Section 10.3] and [29], this is arguably the most relevant
+setting for reinforcement learning, yet the results are far less complete compared to the case of
+discounted rewards. Up to our knowledge, our results establish the first rate of convergence for
+the RVI-Q-learning iteration. We begin by recalling the general framework and known facts, which
+can be found in the classical reference [23, Puterman]. This book also discusses a large variety of
+applications.
+  Consider a controlled Markov chain with state space S, action space A, and transition probabili-
+ties p(·|i, u) ∈ ∆(S), where S and A are finite sets and p(j|i, u) is the probability of moving to state
+j ∈ S when we choose action u ∈ A at state i ∈ S. Let g(i, u, j) ∈ R be a reward when moving
+from state i to j under action u.
+  Given an initial state i0 ∈ S and a sequence of actions (ut )t≥1 , the chain evolves at random
+according to it+1 ∼ p(·|it , ut ). We look for a stationary policy µ : S → A such that the control
+ut = µ(it ) maximizes the long term expected reward
+                                                  " T −1                   #
+                                                   1X
+(8)                          Rµ (i0 ) = lim inf E        g(it , ut , it+1 ) .
+                                         T →∞      T t=0
+
+  By adding a constant to the rewards, we may assume that 0 ≤ g(i, u, j) ≤ g for some g ∈ R, and
+therefore 0 ≤ Rµ (i0 ) ≤ g. This translation does not affect the optimal policies. Under the following
+standard “unichain” assumption
+           (
+              for every stationary policy µ the induced Markov chain with transition
+(uni)
+              probabilities Pi,j = p(j|i, µ(i)) has a single recurrent class,
+the lim inf in (8) is attained as a limit and Rµ (i0 ) does not depend on the state i0 . Moreover, the
+optimal value r = maxµ Rµ (i0 ) satisfies 0 ≤ r ≤ g and is attained for some optimal stationary
+14                                      M. BRAVO AND R. COMINETTI
+
+policy µ̄, which can be found by solving the following system of Bellman equations
+                                           "                                      #
+                                             X                                
+(9)                (∀i ∈ S)    V (i) = max        p(j|i, u) g(i, u, j) + V (j) − r ,
+                                            u∈A
+                                                   j∈S
+
+whose solution V ∈ RS is unique up to an additive constant. Denoting by Q(i, u) the expression
+within square brackets, we have V (i) = maxu∈A Q(i, u), and an optimal policy is then obtained by
+setting µ̄(i) = u where the action u ∈ A maximizes Q(i, ·). We refer to [23, Section 8.4] for details.
+  The system (9) can be expressed directly in terms of the Q-factors as
+                                           X
+                                                                          Q(j, u0 ) − r.
+                                                                                   
+(10)       (∀(i, u) ∈ S × A)     Q(i, u) =     p(j|i, u) g(i, u, j) + max
+                                                                       0     u ∈A
+                                                  j∈S
+
+Let d = |S×A| and consider the map M : Rd → Rd given by
+                                    X
+                                                                        0
+                                                                           
+                      M (Q)(i, u) =   p(j|i, u) g(i, u, j) + max
+                                                              0
+                                                                 Q(j, u   )  .
+                                                                     u ∈A
+                                           j∈S
+
+Denoting e ∈ Rd the all-ones vector with e(i, a) = 1 for all (i, a), then (10) reduces to the fixed
+point equation Q = H(Q) for the map H(Q) = M (Q) − r e, whose solution is again unique up to
+an additive constant.
+     Note that H is nonexpansive for k · k∞ . However, in general the optimal value r is unknown so
+one cannot directly implement a fixed point iteration. Moreover, in many situations the transition
+probabilities are not known and one only has access to samples from the distributions p(·|i, u).
+The RVI-Q-learning iteration studied in [1] addresses both issues by fixing a continuous function
+f : Rd → R such that f (Q + c e) = f (Q) + c for all c ∈ R and then, starting from an initial guess
+Q0 ∈ Rd , computes the recursive updates
+                                                               n                n    0
+                                                                                                 
+(rvi-q)             Qn (i, u) = (1−αn )Qn−1 (i, u)+αn g(i, u, ξiu )+max
+                                                                     0
+                                                                        Qn−1 (ξiu , u  )−f (Qn−1 )  .
+                                                                      u ∈A
+                          n
+with independent samples ξiu ∼ p(·|i, u) for each pair (i, u) ∈ S × A. Simple examples for f are the
+max function f (Q) = maxi,u Q(i, u), the average f (Q) = d1 i,u Q(i, u), and f (Q) = Q(i0 , u0 ) for a
+                                                              P
+
+fixed (i0 , u0 ) ∈ S × A.
+     There are two main difficulties to analyze the iteration (rvi-q). Firstly, while H is nonexpansive,
+this property is lost when we introduce the stabilizer f (Q). To deal with this issue we will study
+an hypothetical iteration where instead of f (Qn−1 ) we consider the unknown value r: convergence
+of (rvi-q) will follow from the convergence of the latter. The second difficulty comes from the
+fact that the variances θn2 might increase with n. However, we will show that they grow in a
+                  STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                           15
+
+controlled manner which can still be handled with our general results. For clarity we address both
+issues separately. We first establish a general consequence of Theorems 2.5 and 2.11 with possibly
+increasing variances, and later we show how it applies to (rvi-q).
+
+Theorem 3.1. Consider the iteration (skm) for αn = 1/(n + 1)a with 54 < a ≤ 1. Assume (h1 )
+and suppose in addition that there exist constants c and η such that
+                              
+                               (a) kxn k ≤ kxn−1 k + η αn almost surely, and
+(11)              (∀n ≥ 1)
+                               (b) E(kU k2 ) ≤ c(1 + E(kx k2 )).
+                                            n                n−1
+
+Then, the sequence (xn )n∈N generated by (skm) converges almost surely to some fixed point x∗ ∈
+Fix(T ), and there exists a constant κa such that
+                                               (      √
+                                         κa       O(1/ n1−a ) if 45 < a < 1,
+(12)                 E(kxn − T xn k) ≤ √ ∼            √
+                                          τn      O(1/ log n) if a = 1.
+
+Proof. The proof combines Theorem 2.5 and Theorem 2.11.
+Convergence. Since (h0 ) and (h1 ) are clearly satisfied, in order to apply Theorem 2.5 it suffices to
+check (h2 ). From (11)(a) we get kxn k ≤ kx0 k + η nk=1 αk ≤ η̃ τn for some constant η̃. Then, using
+                                                   P
+
+(11)(b) we can find another constant ζ such that
+
+                                   θn2 = E(kUn k22 ) ≤ ζ 2 τn−1
+                                                            2
+                                                                < ∞.
+
+Since τn is increasing, from Theorem B.2 in Appendix B we get
+                                                                      √
+                            qP                       qP
+                                n     n 2 2            n     n 2
+                       νn =     k=1 (πk ) θk ≤ ζτn−1   k=1 (πk ) ≤ ζτn αn+1 ,
+
+and therefore
+                           
+                                P∞                    P∞ 3/2
+                                 k=1 αk νk−1 ≤ S1 , ζ  k=1 αk τk−1 ,
+                           (a)
+                           
+(13)                               P∞                       P∞
+                                          2 2           2         2 2
+                                     k=1 αk θk ≤ S2 , ζ
+                           (b)
+                                                             k=1 αk τk−1 .
+                           
+
+When a < 1 we have τk−1 ∼ k 1−a while for a = 1 we get τk−1 ∼ ln k. It follows that for 54 < a ≤ 1
+both series S1 and S2 in (13) converge, and (h2 ) holds. Invoking Theorem 2.5 we conclude that xn
+converges almost surely to some x∗ ∈ Fix(T ).
+                                                          √
+Error bound. We next show that E(kxn − T xn k) ≤ Bn ∼ O(1/ τn ) using Theorem 2.11. Note that
+the assumptions are satisfied, including (h4 )(ii) which holds for κ̄ = 2kx0 − x∗ k + µ S1 with S1 as
+16                                      M. BRAVO AND R. COMINETTI
+
+in (13)(a), and with the finite constant
+                                          αk (1−αk )                      (k+1) −1a
+(14)                        γa = supk≥2 αk+1 (1−αk+1 )
+                                                       = supk≥2 ( k+2
+                                                                  k+1
+                                                                      )2a (k+2)a −1
+
+
+which is slightly larger than 1 and is maximal for a = 1 so that γa ≤ γ1 = 32
+                                                                           27
+                                                                              .
+                  √
+  From νn ≤ ζτn αn+1 it follows that the two last terms 2αn νn−1 + 4νn in Bn have an asymptotic
+           √                                            √
+order o(1/ τn ) and are dominated by the first term κ̄/ τn . For the convolution integral in Bn we
+                                                                            √
+need h(·) such that νk−1 ≤ (1 − αk )h(τk ). Combining the bound νk−1 ≤ ζτk αk with Lemmas B.6
+and B.7, we may find a constant ω such that this holds for h(x) = ω x (1 + x)−b with b = a/2(1−a)
+if a < 1, and for h(x) = ω x e−x/2 when a = 1. These functions are not convex and decreasing
+as required by Theorem 2.11, but these properties hold in some interval [xa , ∞). By suitably
+modifying h(x) on [0, xa ] we can ensure that these conditions are met everywhere. Splitting the
+                                                                                           √
+convolution integral, one can easily check that the integral over [0, xa ] is of order O(1/ τn ), while
+fixing ρ ∈ (0, 1) and noting that b > 2, the integral over [xa , τn ] can be estimated as
+                    Z τn                 Z ρτn               Z τn
+                         h(x)                    h(x)                 h(x)
+                        √        dx ≤         √         dx +      √         dx
+                     xa   τn − x          xa     τn − x       ρτn τn − x
+                                                      Z ∞             Z τn
+                                               1                           h(ρτ )
+                                     ≤ p                 h(x) dx +         √ n dx
+                                           (1−ρ)τn xa                  ρτn  τn − x
+                               √                                                      √
+which is again of order O(1/ τn ). Thus, all four terms in Bn are of order O(1/ τn ) and we may
+find some constant κa satisfying (12).                                                                
+
+     We now apply Theorem 3.1 to study the RVI-Q-learning iteration.
+
+Theorem 3.2. Assume (uni) and let αn = 1/(n + 1)a with 45 < a ≤ 1. Then, almost surely we
+have f (Qn ) → r and Qn → Q∗ ∈ Fix(H) where Q∗ is the unique fixed point satisfying f (Q∗ ) = r.
+Moreover, there exists a constant κa such that
+                                                        (       √
+                                          κa                O(1/ n1−a ) if 45 < a < 1,
+(15)                 E(kQn − H(Qn )k∞ ) ≤ √ ∼                   √
+                                           τn               O(1/ log n) if a = 1.
+
+Proof. We will compare (Qn )n∈N to an hypothetical sequence (Qrn )n∈N generated from the same
+initial point Qr0 = Q0 by the recursion
+                                                                                        0
+                Qrn (i, u) = (1 − αn )Qrn−1 (i, u) + αn g(i, u, ξiu
+                                                                 n           r     n
+                                                                                               
+(16)                                                                ) + max
+                                                                         0
+                                                                            Q   (ξ
+                                                                             n−1 iu  , u  ) − r  .
+                                                                        u ∈A
+
+This cannot be implemented (unless r is known), but we can still use it as a benchmark to compare
+with the original Qn . In order to study Qrn , we consider the filtration Fn = σ({(Qrn , ξ k ) : k ≤ n})
+                      STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                             17
+
+induced by the process, and denote Zn ∈ Rd the random vector with components
+                                                     n
+                                Zn (i, u) = g(i, u, ξiu ) + max
+                                                             0
+                                                                Qrn−1 (ξiu
+                                                                        n
+                                                                           , u0 ).
+                                                            u ∈A
+
+Observing that Qrn−1 is Fn−1 -measurable, we have E(Zn |Fn−1 ) = M (Qrn−1 ). Hence, Un = Zn −
+M (Qrn−1 ) is a martingale difference sequence and (16) can be rewritten in compact form in the
+framework of (skm) as
+                               Qrn = (1 − αn )Qrn−1 + αn H(Qrn−1 ) + Un .
+                                                                       
+
+Now, (h0 ) is clearly satisfied, while E(Un |Fn−1 ) = 0 holds by construction. On the other hand, from
+the definition of Un it follows directly that kUn k∞ ≤ g + 2kQrn−1 k∞ . Also, since |g(i, u, ξiu
+                                                                                              k
+                                                                                                 ) − v| ≤ g,
+from (16) we get kQrn k∞ ≤ kQrn−1 k∞ + g αn .
+  This shows that all the conditions of Theorem 3.1 are met. It follows that Qrn converges almost
+surely to some Qr ∈ Fix(H), and a fortiori f (Qrn ) → f (Qr ). Now, substracting (rvi-q) and (16),
+a simple induction shows that Qn − Qrn = cn e where the sequence cn ∈ R satisfies c0 = 0 and
+
+                                  cn = (1 − αn )cn−1 + αn r − f (Qrn−1 )),
+
+which implies cn → r − f (Qr ). It follows that Qn → Q = Qr + (r − f (Qr )) e which is also in Fix(T )
+with f (Q) = r, so that in fact Q = Q∗ and f (Qn ) → r. Finally, since Q 7→ Q − H(Q) is invariant
+by addition of constants, we have kQn − H(Qn )k∞ = kQrn − H(Qrn )k∞ and (15) follows directly
+from (12) applied to Qrn .                                                                                
+
+Remark 3.3. With a more detailed analysis, similar to the one in Appendix A, one can obtain an
+explicit expression for κa in terms of the primitives a, g and Q0 .
+
+3.1. Numerical example. We illustrate Theorem 3.2 on a small example borrowed from [13,
+Duff], with two states S = {1, 2} and two actions A = {u1 , u2 }. The rewards depend only on the
+final state with g(i, u, 1) = 1.0 and g(i, u, 2) = 10.0 for all (i, u) ∈ S × A, and the actions only
+control the transition probabilities as in Fig. 1.
+
+                                 0.7                                          0.1
+
+                0.3    1      action u1      2   0.3         0.9   1       action u2   2   0.9
+
+                                 0.7                                          0.1
+
+
+
+               Figure 1. Transition probabilities for actions u1 (left) and u2 (right)
+18                                      M. BRAVO AND R. COMINETTI
+
+Observe that this example clearly satisfies (uni). The optimal value is v = 71
+                                                                            8
+                                                                               and, for f (Q) =
+maxi,u Q(i, u), the fixed point Q∗ is
+                                                         !
+                                                1   53 −1
+                                           Q∗ =                .
+                                                8   17 71
+We performed 100 independent runs of RVI-Q-learning starting from Q0 ≡ 0 and with αn =
+1/(n + 1)a (10.000 iterations in each run). The upper plots in Fig. 2 show the evolution of the values
+f (Qn ) over 10 runs, for a = 1 (left) and a = 54 (right). The bottom plots show the corresponding
+rates for E(kQn − H(Qn )k∞ ), estimated as the average over the 100 runs and rescaled by the
+theoretical rates. These graphics are in agreement with our estimates, although the decreasing
+trend in the lower plots suggest that there might be some room for improving our asymptotic rates.
+The trajectories for a = 54 , which in fact is not covered by Theorem 3.2, are more noisy than the
+simulations for a = 1. Further simulations with a close to 12 exhibit larger and persistent oscillations,
+even when started from the solution Q0 = Q∗ , with no signs of achieving convergence.
+
+                         4. The case of uniformly bounded variances
+
+     In this section we derive more explicit error bounds for the case where the noise sequence Un is
+a martingale sequence which is uniformly bounded in L2 , that is, under the assumption
+
+(bVar)               There exists a finite constant θ ≥ 0 such that supn∈N θn ≤ θ.
+
+We analyze subsequently the case of constant stepsizes over a fixed horizon, and then the case of
+stepsizes of power form.
+
+4.1. Fixed horizon with constant stepsizes. By considering a pre-fixed number of iterations
+n0 we can still exploit the bound (4) with constant stepsizes αn ≡ α.
+
+Theorem 4.1. Assume (h1 ), (h4 ) and (bVar). For the (skm) iterates with constant stepsizes
+αn ≡ α and β = 1 − α, we have
+                                                     √  r        
+                                           κ̄     2µθ α    αn
+(17)                   E(kxn − T xn k) ≤ √      + √     2     +α+2 .
+                                          παβ n     1+β    πβ
+                                                                           2/3
+In particular, considering a fixed n0 and constant stepsizes αn ≡ 1/(6 n0 ) we have
+                                                          2(κ̄ + µθ)
+(18)                                E(kxn0 − T xn0 k) ≤      √6 n
+                                                                     .
+                                                                  0
+                                            STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                                                                                   19
+
+
+                                              RVI-Q-learning trajectories                                                              RVI-Q-learning trajectories
+                                                                                                                                                             1
+                                      11                                                                                        11
+                                                                  1                                                                                ↵n =
+                                                            ↵n = n+1
+
+
+
+
+         10 sample paths of f (Qn )                                                                10 sample paths of f (Qn )
+                                                                                                                                                          (n+1)4/5
+
+
+
+                                      10                                                                                        10
+
+
+                                       r                                                                                         r
+
+                                       8                                                                                         8
+
+
+                                       7                                                                                         7
+
+
+
+                                             2000         4000      6000       8000    10000                                          2000         4000      6000      8000   10000
+                                                          Iteration number n                                                                      Iteration number n
+
+
+
+                                      2.0                                                                                       2.0
+                                                         Expected Rate                                                                            Expected Rate
+                                                    p                                                                                        p
+                                                        ln n EkQn   H(Qn )k1                                                                 10
+                                                                                                                                                  n EkQn    H(Qn )k1
+
+
+
+
+          Average of 100 replicas                                                                  Average of 100 replicas
+                                      1.5                                                                                       1.5
+
+
+
+
+                                      1.0                                                                                       1.0
+
+
+
+
+                                      0.5                                                                                       0.5
+
+
+
+
+                                             2000         4000      6000       8000    10000                                          2000         4000      6000      8000   10000
+                                                          Iteration number n                                                                      Iteration number n
+
+
+
+       Figure 2. RVI-Q-learning for αn = 1/(n + 1)a with a = 1 (left) and a = 45 (right).
+
+
+Proof. With constant stepsizes we have τn = αβ n and πkn = αβ n−k so that
+                                                                           pPn                                     √
+                                                                                               2(n−k) ≤ √ θα     θ α
+                                                                 νn ≤ θα              k=1 β                    = √
+                                                                                                                   1+β
+                                                                                                                       ,
+                                                                                                         1−β 2
+
+                                                                                                                                                                          √
+                                                                            θ α
+and then (17) follows directly from (6) with the constant function h(x) ≡ β √ 1+β
+                                                                                  . Substituting
+                  2/3
+α = 1/(6 n0 ) in (17) and after some routine algebra we get
+                                           √                                
+                                     1                                    2µθ
+                E(kxn0 − T xn0 k) ≤ √      √  6 κ̄      2+α
+                                                   + √6 6√n + √  1       √
+                                                                           2−α
+                                        01
+                                    6 n     π(1−α)          0 3 π(1−α)
+
+
+and (18) follows using α ≤ 16 and n0 ≥ 1 to bound the coefficients of κ̄ and µθ in the expression in
+parenthesis.                                                                                                                                                                          
+20                                      M. BRAVO AND R. COMINETTI
+
+                                             2/3
+Remark 4.2. The choice αn ≡ 1/(6 n0 ) is just one among many alternatives. As a mater of fact,
+for any given values of (κ̄, θ, µ, n0 ) the bound (17) has a unique minimizer α∗ ∈ (0, 1) which can be
+                                                                   √
+computed numerically and yields a nonasymptotic bound O(1/ 6 n0 ) with a smaller proportionality
+constant.
+
+Remark 4.3. A natural question is whether the error bound (17) can be improved by using some
+variance reduction technique. The simplest approach would be to use a minibatch of size k at every
+iteration, which reduces the variance from θ2 to θ2 /k, and then choose k and α that jointly minimize
+the bound for a fixed horizon n0 . In terms of oracle complexity, it turns out that for a given budget
+N = k n0 of calls to the oracle the optimal batch size is k = 1, which is just the original iteration.
+We also tried variable batch sizes but were unable to improve the complexity. This confirms that
+(skm) has already some built-in variance reduction. Naturally, this does not exclude the possibility
+of an improvement by using more sophisticated variance reduction schemes, or alternative bounds
+stronger than those in Theorem 2.1.
+
+4.2. Stepsizes of power form. Let us use (6) to obtain explicit error bounds and rates of con-
+vergence for stepsizes of the form αn = 1/(n + 1)a with 21 ≤ a ≤ 1. We will see that the last two
+terms 2µθ αn νn−1 + 4µθ νn in Bn are asymptotically dominated by the first two, and that each one
+of the leading terms may dominate depending on the exponent a. For a = 23 both terms are of the
+                                                                             √
+same order and yield the fastest rate which turns out to be of order O(ln(n)/ 6 n).
+     To state precisely our next result we denote
+
+                                       n
+                                       X                      n
+                                                              X
+                                                                      1           1
+(19)                        τn (a) =         αk (1 − αk ) =         (k+1)a
+                                                                           (1 − (k+1)a)
+
+                                       k=1                    k=1
+
+
+and, in addition to γa given by (14), we introduce the following parameters
+                            
+                                            a
+                              b =
+                             a          2(1−a)
+                            
+                            
+                                                            2(1−a)/a
+(20)                            λa =         3a/2 − 3−a/2     − (1−a) τ2 (a)
+                                                              1−ba
+                                        2γa
+                            
+                                da   = 3a−2 λa + (1 − a) τ1 (a)      .
+                            
+
+
+Theorem 4.4. Assume (h1 ), (h4 ), (bVar), and αn = 1/(n+1)a with 12 ≤ a ≤ 1. Then E(kxn −
+T xn k) ≤ Bn,a with explicit error bounds Bn,a (see Theorems A.1 to A.3), whose tight asymptotics
+                   STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                              21
+
+as n → ∞ are given by
+                             
+                                2µθγa Γ(1 − ba ) 1
+                               √                                    if 12 ≤ a < 23 ,
+                             
+                             
+                                         Γ( 32 − ba ) na− 2
+                                                          1
+                             
+                             
+                             
+                                 1 −  a
+                             
+                               2µθγ2/3 ln(n)
+                             
+                             
+                              √3π √                                if a = 23 ,
+                             
+                             
+                                          6
+                                              n
+                             
+(21)                  Bn,a ≈                   √
+                              (κ̄ + 2µθda ) 1 − a           1
+                                         √                          if 23 < a < 1,
+                             
+                             
+                             
+                             
+                                          π            n (1−a)/2
+                             
+                             
+                             
+                             
+                             
+                              κ̄ + 2µθd1 1
+                                    √        √                      if a = 1.
+                             
+                             
+                                      π
+                             
+                                               ln n
+Here, Γ stands for the Gamma function.
+
+Proof. The proof is technical and is presented in Appendix A. It proceeds by analyzing separately
+the different ranges of the exponent a.                                                                 
+
+  Notice that when a approaches 21 the convergence rate slows down, and for a = 12 the error bound
+                                                                    √
+does not converge to 0 but rather it has a strictly positive limit 2 2π γ1/2 µθ ∼ 5.16 µθ.
+
+4.3. An application in stochastic optimization. Consider the standard stochastic gradient
+descent iteration for minimizing an expected cost f (x) = E(F (x, ξ)), with F : Rd × Ξ → R and ξ a
+random variable with values in Ξ, namely
+
+(sgd)                                xn = xn−1 − γn ∇x F (xn−1 , ξn )
+
+where the ξn ’s are i.i.d. samples of the random variable ξ.
+  We assume that f (·) is a well-defined smooth convex function, and that F (·, ξ) is differentiable
+with ∇f (x) = E(∇x F (x, ξ)) globally Lipschitz with a known constant L for k · k2 . As noted in §1.3,
+(sgd) coincides with (skm) for T x = x − L2 ∇f (x), αn = γn L/2, and Un = L2 [∇f (xn ) − ∇x F (xn , ξn )].
+Clearly Fix(T ) = Argmin f , which we assume nonempty, while [5, Corollary 10] shows that T is
+nonexpansive.
+                                                          1         1
+Corollary 4.5. In the above (sgd) setting, take γn = L2 (n+1)a with 2 ≤ a ≤ 1 and suppose that the
+
+noise has uniformly bounded variance E(kUn k22 ) ≤ θ2 . Then,
+
+                                          E(k∇f (xn )k2 ≤ L2 Bn,a ,
+                                                          
+(22)                         (∀n ≥ 1)
+
+with Bn,a as in Theorem 4.4. Moreover, if a ∈ ( 32 , 1] then the iterates (xn )n∈N converge almost surely
+towards some point in Argmin f .
+22                                     M. BRAVO AND R. COMINETTI
+
+Proof. The bound (22) follows directly from Theorem 4.4, while almost sure convergence for a > 23
+is a consequence of Theorem 2.5 (see also Theorem 2.7).                                               
+
+     As far as we know, almost sure convergence of the (sgd) iterates was only proved recently in [20,
+Liu and Yuan] for a ∈ ( 23 , 1) and under a weak assumption on the variances (cf. [20, Condition
+ABC]). In the special case of bounded variances, we recover this from Theorem 2.5, including also
+the limit case a = 1.
+     In addition, [20] established almost sure asymptotic rates for the optimality gap f (xn ) − min f .
+As mentioned in §2.4, the pathwise estimate (3) can also be used to obtain almost sure rates for the
+gradient norm k∇f (xn )k2 . However, in contrast with the error bound in expectation (22), these
+almost sure rates involve stochastic multiplicative constants for which in general there is no a priori
+control, so they do not provide explicit error bounds. In this sense, we note that Markov’s inequality
+and (22) readily give error bounds that hold with high probability.
+     In order to put (22) in perspective, we recall that for stepsizes γn = c/na with c constant, Bach
+and Moulines obtained in [4, Theorem 4] explicit error bounds for the expected optimality gap
+E f (xn ) − min f ≤ bn,a . This readily yields an alternative bound for E(k∇f (xn )k2 ). Indeed, a
+                 
+
+convex function with L-Lipschitz gradient satisfies
+                                           1
+                f (x) + h∇f (x), y − xi + 2L k∇f (y) − ∇f (x)k22 ≤ f (y)    (∀x, y ∈ Rd ),
+
+so that taking y = xn and x ∈ Argmin f we get k∇f (xn )k22 ≤ 2L(f (xn ) − min f ), and Jensen’s
+inequality then yields
+
+                                       E(k∇f (xn )k2 ≤ 2L bn,a .
+                                                     p
+(23)
+
+  It is noteworthy that both (22) and (23) give exactly the same asymptotic rates, except for a = 23
+       p          √                    √
+where bn,a ∼ 1/ 6 n and Bn,a ∼ log n/ 6 n differ by a log factor. The coincidence in the asymptotic
+rates is remarkable since our analysis holds for general nonexpansive maps and does not exploit the
+existence of a potential nor the special properties of the Euclidean norm. On the other hand, our
+estimates are slightly more general since [4] requires stronger assumptions: ∇x F (·, ξ) is almost
+surely Lipschitz with a uniform constant L, and the conditional variances E(kUn k22 |Fn−1 ) ≤ θ2
+are uniformly bounded almost surely. In contrast, we only require Lipschitzianity of the expected
+gradient ∇f (·) and the weaker condition E(kUn k22 ) ≤ θ2 .
+                                                                                     √
+  The best rates in Eqs. (22) and (23) are obtained for a = 2/3, with orders O(1/ 6 n) and
+         √                                     √
+O(log(n)/ 6 n) respectively. A faster rate O(1/ 4 n) was obtained in [14, Ghadimi and Lan] for
+                   STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                                   23
+
+a randomized version of (sgd) which, instead of the last iterate xn , outputs a random iterate
+x̂ ∈ {x0 , . . . , xn } selected with suitable probabilities. In the next section §5 we show that, for gen-
+eral nonexpansive maps in Euclidean spaces, the same improvement holds for a randomized version
+of (skm).
+  The asymptotic rates in gradient norm for stochastic optimization have been improved signifi-
+cantly using more elaborated iterations which, however, do not seem to fit into the basic settings
+of (sgd) nor (skm). Up to our knowledge, the fastest rate is achieved by the (sgd3) iteration in
+                                        √
+[3, Allen-Zhu] which attains a rate O(1/ n).
+
+                            5. Some comments on the Euclidean case
+
+  Let us consider the special case where k · k is a norm in Rd induced by an inner product h· , ·i.
+Denote R = d(x0 , Fix(T )) the distance from x0 to Fix(T ), and let µ as in (1) relating k · k to
+the standard L2 -norm. By adapting the classical analysis of Browder and Petryshyn [9] for the
+deterministic Krasnoselskii–Mann iteration, i.e. when Un ≡ 0 in (skm), we have the following.
+
+Proposition 5.1. Consider the iteration (skm) in a Euclidean space, and assume (h1 ). Then, for
+all n ∈ N we have
+                        n
+                        X                                                           n
+                                                                                    X
+                              αk (1 − αk ) E kT xk−1 − xk−1 k   2         2     2
+                                                                                          αk2 θk2 .
+                                                                    
+(24)                                                                    ≤R +µ
+                        k=1                                                         k=1
+                                              Pn
+Equivalently, letting pnk   = αk (1 − αk )/        i=1 αi (1 − αi ) for k = 1, . . . , n, and selecting a random
+iterate x̂n ∈ {x0 , . . . , xn−1 } with probabilities P(x̂n = xk−1 ) = pnk , we have
+                                                        R2 + µ2 nk=1 αk2 θk2
+                                                                     P
+(25)                                 E kT x̂n − x̂n k ≤ Pn
+                                                     2
+                                                                                .
+                                                               k=1 αk (1 − αk )
+
+Proof. Let ζk = kxk − y0 k with y0 the projection of x0 onto Fix(T ). Using the parallelogram rule
+we obtain
+
+          ζk2 = k(1−αk )xk−1 + αk (T xk−1 + Uk ) − y0 k2
+                        2
+              = (1−αk )ζk−1 + αk kT xk−1 − T y0 + Uk k2 −αk (1−αk )kT xk−1 − xk−1 + Uk k2 .
+
+Since T xk−1 is Fk−1 -measurable and E(Uk |Fk−1 ) = 0, using the law of total expectation and the
+nonexpansivity of T , it follows that
+        E kT xk−1 − T y0 + Uk k2 = E kT xk−1 − T y0 k2 + 2hT xk−1 − T y0 , Uk i + kUk k2
+                                                                                        
+
+                                      ≤ E ζk−1
+                                           2
+                                                 + E kUk k2 ,
+                                                          
+24                                   M. BRAVO AND R. COMINETTI
+
+and similarly
+                    E kT xk−1 −xk−1 +Uk k2 = E kT xk−1 −xk−1 k2 +E kUk k2 .
+                                                                       
+
+Combining these inequalities, we deduce
+
+             E ζk2 ≤ E ζk−1 2
+                                 + αk2 E kUk k2 − αk (1 − αk ) E kT xk−1 − xk−1 k2 ,
+                                                                               
+
+and then (24) follows by telescoping and using the bound E(kUk k2 ) ≤ µ2 θk2 .
+                                                                                                  
+
+Remark 5.2. Note that (25) implies a bound for the minimum expected residual
+                                                R2 + µ2 nk=1 αk2 θk2
+                                                          P
+                        min E kT xk − xk k ≤ Pn
+                                             2
+                                                                      ,
+                                                     k=1 αk (1 − αk )
+                      k=0,...,n−1
+
+however detecting the k at which the minimum is attained would require to compute the expected
+values, which is not possible in general. In contrast, the random output x̂n is easily implemented.
+
+Remark 5.3. In the deterministic case we have that kxn − T xn k is nonincreasing, and one can
+obtain a bound for the last-iterate residual, namely
+                                                              R2
+                                  kT xn − xn k2 ≤ Pn+1                    .
+                                                         k=1 αk (1 − αk )
+
+However, in the stochastic case it seems unlikely to have E (kxn − T xn k2 ) decreasing so the error
+bound (25) is stated for the random iterate x̂n .
+
+     In order to compare these Euclidean space estimates with our previous error bounds for the
+expected fixed-point residual (instead of its square), we can apply Jensen’s inequality to (25) to
+obtain
+                                                     s
+                                                         R2 + µ2 nk=1 αk2 θk2
+                                                                 P
+(26)                          E (kT x̂n − x̂n k) ≤        Pn                  .
+                                                            k=1 αk (1 − αk )
+
+We conclude by analyzing the case of bounded variances with constant stepsizes and stepsizes of
+power form.
+
+Corollary 5.4. Assume (h1 ) and (bVar). Consider (skm) in a Euclidean space over a fixed hori-
+                                          √
+zon n0 with constant stepsizes αn ≡ α = 1/ n0 + 1. Let x̂n0 be a random iterate as in Theorem 5.1.
+Then,
+                                                       p
+                                                         R 2 + µ2 θ 2
+(27)                            E (kT x̂n0 − x̂n0 k) ≤ p         √ .
+                                                        τ1 (1/2) 4 n0
+                  STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                            25
+
+   As in Theorem 4.1 one can find the optimal constant stepsize α for a fixed horizon n0 , which yields
+                                                                                       √
+a similar error bound with a slightly smaller constant. Note also that the rate O(1/ 4 n0 ) in (27) is
+                     √
+faster than the O(1/ 6 n0 ) from Theorem 4.1. However, these results are not directly comparable.
+Indeed, Theorem 4.1 holds for the last iterate xn0 and applies to general normed spaces but under
+(h4 ), whereas Theorem 5.4 is valid for the random iterate x̂n0 and in Euclidean spaces although it
+only requires Fix(T ) to be nonempty.
+  For stepsizes of power form we get the next estimate, with τn (a) as in (19).
+
+Corollary 5.5. Assume (h1 ) and (bVar). Let us consider the iteration (skm) in a Euclidean
+space, for αn = 1/(n + 1)a with 12 ≤ a ≤ 1. Let x̂n be a random iterate as in Theorem 5.1. Then,
+                                         p
+                                            R2 + µ2 θ2 ln (n + 1)
+                                                                   if a = 12 ,
+                                        
+                                                            √
+                                        
+                                              p
+                                                           4
+                                        
+                                        
+                                                 τ1 (1/2) n
+                                        
+                                        
+                                         p
+                                           R2 + µ2 θ2 /(2a − 1)
+(28)               E (kT x̂n − x̂n k) ≤     p                      if 12 < a < 1,
+                                               τ1 (a) n (1−a)/2
+                                        
+                                           √
+                                        
+                                        
+                                                 p
+                                          2  ln 2     R 2 + µ2 θ 2
+                                        
+                                        
+                                                                   if a = 1.
+                                        
+                                        
+                                             p
+                                                 ln (n + 1)
+                                        
+
+Proof. This follows from (26) by combining the simple integral upper estimate
+                n        n
+                                                       (
+                                                         1/(2a − 1) if 12 < α ≤ 1,
+                                        Z n+1
+              X
+                    2
+                        X       1              1
+                   αk =               ≤           dx ≤
+               k=1      k=1
+                            (k + 1)2a    1    x2a         ln(n + 1) if α = 12 ,
+with the lower estimates τn (a) ≥ τ1 (a) n1−a for 12 ≤ a < 1, and τn (1) ≥ 4 ln1 2 ln(n + 1) for a = 1,
+established in Theorem B.8 in the Appendix B.                                                        
+                                                        √
+  Note that for a = 23 the bound (28) is of order O(1/ 6 n), which is slightly faster than the rate
+        √
+O(ln(n)/ 6 n) in Theorem 4.4, while for 23 < a ≤ 1 both analysis yield the same rate O(1/n(1−a)/2 ).
+On the other hand, while the rates in Theorem 4.4 deteriorate for a < 32 , in the Euclidean setting of
+                                                           √
+Theorem 5.5 the rates improve attaining an order O(ln(n)/ 4 n) for a = 21 . However, as mentioned
+before, these bounds apply in different settings: the random iterate x̂n and Euclidean spaces for
+(28), and the last iterate xn and general normed spaces in Theorem 4.4.
+26                                    M. BRAVO AND R. COMINETTI
+
+                                         Acknowledgments
+
+     We are deeply indebted to 4 reviewers for their insightful comments on the original manuscript
+which prompted us to enhance the scope of the paper, notably by including the application to
+RVI-Q-learning. We also warmly thank our friend and colleague Cristóbal Guzmán for stimulating
+discussions on this topic and, in particular, for pointing out the interpretation of (24) as an expected
+                                                                            √
+value for a random selection of the iterates, and the resulting rate O(1/ 4 n0 ) for constant stepsizes.
+
+                                             References
+
+ [1] Abounadi, J., Bertsekas, D. and Borkar, V.S. (2001). Learning algorithms for markov
+       decision processes with average cost. SIAM J. Control Optim., 40 681–698.
+ [2] Abounadi, J., Bertsekas, D. and Borkar, V.S.. (2002). Stochastic approximation for
+       nonexpansive maps: application to Q-learning algorithms. SIAM J. Control Optim., 41 1–22.
+ [3] Allen-Zhu, Z. (2018). How to make the gradients small stochastically: Even faster convex
+       and nonconvex SGD. In: Advances in Neural Information Processing Systems 31.
+ [4] Bach, F. and Moulines, E. (2011). Non-asymptotic analysis of stochastic approximation
+       algorithms for machine learning. In: Advances in Neural Information Processing Systems 24.
+ [5] Baillon, J.-B. and Haddad, G. (1977). Quelques propriétés des opérateurs angle-bornés et
+       n-cycliquement monotones. Israel J. Math., 26 137–150.
+ [6] Benaı̈m, M. (1999). Dynamics of stochastic approximation algorithms. In Séminaire de
+       Probabilités, XXXIII, vol. 1709 of Lecture Notes in Math. Springer, Berlin, 1–68.
+ [7] Benaı̈m, M. and Faure, M. (2012). Stochastic approximations, cooperative dynamics and
+       supermodular games. Ann. Appl. Probab., 22 2133–2164.
+ [8] Bravo, M., Cominetti, R. and Pavez-Signé, M. (2019). Rates of convergence for inexact
+       Krasnosel’skii-Mann iterations in Banach spaces. Math. Program., 175 241–262.
+ [9] Browder, F.E. and Petryshyn, W.V. (1967). Construction of fixed points of nonlinear
+       mappings in Hilbert space. J. Math. Anal. Appl., 20 197–228.
+[10] Chen, H. (2002). Stochastic Approximation and Its Applications. Kluwer Academic Publishers,
+       Dordrecht, Netherlands.
+[11] Combettes, P.L. and Pesquet, J.C. (2015). Stochastic quasi-Fejér block-coordinate fixed
+       point iterations with random sweeping. SIAM J. Optim., 25 1221–1248.
+[12] Combettes, P.L. and Pesquet, J.C. (2016). Stochastic approximations and perturbations
+       in forward-backward splitting for monotone operators. Pure Appl. Funct. Anal., 1 13–37.
+                   STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                      27
+
+[13] Duff, M. (1995). Q-learning for bandit problems. In Machine Learning Proceedings 1995
+    (A. Prieditis and S. Russell, eds.). Morgan Kaufmann, 209–217.
+[14] Ghadimi, S. and Lan, G. (2013). Stochastic first- and zeroth-order methods for nonconvex
+    stochastic programming. SIAM Journal on Optimization, 23 2341–2368.
+[15] Iusem, A.N., Jofré, A., Oliveira, R. and Thompson, P. (2019). Variance-based sto-
+    chastic extragradient methods with linear search for stochastic variational inequalities. SIAM
+    J. Control Optim., 29 175–206.
+[16] Jaakola, T., Jordan, M.I.. and Singh, S.P.. (1994). On the convergence of stochastic
+    iterative dynamic programming algorithms. Neural Comput., 6 1185–1201.
+[17] Jofré, A. and Thompson, P. (2019). On variance reduction for stochastic smooth convex
+    optimization with multiplicative noise. Math. Program., 174 253–292.
+[18] Kiefer, J. and Wolfowitz, J. (1952). Stochastic estimation of the maximum of a regression
+    function. Ann. Math. Statist., 23 462–466.
+[19] Kushner, H.J. and Yin, G. (2003). Stochastic Approximation and Recursive Algorithms and
+    Applications. Springer- Verlag, New York.
+[20] Liu, J. and Yuan, Y. (2022). On almost sure convergence rates of stochastic gradient meth-
+    ods. In 35th Annual Conference on Learning Theory (M. R. Po-Ling Loh, ed.), vol. 178 of
+    Proceedings of Machine Learning Research. 1–21.
+[21] Nemirovskii, A., Juditskii, A., Lan, G. and Shapiro, A. (2009). Robust stochastic
+    approximation approach to stochastic programming. SIAM J. Optim., 19 1574–1609.
+[22] Polyak, B.T. and Juditsky, A.B. (1992). Acceleration of stochastic approximation by
+    averaging. SIAM J. Control Optim., 30 838–855.
+[23] Puterman, M. (1994, 2005). Markov Decision Processes: Discrete Stochastic Dynamic Pro-
+    gramming. John Wiley and Sons, Hoboken, New Jersey.
+[24] Robbins, H. and Siegmund, D. (1971). A convergence theorem for non-negative almost
+    supermartingales and some applications. In: Optimization Methods and Statistics, J.S. Rustagi,
+    ed. 233–257.
+[25] Robins, H. and Monro, S. (1951). A stochastic approximation method. Ann. Math. Statist.,
+    22 400–407.
+[26] Rosasco, L., Villa, S. and Vu, B.C. (2016). Stochastic forward-backward splitting for
+    monotone inclusions. J. Optim. Theory Appl., 169 388–406.
+28                                     M. BRAVO AND R. COMINETTI
+
+[27] Sutton, R. and Barto, A. (2018). Reinforcement Learning. 2nd ed. The MIT Press,
+       Cambridge, Massachusetts.
+[28] Tsitsiklis, J.N. (1994). Asynchronous stochastic approximation and Q-learning. Mach.
+       Learn., 16 185–202.
+[29] Wan, Y., Naik, A. and Sutton, R. (2021). Learning and planning in average-reward
+       markov decision processes. In Proceedings 38th International Conference on Machine Learning
+       (M. Meila and T. Zhang, eds.), vol. 139 of Proc. Machine Learning Research. 10653–10662.
+
+                              Appendix A. Proof of Theorem 4.4
+
+     In this Appendix we establish explicit error bounds in the case of stepsizes of power form αn =
+1/(n + 1)a with 21 ≤ a ≤ 1 and bounded variances θn ≤ θ. We adopt the notations in (20), and
+for brevity we just write τn for the expression τn (a) given by Eq. (19). The analysis is split into
+three Lemmas that deal with different ranges for the exponent a, and which are based on some
+additional technical results presented in the next Appendix B. These error bounds are then used to
+prove Theorem 4.4.
+     We first deal with the case a < 1. In view of Theorem B.6 we can use the estimate (37) and
+apply the integral bound (6) with
+                                                                    a
+                                     h(x) = θ (λa + (1 − a)x)− 2(1−a) .
+
+The corresponding integral in Bn can be expressed in closed form in terms of Gauss’ hypergeometric
+function 2 F1 (a, b; c; z), which yields the following error bound.
+
+Proposition A.1. Assume (h1 ) and (h4 ). Let αn = 1/(n+1)a with 21 ≤ a < 1, and denote
+                            n −τ1 )
+       a
+b = 2(1−a) and zn = (1−a)(τ
+                     λa +(1−a)τn
+                                    . Then E(kxn − T xn k) ≤ Bn,a with
+                                           √
+                                        γa τn −τ1                                       √
+                           √ κ̄ + 4µθ                           1 3
+                                                                         
+                  Bn,a ,          √                  b 2 F 1 b,  ;  ; zn   + 2µθ (αn +2) αn .
+                            πτn     π (λa +(1−a)τn )            2 2
+
+
+Proof. This follows by majorizing the two last terms in (6) by using Theorems B.1 and B.2 which
+                          √              √
+give respectively νn−1 ≤ θ αn and νn ≤ θ αn , and computing the integral term in the bound using
+                                 −x
+the change of variables y = ττnn−τ 1
+                                     which yields
+                       Z τn                       √
+                                                              Z 1
+                             h(x)                θ τn −τ1
+(29)                        √          dx = (λa +(1−a)τn )b        √1 (1 − zn y)−b dy
+                                                                     y
+                        τ1    τ n −  x                          0
+                                                  √
+                                                    τn −τ1
+                                          = (λa2θ+(1−a)τ               1 3
+                                                                                 
+                                                           )b 2 F1 b, 2 ; 2 ; zn
+                                                         n
+                    STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                                              29
+
+where the last equality results by matching the coefficients in the known identity
+                                                   Z 1
+                                           Γ(c)
+                    2 F1 (a, b; c; z) = Γ(b)Γ(c−b)     y b−1 (1 − y)c−b−1 (1 − z y)−a dy.
+                                                       0                                                                 
+
+
+  For a = 32 we get the following simpler expression for the previous error bound.
+
+Proposition A.2. Assume (h1 ) and (h4 ), and let c = 3 λ2/3 ≈ 1.76393 and γ2/3 = αα45 (1−α 4)
+                                                                                      (1−α5 )
+                                                                                              ≈
+1.06584. Then
+                                                                     √               
+                        κ̄      6µθγ2/3           (τ −τ )+ (c+τ )(τ −τ )                               √
+(30)           Bn, 2 = √πτ
+                   3       n
+                             + √π√c+τ   n
+                                          ln 1 + 2 n 1 c+τ1 n n 1                         + 2µθ (αn +2) αn .
+                                                                                  √
+Proof. This follows from the identity 2 F1 (1, 12 ; 32 ; z) = 2√1 z ln( 1+ z
+                                                                          √ ).
+                                                                        1− z
+                                                                                                                         
+
+                                                                                                           Pn        k
+  Let us consider next the case a = 1, that is to say, αn = 1/(n + 1). In this case τn =                       k=1 (k+1)2 ≈
+                                               2
+ln n, and in fact τn − ln(n+1) ∈ (γ − π6 , 0) with γ ≈ 0.5772 the Euler-Mascheroni constant. In
+                                                                                                 √
+view of Theorem B.7, we can apply (6) by using h(x) = θ ω e−x/2 with ω = 23 e17/72 . The resulting
+convolution integral in the error bound can be expressed in closed form in terms of Dawson’s function
+                                                  Z x
+                                              −x2       2        1
+                                    D+ (x) , e        ey dy ≈
+                                                   0            2x
+where the asymptotics for x large follows from l’Hôpital’s rule.
+                                                                                                       √ 1/9 32
+Proposition A.3. Assume (h1 ) and (h4 ). Let αn = 1/(n + 1) and denote d1 =                             3 e 27 . Then,
+for all n ≥ 1 we have E(kxn − T xn k) ≤ Bn,1 with
+                                     √           q           
+                            κ̄      2 2 µθd1        1      1
+                                                                 2µθ(2n + 3)
+(31)               Bn,1 , √     +      √      D+    2
+                                                      τn − 4    +
+                            πτn          π                         (n + 1)3/2
+and Bn,1 ≈ κ̄+2µθd
+              √ 1 √1
+               π   ln n
+                        as n → ∞.
+                                                                                           p
+Proof. Considering τ1 = 14 and using the change of variables y =                            (τ −x)/2, the convolution
+integral in the error bound (6) can be computed as
+                             Z τ                                          Z √(τ −τ1 )/2
+                                  ωe  −x/2
+                                                      τ√          2
+                                  √      dx = 2 2 ωe− 2         ey dy
+                               τ1   τ −x                0
+                                              √ 1/9     q    
+                                            =  6 e D+ τ − 14 /2
+                                                       √
+                                                           3√e1/9
+                                                   ≈          τ
+                                                                  .
+30                                             M. BRAVO AND R. COMINETTI
+
+                                                                               αk (1−αk )
+Then (31) follows by substituting in (6) with τ = τn ≈ ln n, and noting that αk+1 (1−αk+1 )
+                                                                                            is decreasing
+so that its maximum γ1 = 32
+                         27
+                            is attained for k = 2.                                                           
+
+     Combining the estimates in these preliminary Lemmas, we now proceed to present the proof of
+Theorem 4.4.
+
+Proof of Theorem 4.4. For a = 1 the tight asymptotics of Bn,1 in (21) was already established
+in Theorem A.3. Let us then consider the case 21 ≤ a < 1.
+  We estimate the asymptotic rate for the three terms in the bounds Bn,a in Theorem A.1. The
+                                               √
+simplest one is the third term I3 , 2µθ (αn +2) αn ≈ 4µθ n−a/2 , which holds for all 21 ≤ a < 1. On
+                                                                                       1−a
+the other hand, an integral estimate for the sum τn yields τn ≈ n1−a , so that the first term in Bn,a
+                      √
+         κ̄
+is I1 , √πτ n
+              ≈ κ̄ √1−a
+                     π
+                        n−(1−a)/2 . Note that for a > 21 and n large I3 is negligible compared to I1 ,
+whereas for a = 21 they are both of the same order O(n−1/4 ).
+                                                           R τn h(x)
+  Let us now analize the rate of the second term I2 , 2µγ
+                                                       √       √
+                                                         π τ1 τn−x
+                                                                     dx, which we separate in three
+cases depending on the location of a.
+                                                                 n −τ1 )
+Case a ∈ [ 21 , 23 ). From (29) with b = 2(1−a)
+                                            a
+                                                and zn = (1−a)(τ
+                                                          λa +(1−a)τn
+                                                                         , we have
+                                                                                  Z 1
+                         2µγa τn h(x)                             √
+                             Z
+                                                         2µθγ       τn −τ1
+(32)                I2 , √      √     dx =                √ a                           √1 (1 − zn y)−b dy
+                                                            π (λa +(1−a)τn )b             y
+                           π τ1 τn −x                                              0
+                                                                            Z 1
+                                                                     1
+                                                     ≈ √2µθγa n 2 −a              √1 (1 − zn y)−b dy
+                                                                                    y
+                                                           π(1−a)
+                                                                             0
+
+We observe that zn increases and converges to 1 and, since b < 1, by monotone convergence the
+latter integral has a finite limit when n → ∞, namely1
+                                    Z 1
+                                                          √ Γ(1−b)
+                                        √1 (1 − y)−b dy =  π Γ( 3 −b) .
+                                          y                                  2
+                                              0
+
+                 Γ(1−b)        1
+Hence I2 ≈ 2µθγ
+           √ a
+             1−a Γ( 3 −b)
+                          n 2 −a and since 12 − a < 21 (1 − a) it follows that I2 dominates I1 and I3 in the
+                          2
+error bound. This proves (21) for a ∈ [ 21 , 23 ).
+Case a = 23 . Here we have τn ≈ 3 n1/3 and one can readily check that the dominating term is
+                              2µθγ2/3 ln n
+precisely I2 with I2 ≈         √
+                                 3π n1/6
+                                             which follows directly from (30). This establishes the case a = 23
+in (21).
+
+     1Recall the definition of the gamma function Γ(z) =
+                                                           R∞
+                                                            0
+                                                                xz e−x dx
+                   STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                         31
+
+Case a ∈ ( 32 , 1). Here we have b > 1 and since zn → 1 the integral on the left-hand side of (32)
+diverges as n → ∞. To deal with this case we use the original expression which we write as
+                              2µθγa ∞ (λa + (1 − a)x)−b
+                                    Z
+                        I2 = √              p             1[τ1 ,τn ] (x) dx.
+                                πτn 0         1−x/τn
+Using Lebesgue’s dominated convergence theorem, the latter integral converges to
+                          Z ∞
+                                                                    1−b
+                              (λa + (1 − a)x)−b dx = 2(λa +(1−a)τ
+                                                           3a−2
+                                                                  1)
+                                                                        .
+                                   τ1
+
+It follows that I2 ≈ 2µθd
+                     √ a which is of the same order as I1 ≈ √ κ̄ , and both terms combined yield
+                       πτn                                   πτn
+the asysmptotics (21) for a ∈ ( 23 , 1).                                                           
+
+                    Appendix B. Estimates for stepsizes of power form
+                                                                           1
+  This Appendix considers again the case of stepsizes of power form αn = (n+1)a with 0 < a ≤ 1,
+
+and establishes the technical estimates required to prove the explicit error bounds in Appendix A.
+As before we adopt the notations in (20), and we write τn for the expression τn (a) in Eq. (19).
+                          Pn         n 2
+B.1. Bounds for δn2 =          k=1 (πk ) .
+
+                      1                           1       2
+Lemma B.1. For αn = (n+1)a with 0 < a ≤ 1 we have 2 αn ≤ δn ≤ αn for n ≥ 1.
+
+
+
+Proof. For the upper bound we claim that πkn increases for k ≥ 1 so that πkn ≤ πnn = αn , and then
+                               Pn       n 2    n
+                                                     Pn      n    n       n      n
+                       δn2 =      k=1 (πk ) ≤ πn        k=1 πk = πn (1 − π0 ) ≤ πn = αn .
+
+To prove the monotonicity we note that πkn ≤ πk+1
+                                              n
+                                                  amounts to αk (1−αk+1 ) ≤ αk+1 , which can be
+                                                                           1 a          1 a
+expressed as (k + 1)a − 1 ≤ k a . Dividing by (k + 1)a this becomes 1 ≤ ( k+1 ) + (1 − k+1 ) . The
+latter inequality holds because the map x 7→ xa + (1 − x)a is concave for x ∈ [0, 1] with minimum
+value 1 attained at the border of the interval.
+  Let us now establish the lower bound δn2 ≥ 12 αn . For n = 1 this holds since δ12 = α12 and
+α1 = 21a ≥ 12 . For the inductive step, if δn−1
+                                            2
+                                                ≥ 21 αn−1 we note that
+
+                            δn2 = (1 − αn )2 δn−1
+                                              2
+                                                  + αn2 ≥ 12 (1 − αn )2 αn−1 + αn2
+
+so that it suffices to show that (1 − αn )2 αn−1 + 2αn2 ≥ αn , or equivalently
+
+                                             (1 − αn )2 ≥ (1 − 2αn ) ααn−1
+                                                                        n
+                                                                           .
+32                                        M. BRAVO AND R. COMINETTI
+
+                                  1/a
+Since ααn−1
+         n       n a
+            = ( n+1 ) = (1 − αn )a , it suffices to show (1 − α)2 ≥ (1 − 2α)(1 − α1/a )a for all α ∈ [0, 1].
+When α ≥ 21 this is clear since the right-hand side becomes negative. For α ≤ 21 the inequality
+follows since (1 − α)2 ≥ (1 − 2α) and (1 − α1/a )a ≤ 1.                                                   
+
+     Below we establish a slightly sharper upper bound. The proof is elementary but somewhat
+technical so we split it into several Lemmas.
+                      1                            2
+Lemma B.2. For αn = (n+1)a with 0 < a ≤ 1 we have δn ≤ αn+1 for all n ≥ 1.
+
+
+
+Proof. Let us set ρn , δn2 /αn+1 and prove by induction that ρn ≤ 1. For n = 1 this holds since
+ρ1 = α12 /α2 = ( 34 )a ≤ 1. For the inductive step, we take n ≥ 2 such that ρn−1 ≤ 1. We will
+exploit two alternative upper bounds. As in the proof of Theorem B.1 we have δn2 ≤ πnn (1 − π0n ) and
+therefore
+                                                            Qn
+(33)                                      ρn ≤ ααn+1
+                                                  n
+                                                     (1 −    i=1 (1 − αi )).
+
+The second bound is derived from the recursive formula δn2 = (1 − αn )2 δn−1
+                                                                         2
+                                                                             + αn2 , which combined
+with the induction hypothesis yields
+
+(34)                           ρn ≤ ααn+1
+                                       n
+                                          (1 − αn + αn2 ) = ααn+1
+                                                               n
+                                                                  (1 − αn (1 − αn )).
+
+  In the sequel we consider αn = (n + 1)−a as a function of a, and we analyze how the previous
+                                                                                        Qn−1
+bounds vary with a. We first note that these bounds coincide if and only if αn = i=1          (1 − αi ),
+                  1
+                         Q n−1         1
+that is to say, (n+1)a =   i=1 (1 − (i+1)a ). When a increases from 0 to 1 the left-hand side decreases
+           1
+from 1 to n+1 whereas the expression on the right increases from 0 to n1 . Thus, there is a unique
+an ∈ (0, 1) at which both bounds coincide: the bound (34) is smaller than (33) for a ∈ [0, an ], and
+conversely for a ∈ [an , 1].
+     We will show that both bounds are smaller than 1 in the corresponding intervals, or equivalently,
+that their logarithms are smaller than 0. To this end we exploit the following properties (established
+later in separate Lemmas)
+                                          Qn           1
+       a) un (a) , a ln( n+2
+                         n+1
+                             ) + ln(1 −   i=1 (1 − (i+1)a )) is concave,
+       b) vn (a) , a ln( n+2
+                         n+1
+                                          1
+                             ) + ln(1 − (n+1)        1
+                                             a + (n+1)2a ) first decreases and then increases.
+
+
+Since clearly un (0) = vn (0) = 0, the conclusion follows directly if we show that the common value
+un (an ) = vn (an ) at the intersect is negative. Linearizing the concave function un (·) it suffices to
+show that
+
+(35)                                       un (1) + u0n (1)(an − 1) ≤ 0.
+                  STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                                               33
+                                                                                               Pn     ln(i+1)
+A direct computation gives un (1) = ln( (n+2)n
+                                        (n+1)2
+                                               ) and u0n (1) = ln( n+2
+                                                                   n+1
+                                                                       ) − n1                   i=1       i
+                                                                                                              ,   while an
+inductive argument shows that u0n (1) decreases in n with u2 (1) < 0 so that u0n (1) < 0. On the other
+hand, we observe that an ≥ 1 − bn with
+                                                     ln(n+1)−ln(n)
+                                            bn = ln(n+1)+ Pn−1 ln i+1
+                                                                i=1   i
+
+
+which follows by taking logarithms in the equation that defines an , and using the next inequality
+                                                     Pn−1            1
+obtained by linearizing the concave function wn (a) = i=1 ln(1 − (i+1) a)
+
+                                                                                      Pn−1 ln i+1
+        −an ln(n + 1) = wn (an ) ≤ wn (1) + wn0 (1)(an − 1) = − ln(n) + (                i=1    i
+                                                                                                    )(an − 1).
+
+Hence, (35) will follow by showing that un (1)−u0n (1)bn ≤ 0, which is done in Theorem B.5 below. 
+
+  The next two Lemmas establish respectively the claims a) and b) used in the previous proof.
+
+                          n+2
+                                                 Qn             1
+Lemma B.3. un (a) , a ln( n+1 ) + ln(1 −            i=1 (1 − (i+1)a )) is concave for all n ≥ 1.
+
+
+Proof. For n = 1 this holds trivially since u1 (a) = a ln( 34 ), so let us consider the case n ≥ 2.
+                               n+2
+Ignoring the linear term a ln( n+1 ), it suffices to show the concavity of wn (a) , ln(1 − gn (a)) where
+        Qn               −a
+gn (a) , i=1 (1 − (i + 1) ). Let us first observe that
+                                                   Pn      ln(i+1)
+                                 (ln gn )0 (a) =      i=1 (i+1)a −1 , S1 (a) ≥ 0
+
+                                                       Pn       (i+1)a ln2 (i+1)
+so that gn0 = gn S1 . Setting S2 (a) = −S10 (a) =         i=1     ((i+1)a −1)2
+                                                                                 we also get
+
+                                     gn00 = gn0 S1 + gn S10 = gn (S12 − S2 ).
+
+Using these identities and wn0 = −gn0 /(1 − gn ) we obtain
+
+                        wn00 = − (1−g1 n )2 [gn00 (1 − gn ) + (gn0 )2 ]
+                                    gn       2
+                              = − (1−g n)
+                                         2 [S1 − (1 − gn )S2 ].
+
+                                    gn      Pn ln(i+1)                       ln(i+1)
+                              = − (1−g n)
+                                         2    i=1 (i+1)a −1 [S1 − (1 − gn ) 1−(i+1)−a ].
+
+                                            ln(i+1)
+We claim that all the terms S1 − (1 − gn ) 1−(i+1)−a in the latter sum are non-negative. As a matter
+                               ln(i+1)
+of fact, since the expression 1−(i+1)−a increases with i, it suffices to show
+
+
+                                                   ln(n+1)
+(36)                               S1 ≥ (1 − gn ) 1−(n+1)−a            (∀ n ≥ 2),
+
+for which we consider 3 separate cases.
+34                                      M. BRAVO AND R. COMINETTI
+
+Case n = 2. In this case the inequality (36) reads
+                         ln(2)   ln(3)   (1−(1−2−a )(1−3−a )) ln(3)
+                          a
+                         2 −1
+                               +  a
+                                 3 −1
+                                       ≥        (1−3−a )
+                                                                    = ( 3a1−1 + 21a ) ln(3)
+                                 ln(2)
+which is equivalent to 2−a ≥ 1 − ln(3) and clearly holds for all a ∈ [0, 1].
+Case n = 3. Here (36) becomes
+                                            −a )(1−3−a )(1−4−a )
+           ln(2)                    (1−(1−2                        ) ln(4)
+           2a −1
+                 + 3ln(3)   ln(4)
+                     a −1 + 4a −1 ≥              (1−4−a )
+                                                                             = ( 4a1−1 + 21a + 31a − 61a ) ln(4)
+
+which can be rewritten as
+                            ln(2)
+                            2a −1
+                                  + 3ln(3)      1   1 1               1   1 1
+                                      a −1 ≥ ( 2a − 2 6a ) ln(4) + ( 3a − 2 6a ) ln(4).
+
+
+                                                                            ln(3)
+This follows by combining the inequalities 2ln(2)      1   1 1                         1   1 1
+                                             a −1 ≥ ( 2a − 2 6a ) ln(4) and 3a −1 ≥ ( 3a − 2 6a ) ln(4), both
+
+of which can be checked by noting that they hold for a = 1 and observing that (2a − 1)( 21a − 12 61a )
+and (3a − 1)( 31a − 12 61a ) are increasing with a.
+                                                                ln(n+1)
+Case n ≥ 4. We will prove the stronger inequality S1 ≥ 1−(n+1)        −a , which we rewrite
+
+                          Pn−1 ln(i+1)         ln(n+1)     ln(n+1)
+                             i=1 (i+1)a −1 ≥ 1−(n+1)−a − (n+1)a −1 = ln(n + 1).
+
+Since n−1    ln(i+1)
+     P
+        i=1 (i+1)a −1 decreases with a, it suffces to check at a = 1, that is to say
+                                         Pn−1 ln(i+1)
+                                           i=1     i
+                                                       ≥ ln(n + 1),
+                                                               Pn−1 ln(i+1)
+which readily follows by induction by showing that θn , i=1               i
+                                                                             − ln(n + 1) is increasing for
+n ≥ 4 with θ4 > 0.                                                                                                  
+
+Lemma B.4. vn (a) , a ln( n+2
+                          n+1
+                                           1
+                              ) + ln(1 − (n+1)       1
+                                              a + (n+1)2a ) first decreases and then increases
+
+
+
+Proof. A direct computation shows that vn0 (a) ≤ 0 is equivalent to
+                                            2−(n+1)a
+                                        (n+1)2a −(n+1)a +1
+                                                           ≥ ln(n+2)
+                                                             ln(n+1)
+                                                                     − 1.
+                 ln(n+2)
+Setting cn = 1/( ln(n+1) − 1) and z = (n + 1)a this is transformed into
+
+                                       z 2 + (cn − 1)z + (1 − 2cn ) ≤ 0
+
+Since cn > 1 the latter holds if and only if z ≤ zn with zn = 21 (1 − cn +
+                                                                                          p
+                                                                                           c2n + 6cn − 3) the positive
+                                                            ln(zn )
+root of the quadratic. Therefore, vn (a) decreases for a ≤ ln(n+1)  and increases afterwards.                       
+
+Lemma B.5. un (1) − u0n (1)bn ≤ 0.
+                    STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                                                          35
+                                                                                  Pn        ln(i+1)
+Proof. Substituting un (1) = ln( (n+2)n
+                                 (n+1)2
+                                                         n+2
+                                        ), u0n (1) = ln( n+1 ) − n1                   i=1       i
+                                                                                                                   ln(n+1)−ln(n)
+                                                                                                    , and bn = ln(n+1)+ Pn−1 ln i+1 ,
+                                                                                                                          i=1    i
+the inequality un (1) − u0n (1)bn ≤ 0 can be rewritten as rn ≤ Qn where
+                                         1
+                                             Pn      ln(i+1)
+                               rn ,      n     i=1       i
+                                                                           
+                                                             (n+1)      2
+                                         (1− n1 ) ln(n+1) ln n(n+2) +ln( n+2  ln n+1
+                                                                         n+1 ) ( n )
+                              Qn ,                                       
+                                                                             (n+1)2
+                                                                                                  .
+                                                       ln( n+1
+                                                            n )
+                                                               −n ln         n(n+2)
+
+
+Since r1 = ln 2 = Q1 we just need to show that rn ≤ Qn for n ≥ 2. Now, using the inequality
+ln b ≥ 1 − 1b we get the lower bound
+                                                              n−1
+                                                     n          n+2
+                                                                    ln(n+1)+ n+1
+                                         Qn ≥ qn , (n+1)2 ln n+1 −n
+                                                            ( n )
+so that it suffices to show that rn ≤ qn . By direct evaluation one can check that r2 ≤ q2 so the
+conclusion follows from the fact that rn decreases while qn increases. Indeed, rn decreases since it
+is the average of the decreasing sequence ln(i+1)
+                                              i
+                                                  , whereas qn = fg(n)
+                                                                   (n)
+                                                                       with f (x) = x−1
+                                                                                     x
+                                                                                        ln(x + 1) + x+1
+                                                                                                    x+2
+                                       2    x+1
+                                                
+positive increasing and g(x) = (x + 1) ln x − x is positive and decreasing for x ≥ 2.                
+                   δn−1
+B.2. Bounds for 1−α    n
+                         in terms of τn . We proceed next to establish explicit bounds of the form
+                                                                                          √
+δn−1 ≤ (1 − αn )ϕ(τn ) required to apply Theorem 2.11. Since Theorem B.2 gives δn−1 ≤ αn , we
+will look for suitable functions ϕ(·) such that
+                                           √
+                                δn−1         αn
+                                       ≤         ≤ ϕ(τn )                         (∀ n ≥ 2).
+                               1 − αn     1 − αn
+We restrict to a ∈ [ 21 , 1] and treat separately the cases 12 ≤ a < 1 and a = 1.
+                                                                                          Pn
+B.2.1. Bounds for 12 ≤ a < 1. Approximating the sum τn =            k=1 αk (1 − αk ) by an integral of
+                                                                                              a
+  1
+(x+1)a
+              1
+       (1 − (x+1)                             1
+                 a ) one can check that τn ≈ 1−a (n + 1)
+                                                         1−a
+                                                             which yields αn ≈ ((1 − a)τn )− 1−a . This
+prompts us to look for an estimate of the form
+                             √                                      a
+                                  ≤ ϕ(τn ) = (λa + (1 − a) τn )− 2(1−a)
+                      δn−1     αn
+(37)                  1−αn
+                           ≤ 1−αn
+                                                                                                  (∀ n ≥ 2)
+
+with the largest possible constant λa , which requires
+                                                   2(1−a)
+                                                        a
+                                             1−α
+                             λa ≤ ξn ,       √ n
+                                               αn
+                                                              − (1−a) τn                  (∀ n ≥ 2).
+
+Lemma B.6. The sequence ξn is increasing and (37) holds with optimal constant
+                                                                    2(1−a)
+                               λa = ξ2 = 3a/2 − 3−a/2                   a
+                                                                                − (1−a) τ2 (a).
+36                                             M. BRAVO AND R. COMINETTI
+
+                                                                                                     2(1−a)
+Proof. We show that ξn ≥ ξn−1 for n ≥ 3. Denoting f (x) = (xa/2 − x−a/2 )                               a     we have
+
+                           ξn − ξn−1 = f (n + 1) − f (n) − (1 − a)αn (1 − αn ).
+
+A straightforward computation gives
+                                                (1−a)xa (1−x−a )2/a (xa +1)
+                              f 0 (x) =                  (xa −1)3
+                                                           a−1 (1−x−a )2/a (ax2a +(4a−2)xa −(2−a))
+                              f 00 (x) = − (1−a)x                       (xa −1)4
+                                                                         √         1/a
+                                  00                                 1−2a+ 1−2a+3a2
+from where it follows that f (x) ≤ 0 for all x ≥                            a
+                                                                                       . This last expression is smaller
+than 3 for all a ∈ [ 12 , 1], so that f 0 (x) decreases for x ≥ 3 and therefore
+                                                      R n+1
+                                 f (n + 1) − f (n) = n f 0 (x) dx ≥ f 0 (n + 1).
+
+The result will follow by proving that f 0 (n + 1) ≥ (1 − a)αn (1 − αn ), that is
+                                       a          −a 2/a         a
+                    (1 − a) (n+1) (1−(n+1)   )
+                                     ((n+1)a −1)3
+                                                 ((n+1) +1)             1
+                                                            ≥ (1 − a) (n+1)         1
+                                                                           a (1 − (n+1)a ).
+
+
+Canceling the factor (1 − a) and setting x = (n + 1)a , this amounts to
+                                                 x(1− x1 )2/a (x+1)
+                                                     (x−1)3
+                                                                    ≥ x1 (1 − x1 )
+
+which is in turn equivalent to
+                                                                            4
+                                                     ( x−1
+                                                        x
+                                                           )2/a ≥ x(x−1)
+                                                                    3 (x+1) .
+
+
+The expression on the left increases with a so it suffices to check at a = 12 , which amounts to the
+                        x
+trivial inequality 1 ≥ x+1 , completing the proof.                                                                      
+                                                                                       1
+B.2.2. Bounds for a = 1. For a = 1, which corresponds to a simple averaging with αn = n+1 , we
+have the following bound obtained as a limit of (37).
+                          √
+Lemma B.7. Let ω = 23 e17/72 ≈ 1.0966. Then for αn = n+1
+                                                      1
+                                                         we have
+                                                  √
+                                           δn−1     αn
+(38)                                       1−αn
+                                                ≤ 1−αn
+                                                       ≤ ω e−τn /2                 (∀ n ≥ 2)
+                          √
+             δn−1             α
+Proof. Since 1−α n
+                   and 1−αnn are continuous in a, (38) follows by letting a → 1 in (37). To see this
+                 λa
+let us set ba , 1−a and rewrite the right hand side of (37) as
+                                              a      − a
+                                                                             2λa
+                        (λa + (1 − a)τn )− 2(1−a) = λa 2(1−a) (1 + τbna )−ba
+                                                                                  a
+                                                                                    .
+
+For a → 1 we have λa → 1, hence ba → ∞ and 2λaa → 12 , and therefore
+                                                  a
+                                 (1 + τn /ba )−ba 2λa → e−τn /2 .
+                  STOCHASTIC FIXED-POINT ITERATIONS FOR NONEXPANSIVE MAPS                                  37
+                                                                                    a
+                                                                                −
+The proof is completed by a straightforward calculation that yields λa 2(1−a) → ω.                         
+
+
+                              Pn       1          1
+Lemma B.8. Let τn (a) =        k=1 (k+1)a (1 − (k+1)a ).        Then τn (a) ≥ τ1 (a) n1−a for all 21 ≤ a < 1,
+                                    1
+while for a = 1 we have τn (1) ≥ 4 ln(2) ln(n + 1).
+
+Proof. For n = 1 both inequalities are trivially satisfied with equality. For the induction step, let
+us consider first the case 21 ≤ a < 1 and assume that the inequality holds for n − 1. Then
+
+                        τn (a) = (n + 1)−a 1 − (n + 1)−a + τn−1 (a)
+                                                          
+
+                                ≥ (n + 1)−a 1 − (n + 1)−a + τ1 (a) (n − 1)a ,
+                                                          
+
+hence it suffices to prove that (n + 1)−a (1 − (n + 1)−a ) ≥ τ1 (a) (na − (n − 1)a ), or equivalently
+                                        (1 − (n + 1)−a )
+                                                                ≥ τ1 (a).
+                                  (n + 1)a (n1−a − (n − 1)1−a )
+Since the latter holds with equality for n = 1, it suffices to show that the quotient increases in n.
+The numerator is clearly increasing so it suffices to show that the denominator decreases. We claim
+that (x + 1)a (x1−a − (x − 1)1−a ) decreases for x ≥ 1. Indeed, differentiating with respect to x, this
+amounts to
+                                                 xa
+                                                                
+                                    a 1+                             ≤1+x
+                                            xa − (x − 1)a
+and using the change of variable z = (x − 1)/x this is in turn equivalent to
+                                           
+                                      1                1
+                            a 1+              ≤  1 +           ∀z ∈ [0, 1).
+                                   1 − za            1−z
+                                    1
+                                        
+The latter holds since a 7→ a 1 + 1−z a   is increasing, which can be checked by differentiating with
+respect to a and using the inequality (1 − y)(2 − y) + y log(y) ≥ 0 for y ∈ (0, 1).
+                                                                   1
+  Similarly, for a = 1, an inductive argument to prove τn (1) ≥ 4 ln(2) ln(n + 1) reduces the problem
+to showing that for all n ≥ 1
+                                                 
+                           1               1                 1
+                                   1−                 ≥           (ln(n + 1) − ln(n)) .
+                        (n + 1)         (n + 1)           4 ln(2)
+This is in turn equivalent to
+                                    (n + 1)2
+                                                               
+                                                          n+1
+                                             log                    ≤ 4 ln(2)
+                                       n                   n
+                                        2
+which follows directly since x 7→ (x+1)        x+1
+                                                      
+                                    x
+                                        log     x
+                                                          is a decreasing function.                        
+38                                     M. BRAVO AND R. COMINETTI
+
+     (M.B.) Universidad Adolfo Ibáñez, Facultad de Ingenierı́a y Ciencias, Diagonal Las Torres 2640,
+Santiago, Chile
+     Email address:   mario.bravo@uai.cl
+
+     (R.C.) Universidad Adolfo Ibáñez, Facultad de Ingenierı́a y Ciencias, Diagonal Las Torres 2640,
+Santiago, Chile
+     Email address:   roberto.cominetti@uai.cl
+

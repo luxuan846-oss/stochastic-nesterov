@@ -1,0 +1,1673 @@
+                Near-Optimal Sample Complexity for MDPs via Anchoring
+
+
+                                    Jongmin Lee 1 Mario Bravo 2 Roberto Cominetti 3
+
+
+                         Abstract                                      memory requirements, specially when combined with func-
+                                                                       tion approximation techniques for large scale problems.
+     We study a new model-free algorithm to compute
+     ε-optimal policies for average reward Markov de-                  The sample complexity of model-free algorithms has been
+     cision processes, in the weakly communicating                     studied both in the discounted and the average reward se-
+     setting. Given a generative model, our procedure                  tups. While for discounted MDPs these procedures have
+     combines a recursive sampling technique with                      been shown to achieve optimal sample complexity, previous
+     Halpern’s anchored iteration, and computes an                     results for average rewards are less satisfactory and exhibit
+     ε-optimal policy with sample and time complex-                    a substantial gap with respect to the known lower bound.
+                     ∗ 2                                               Furthermore, most prior model-free and model-based algo-
+     ity O(|S||A|∥h
+          e            ∥sp /ε2 ) both in high probability
+     and in expectation. To our knowledge, this is the                 rithms for average reward MDPs require for their implemen-
+     best complexity among model-free algorithms,                      tation some a priori bound on the mixing times or on the
+     matching the known lower bound up to a factor                     span seminorm of the bias vector.
+     ∥h∗ ∥sp . Although the complexity bound involves
+     the span seminorm ∥h∗ ∥sp of the unknown bias                     1.1. Our contribution
+     vector, the algorithm requires no prior knowledge
+                                                                       We propose a new model-free algorithm to compute an ε-
+     and implements a stopping rule which guarantees
+                                                                       optimal policy for weakly communicating average reward
+     with probability 1 that the procedure terminates in
+                                                                       MDPs. We show that, with probability at least 1 − δ, the
+     finite time. We also analyze how these techniques
+                                                                       algorithm achieves the task with a sample and time complex-
+     can be adapted for discounted MDPs.                                                          ∗ 2
+                                                                       ity of order O(L|S||A|∥h
+                                                                                       e           ∥sp /ε2 ). Here S and A are the
+                                                                       state and action spaces of the MDP and ∥h∗ ∥sp is the span
+                                                                       seminorm of the bias vector described later in Section 1.2,
+1. Introduction                                                        while Le = ln(|S||A|∥h∗ ∥sp /(εδ)) ln4 (∥h∗ ∥sp /ε) is a log-
+A main task in reinforcement learning is to compute an                 arithmic multiplicative factor. This yields a near-optimal
+ε-optimal policy for Markov Decision Processes (MDPs)                  algorithm since this complexity matches the known lower
+when the transition probabilities are unknown. If one has              bound up to a factor ∥h∗ ∥sp . More explicit estimates of the
+access to a generative model that provides independent sam-            algorithm’s complexity are discussed in Section 3.2.
+ples of the next state for any given initial state and action, a       Our algorithm can be implemented without any prior knowl-
+standard approach in model-based algorithms is to approxi-             edge about ∥h∗ ∥sp nor other characteristics of the optimal
+mate the transition probabilities by sampling to a sufficiently        policy. Also, it implements a stopping rule which guarantees
+high accuracy, and build a surrogate model which is then               with probability 1 that the method finds an ε-optimal policy
+solved by dynamic programming techniques. In contrast,                 in finite time, with the above complexity bound holding both
+model-free methods recursively approximate a solution of               in high probability as well as in expectation. This compares
+the Bellman equation for the value function, with lower                favorably to previous model-free and model-based methods
+    1                                                                  which usually require some prior estimates of the span semi-
+      Department of Mathematical Sciences, Seoul National Uni-
+versity, Seoul, Korea 2 Facultad de Ingenierı́a y Ciencias, Uni-       norm ∥h∗ ∥sp , or an upper bound for the maximal mixing
+versidad Adolfo Ibáñez, Santiago, Chile 3 Institute for Mathe-       time tmix (see Table 1 and Section 1.3). To our knowledge,
+matical & Computational Engineering and Department of Indus-           the only algorithm with explicit complexity guarantees and
+trial and Systems Engineering, Pontificia Universidad Católica        which does not require prior knowledge is the model-based
+de Chile, Santiago, Chile. Correspondence to: Jongmin Lee              method in the recent paper by Tuynman et al. (2024), which
+<dlwhd2000@snu.ac.kr>, Mario Bravo <mario.bravo@uai.cl>,
+Roberto Cominetti <roberto.cominetti@uc.cl>.                           however applies for communicating MDPs, achieving a
+                                                                       complexity bound of e   O(|S||A| D/ε2 + |S|2 |A|D2 ), where
+Proceedings of the 42 nd International Conference on Machine           D stands for the diameter of the MDP.
+Learning, Vancouver, Canada. PMLR 267, 2025. Copyright 2025
+by the author(s).                                                      The core of our analysis builds on the following key ideas.
+
+                                                                   1
+                                      Near-Optimal Sample Complexity for MDPs via Anchoring
+
+      Previous works                     Sample complexity                       Method type          MDP class         Prior knowledge
+                                                             
+      Wang (2017)                        e |S||A|τ 2 t2 /ε2
+                                         O                                        model-free                M                     l
+                                                      mix 
+      Jin & Sidford (2020)               e |S||A|t2 /ε2
+                                         O                                        model-free                M                     l
+                                                  mix      
+      Jin & Sidford (2021)               e |S||A|tmix /ε3
+                                         O                                        model-based               M                     l
+                                                           
+      Li et al. (2024)                   e |S||A|t3 /ε2
+                                         O                                        model-free                M                     l
+                                                  mix      
+      Wang et al. (2024)                 e |S||A|tmix /ε2
+                                         O                                        model-based               M                     l
+                                         e |S||A|∥h∗ ∥sp /ε3
+                                                              
+      Wang et al. (2022)                 O                                        model-based               W                     l
+                                         e |S||A|∥h∗ ∥2sp /ε2
+                                                              
+      Zhang & Xie (2023)                 O                                        model-free                W                     l
+                                         e |S||A|∥h∗ ∥sp /ε2
+                                                              
+      Zurek & Chen (2024)                O                                        model-based               W                     l
+                                         e |S||A|(btran + ∥h∗ ∥sp )/ε2
+                                                                       
+      Zurek & Chen (2024)                O                                        model-based               G                     l
+                                                           
+      Jin et al. (2024a)                 e |S||A|t8 /ε8
+                                         O                                        model-free                M                    △
+                                                  mix
+                                         e |S||A|∥h∗ ∥7sp /ε7
+                                                              
+      Bravo & Contreras (2024)           O                                        model-free                W                    △
+                                         e |S||A|∥h∗ ∥2sp /ε2
+                                                              
+      Zurek & Chen (2025)                O                                        model-based               W                    △
+                                         e |S||A|∥h∗ ∥2sp /ε2
+                                                              
+      This work (Theorem 3.2)            O                                        model-free                W                    △
+
+                                                                                                                                 ×
+                                                         
+      Tuynman et al. (2024)              e |S||A|D/ε2
+                                         O                                        model-based               C
+                                         e |S||A|∥h∗ ∥2 /ε2                                                                      ×
+                                                              
+      This work (Corollary 3.5)          O              sp                        model-free                W
+
+Table 1. Algorithms for average reward MDPs. The table shows the leading term in the sample complexity for computing an ε-optimal
+policy with probability at least 1 − δ. The notation O(·) e hides logarithmic factors including log(1/δ). The column ‘MDP class’
+distinguishes the type of MDP to which the algorithm applies: (M) uniformly mixing or ergodic MDPs with finite mixing times tmix ;
+(C) communicating MDPs with finite diameter D; (W) weakly communicating MDPs with bias vector h∗ ; and (G) general MDPs with
+transient parameter btran . The symbol ‘l’ denotes an algorithm that requires prior knowledge of tmix , ∥h∗ ∥sp , or btran for its implementation.
+Similarly, ‘△’ stands for algorithms that run without prior knowledge but require it to fix the number of iterations or the number of
+samples. Finally ‘×’ applies to algorithms that do not require any prior knowledge. For a more thorough discussion see Section 1.3.
+
+
+First, we show that any approximate solution of the Bell-                   erences (Bertsekas, 2012; Puterman, 2014; Sutton & Barto,
+man equation with an ε residual error yields an ε-optimal                   2018). We consider a Markov decision process (S, A, P, r)
+policy. To achieve an accurate empirical estimation of the                  with finite state space S, finite action space A, transition
+Bellman residual error, we use a recursive sampling tech-                   kernel P : S × A → ∆(S), and reward r : S × A → R.
+nique analyzed using an Azuma-Hoeffding-like inequality.                    Given an initial state s0 = s and a stationary and determin-
+Leveraging these estimates, we draw on concepts from the                    istic control policy π : S → A, the average reward or gain
+domain of fixed-points for nonexpansive maps, where the                     gπ ∈ RS is defined by
+classical Halpern (or Anchored) iteration is known to be                                          h P                         i
+efficient (see Section 1.3 for a detailed discussion). This                                           n−1
+                                                                                   gπ (s) = lim Eπ n1 t=0 r(st , at ) | s0 = s
+combined approach represents our main contribution and, to                                     n→∞
+
+the best of our knowledge, is being applied for the first time
+to average reward MDPs in the generative setup. In the last                 where Eπ denotes the expected value over all trajectories
+section we adapt these ideas to study a similar algorithm for               (s0 , a0 , s1 , a1 , . . . , st , at , . . . ) of the Markov chain induced
+discounted MDPs and compare with other existing methods.                    by the control at = π(st ) with transitions st+1 ∼ P(st , at ).
+                                                                            The optimal reward is then g ∗ (s) = maxπ gπ (s). A policy
+Notations. For a finite set J we denote ∆(J) the set of                     π is called ε-optimal if 0 ≤ g ∗ (s) − gπ (s) ≤ ε for all s ∈ S.
+probability distributions over J. Also, for x ∈ RJ we                       Although one could consider more elaborated history-
+denote by ∥x∥∞ = maxj∈J |x(j)| its infinity norm and by                     dependent randomized policies π, when S and A are finite
+∥x∥sp = maxj∈J x(j) − minj∈J x(j) its span seminorm.                        the optimum is already attained with the simpler determin-
+For x ∈ RJ and a real number c ∈ R, we denote x − c the                     istic stationary policies (Puterman, 2014), so we restrict to
+vector with components x(j) − c for all j ∈ J.                              such policies π and we denote Pπ the transition matrix of the
+                                                                            induced Markov chain, namely, Pπ (s′ |s) = P(s′ |s, π(s)).
+1.2. The model
+Let us recall some basic facts about average reward Markov                  Classification of MDPs. An MDP is called unichain if
+decision processes. These can be found in the classical ref-                the Markov chain Pπ induced by every policy π has a single
+
+                                                                        2
+                                         Near-Optimal Sample Complexity for MDPs via Anchoring
+
+recurrent class plus a possibly empty set of transient states1 .                1.3. Previous work
+The MDP is said to be weakly communicating if there is a
+                                                                                Average reward MDPs. The setup of average reward
+set of states where each state in the set is accessible from
+                                                                                MDPs was introduced in the dynamic programming litera-
+every other state in that set under some policy, plus a pos-
+                                                                                ture by Howard (1960), while Blackwell (1962) established
+sibly empty set of states that are transient for all policies.
+                                                                                a theoretical framework for their analysis. Reinforcement
+Otherwise, the MDP is called multichain in which case each
+                                                                                learning provides a variety of methods to approximately
+Pπ may have multiple recurrent classes. Unichain MDPs
+                                                                                solve average reward MDPs in the case where the transi-
+are weakly communicating, while multichain is the weakest
+                                                                                tion matrix and reward are unknown (Mahadevan, 1996;
+notion. In this paper we set our study in the middle ground
+                                                                                Dewanto et al., 2020). These methods include model-based
+by adopting the following standing assumption:
+                                                                                algorithms (Jin & Sidford, 2021; Zurek & Chen, 2024),
+  (H) The MDP (S, A, P, r) is weakly communicating.                             model-free algorithms (Wei et al., 2020; Wan et al., 2021),
+                                                                                policy gradient methods (Bai et al., 2024; Kumar et al.,
+Bellman’s equation. An optimal policy π can be obtained                         2025), and mirror descent (Murthy & Srikant, 2023).
+by first solving the following Bellman equation for the gain
+g ∈ RS and bias h ∈ RS , namely: for all s ∈ S                                  Model-based methods with a generative model. Model-
+                                   X
+                                        P(s′ |s, a) h(s′ ) ,                    based algorithms use sampling to estimate the transition
+                         
+  h(s) + g(s) = max r(s, a) +
+                     a∈A
+                                          s′ ∈S                                 probabilities of the MDP, and then solve the surrogate model
+and then taking actions π(s) = a ∈ A that attain the                            by using standard dynamic programming techniques. These
+max. This Bellman equation always has solutions (Puter-                         methods can achieve optimal sample complexity in both
+man, 2014, Corollary 9.1.5). Under the assumption (H) the                       the discounted and average reward setups. For discounted
+gain g(s) ≡ g ∗ is constant across all states with g ∗ the opti-                MDPs, Agarwal et al. (2020); Li et al. (2020) achieve opti-
+mal average reward (Puterman, 2014, Theorems 8.3.2, 8.4.1,                      mal sample complexity by matching the lower bound in Azar
+9.1.2, 9.1.6) so that hereafter we treat the gain g ∗ (s) as a                  et al. (2013). For average reward MDPs satisfying a uniform
+scalar g ∗ ∈ R. Moreover, (Puterman, 2014, Theorems 9.1.7,                      mixing condition, Jin & Sidford (2021) proposed a model-
+9.1.8) show that choosing actions that maximize the right                       based algorithm based on a reduction to a discounted MDP.
+hand side in the Bellman equation yields an optimal policy.                     Also using reductions to discounted MDPs, (Wang et al.,
+                                                                                2022) relaxed the uniform mixing assumption to deal with
+Bellman’s equation can be rewritten in terms of the so-called
+                                                                                weakly communicating MDPs; Wang et al. (2024) achieved
+Q-factors. Namely, denoting Q(s, a) the expression inside
+                                                                                optimal sample complexity assuming finite mixing times;
+the maximum, the system becomes: for all (s, a) ∈ S × A
+                            X                                                   and, Zurek & Chen (2024) achieved optimal complexity for
+ Q(s, a) + g ∗ = r(s, a) +      P(s′ |s, a) max
+                                             ′
+                                                  Q(s′ , a′ ),                  weakly communicating and multichain MDPs.
+                                                    a ∈A
+                                 s′ ∈S
+and then an optimal policy can be obtained by selecting                         Model-free methods with a generative model. Most
+π(s) ∈ argmaxa∈A Q(s, a).                                                       model-free algorithms directly estimate the Q-factors and
+This Q-version of the Bellman equation can be expressed                         policy without learning a model of the transition probabil-
+more compactly as the fixed-point equation2                                     ities. They are more efficient in terms of computation and
+                                                                                memory requirements, and can tackle large scale problems
+                   Q = r + P maxA (Q) − g ∗
+                                                                                when combined with function approximation.
+where maxA : RS×A → RS assigns to each Q ∈ RS×A
+                                                                                In the generative model setup (Kearns & Singh, 1998)
+the vector h ∈ RS with h(s) = maxa∈A Q(s, a), whereas
+                                                                                the sample complexity of model-free algorithms has been
+P : RS → RS×A transforms each        S
+                             P h ∈ R ′ into the ′matrix
+        S×A                                                                     widely studied. For discounted MDPs they achieve op-
+Ph ∈ R       with Ph(s, a) = s′ ∈S P(s |s, a)h(s ).
+                                                                                timal sample complexity matching the complexity lower
+In what follows we denote T : RS×A → RS×A the map                               bound (Sidford et al., 2018; Wainwright, 2019; Jin et al.,
+T (Q) = r + P maxA (Q) so that Bellman’s equation re-                           2024b). For average rewards, Table 1 presents a summary
+duces to Q = Tg∗ (Q) with Tg∗ (Q) = T (Q) − g ∗ . We                            of the sample complexity of previous model-free and model-
+denote Q∗ an arbitrary fixed-point, and h∗ = maxA (Q∗ )                         based algorithms. Specifically, for MDPs with finite mixing
+the corresponding solution for the original form of Bell-                       times tmix , Wang (2017) developed a model-free method
+man’s equation.                                                                 that applies a primal-dual algorithm to a bilinear saddle
+   1
+                                                                                point reformulation of the Bellman equation. Also under
+      For basic concepts in Markov chains such as recurrent classes,
+                                                                                the mixing condition, Jin & Sidford (2020) use a stochas-
+transient states, accessibility, irreducibility, etc., we refer to Puter-
+man (2014, Appendix A.2).                                                       tic mirror descent framework to solve bilinear saddle point
+    2
+      Recall that for a matrix B ∈ RS×A and a real number g ∈ R,                problems, whereas Li et al. (2024) studied an actor-critic
+the operation B − g subtracts g from each component B(s, a).                    method also based on stochastic mirror descent. Zhang
+
+                                                                            3
+                                  Near-Optimal Sample Complexity for MDPs via Anchoring
+
+& Xie (2023) first obtained sample complexity results for            the first methods considered in the dynamic programming
+weakly communicating MDPs, by applying Q-learning with               literature (Bellman, 1957) and serve as a fundamental algo-
+variance reduction to an approximation by a discounted               rithm to compute the value function for discounted MDPs as
+MDP. Lower bounds on the sample complexity for mixing                well as unichain average reward MDPs. The sample-based
+and weakly communicating MDPs, with orders of tmix /ε2               variants, such as TD-Learning (Sutton, 1988), Fitted Value
+and ∥h∗ ∥sp /ε2 , respectively, were established by Jin & Sid-       Iteration (Ernst et al., 2005; Munos & Szepesvári, 2008),
+ford (2021) and Wang et al. (2022).                                  and Deep Q-Network (Mnih et al., 2015), are the workhorses
+                                                                     of modern reinforcement learning algorithms (Bertsekas &
+                                                                     Tsitsiklis, 1996; Sutton & Barto, 2018; Szepesvári, 2010).
+Prior knowledge. A drawback of these previous model-
+                                                                     VIs are also routinely applied in diverse settings, includ-
+based and model-free algorithms is that their implementa-
+                                                                     ing factored MDPs (Rosenberg & Mansour, 2021), robust
+tion requires prior estimates for the mixing times tmix of the
+                                                                     MDPs (Kumar et al., 2024), MDPs with reward machines
+Markov chains induced by all policies, or the span seminorm
+                                                                     (Bourel et al., 2023), and MDPs with options (Fruit et al.,
+∥h∗ ∥sp of some solution of Bellman’s equations. Several
+                                                                     2017). In the generative model setup, variance reduction
+methods that partially overcome this limitation have been
+                                                                     sampling was applied to approximate VIs for discounted re-
+proposed recently. In the case of finite but unknown mixing
+                                                                     wards: Sidford et al. (2023; 2018) use precomputed offsets
+times, Jin et al. (2024a) combine Q-learning and approxima-
+                                                                     to reduce variance of sampling, Wainwright (2019) applies
+tion by discounted MDPs with progressively larger discount
+                                                                     SVRG-type variance reduction sampling (Johnson & Zhang,
+factors, presenting a model-free algorithm with sample com-
+                                                                     2013) to Q-learning, and Jin et al. (2024b) use SARAH-type
+plexity of order t8mix /ε8 . For weakly communicating MDPs,
+                                                                     variance reduction sampling (Nguyen et al., 2017) which
+Bravo & Contreras (2024) develop a model-free value itera-
+                                                                     we also exploit in this work.
+tion that combines Halpern’s anchoring with mini-batching,
+achieving a sample complexity of order ∥h∗ ∥7sp /ε7 . Also in
+the weakly communicating setting, Zurek & Chen (2025)                Halpern iterations. For γ-contractions on Banach spaces,
+recently proposed a model-based algorithm that uses a dis-           the classical Banach-Picard iterates xk+1 = T (xk ) con-
+counted MDP approximation with a sufficiently large dis-             verge to the unique fixed point x∗ = T (x∗ ), with explicit
+count factor, which is then solved by plugging in a generic          bounds for the residuals ∥T (xk ) − xk ∥ ≤ γ k ∥T (x0 ) − x0 ∥
+subroutine, achieving a complexity of ∥h∗ ∥2sp /ε2 . Addi-                                                γk
+                                                                     and the distance ∥xk − x∗ ∥ ≤ 1−γ       ∥T (x0 ) − x0 ∥ to the
+tionally, Neu & Okolo (2024) use a primal-dual stochastic
+                                                                     fixed point. This fits well for discounted MDPs, and is also
+gradient descent combined with a regularization technique,
+                                                                     useful in the average reward setting for unichain MDPs.
+although the sample complexity is not stated in terms of
+the intrinsic characteristics of the MDP but in terms of the         For nonexpansive maps with γ = 1, as it is the case for
+output of the algorithm, namely, using the expected value            average reward MDPs, these estimates degenerate and pro-
+of the gain of the policy generated by the method.                   vide no useful information. An alternative is provided by
+                                                                     Halpern’s iteration xk+1 = (1 − βk+1 )x0 + βk+1 T (xk ),
+Although the implementation of these methods does not
+                                                                     where the next iterate is computed as a convex combination
+involve explicitly the mixing time tmix , the diameter D, or
+                                                                     between T (xk ) and the initial point x0 which acts as an
+the span seminorm ∥h∗ ∥sp of a bias vector, they do need
+                                                                     anchor point along the iterations (Halpern, 1967). The se-
+an estimate of these quantities in order to fix the number
+                                                                     quence βk ∈ (0, 1) is chosen exogenously and increasing to
+of iterations that need to be run or the number of samples
+                                                                     1, so that the strength of the anchor mechanism diminishes
+to collect in order to guarantee ε-optimality. In this sense,
+                                                                     as the iteration progresses.
+they fail to fully dispense for the need of prior knowledge.
+To the best of our knowledge, the only algorithms that can           Halpern’s anchored iteration has been widely studied in
+run without prior knowledge and guarantee at termination             minimax optimization and fixed-point problems (Halpern,
+an ε-optimal policy are the model-based algorithm by Tuyn-           1967; Sabach & Shtern, 2017; Lieder, 2021; Park & Ryu,
+man et al. (2024), which applies to communicating MDPs               2022; Contreras & Cominetti, 2022; Yoon & Ryu, 2021; Cai
+by estimating the diameter D, and the model-free algorithm           et al., 2022). In the context of reinforcement learning, Lee
+SAVIA+ presented in this paper which applies to the larger           & Ryu (2023; 2025) applied the anchoring technique to VIs
+class of weakly communicating MDPs by implementing an                achieving an accelerated convergence rate for cumulative-
+effective stopping rule based on the empirical Bellman resid-        reward MDPs and the first non-asymptotic rate for average
+ual. These latter algorithms achieve sample complexities of          reward multichain MDPs. As mentioned, Bravo & Contreras
+order D/ε2 and ∥h∗ ∥2sp /ε2 respectively.                            (2024) applied the anchoring mechanism to Q-learning for
+                                                                     average reward MDPs with a generative model.
+Value Iterations. Value iterations (VIs)—an instantiation            Assuming that the set of fixed points Fix(T ) is nonempty,
+of the Banach-Picard fixed point iterations—were among               and under suitable conditions on βk , Halpern’s iterates have
+
+                                                                 4
+                                  Near-Optimal Sample Complexity for MDPs via Anchoring
+
+been proved to converge towards a fixed point in the case            Combining Proposition 2.1 with the general estimate of the
+of Hilbert spaces (Wittmann, 1992) as well as in uniformly           Bellman residual error, it follows that
+smooth Banach spaces (Reich, 1980; Xu, 2002). For more
+general normed spaces, the analysis in Sabach & Shtern                 g ∗ − gπk (s) ≤ ∥Qk − T (Qk )∥sp ≤ k+1
+                                                                                                           4
+                                                                                                              ∥Q0 − Q∗ ∥sp
+(2017, Lemma 5) implies that for βk = k/(k + 2) one has
+the explicit error bound ∥T (xk ) − xk ∥ ≤ k+14
+                                                 ∥x0 − x∗ ∥.         where πk (s) ∈ argmaxa∈A Qk (s, a). Thus (Anc-VI) not
+The proportionality constant in this bound was recently im-          only reduces the Bellman residual error but it allows to
+proved in the Hilbert setting by Lieder (2021); Kim (2021).          derive ε-optimal policies.
+For a comprehensive analysis, including the determination
+of the optimal Halpern iteration, see Contreras & Cominetti          2.3. Estimating T (Qk ) by recursive sampling
+(2022).
+                                                                     We are interested in the generative setting where the tran-
+                                                                     sition kernel P is not known but one can generate sam-
+2. Framework overview                                                ples from P(·|s, a). In this case (Anc-VI) cannot be imple-
+                                                                     mented since one cannot compute T (Qk ). With a generative
+2.1. Anchored Value Iteration
+                                                                     model, a natural approach is to approximate T k ≈ T (Qk )
+As discussed in Section 1.2, Bellman’s equation is equiv-            by computing hk = maxA (Qk ) and then collecting samples
+alent to the fixed point equation Q = Tg∗ (Q) where                  {sj }m
+                                                                          j=1 ∼ P(·|s, a) in order to set
+                                                                            k
+
+
+Tg∗ (Q) = T (Q) − g ⋆ with T (Q) = r + P maxA (Q).                                                         Pmk
+Since maxA and P are nonexpansive for the norm · ∞                            T k (s, a) = r(s, a) + m1k         k
+                                                                                                            j=1 h (sj ).
+in the corresponding spaces, the same holds for Tg∗ and one
+might consider Halpern’s iteration                                   We note that the number of samples required to attain a
+                                                                     small error scales with the norm of hk . In order to reduce
+        Qk+1 = (1 − βk+1 ) Q0 + βk+1 Tg∗ (Qk ).           (1)        the sample complexity, we use instead a recursive sampling
+                                                                     technique borrowed from Jin et al. (2024b). The basic idea
+This recursion involves the unknown optimal value g ∗ . How-         is to exploit the previous approximation T k−1 ≈ T (Qk−1 )
+ever, since T (Q + c) = T (Q) + c is homogeneous by addi-            and the linearity of the map P, and to approximate T (Qk )
+tion of constants c ∈ R, one can interpret (1) in the quotient       by estimating the difference T (Qk ) − T (Qk−1 ) = Pdk
+quotient space M = RS×A /E with E the subspace of                    with dk = hk − hk−1 and adding it to T k−1 . Specifically,
+constant matrices, and consider instead the implementable            for each (s, a) take mk samples sj ∼ P(·|s, a) and set
+iteration where g ∗ is removed
+                                                                                                       Pmk k
+                                                                        T k (s, a) = T k−1 (s, a) + m1k j=1  d (sj ), k ≥ 0.
+    Qk+1 = (1 − βk+1 ) Q0 + βk+1 T (Qk ).           (Anc-VI)
+As explained in Appendix C, both (1) and (Anc-VI) are                Starting with T −1 = r ∈ RS×A and h−1 = 0 ∈ RS , and
+equivalent up to constants and can be interpreted as a stan-         denoting Dk ≈ Pdk the matrix sampled at the k-th stage,
+dard Halpern iteration in the quotient space M.                      we have                     Pk
+                                                                                        T k = r + i=0 Di                 (2)
+2.2. Reducing both Bellman residual and policy error                 so that all the previous estimates {Di }ki=0 are used to ap-
+From the previous observations, it follows that the error            proximate T (Qk ). The subsequent analysis will show that
+bounds for Halpern’s iteration directly translate into er-           ∥dk ∥sp can be significantly smaller than ∥hk ∥sp , achieving
+ror bounds for (Anc-VI) in span seminorm. In particu-                a significant reduction in the overall sample complexity.
+lar, Sabach & Shtern (2017, Lemma 5) implies that for                Our algorithms, to be presented in next section, will use as
+βk = k/(k + 2) (Anc-VI) the Bellman residual error con-              a subroutine the following generic sampling procedure.
+verge to zero with the explicit bound in span seminorm
+                                                                     Algorithm 1 SAMPLE(d, m)
+             ∥Qk − T (Qk )∥sp ≤ k+1
+                                 4
+                                    ∥Q0 − Q∗ ∥sp
+                                                                       Input: d ∈ RS ; m ∈ N
+         ∗
+where Q is any solution of Bellman’s equation. Moreover,               for (s, a) ∈ S × A do
+for weakly communicating MDPs we can prove that any                                  1
+                                                                                       Pm                   iid
+                                                                         D(s, a) = m     j=1 d(sj ) with sj ∼ P(· | s, a)
+Q with a small residual ∥Q − T (Q)∥sp yields an approxi-               end for
+mately optimal policy. More precisely, adapting (Puterman,             Output: D
+2014, Theorem 9.1.7), we have following result.
+Proposition 2.1. Let Q ∈ RS×A and π : S → A a greedy
+policy such that π(s) ∈ argmaxa∈A Q(s, a). Then for all              For later reference we observe that this subroutine draws
+states s ∈ S we have 0 ≤ g ∗ − gπ (s) ≤ ∥Q − T (Q)∥sp .              |S||A| m samples and its output satisfies ∥D∥sp ≤ ∥d∥sp . In
+
+                                                                 5
+                                   Near-Optimal Sample Complexity for MDPs via Anchoring
+
+what follows we focus on the sample complexity, that is to              ing the specific choice of number of samples mk in the recur-
+say, the total number of samples required by the algorithms.            sive sampling, combined with some ad-hoc union bounds.
+If we assume that each sample requires constant O(1)-time,
+                                                                        R EMARK . A direct consequence of Proposition 3.1 is that,
+then the time complexity of the algorithms will be of the
+                                                                        with probability at least 1−δ, the true Bellman residual error
+same order as the sampling complexity.
+                                                                        ∥Qk − T (Qk )∥sp and the empirical residual ∥Qk − T k ∥sp
+                                                                        differ at most by 2ε, as results from a triangular inequality
+3. Stochastic Anchored Value Iteration                                  for ∥·∥sp and the general estimate ∥ · ∥sp ≤ 2∥ · ∥∞ .
+We may now present our method which combines two basic                  In what follows we consider the specific sequences
+ingredients: an anchored value iteration and recursive sam-
+                                                                                            ck = 5(k+2) ln2 (k+2)
+                                                                                         
+pling. The following SAVIA iteration is our basic algorithm                         (S)
+which considers a fixed sampling sequence ck > 0 and an                                     βk = k/(k+2)
+averaging sequence βk ∈ (0, 1) increasing to 1.                                          P∞
+                                                                        which satisfy 2 k=0 c−1  k    ≤ 1 and βk increasing to 1.
+Algorithm 2 SAVIA(Q0 , n, ε, δ)                                         These βk ’s are the same as in Sabach & Shtern (2017),
+                                                                        and provide explicit guarantees for the reduction of the Bell-
+  Input: Q0 ∈ RS×A ; n ∈ N ; ε > 0 ; δ ∈ (0, 1)                         man residual error. The choice for ck has been carefully
+  α = ln(2|S||A|(n+1)/δ)                                                tailored to achieve a small sample complexity.
+  T −1 = r ; h−1 = 0 ; β0 = 0
+  for k = 0, . . . , n do                                               The following result presents our complexity bound for
+     Qk = (1−βk ) Q0 + βk T k−1                                         SAVIA for weakly communicating MDPs satisfying (H).
+     hk = maxA (Qk )                                                    Theorem 3.2. Assume (H) and (S) and let (Qn , T n , π n )
+     dk = hk − hk−1                                                     be the output computed by SAVIA(Q0 , n, ε, δ). Then, with
+     mk = max{⌈α ck ∥dk ∥2sp /ε2 ⌉, 1}                                  probability at least (1 − δ) we have, for all s ∈ S
+     Dk = SAMPLE(dk , mk )
+                                                                                                               8∥Q0 − Q∗ ∥sp
+     T k = T k−1 + Dk                                                   g ∗ − gπn (s) ≤ ∥Qn − T (Qn )∥sp ≤                   + 4ε,
+  end for                                                                                                         n+2
+  π n (s) ∈ argmaxa∈A Qn (s, a) (∀s ∈ S)                                with a sample and time complexity of order
+  Output: (Qn , T n , π n )
+                                                                            O L |S||A| (∥Q0 − Q∗ ∥2sp + ∥Q0 ∥2sp )/ε2 + n2
+                                                                                                                              
+
+
+The iteration can start from an arbitrary Q0 , including the all-       where L = ln(|S||A|(n + 1)/δ) ln3 (n + 2).
+zero matrix. However, if one has a prior estimate Q0 ≈ Q∗
+(e.g. from a similar MDP solved previously), it may be                  The proof exploits Proposition 3.1 and the remark above in
+convenient to start from Q0 since our complexity bounds                 order to establish an upper bound of the Bellman residual
+scale with the distance ∥Q0 − Q∗ ∥sp . In any case we stress            error. The bound for the optimality gap in the policy error
+that SAVIA does not require any prior knowledge and all                 then follows from Proposition 2.1. The recursive sampling
+the parameters in the algorithm are independent of Q∗ or                technique is crucial here to attain a complexity that scales
+h∗ , including the sequences βk , ck for which we provide a             quadratically in ε, whereas a naive sampling would give a
+specific choice in the next subsection.                                 much worse order complexity. Note that L contains only
+                                                                        logarithmic factors and is bounded away from 0 so that in
+                                                                        our complexity estimates it can absorb any constant factors.
+3.1. Sample complexity for the basic SAVIA iteration.
+In order to study the sample complexity of SAVIA we first               3.2. A model-free algorithm without prior knowledge
+establish conditions which ensure that with high probability
+the recursive sampling provides good approximations T k ≈               Theorem 3.2 shows that SAVIA is effective in reducing the
+T (Qk ) for all k’s. We only present the main results and               Bellman residual error as well as the policy error. Namely,
+ideas, and defer all proofs to the Appendix.                            with probability at least 1 − δ, after n ≥ ∥Q0 − Q∗ ∥sp /ε
+                                         P∞                             iterations it produces a (12 ε)-optimal policy π n and with
+Proposition 3.1. Let ck > 0 with 2 k=0 c−1     k ≤ 1 and                Oe |S||A|(∥Q0 − Q∗ ∥2sp /ε2 + 1) complexity.
+                                                                                                          
+T k , Qk the iterates generated by SAVIA(Q0 , n, ε, δ). Then,
+with probability at least 1−δ we have ∥T k −T (Qk )∥∞ ≤ ε               Unfortunately, since Q∗ is unknown we cannot directly de-
+simultaneously for all k = 0, . . . , n.                                termine the number of iterations n required to achieve this
+                                                                        goal. To bypass this issue, we modify the basic iteration
+The proof is an adaptation of the arguments leading to the              by running SAVIA for an increasing sequence of n’s us-
+Azuma-Hoeffding inequality (Azuma, 1967), by consider-                  ing a standard doubling trick (Auer et al., 1995; Besson
+
+                                                                    6
+                                   Near-Optimal Sample Complexity for MDPs via Anchoring
+
+& Kaufmann, 2018), and incorporating an explicit stop-              SAVIA+ computes an ε-optimal policy without requiring
+ping rule based on the empirical Bellman residual error             any prior estimates for the number of iteration to run, thanks
+∥Qni − T ni ∥sp . Specifically, we consider the SAVIA+ iter-        to the doubling trick and the stopping rule.
+ation described in Algorithm 3.
+                                                                    In order to compare our complexity result with the lower
+                                                                    bound and the previous results in Table 1, which concern the
+Algorithm 3 SAVIA+(Q0 , ε, δ)
+                                                                    case ∥h∗ ∥sp ≥ 1, we state the following Corollary under this
+  Input: Q0 ∈ RS×A ; ε > 0 ; δ ∈ (0, 1)                             assumption. Note however that Theorem 3.4 holds without
+  for i = 0, 1, . . . do                                            any additional restriction.
+    Set ni = 2i , δi = δ/ci .
+                                                                    Corollary 3.5. Assume (H), (S), r(s, a) ∈ [0, 1] for all
+    (Qni , T ni , π ni ) = SAVIA(Q0 , ni , ε, δi )
+                                                                    (s, a) ∈ S × A, and ∥h∗ ∥sp ≥ 1. Let (QN , T N , π N ) be the
+  until ∥Qni − T ni ∥sp ≤ 14 ε
+                                                                    output of SAVIA+(Q0 , ε/16, δ) with Q0 = 0 and ε ≤ 1.
+  Output: Qni , T ni , π ni
+                                                                    Then, with probability at least (1 − δ) we have, for all s ∈ S
+                                                                            g ∗ − gπN (s) ≤ ∥QN − T (QN )∥sp ≤ ε,
+Our next results establish the effectiveness of the stopping
+                                                                                                           e |S||A|∥h∗ ∥2 /ε2
+                                                                                                                              
+rule and determine the sample complexity of the modified            with sample and time complexity O L                  sp
+algorithm SAVIA+. In order to simplify the notation, and                  e = ln (|S||A|∥h∗ ∥sp /(εδ)) ln4 (∥h∗ ∥sp /ε).
+                                                                    where L
+to avoid equation display issues, we express our estimates
+in terms of the following quantities                                The proof is a straightforward application of Theorem 3.4
+                                                                    considering that ∥Q∗ ∥sp ≤ ∥r∥sp + ∥h∗ ∥sp . To the best of
+               µ = ∥Q0 − Q∗ ∥sp ,                                   our knowledge, the sample complexity in Corollary 3.5 is
+               ν = ∥Q0 − Q∗ ∥sp + ∥Q0 ∥sp ,                         state-of-the-art among model-free algorithms, and matches
+                                                                    the complexity lower bound up to a factor ∥h∗ ∥sp . Fur-
+               κ = max{∥r∥sp , ∥Q0 ∥sp }.
+                                                                    thermore, SAVIA+ does not require any prior knowledge
+Define the stopping time of SAVIA+ as the random variable           of ∥h∗ ∥sp and automatically provides an ε-optimal policy,
+                                                                    unlike most prior works.
+       N = inf{ni ∈ N : ∥Qni − T ni ∥sp ≤ 14ε}
+                                                                    Our previous results provide PAC bounds (probably approx-
+where Qni , T ni ’s are the iterates generated in each loop.        imately correct) which guarantee a small error with high
+We first show that N has finite expectation and, as a conse-        probability. On the other hand, it is also relevant to estimate
+quence, that the algorithm stops in finite time.                    the expected sample complexity considering the full proba-
+                                                                    bility space, including the low probability events in which
+Proposition 3.3. Assume (H) and (S). Then, E[N ] ≤
+                                                                    the algorithm may take a significantly longer time to con-
+2(1 + µ/ε)/(1 − δ). In particular N is finite almost surely
+                                                                    verge. Such expected complexity results have been studied
+and SAVIA+(Q0 , ε, δ) stops with probability 1 after finitely
+                                                                    mainly in the multi-armed bandit literature (Katz-Samuels
+many loops.
+                                                                    & Jamieson, 2020; Mason et al., 2020; Jourdan et al., 2023),
+The proof exploits the fact that restarting SAVIA from Q0           but much less in the reinforcement learning literature. The
+in every cycle guarantees the independence of the stopping          following result establishes the expected sample complexity
+events in each loop. This independence is also relevant             of SAVIA+ in terms of expected policy error.
+to establish the following sample complexity of SAVIA+,             Theorem 3.6. Assume (H) and (S). Let (QN , T N , π N ) be
+which is one of the main results of this paper.                     the output of SAVIA+(Q0 , ε, δ). Then, for all s ∈ S
+Theorem 3.4. Assume (H) and (S). Let (QN , T N , π N ) be
+                                                                                 E[g ∗ − gπN (s)] ≤ 16 ε + δ∥r∥sp ,
+the output of SAVIA+(Q0 , ε, δ). Then, with probability at
+least (1 − δ) we have, for all s ∈ S                                with expected sample and time complexity
+        g ∗ − gπN (s) ≤ ∥QN − T (QN )∥sp ≤ 16 ε,                                                                        
+                                                                       e |S||A|(ν 2 /ε2 + 1 + δ (1 + µ/ε)2 (1 + (κ/ε)2 ) .
+                                                                       O
+                                                           
+                                  b |S||A|(ν 2 /ε2 +1)
+with sample and time complexity O L
+                                4
+where Lb = ln |S||A| (1+µ/ε)/δ ln (1+µ/ε).                          In contrast with the proof of Theorem 3.4 which only fo-
+                                                                    cuses on the occurrence of good events, the analysis in
+In the proof, we consider some ‘good’ events Gi (see Ap-            expectation requires to estimate the sample complexity for
+pendix) which guarantee a low sample complexity for the             the ‘unlucky’ events where Theorem 3.2 does not provide
+i-th loop and then, through simple union bounds, we show            a guarantee of low sample complexity. To this end we es-
+that the probability of these good events occurring at every        tablish a uniform bound for ∥dk ∥sp ≤ max{∥r∥2sp , ∥Q0 ∥2sp }
+iteration is at least 1 − δ. Thus Theorem 3.4 shows that            and compute the expected sample complexity considering
+
+                                                                7
+                                    Near-Optimal Sample Complexity for MDPs via Anchoring
+
+both the lucky and unlucky events by the law of total expec-             Similarly to the case of average rewards, by introducing
+tation.                                                                  the γ-contracting map Tγ : RS×A → RS×A defined as
+                                                                         Tγ (Q) = r + γ P maxA (Q), this is equivalent to the fixed
+Observe that, compared to Theorem 3.4, the expected policy
+                                                                         point equation Q = Tγ (Q).
+error and expected sample complexity include the additional
+terms δ∥r∥sp and e O(|S||A|δ (1 + µ/ε)2 (1 + (κ/ε)2 )) re-
+spectively. These additional terms arise from the the un-                4.2. Sample complexity of SAVID
+lucky events, showing a fourth order in ε while our PAC                  We present now our algorithms SAVID and SAVID+
+complexity is quadratic in ε.                                            adapted to the setting of discounted MDPs. The main dif-
+From Theorem 3.6 we derive following analog of Corol-                    ference is the introduction of the discount factor in the sam-
+lary 3.5 for the expected policy error and complexity.                   pling process updates
+Corollary 3.7. Assume (H), (S), r(s, a) ∈ [0, 1] for all                           T k = T k−1 + γ Dk = r + γ
+                                                                                                                    Pk           i
+                                                                                                                       i=0 D
+(s, a) ∈ S × A and ∥h∗ ∥sp ≥ 1. Let (QN , T N , π N ) be the
+output of SAVIA+(Q0 , ε/17, δ) with Q0 = 0, ε ≤ 1, and                   and the fact that we measure errors using the infinity norm
+δ = ε2 /17. Then, for all s ∈ S                                          instead of the span seminorm. Also, the previous variable h
+                                                                         is now called V , to reflect the nature of the value function
+                     E[g ∗ − gπN (s)] ≤ ε,
+                                                                         in this setting. With these premises, all the elements of our
+                                e |S||A|∥h∗ ∥2sp /ε2 .
+                                                                        approach, including the anchored value iteration, recursive
+with expected sample complexity O
+                                                                         sampling, and proof techniques, are directly adapted to the
+Interestingly, by setting δ = ε2 /17, the expected sample                discounted setup.
+complexity of Corollary 3.7 has same order as Corollary 3.5.
+We are not aware of such estimates on the expected com-                  Algorithm 4 SAVID(Q0 , n, ε, δ, γ)
+plexity for MDPs with a generative model.                                  Input: Q0 ∈ RS×A ; n ∈ N ; ε > 0 ; δ ∈ (0, 1)
+                                                                           α = ln(2|S||A|(n+1)/δ)
+4. Discounted MDPs                                                         T −1 = r ; V −1 = 0 ; β0 = 0
+                                                                           for k = 0, . . . , n do
+In this section, we extend SAVIA to the discounted setup.                     Qk = (1−βk ) Q0 + βk T k−1
+We will show that with minor changes the approach applies                     V k = maxA (Qk )
+to the discounted case, using essentially the same key ideas.                 dk = V k − V k−1
+                                                                                                      2
+                                                                              mk = max{⌈2 α ck dk ∞ /ε2 ⌉, 1}
+4.1. The model                                                                Dk = S AMPLE(dk , mk )
+                                                                              T k = T k−1 + γDk
+Let us recall the setup. We consider a discounted Markov
+                                                                           end for
+decision process (S, A, P, r, γ), where γ ∈ (0, 1) is the
+                                                                           π n (s) ∈ argmaxa∈A Qn (s, a) (∀s ∈ S)
+discount factor. The assumptions on the state and action
+                                                                           Output: Qn , T n , π n
+spaces, transition probabilities, and rewards remain the same
+as in the average reward case, except for condition (H)
+which is no longer required. Given an initial state s0 = s
+and action a0 = a and a stationary and deterministic policy              Algorithm 5 SAVID+(Q0 , ε, δ, γ)
+π : S → A, the Q-value function is now defined by                          Input: Q0 ∈ RS×A ; ε > 0 ; δ ∈ (0, 1)
+                      P∞                                                   for i = 0, 1, . . . do
+     Qπ (s, a) = Eπ [ t=0 γ t r(st , at ) | s0 = s, a0 = a]                  Set ni = 2i , δi = δ/ci .
+                                                                             (Qni , T ni , π ni ) = SAVID(Q0 , ni , ε, δi , γ)
+where Eπ denotes the expected value over all trajectories                  until ∥Qni − T ni ∥∞ ≤ 11 ε
+(s0 , a0 , s1 , a1 , . . . , st , at , . . . ) induced by P and π.         Output: Qni , T ni , π ni
+The optimal Q-value is Q∗ (s, a) = maxπ Qπ (s, a) and an
+optimal policy chooses π(s) ∈ argmaxa∈A Q∗ (s, a). A                     The following result connects the Bellman residual error
+policy π is called ε-optimal if ∥Q∗ − Qπ ∥∞ ≤ ε.                         to the policy error. Compared to Proposition 2.1, there is
+It is well-known that Q∗ is the unique solution of the fol-              1 − γ loss when we translate the Bellman residual error
+lowing the Bellman equation, for all (s, a) ∈ S × A                      ∥Q − Tγ (Q)∥∞ into a policy error.
+                          X                                              Proposition 4.1. Let Q ∈ RS×A and π : S → A a greedy
+    Q(s, a) = r(s, a) + γ     P(s′ |s, a) max
+                                           ′
+                                               Q(s′ , a′ ).              policy such that π(s) ∈ argmaxa∈A Q(s, a). Then we
+                                              a ∈A
+                            s′ ∈S                                        have ∥Q∗ − Qπ ∥∞ ≤ 1−γ 2
+                                                                                                  ∥Q − Tγ (Q)∥∞ .
+
+                                                                     8
+                                  Near-Optimal Sample Complexity for MDPs via Anchoring
+                                                                                           √
+Recall that a major difficulty in the average reward setting         have ∥Q∗ ∥∞ = O(1/ 1 − γ), the complexity bound in
+was the fact that in general we do not have an a priori bound
+                                                                                                                       
+                                                                     Theorem 4.3 improves to O  e |S||A|/((1 − γ)3 ε2 ) . Note
+on the optimal bias vector h∗. For discounted MDPs, we               however that the worst case example in (Azar et al., 2013)
+have the simple bound ∥Q∗ ∥∞ ≤ ∥r∥∞ /(1−γ), that can                 is such that ∥Q∗ ∥∞ = Ω(1/(1−γ)).
+be used to run SAVID and which allows us to obtain the
+following sample complexity.
+                                                                     5. Conclusion
+Theorem 4.2. Assume (S), r(s, a) ∈ [0, 1] for all (s, a) ∈
+S × A, and n = ⌈10/((1−γ)ε)⌉. Let (Qn , T n , π n ) be               This work proposed a novel framework Stochastic Anchored
+the output of SAVID(Q0 , n, ϵ/10, δ, γ) with Q0 = 0 and              Value Iteration that computes an ε-optimal policy with an-
+ε ≤ 1/(1−γ). Then, with probability at least (1 − δ) we              chored value iteration and recursive sampling. Our model-
+have                                                                 free algorithm SAVIA+ does not require prior knowledge of
+                 ∥Qn − Tγ (Qn )∥∞ ≤ ε,                               the bias vector and achieves near-optimal sample complexity
+                                                         
+with sample and time complexity O Lγ |S||A|/((1−γ)2 ε2 )             for weakly communicating average reward MDPs, matching
+where Lγ = ln(2|S||A|/((1−γ)εδ)) ln3 (2/((1−γ)ε)).                   the lower bound up to a factor ∥h∗ ∥sp . Similarly, SAVID+
+                                                                     attains near-optimal complexity for discounted MDPs.
+It is known that for discounted MDPs the lower bound
+on the complexity to compute an ε-optimal Q-value func-              A possible research direction is to improve the sample com-
+tion and an ε-optimal policy is Ω(|S||A|/((1
+                                    e              − γ)3 ε2 ))       plexity of SAVIA+ to match the lower bound for weakly
+(Azar et al., 2013). In fact, model-free algorithms can              communicating MDPs. Other interesting open questions are
+achieve this complexity; see (Wainwright, 2019) for Q-               the analysis of the anchoring framework for general multi-
+values and (Sidford et al., 2018) for optimal policies. Since        chain MDPs, and the study of alternative sampling setups
+∥Q − Tγ (Q)∥∞ ≤ (1 + γ) ∥Q∗ − Q∥∞ , it follows that                  such as episodic sampling and online learning.
+these algorithms require e O(|S||A|/((1−γ)3 ε2 )) to obtain
+an ε Bellman residual error. Up to our knowledge, the                Acknowledgments
+O(|S||A|)/((1−γ)2 ε2 )) sample complexity in Theorem 4.2
+ e
+                                                                     The work of Mario Bravo and Roberto Cominetti was par-
+is the best known sample complexity to obtain an ε residual
+                                                                     tially supported by FONDECYT 1241805. Jongmin Lee
+error for discounted MDPs.
+                                                                     was supported by the Samsung Science and Technology
+On the other hand, Proposition 4.1 implies that, to compute          Foundation (Project Number SSTF-BA2101-02).
+an ε-optimal policy with arbitrary high probability, SAVID
+                           4 2
+requires O(|S||A|/((1−γ)
+         e                  ε )) sample calls, matching the          Impact Statement
+lower bound up to a factor 1/(1−γ). In what follows, we
+show that SAVID+ can improve this upper bound, making                This paper focuses on the theoretical aspects of reinforce-
+                                  2
+the dependence explicit on ∥Q∗ ∥∞ and saving a factor of             ment learning. There are no societal impacts that we antici-
+1/(1−γ)2 by using a doubling trick and a stopping rule.              pate from our theoretical result.
+
+4.3. Sample complexity of SAVID+                                     References
+Theorem 4.3. Assume (S), r(s, a) ∈ [0, 1] for all (s, a) ∈           Agarwal, A., Kakade, S., and Yang, L. F. Model-based rein-
+S × A, and ∥Q∗ ∥∞ ≥ 1. Let (QN , T N , π N ) be the output             forcement learning with a generative model is minimax
+of SAVID+(Q0 , ε(1 − γ)/24, δ, γ) with Q0 = 0 and ε ≤                  optimal. Conference on Learning Theory, 2020.
+1/(1−γ). Then, with probability at least (1 − δ) we have
+  ∥Q∗ − QπN ∥∞ ≤ 2 QN − Tγ (QN ) ∞ /(1−γ) ≤ ε,                       Auer, P., Cesa-Bianchi, N., Freund, Y., and Schapire, R. E.
+                                                                       Gambling in a rigged casino: The adversarial multi-armed
+with sample and time complexity                                        bandit problem. Proceedings of IEEE 36th Annual Foun-
+                                                                     dations of Computer Science, pp. 322–331, 1995.
+          O L e γ |S||A| ∥Q∗ ∥2 /((1−γ)2 ε2 )
+                              ∞
+                                                                     Azar, M. G., Munos, R., and Kappen, H. J. Minimax PAC
+      e γ = ln 2|S||A|/((1−γ)εδ) ln4 2/((1−γ)ε) .
+                                              
+where L                                                                bounds on the sample complexity of reinforcement learn-
+                                                                       ing with a generative model. Machine Learning, 91(3):
+Notice that if we use the bound ∥Q∗ ∥∞ ≤ 1/(1 − γ) we                  325–349, 2013.
+    O(|S||A|/((1 − γ)4 ε2 )) complexity, which matches
+get e
+the one of SAVID. However, the sample complexity of                  Azuma, K. Weighted sums of certain dependent random
+SAVID+ shows an explicit dependence on ∥Q∗ ∥∞ that                     variables. Tohoku Mathematical Journal, Second Series,
+might be useful for particular MDPs. For instance, if we              19(3):357–367, 1967.
+
+                                                                 9
+                                  Near-Optimal Sample Complexity for MDPs via Anchoring
+
+Bai, Q., Mondal, W. U., and Aggarwal, V. Regret analysis              Jin, Y. and Sidford, A. Efficiently solving MDPs with
+  of policy gradient algorithm for infinite horizon average              stochastic mirror descent. International Conference on
+  reward Markov decision processes. International Confer-                Machine Learning, 2020.
+  ence on Artificial Intelligence, 2024.
+                                                                      Jin, Y. and Sidford, A. Towards tight bounds on the sam-
+Bellman, R. A Markovian decision process. Journal of                     ple complexity of average-reward MDPs. International
+  Mathematics and Mechanics, 6(5):679–684, 1957.                         Conference on Machine Learning, 2021.
+
+Bertsekas, D. P. Dynamic Programming and Optimal Con-                 Jin, Y., Gummadi, R., Zhou, Z., and Blanchet, J. Feasible
+  trol, volume II. Athena Scientific, 4th edition, 2012.                 Q-learning for average reward reinforcement learning.
+                                                                         International Conference on Artificial Intelligence and
+Bertsekas, D. P. and Tsitsiklis, J. N. Neuro-Dynamic Pro-                Statistics, 2024a.
+  gramming. Athena Scientific, 1996.
+                                                                      Jin, Y., Karmarkar, I., Sidford, A., and Wang, J. Truncated
+Besson, L. and Kaufmann, E. What doubling tricks can                     variance reduced value iteration. Neural Information
+  and can’t do for multi-armed bandits. arXiv preprint                   Processing Systems, 2024b.
+  arXiv:1803.06971, 2018.                                             Johnson, R. and Zhang, T. Accelerating stochastic gradi-
+                                                                        ent descent using predictive variance reduction. Neural
+Blackwell, D. Discrete dynamic programming. The Annals
+                                                                        information processing systems, 2013.
+  of Mathematical Statistics, 33:719–726, 1962.
+                                                                      Jourdan, M., Degenne, R., and Kaufmann, E. An ε -best-arm
+Bourel, H., Jonsson, A., Maillard, O.-A., and Talebi, M. S.             identification algorithm for fixed-confidence and beyond.
+  Exploration in reward machines with low regret. Interna-              Neural Information Processing Systems, 2023.
+  tional Conference on Artificial Intelligence and Statistics,
+  2023.                                                               Katz-Samuels, J. and Jamieson, K. The true sample com-
+                                                                        plexity of identifying good arms. International Confer-
+Bravo, M. and Contreras, J. P. Stochastic Halpern iteration in          ence on Artificial Intelligence and Statistics, 2020.
+  normed spaces and applications to reinforcement learning.
+  arXiv preprint arXiv:2403.12338v4, 2024.                            Kearns, M. and Singh, S. Finite-sample convergence rates
+                                                                        for Q-learning and indirect algorithms. Neural Informa-
+Cai, X., Song, C., Guzmán, C., and Diakonikolas, J. Stochas-           tion Processing Systems, 1998.
+  tic Halpern iteration with variance reduction for stochas-
+  tic monotone inclusions. Neural Information Processing              Kim, D. Accelerated proximal point method for maximally
+  Systems, 2022.                                                        monotone operators. Mathematical Programming, 190
+                                                                        (1–2):57–87, 2021.
+Contreras, J. P. and Cominetti, R. Optimal error bounds
+                                                                      Kumar, N., Wang, K., Levy, K. Y., and Mannor, S. Efficient
+  for non-expansive fixed-point iterations in normed spaces.
+                                                                        value iteration for s-rectangular robust Markov decision
+  Mathematical Programming, 199(1–2):343–374, 2022.
+                                                                        processes. International Conference on Machine Learn-
+Dewanto, V., Dunn, G., Eshragh, A., Gallagher, M., and                  ing, 2024.
+  Roosta, F. Average-reward model-free reinforcement                  Kumar, N., Murthy, Y., Shufaro, I., Levy, K. Y., Srikant,
+  learning: a systematic review and literature mapping.                 R., and Mannor, S. On the global convergence of policy
+  arXiv preprint arXiv:2010.08920, 2020.                                gradient in average reward Markov decision processes.
+                                                                        International Conference on Learning Representations,
+Ernst, D., Geurts, P., and Wehenkel, L. Tree-based batch
+                                                                        2025.
+  mode reinforcement learning. Journal of Machine Learn-
+  ing Research, 2005.                                                 Lee, J. and Ryu, E. K. Accelerating value iteration with
+                                                                        anchoring. Neural Information Processing Systems, 2023.
+Fruit, R., Pirotta, M., Lazaric, A., and Brunskill, E. Regret
+  minimization in MDPs with options without prior knowl-              Lee, J. and Ryu, E. K. Optimal non-asymptotic rates of value
+  edge. Neural Information Processing Systems, 2017.                    iteration for average-reward markov decision processes.
+                                                                        International Conference on Representation Learning,
+Halpern, B. Fixed points of nonexpanding maps. Bulletin                 2025.
+  of the American Mathematical Society, 73(6):957–961,
+ 1967.                                                                Li, G., Wei, Y., Chi, Y., Gu, Y., and Chen, Y. Breaking
+                                                                        the sample size barrier in model-based reinforcement
+Howard, R. A. Dynamic Programming and Markov Pro-                       learning with a generative model. Neural Information
+  cesses. John Wiley and Sons, 1960.                                    Processing Systems, 2020.
+
+                                                                 10
+                                  Near-Optimal Sample Complexity for MDPs via Anchoring
+
+Li, T., Wu, F., and Lan, G. Stochastic first-order methods for        Sidford, A., Wang, M., Wu, X., Yang, L., and Ye, Y. Near-
+   average-reward Markov decision processes. Mathematics                optimal time and sample complexities for solving Markov
+   of Operations Research, 2024.                                        decision processes with a generative model. Neural In-
+                                                                        formation Processing Systems, 2018.
+Lieder, F. On the convergence rate of the Halpern-iteration.
+  Optimization Letters, 15(2):405–418, 2021.                          Sidford, A., Wang, M., Wu, X., and Ye, Y. Variance reduced
+                                                                        value iteration and faster algorithms for solving Markov
+Mahadevan, S. Average reward reinforcement learning:                    decision processes. Naval Research Logistics, 70(5):423–
+ Foundations, algorithms, and empirical results. Machine                442, 2023.
+ Learning, 22(1):159–195, 1996.
+                                                                      Sutton, R. S. Learning to predict by the methods of temporal
+Mason, B., Jain, L., Tripathy, A., and Nowak, R. Finding                differences. Machine Learning, 3:9–44, 1988.
+ all ε-good arms in stochastic bandits. Neural Information
+ Processing Systems, 2020.                                            Sutton, R. S. and Barto, A. G. Reinforcement Learning: An
+                                                                        introduction. MIT press, 2nd edition, 2018.
+Mnih, V., Kavukcuoglu, K., Silver, D., Rusu, A. A., and
+ et al. Human-level control through deep reinforcement                Szepesvári, C. Algorithms for Reinforcement Learning.
+ learning. Nature, 518(7540):529–533, 2015.                             Morgan Claypool Publishers, 2010.
+
+Munos, R. and Szepesvári, C. Finite-time bounds for fitted           Tuynman, A., Degenne, R., and Kaufmann, E. Finding good
+ value iteration. Journal of Machine Learning Research,                 policies in average-reward Markov decision processes
+ 2008.                                                                  without prior knowledge. Neural Information Processing
+                                                                        Systems, 2024.
+Murthy, Y. and Srikant, R. On the convergence of natural
+ policy gradient and mirror descent-like policy methods               Wainwright, M. J. Variance-reduced Q-learning is minimax
+ for average-reward MDPs. IEEE Conference on Decision                  optimal. arXiv preprint arXiv:1906.04697, 2019.
+ and Control, pp. 1979–1984, 2023.
+                                                                      Wan, Y., Naik, A., and Sutton, R. S. Learning and planning
+Neu, G. and Okolo, N. Dealing with unbounded gradients                 in average-reward Markov decision processes. Interna-
+  in stochastic saddle-point optimization. International               tional Conference on Machine Learning, 2021.
+  Conference on Machine Learning, 2024.
+                                                                      Wang, J., Wang, M., and Yang, L. F. Near sample-optimal
+Nguyen, L. M., Liu, J., Scheinberg, K., and Takáč, M. Sarah:         reduction-based policy learning for average reward MDP.
+  A novel method for machine learning problems using                   arXiv:2212.00603, 2022.
+  stochastic recursive gradient. International Conference
+  on Machine Learning, 2017.                                          Wang, M. Primal-dual π learning: Sample complexity and
+                                                                       sublinear run time for ergodic Markov decision problems.
+Park, J. and Ryu, E. K. Exact optimal accelerated complex-             arXiv:1710.06100, 2017.
+  ity for fixed-point iterations. International Conference on
+  Machine Learning, 2022.                                             Wang, S., Blanchet, J., and Glynn, P. Optimal sample com-
+                                                                       plexity for average reward Markov decision processes.
+Puterman, M. L. Markov Decision Processes: Discrete                    International Conference on Learning Representations,
+  Stochastic Dynamic Programming. John Wiley and Sons,                 2024.
+  2nd edition, 2014.
+                                                                      Wei, C.-Y., Jahromi, M. J., Luo, H., Sharma, H., and Jain,
+Reich, S. Strong convergence theorems for resolvents of                R. Model-free reinforcement learning in infinite-horizon
+  accretive operators in Banach spaces. Journal of Mathe-              average-reward Markov decision processes. International
+  matical Analysis and Applications, 75(1):287–292, 1980.              Conference on Machine Learning, 2020.
+
+Rosenberg, A. and Mansour, Y. Oracle-efficient regret mini-           Wittmann, R. Approximation of fixed points of nonexpan-
+  mization in factored MDPs with unknown structure. Neu-               sive mappings. Archiv der Mathematik, 58(5):486–491,
+  ral Information Processing Systems, 2021.                            1992.
+
+Sabach, S. and Shtern, S. A first order method for solving            Xu, H.-K. Iterative algorithms for nonlinear operators. Jour-
+  convex bilevel optimization problems. SIAM Journal on                 nal of the London Mathematical Society, 66(1):240–256,
+  Optimization, 27(2):640–660, 2017.                                    2002.
+
+                                                                 11
+                               Near-Optimal Sample Complexity for MDPs via Anchoring
+
+Yoon, T. and Ryu, E. K. Accelerated algorithms for smooth
+  convex-concave minimax problems with O(1/k 2 ) rate
+  on squared gradient norm. International Conference on
+  Machine Learning, 2021.
+Zhang, Z. and Xie, Q. Sharper model-free reinforcement
+  learning for average-reward Markov decision processes.
+  Conference on Learning Theory, 2023.
+
+Zurek, M. and Chen, Y. Span-based optimal sample com-
+  plexity for weakly communicating and general average
+  reward MDPs. Neural Information Processing Systems,
+  2024.
+
+Zurek, M. and Chen, Y. The plug-in approach for average-
+  reward and discounted MDPs: Optimal sample complex-
+  ity analysis. Conference on Algorithmic Learning Theory,
+  2025.
+
+
+
+
+                                                             12
+                                   Near-Optimal Sample Complexity for MDPs via Anchoring
+
+A. Omitted proofs for the average reward setting
+In this section, we present the proofs omitted in the main body of the paper, along with additional comments to complement
+our results. We start by analyzing the average reward setup, while the analog results in the discounted setting is presented in
+Appendix B. For better readability, we restate the main results.
+
+A.1. Proof of Proposition 2.1
+Proposition 2.1. Let Q ∈ RS×A and π : S → A a policy such that π(s) ∈ argmaxa∈A Q(s, a). Then for all states s ∈ S
+we have 0 ≤ g ∗ − gπ (s) ≤ ∥Q − T (Q)∥sp .
+
+Proof. Let Pπ the transition matrix of the Markov chain induced by π, that is, Pπ (s′ |s) = P(s′ |s, π(s)). Then gπ = Pπ∞ rπ
+                             PT −1
+where Pπ∞ = limT →∞ T1 t=0 (Pπ )t and rπ (s) = r(s, π(s)). Since Pπ∞ = Pπ∞ Pπ , it follows that for all h ∈ RS we
+have gπ = Pπ∞ (rπ + Pπ h − h). In particular if we take h = maxA (Q) so that h(s) = Q(s, π(s)), then for every s′ ∈ S the
+term rπ (s′ ) + (Pπ h)(s′ ) − h(s′ ) is exactly the component (s′ , π(s′ )) of the matrix T (Q) − Q, and therefore by averaging
+according to Pπ∞ (·|s) we derive the inequality gπ (s) ≥ mins′ ,a′ T (Q) − Q (s′ , a′ ).
+                                                                                   
+
+Similarly, for an optimal policy π ∗ we have g ∗ = Pπ∞∗ (rπ∗ + Pπ∗ h − h) for h = maxA (Q). Denoting h′ (s) = Q(s, π ∗ (s))
+we have h′ (s) ≤ h(s) and therefore
+
+                               rπ∗ (s′ ) + (Pπ∗ h)(s′ ) − h(s′ ) ≤ rπ∗ (s′ ) + (Pπ∗ h)(s′ ) − h′ (s′ ).
+
+Noting that rπ∗ (s′ ) + (Pπ∗ h)(s′ ) −h′ (s′ ) is the component (s′ , π ∗ (s′ )) of T (Q) − Q, and averaging with Pπ∞∗ (·|s) we get
+g ∗ = g ∗ (s) ≤ maxs′ ,a′ T (Q)−Q (s′ , a′ ). Sustracting both estimates we conclude 0 ≤ g ∗ −gπ (s) ≤ ∥T (Q) − Q∥sp .
+
+A.2. Proofs of Section 3.1
+Let Fk = σ({Di : i = 0, . . . , k}) denote the natural filtration generated by the sampling process in SAVIA, and P(·) the
+probability distribution over the trajectories (Dk )k∈N . Notice that, because of the order of the updates, T k is Fk -measurable
+whereas Qk , hk , dk and mk , being functions of T k−1 , are Fk−1 -measurable.
+                                       P∞
+Proposition 3.1. Let ck > 0 with 2 k=0 c−1                    k    k                                       0
+                                                k ≤ 1 and T , Q the iterates generated by SAVIA(Q , n, ε, δ). Then, with
+                                         k        k
+probability at least 1 − δ we have ∥T − T (Q )∥∞ ≤ ε simultaneously for all k = 0, . . . , n.
+                                           Pk                                                                      Pk
+Proof. Let Y i = Di − Pdi and X k = i=0 Y i . Since h−1 = 0, by telescoping T (Qk ) = r + Phk = r + i=0 Pdi and
+                                            k
+then using (2) we get T k − T (Qk ) = i=0 (Di − Pdi ) = X k .
+                                          P
+
+We proceed to estimate P(∥X k ∥∞ ≥ ε) by adapting the arguments of Azuma-Hoeffding’s inequality. Let ss,a
+                                                                                                      k,j ∼ P(· | s, a)
+for j = 1, . . . , mk be the samples at the k-th iteration for (s, a) ∈ S × A, so that
+                                              Pmk k s,a
+                              Y k (s, a) = m1k j=1     d (sk,j ) − Pdk (s, a)
+                                                                             
+                                                                                   ∀(s, a) ∈ S × A.
+
+Since dk and mk are Fk−1 -measurable, it follows that E[Y k |Fk−1 ] = 0 and therefore X k is an Fk -martingale. From
+Markov’s inequality and the tower property of conditional expectations we get that for each (s, a) ∈ S × A and λ > 0
+
+                      P(X k (s, a) ≥ ε) ≤ e−λε E exp(λ X k (s, a))
+                                                                     
+
+                                        = e−λε E exp(λ X k−1 (s, a)) E[exp(λ Y k (s, a)) | Fk−1 ] .
+                                                                                                  
+                                                                                                                       (3)
+
+Now, conditionally on Fk−1 , the terms Yjk = m1k dk (ss,a           k
+                                                                                          k
+                                                          k,j ) − Pd (s, a) in the sum of Y (s, a) are independent random
+variables with zero mean and |Yjk | ≤ m1k ∥dk ∥sp so that Hoeffding’s Lemma gives us
+
+                                               mYk
+
+                    E exp(λ Y k (s, a)) | Fk−1 =    E exp(λ Yjk ) | Fk−1 ≤ exp                  1 2   k 2
+                                                                                                              
+                                                                                                2 λ ∥d ∥sp /mk       .           (4)
+                                                       j=1
+
+
+Using (3) and (4), together with mk ≥ α ck ∥dk ∥2sp /ε2 , a simple induction yields
+                                                                               Pk     −1
+                                       E[exp(λ X k (s, a))] ≤ exp      1 2 2
+                                                                                            
+                                                                       2λ ε      i=0 ci /α .
+
+
+                                                                 13
+                                 Near-Optimal Sample Complexity for MDPs via Anchoring
+              P∞    −1
+                       ≤ 12 we get P(X k (s, a) ≥ ε) ≤ exp   −λ ε + 14 λ2 ε2 /α and taking λ = 2α/ε we deduce
+                                                                               
+Then, since    i=0 ci
+
+                                   P(X k (s, a) ≥ ε) ≤ exp(−α) = δ/(2|S||A|(n+1)).
+A symmetric argument yields the same bound for P(X k (s, a) ≤ −ε) so that P(|X k (s, a)| ≥ ε) ≤ δ/(|S||A|(n + 1)).
+Applying aSunion bound over all (s, a) ∈ S × A we get P(∥X k ∥∞ ≥ ε) ≤ δ/(n+1), and then a second union bound over
+            n
+k gives P( k=0 {∥X k ∥∞ ≥ ε}) ≤ δ. The conclusion follows by taking the complementary event.
+
+From now on we consider the specific sequences ck = 5(k + 2) ln2 (k + 2) and βk = k/(k + 2). We also fix some solution
+Q∗ of Bellman’s equation Q∗ = T (Q∗ ) − g ∗ , and we set h∗ = maxA (Q∗ ). We keep the notation for all the sequences
+generated by SAVIA and we assume throughout that
+                                      T k − T (Qk ) ∞ ≤ ε         for all k = 0, . . . , n,                              (5)
+which, in view of Proposition 3.1, holds with probability at least (1 − δ). Also, as noted earlier, for D = S AMPLE(d, m) we
+have ∥D∥sp ≤ ∥d∥sp , which combined with the nonexpansivity of the map Q 7→ maxA (Q) implies
+
+                       ∥T k − T k−1 ∥sp = ∥Dk ∥sp ≤ ∥dk ∥sp = ∥hk − hk−1 ∥sp ≤ ∥Qk − Qk−1 ∥sp .                          (6)
+As a preamble to the proof of Theorem 3.2 we establish two preliminary technical Lemmas.
+Lemma A.1. Assuming (S) and (5), we have that
+                              ∥Qk − Q∗ ∥sp ≤ ∥Q0 − Q∗ ∥sp + 23 ε k,       for all k = 0, . . . , n.
+
+                                                                 k
+Proof. From the iteration Qk = (1 − βk )Q0 + βk T k−1 with βk = k+2 we get
+
+                                ∥Qk − Q∗ ∥sp ≤ k+2
+                                                2
+                                                   ∥Q0 − Q∗ ∥sp + k+2
+                                                                   k
+                                                                      ∥T k−1 − Q∗ ∥sp .                                  (7)
+Using the invariance of ∥·∥sp by addition of constants and the nonexpansivity of T for this seminorm, a triangle inequality
+together with ∥·∥sp ≤ 2∥ · ∥∞ and the bound (5) imply
+
+                             ∥T k−1 − Q∗ ∥sp = ∥T k−1 − T (Q∗ )∥sp ≤ 2ε + ∥Qk−1 − Q∗ ∥sp                                 (8)
+which plugged back into (7) yields
+                            ∥Qk − Q∗ ∥sp ≤ k+2
+                                            2
+                                               ∥Q0 − Q∗ ∥sp + k+2
+                                                               k
+                                                                  2ε + ∥Qk−1 − Q∗ ∥sp .
+                                                                                     
+
+Denoting θk = (k + 1)(k + 2)∥Qk − Q∗ ∥sp this becomes θk ≤ θ0 (k + 1) + 2ε k(k + 1) + θk−1 , and inductively
+                                         Pk                Pk
+                                θk ≤ θ0 i=1 (i + 1) + 2ε i=1 i(i + 1) + θ0
+                                        = θ0 12 (k + 1)(k + 2) + 32 ε k(k + 1)(k + 2).
+The conclusion then follows dividing by (k + 1)(k + 2).
+
+
+Lemma A.2. Assume (S) and (5) and let ρk = 2∥Q0 − Q∗ ∥sp + 23 ε k. Then
+                                              2
+                                                  Pk
+                         ∥Qk − Qk−1 ∥sp ≤ k(k+1)     i=1 ρi+2 for all k = 1, . . . , n.
+
+                  2        k                    2
+Proof. From Qk = k+2 Q0 + k+2 T k−1 and Qk−1 = k+1 Q0 + k−1
+                                                        k+1 T
+                                                              k−2
+                                                                  we derive
+
+                             Qk − Qk−1 = (k+1)(k+2)
+                                             2
+                                                    (T k−1 − Q0 ) + k−1
+                                                                    k+1 (T
+                                                                           k−1
+                                                                               − T k−2 ).                                (9)
+
+Now, (8) together with Lemma A.1 readily imply ∥T k−1 − Q0 ∥sp ≤ ∥T k−1 − Q∗ ∥sp +∥Q∗ − Q0 ∥sp ≤ ρk+2 , and therefore
+using (6) we get
+                              ∥Qk − Qk−1 ∥sp ≤ (k+1)(k+2)
+                                                   2
+                                                          ρk+2 + k−1
+                                                                 k+1 ∥Q
+                                                                       k−1
+                                                                           − Qk−2 ∥sp .
+                                                     2k
+                                                                                                           Pk
+Denoting θ̃k = k(k + 1)∥Qk − Qk−1 ∥sp we have θ̃k ≤ k+2 ρk+2 + θ̃k−1 ≤ 2ρk+2 + θ̃k−1 . Hence θ̃k ≤ 2         i=1 ρi+2 from
+which the result follows directly.
+
+                                                             14
+                                 Near-Optimal Sample Complexity for MDPs via Anchoring
+
+Theorem 3.2. Assume (H) and (S) and let (Qn , T n , π n ) be the output computed by SAVIA(Q0 , n, ε, δ). Then, with
+probability at least (1 − δ) we have, for all s ∈ S
+                                                                          8∥Q0 − Q∗ ∥sp
+                                 g ∗ − gπn (s) ≤ ∥Qn − T (Qn )∥sp ≤                     + 4ε,
+                                                                             n+2
+with a sample and time complexity of order
+
+                                     O L |S||A| (∥Q0 − Q∗ ∥2sp + ∥Q0 ∥2sp )/ε2 + n2
+                                                                                       
+
+
+where L = ln(|S||A|(n + 1)/δ) ln3 (n + 2).
+
+
+Proof. From Proposition 3.1, with probability at least (1 − δ) we have ∥T k − T (Qk )∥sp ≤ ε for all k = 0, . . . , n. Now, the
+                2           n
+recursion Qn = n+2 Q0 + n+2   T n−1 implies
+
+             Qn − T (Qn ) = n+2
+                             2                  n                       n
+                                                                                            
+                                Q0 − T (Qn ) + n+2 T n−1 − T (Qn−1 ) + n+2 T (Qn−1 ) − T (Qn ) .                          (10)
+
+Using the fact that Q∗ = T (Q∗ ) − g ∗ and the invariance of ∥·∥sp by additive constants, a triangle inequality and the
+∥·∥sp -nonexpansivity of T (·) together with Lemma A.1, imply
+
+                                 ∥Q0 − T (Qn )∥sp ≤ ∥Q0 − Q∗ ∥sp + ∥Q∗ − Qn ∥sp ≤ ρn ,
+
+                                                        2
+                                                             Pn
+while Lemma A.2 gives ∥T (Qn−1 ) − T (Qn )∥sp ≤ n(n+1)         i=1 ρi+2 . Thus, applying a triangle inequality to (10) and
+using these estimates together with Proposition 2.1 and ∥·∥sp ≤ 2∥ · ∥∞ we obtain
+                                                                                         Pn
+                       g ∗ − gπ (s) ≤ ∥Qn − T (Qn )∥sp ≤ n+2
+                                                          2                2
+                                                             ρn + 2ε + (n+1)(n+2)           i=1 ρi+2
+                                                                                               2
+                                                              4(1+2n)
+                                                          = (n+1)(n+2) ∥Q0 − Q∗ ∥sp + 4(3+8n+3n  )
+                                                                                      3(n+1)(n+2) ε
+                                                                8∥Q0 −Q∗ ∥sp
+                                                          ≤        n+2       + 4ε.
+
+
+To estimate the complexity, for k ≥ 1, we use the inequality ∥dk ∥sp ≤ ∥Qk − Qk−1 ∥sp in (6) and Lemma A.2 to find
+
+                                                          2
+                                                                Pk
+                                             ∥dk ∥sp ≤ k(k+1)      i=1 ρi+2
+                                                       4
+                                                    = k+1 ∥Q0 − Q∗ ∥sp + 2(k+5)
+                                                                         3(k+1) ε
+                                                       4
+                                                    ≤ k+1 ∥Q0 − Q∗ ∥sp + 2ε.
+                                                        Pn                                      k 2    2
+Now, to estimate the total number of samples |S||A|       k=0 mk we recall that mk = max{⌈αck ∥d ∥sp /ε ⌉, 1} which can
+be bounded as mk ≤ 1 + αck ∥dk ∥2sp /ε2 . Then
+ Pn                    α
+                              Pn             k 2
+    k=0 mk ≤ (n + 1) + ε2        k=0 ck ∥d    ∥sp
+                                                     Pn                                          2
+             ≤ (n + 1) + 10ε2α ln2 (2) ∥Q0 ∥2sp + 5α
+                                                  ε2
+                                                                    2          4    0  ∗
+                                                      k=1 (k + 2) ln (k + 2) k+1 ∥Q − Q ∥sp + 2ε
+                                                 Pn                                       Pn
+             ≤ (n + 1) + 10ε2α ln2 (2)∥Q0 ∥2sp + k=1 ε2240 α    2           0     ∗ 2
+                                                        (k+1) ln (k + 2)∥Q − Q ∥sp + 40 α
+                                                                                                           2
+                                                                                             k=1 (k + 2) ln (k + 2)
+
+             = O α∥Q0 ∥2sp /ε2 + α ln3 (n + 2)∥Q0 − Q∗ ∥2sp /ε2 + α n2 ln2 (n + 2) ,
+                                                                                  
+                                                                                                                 (11)
+
+where the third inequality results by using the trivial bounds (a + b)2 ≤ 2a2 + 2b2 and k+2   3
+                                                                                        k+1 ≤ 2 , and the last equality from
+integral estimations of the sums. The announced complexity bound then follows by multiplying this estimate by |A||S| and
+using the definition of α and L.
+
+
+R EMARK . The complexity analysis above can be refined to obtain an explicit multiplicative constant in O(·).
+
+                                                                 15
+                                 Near-Optimal Sample Complexity for MDPs via Anchoring
+
+A.3. Proofs of Section 3.2
+We now proceed to establish the finite convergence and complexity of the algorithm SAVIA+, for which we introduce some
+additional notation. Let us recall the definition of the parameters
+                                                 µ = ∥Q0 − Q∗ ∥sp ,
+                                                 ν = ∥Q0 − Q∗ ∥sp + ∥Q0 ∥sp ,
+                                                 κ = max{∥r∥sp , ∥Q0 ∥sp }.
+
+The stopping time of SAVIA+ is the random variable
+
+                                        N = inf{ni ∈ N : ∥Qni − T ni ∥sp ≤ 14 ε}
+
+with T ni and Qni ’s the iterates generated in each loop of SAVIA+(Q0 , ε, δ). For notational convenience we also define
+
+                                         I = inf{i ∈ N : ∥Qni − T ni ∥sp ≤ 14 ε}
+
+so that in fact N = 2I . We let i0 ∈ N be the smallest integer satisfying ni0 ≥ ∥Q0 − Q∗ ∥sp /ε = µ/ε, so that either i0 = 0
+and ni0 = 1 or ni0 −1 = ni0 /2 < µ/ε, which combined imply ni0 ≤ 2(1 + µ/ε).
+In order to estimate the sample complexity, we consider the random events
+
+                 Si = {∥Qni − T ni ∥sp ≤ 14 ε}       and   Gi = { T k − T (Qk ) ∞ ≤ ε, ∀k = 0, . . . , ni }
+
+with T k and Qk ’s the inner iterates generated during the execution of SAVIA(Q0 , ni , ε, δi ) in the i-th loop of SAVIA+, and
+                                                                                                              PI
+denote by Mi the number of samples used during this call, so that the total sample complexity is M ≜ i=0 Mi . Observe
+that the Mi ’s and M are random variables.
+With these preliminary definitions we proceed to establish the following simple but useful preliminary estimate.
+Lemma A.3. Assume (H) and (S). Then, for all i ≥ i0 we have P(Si ) ≥ P(Gi ) ≥ 1 − δi .
+
+Proof. Proposition 3.1 guarantees P(Gi ) ≥ 1 − δi so it suffices to show that Gi ⊆ Si . This follows from Theorem 3.2 since
+for i ≥ i0 and all ω ∈ Gi we have
+
+                    ∥Qni (ω) − T ni (ω)∥sp ≤ ∥Qni (ω) − T (Qni )(ω)∥sp + ∥T (Qni )(ω) − T ni (ω)∥sp
+                                                 8∥Q0 −Q∗ ∥sp
+                                             ≤      ni +2     + 4ε + 2ε
+                                             ≤ 14 ε.
+
+Proposition 3.3. Assume (H) and (S). Then, E[N ] ≤ 2(1 + µ/ε)/(1 − δ). In particular N is finite almost surely and
+SAVIA+(Q0 , ε, δ) stops with probability 1 after finitely many loops.
+
+Proof. Since in each loop SAVIA+(Q0 , ni , ε, δi ) restarts afresh from Q0 , the events {Si : i ∈ N} are mutually independent
+and therefore
+                                                   Ti−1               Qi−1
+                                      P(I = i) = P( j=0 Sjc ∩ Si ) = j=0 P(Sjc ) · P(Si ).
+                                                                                           Qi−1
+From Lemma A.3 we get P(Sic ) ≤ P(Gci ) ≤ δi for all i ≥ i0 + 1 and then P(I = i) ≤ j=i0 δj . On the other hand, from
+  P∞
+2 i=0 c−1  i   ≤ 1 it follows that δj = δ/cj ≤ δ/2 and therefore P(I = i) ≤ (δ/2)i−i0 . Using this estimate and the identity
+             i−i0
+n i = n i0 2      , we obtain
+                                                   P∞
+                                           E[N ] = i=0 ni P(N = ni )
+                                                          P∞
+                                                 ≤ ni0 + i=i0 +1 ni0 2i−i0 P(I = i)
+                                                            P∞
+                                                 ≤ ni0 (1 + i=i0 +1 δ i−i0 ).
+
+This last expression is exactly ni0 /(1 − δ) and the conclusion follows using the bound ni0 ≤ 2(1 + µ/ε).
+
+                                                              16
+                                 Near-Optimal Sample Complexity for MDPs via Anchoring
+
+Theorem 3.4. Assume (H) and (S). Let (QN , T N , π N ) be the output of SAVIA+(Q0 , ε, δ). Then, with probability at least
+(1 − δ) we have, for all s ∈ S
+                                     g ∗ − gπN (s) ≤ ∥QN − T (QN )∥sp ≤ 16 ε
+                                                                b = ln |S||A| (1+µ/ε)/δ ln4 (1+µ/ε).
+                                                                                          
+                                  b |S||A|(ν 2 /ε2 +1) where L
+with sample and time complexity O L
+
+Proof. The inequality between the policy error and the BellmanTerror follows from Proposition 2.1 so it suffices to prove
+                                                                ∞
+the second one. Consider the events A = {I ≤ i0 } and B = i=0 Gi . We claim that P(A ∩ B) ≥ 1 − δ. Indeed, by
+                           c
+Proposition 3.1 we have P(Gi ) ≤ δi so that
+                                                  S∞          P∞
+                                      P(B c ) = P( i=1 Gci ) ≤ i=1 δ/ci ≤ δ/2,
+
+while Lemma A.3 implies P(A) ≥ P (Si0 ) ≥ P(Gi0 ) ≥ 1 − δi0 ≥ 1 − δ/2, which combined yield P(Ac ∪ B c ) ≤ δ. Now,
+from the definition of N , I and Gi , it follows that on the event A ∩ B we have
+
+                    ∥QN − T (QN )∥sp ≤ ∥QN − T N ∥sp + ∥T N − T (QN )∥sp + ≤ 14 ε + 2 ε = 16 ε.
+                                                                                                         PI
+Moreover, using (11) in the proof of Theorem 3.2, we can to bound the total sample complexity M ≜ i=0 Mi as
+            Pi0                     Pi0                                                                           
+     M ≤ i=0      Mi = O |S||A| i=0        αi ∥Q0 ∥2sp /ε2 + αi ln3 (ni + 2)∥Q0 − Q∗ ∥2sp /ε2 + αi n2i ln2 (ni + 2) ,
+
+where αi = ln(2|S||A|(ni +1)ci /δ) is the parameter used in the i-th internal cycle of SAVIA+. Note that (ni +1)ci ≤ 14n2i
+and therefore αi ≤ ln(28|S||A|n2i /δ). Now, since the terms in the sum above increase with i, using the estimate
+ni0 ≤ 2(1 + µ/ε) we conclude
+
+              M ≤ |S||A| αi0 (i0 +1) O ∥Q0 ∥2sp /ε2 + ln3 (ni0 + 2)∥Q0 − Q∗ ∥2sp /ε2 + n2i0 ln2 (ni0 + 2)
+                                                                                                          
+
+                 ≤ |S||A| αi0 ln4 (ni0 + 2) O ∥Q0 ∥2sp /ε2 + µ2 /ε2 + 4(1 + µ/ε)2
+                                                                                      
+
+                       b |S||A| O ν 2 /ε2 + 1 .
+                                              
+                 =O L
+
+
+Corollary 3.5. Assume (H), (S), r(s, a) ∈ [0, 1] for all (s, a) ∈ S × A, and ∥h∗ ∥sp ≥ 1. Let (QN , T N , π N ) be the output
+of SAVIA+(Q0 , ε/16, δ) with Q0 = 0 and ε ≤ 1. Then, with probability at least (1 − δ) we have, for all s ∈ S
+                                      g ∗ − gπN (s) ≤ ∥QN − T (QN )∥sp ≤ ε
+                                                             e = ln (|S||A|∥h∗ ∥sp /(εδ)) ln4 (∥h∗ ∥sp /ε).
+                                  e |S||A|∥h∗ ∥2sp /ε2 where L
+                                                      
+with sample and time complexity O L
+
+Proof. Since Q0 = 0 we have ∥Q0 − Q∗ ∥sp = ∥Q∗ ∥sp = ∥r + P max h∗ ∥sp ≤ ∥r∥sp + ∥h∗ ∥sp . The result then follows
+from Theorem 3.4 by noting that (1 + µ/ε) = O(∥h∥2sp /ε) which transforms L
+                                                                          b into the multiplicative factor L.
+                                                                                                           e
+
+Next we proceed to establish the approximation and complexity results in expectation. We begin by the following technical
+Lemma which provides a crude bound for the sample complexity of each cycle of SAVIA+.
+                                 Pni
+Lemma A.4. Let Mi = |S||A| j=0         mj be the number of samples used in SAVIA(Q0 , ni , ε, δi ) during a given cycle
+i ∈ N. Then Mi ≤ |S||A| O ni + (κ/ε)2 αi n2i ln2 (ni + 2) where αi = ln(|S||A|(ni +1)/δi ).
+                                                         
+
+
+Proof. We first show by induction that for all k = 0, . . . , ni we have ∥dk ∥sp ≤ κ and ∥T k−1 ∥sp ≤ (k + 1)κ. For k = 0,
+this is true by initialization since d0 = maxA Q0 and T −1 = r. Using (6), (9), and the induction hypothesis, we have
+
+                         ∥dk ∥sp ≤ ∥Qk − Qk−1 ∥sp ≤ (k+1)(k+2)
+                                                        2
+                                                               ∥T k−1 − Q0 ∥sp + k−1
+                                                                                 k+1 ∥d
+                                                                                       k−1
+                                                                                           ∥sp
+                                                          2
+                                                    ≤ (k+1)(k+2) ((k + 1)κ + κ) + k−1
+                                                                                  k+1 κ = κ
+
+and consequently
+
+                            ∥T k ∥sp ≤ ∥T k−1 ∥sp + ∥Dk ∥sp ≤ (k + 1)κ + ∥dk ∥sp ≤ (k + 2)κ.
+
+                                                             17
+                                 Near-Optimal Sample Complexity for MDPs via Anchoring
+
+Then, using these bounds, the sample complexity Mi for the i-th cycle can be readily bounded as
+                                                              Pni
+                             Mi ≤ |S||A|((ni + 1) + (αi /ε2 ) j=0    cj ∥dj ∥2sp )
+                                                                    ni
+                                 ≤ |S||A|((ni + 1) + 5(κ/ε)2 αi j=0     (j + 2) ln2 (j + 2))
+                                                                 P
+
+                                 = |S||A| O ni + (κ/ε)2 αi n2i ln2 (ni + 2) .
+                                                                            
+
+
+Theorem 3.6. Assume (H) and (S). Let (QN , T N , π N ) be the output of SAVIA+(Q0 , ε, δ). Then, for all s ∈ S
+
+                                             E[g ∗ − gπN (s)] ≤ 16 ε + δ∥r∥sp ,
+
+with expected sample and time complexity
+                                                                                     
+                                    e |S||A|(ν 2 /ε2 + 1 + δ (1 + µ/ε)2 (1 + (κ/ε)2 ) .
+                                    O
+                                                     T∞
+Proof. Consider the events A = {I ≤ i0 } and B = i=1 Gi as in the proof of Theorem 3.4 which established that on the
+event A ∩ B we have g ∗ − gπn (s) ≤ 16 ε for all s ∈ S with P(A ∩ B) ≥ 1 − δ. On the complementary event (A ∩ B)c we
+can use the crude bound g ∗ − gπn (s) ≤ ∥r∥sp and then, since P((A ∩ B)c ) ≤ δ, we derive the first claim
+
+                                             E[g ∗ − gπn (s)] ≤ 16 ε + δ∥r∥sp .
+                                                               PI
+To estimate the expected value of the sample complexity M = i=0 Mi we note that Ac = ·∪∞
+                                                                                       i=i0 +1 {I = i}, and therefore
+                                                                                P∞
+             E[M ] = E[M |A ∩ B] P(A ∩ B) + E[M |A ∩ B c ] P(A ∩ B c ) + i=i0 +1 E[M |I = i] P(I = i).
+
+Let us bound separately the three terms in this sum. For the first term we observe that onthe event A ∩ B we can apply the
+bound in Theorem 3.4 and since P(A ∩ B) ≤ 1 we get with L      b = ln |S||A| (1+µ/ε)/δ ln4 (1+µ/ε) that
+
+                                                                   L|S||A|(ν 2 /ε2 + 1) .
+                                                                                       
+                                  E[M |A ∩ B] P(A ∩ B) = O b
+For the second term, we combine P(A ∩ B c ) ≤ P(B c ) ≤ δ with the bound in Lemma A.4 and ni0 ≤ 2(1 + µ/ε) to get
+                                                           Pi0
+                     E[M |A ∩ B c ] P(A ∩ B c ) ≤ δ |S||A| i=0   O ni + (κ/ε)2 αi n2i ln2 (ni + 2)
+                                                                                                   
+
+                                                ≤ δ |S||A| O ni0 + (κ/ε)2 αi0 n2i0 ln3 (ni0 + 2)
+                                                                                                 
+                                                                                
+                                                ≤ δ |S||A| O ni0 + Lb (κ/ε)2 n2
+                                                                              i0
+
+
+where the last inequality follows from the bound αi0 ln3 (ni0 + 2) ≤ O( b
+                                                                       L).
+                        P∞
+For the third term R ≜ i=i0 +1 E[M |I = i] P(I = i), using again the bound in Lemma A.4 we get
+                                     Pi             Pi
+                     E[M |I = i] = j=0 E[Mj ] ≤ j=0 |S||A| O nj + (κ/ε)2 αj n2j ln2 (nj + 2)
+                                                                                              
+
+                                                 = |S||A| O ni + (κ/ε)2 αi n2i ln2 (ni + 2)
+                                                                                            
+
+and therefore
+                                         P∞                     2    2 2
+                                                                                     
+                            R ≤ |S||A|      i=i0 +1 O ni + (κ/ε) αi ni ln (ni + 2)       P(I = i).
+
+To estimate the dominant terms in this last sum we recall that αi = ln(2|S||A|(ni + 1)/δi ) with ni = 2i and δi = δ/ci .
+Since ln((ni + 1)ci ) = O(i) we get αi = O(L          b O(i), and similarly ln2 (ni + 2) = O(i2 ), so that
+                                             b + i) ≤ L
+                                             P∞                              
+                                R ≤ |S||A| i=i0 +1 O ni + L    b (κ/ε)2 i3 n2 P(I = i).
+                                                                            i
+
+                                                                                       Qi−1                Qi−1 1 
+Using the fact that ni = ni0 2i−i0 and noting that for i ≥ i0 + 1 we have P(I = i) ≤ j=i0 δj ≤ O δ j=i0 j+2           (see the
+                                            P∞           i−i0
+                                                              Qi−1 1              P∞           2(i−i0 ) 3
+                                                                                                          Qi−1 1
+proof of Proposition 3.3), by setting S1 = i=i0 +1 2           j=i0 j+2 and S2 =      i=i0 +1 2        i   j=i0 j+2 we derive
+                                                                                   
+                                        R ≤ δ |S||A| O S1 ni0 + S2 L   b (κ/ε)2 n2 .
+                                                                                 i0
+
+
+
+                                                             18
+                                 Near-Optimal Sample Complexity for MDPs via Anchoring
+
+The sums S1 and S2 can be computed explicitly in terms of incomplete Gamma functions as
+
+                    S1 = e2 2−(i0 +1) [Γ(i0 + 2) − Γ(i0 + 2, 2)] ≤ (e2 − 3)/2,
+                    S2 = 84 + 4i0 (i0 + 5) + 67e4 2−2(i0 +1) [Γ(i0 + 2) − Γ(i0 + 2, 4)] = O((i0 +1)2 ).
+
+so the third term satisfies
+                                                                              
+                                                           b (κ/ε)2 n2 (i0 +1)2 .
+                                      R ≤ δ |S||A| O ni0 + L         i0
+
+Putting together these three bounds, by regrouping terms of the same order and ignoring logarithmic terms we get the
+announced bound for the expected value of the sample complexity
+                                                                                           
+                                             b 2 /ε2 + 1) + δ ni + δ L
+                          E[M ] ≤ |S||A| O L(ν                        b (κ/ε)2 n2 (i0 + 1)2
+                                                                 0              i0
+                                                                                     
+                                         e (ν 2 /ε2 + 1) + δ (1 + µ/ε)2 (1 + (κ/ε)2 ) .
+                                = |S||A| O
+
+
+Corollary 3.7. Assume (H), (S), r(s, a) ∈ [0, 1] for all (s, a) ∈ S × A and ∥h∗ ∥sp ≥ 1. Let (QN , T N , π N ) be the output
+of SAVIA+(Q0 , ε/17, δ) with Q0 = 0, ε ≤ 1, and δ = ε2 /17. Then, for all s ∈ S
+
+                                                 E[g ∗ − gπN (s)] ≤ ε,
+                                e |S||A|∥h∗ ∥2sp /ε2 .
+                                                    
+with expected sample complexity O
+
+                                                                  2
+Proof. From Theorem 3.6 we have E[g ∗ − gπn (s)] ≤ 17
+                                                   16     ε
+                                                      ε + 17 ∥r∥sp ≤ ε. Also the expected complexity follows directly
+from Theorem 3.6 and the choice of δ.
+
+B. Omitted proofs for the discounted reward setting
+A nice feature of our approach, presented mainly in the average reward case, is that it can be applied almost verbatim to the
+discounted setup. Consequently, the proofs for discounted MDPs and average reward MDPs are fairly similar. However, for
+the sake of completeness, the arguments are repeated or referred to those in Appendix A when they are basically the same.
+
+B.1. Proofs of Section 4.2
+Proposition 4.1. Let Q ∈ RS×A and π : S → A a greedy policy such that π(s) ∈ argmaxa∈A Q(s, a). Then we have
+∥Q∗ − Qπ ∥∞ ≤ 1−γ 2
+                     ∥Q − Tγ (Q)∥∞ .
+
+Proof. A simple triangle inequality gives ∥Q∗ − Qπ ∥∞ ≤ ∥Q∗ − Q∥∞ + ∥Qπ − Q∥∞ so it suffices to show that both terms
+in this latter sum are bounded by 1−γ1
+                                        ∥Q − Tγ (Q)∥∞ . The first inequality ∥Q∗ − Q∥∞ ≤ 1−γ 1
+                                                                                                 ∥Q − Tγ (Q)∥∞ results
+                                                               ∗          ∗
+directly from the following triangle inequality combined with Q = Tγ (Q ) and the fact that Tγ is a γ-contraction
+
+                ∥Q∗ − Q∥∞ ≤ ∥Q∗ − Tγ (Q)∥∞ + ∥Tγ (Q) − Q∥∞ ≤ γ ∥Q∗ − Q∥∞ + ∥Q − Tγ (Q)∥∞ .
+                                                     1
+To establish the second inequality ∥Qπ − Q∥∞ ≤ 1−γ      ∥Q − Tγ (Q)∥∞ , we first note that Qπ satisfies the recursive formula
+
+                                   Qπ (s, a) = r(s, a) + γ s′ ∈S p(s′ |s, a) Qπ (s′ , π(s′ ))
+                                                          P
+
+while the definition of π gives Q(s′ , π(s′ )) = maxA (Q)(s′ ) so that
+
+                                 Tγ (Q)(s, a) = r(s, a) + γ s′ ∈S p(s′ |s, a) Q(s′ , π(s′ )).
+                                                             P
+
+Then, sustracting both formulas we readily get ∥Qπ − Tγ (Q)∥∞ ≤ γ∥Qπ − Q∥∞ and therefore
+
+                ∥Qπ − Q∥∞ ≤ ∥Qπ − Tγ (Q)∥∞ + ∥Tγ (Q) − Q∥∞ ≤ γ ∥Qπ − Q∥∞ + ∥Tγ (Q) − Q∥∞
+                                   1
+which readily implies ∥Qπ − Q∥∞ ≤ 1−γ ∥Q − Tγ (Q)∥∞ as claimed.
+
+                                                             19
+                                 Near-Optimal Sample Complexity for MDPs via Anchoring
+
+Analogously to the average reward setting, let Fk = σ({Di : i = 0, . . . , k}) be the natural filtration generated by the
+sampling process in SAVID, and P(·) the probability distribution over the trajectories (Dk )k∈N . Again, T k is Fk -measurable
+whereas Qk , V k , dk , and mk are Fk−1 -measurable.
+                                    P∞
+Proposition B.1. Let ck > 0 with 2 k=0 c−1                k    k                                      0
+                                            k ≤ 1 and T , Q the iterates generated by SAVID(Q , n, ε, δ, γ). Then, with
+                                      k        k
+probability at least 1 − δ we have ∥T − Tγ (Q )∥∞ ≤ γε simultaneously for all k = 0, . . . , n.
+                                        Pk                                                                          Pk
+Proof. Let Y i = Di − Pdi and X k = i=0 Y i . Since V −1 = 0, by telescoping Tγ (Qk ) = r + γPhk = r + γ i=0 Pdi
+                                             Pk
+and then using (2) we get T k − Tγ (Qk ) = γ i=0 (Di − Pdi ) = γX k . The estimation of P(∥X k ∥∞ ≥ ε) proceeds in the
+exact same manner as in the proof of Proposition 3.1.
+
+From now on we consider the specific sequences ck = 5(k + 2) ln2 (k + 2) and βk = k/(k + 2), meaning that we assume
+(S). Let Q∗ be the unique solution of the Bellman equation Tγ (Q) = Q. We assume throughout that
+
+                                       T k − Tγ (Qk ) ∞ ≤ ε        for all k = 0, . . . , n.                              (12)
+
+which, in view of Proposition B.1, holds with probability at least (1 − δ) when SAVID(Q0 , n, ε, δ, γ) is implemented.
+Also, as noted earlier, for D = S AMPLE(d, m) we have ∥D∥∞ ≤ ∥d∥∞ , which combined with the nonexpansivity of the
+map Q 7→ maxA (Q) implies
+
+                   T k − T k−1 ∞ = γ Dk ∞ ≤ γ dk ∞ = γ V k − V k−1 ∞ ≤ γ Qk − Qk−1 ∞ .                                    (13)
+
+The following two technical lemmas serve as counterparts to Lemmas A.1 and A.2 in this setting. Unlike the previous
+results, they establish estimates from the iterate Qk to Q∗ in the infinity norm and therefore the conclusions change slightly.
+As before, these lemmas act as a prelude to the general bound given by Theorem B.4.
+Lemma B.2. Assuming (S) and (12), we have that
+                                                                   1
+                               Qk − Q∗ ∞ ≤ Q0 − Q∗ ∞ +               εk    for all k = 0, . . . , n.
+                                                                   3
+                                                                 k
+Proof. From the iteration Qk = (1 − βk )Q0 + βk T k−1 with βk = k+2 we get
+
+                                Qk − Q∗ ∞ ≤ k+2
+                                             2
+                                                Q0 − Q∗ ∞ + k+2
+                                                             k
+                                                                T k−1 − Q∗ ∞ .
+
+Bound (12) and γ ≤ 1 imply
+
+                T k−1 − Q∗ ∞ = T k−1 − Tγ (Q∗ ) ∞ ≤ ε + γ Qk−1 − Q∗ ∞ ≤ ε + Qk−1 − Q∗ ∞ .                                 (14)
+
+From here the proof follows the exact same lines as in the proof of Lemma A.1.
+Lemma B.3. Assume (S) and (12) and let ρk = 2 Q0 − Q∗ ∞ + 31 ε k. Then
+
+                                                            k
+                                                     2     X
+                              Qk − Qk−1 ∞ ≤                    ρi+2 .       for all k = 1, . . . , n.
+                                                  k(k + 1) i=1
+
+                           k                    2
+                  2
+Proof. From Qk = k+2 Q0 + k+2 T k−1 and Qk−1 = k+1 Q0 + k−1
+                                                        k+1 T
+                                                              k−2
+                                                                  we derive
+
+                              Qk − Qk−1 = (k+1)(k+2)
+                                              2
+                                                     (T k−1 − Q0 ) + k−1
+                                                                     k+1 (T
+                                                                            k−1
+                                                                                − T k−2 ).
+
+Now, (14) together with Lemma B.2 readily imply T k−1 − Q0 ∞ ≤ T k−1 − Q∗ ∞ + Q∗ − Q0 ∞ ≤ ρk+2 , and
+therefore using (13) we get
+
+                              Qk − Qk−1 ∞ ≤ (k+1)(k+2)
+                                                2
+                                                       ρk+2 + γ k−1
+                                                                k+1 Q
+                                                                     k−1
+                                                                         − Qk−2 ∞ .
+
+Using that γ ≤ 1, the proof finishes exactly as in Lemma A.2
+
+                                                              20
+                                  Near-Optimal Sample Complexity for MDPs via Anchoring
+
+The folowing theorem is the analogue of Theorem 3.2 for discounted MDPs. For the sake of completeness and given that the
+constants involved are different, we provide the full proof.
+Theorem B.4. Assume (S) and let (Qn , T n , π n ) be the output computed by SAVID(Q0 , n, ε, δ, γ). Then, with probability
+at least (1 − δ) we have
+                                                             8 Q0 − Q∗ ∞
+                                      ∥Qn − Tγ (Qn )∥∞ ≤                     + 2ε,
+                                                                  n+2
+with a sample and time complexity of order
+                                                              2         2
+                                 O Lγ |S||A| ( Q0 − Q∗ ∞ + Q0 ∞ )/ε2 + n2
+                                                                                   
+
+
+where Lγ = ln(2|S||A|(n + 1)/δ) ln3 (n + 2).
+
+Proof. From Proposition B.1, with probability at least (1 − δ) we have T k − Tγ (Qk ) ∞ ≤ ε for all k = 0, . . . , n. Now,
+                     2         n
+the recursion Qn = n+2  Q0 + n+2 T n−1 implies
+
+            Qn − Tγ (Qn ) = n+2
+                             2                        n                          n
+                                                                                                        
+                                 Q0 − Tγ (Qn ) + n+2      T n−1 − Tγ (Qn−1 ) + n+2   Tγ (Qn−1 ) − Tγ (Qn ) .           (15)
+
+Using the triangle inequality and Lemma B.2, we have that
+
+                 Q0 − Tγ (Qn ) ∞ ≤ Q0 − Q∗ ∞ + γ ∥Q∗ − Qn ∥∞ ≤ 2 Q0 − Q∗ ∞ + 13 ε n = ρn ,
+                                                         2
+                                                              Pn
+while Lemma B.3 gives Tγ (Qn−1 ) − Tγ (Qn ) ∞ ≤ n(n+1)          i=1 ρi+2 . Thus, applying a triangle inequality to (15) and
+using these estimates together with Proposition 4.1, we obtain
+                                                                             Pn
+                            ∥Qn − Tγ (Qn )∥∞ ≤ n+2   2                2
+                                                        ρn + ε + (n+1)(n+2)     i=1 ρi+2
+                                                                                           2
+                                                     4(1+2n)
+                                                 = (n+1)(n+2) Q0 − Q∗ ∞ + 2(3+8n+3n )
+                                                                          3(n+1)(n+2) ε
+                                                     8∥Q0 −Q∗ ∥
+                                                 ≤      n+2
+                                                               ∞
+                                                                 + 2ε.
+
+To estimate the complexity, for k ≥ 1, we use the inequality dk ∞ ≤ Qk − Qk−1 ∞ in (13) together with Lemma B.3
+to find
+                                                      2
+                                                           Pk
+                                          dk ∞ ≤ k(k+1)      i=1 ρi+2
+                                                    4
+                                                 = k+1 Q0 − Q∗ ∞ + 3(k+1)
+                                                                    k+5
+                                                                          ε
+                                                    4
+                                                 ≤ k+1 Q0 − Q∗ ∞ + ε.
+                                                       Pn                                                 2
+Now, to estimate the total number of samples |S||A|       k=0 mk we recall that mk = max{⌈2αck        dk ∞ /ε2 ⌉, 1} which
+                                         2
+can be bounded as mk ≤ 1 + 2αck dk ∞ /ε2 . Then
+Pn                    2α
+                             Pn              2
+   k=0 mk ≤ (n + 1) + ε2       k=0 ck   dk ∞
+                                           2       Pn                                     2
+            ≤ (n + 1) + 20ε2α ln2 (2) ∥Q0 ∥∞ + 10α
+                                                ε2
+                                                                  2         4    0  ∗
+                                                    k=1 (k + 2) ln (k + 2) k+1 Q − Q ∞ + ε
+                                           2                                  ∗ 2
+                                              Pn                                      Pn
+            ≤ (n + 1) + 20ε2α ln2 (2) ∥Q0 ∥∞ + k=1 ε2480 α    2           0
+                                                      (k+2) ln (k + 2) Q − Q ∞ + 20 α
+                                                                                                     2
+                                                                                       k=1 (k + 2) ln (k + 2)
+                       2
+                                                                                
+                                                          2
+            = O α Q0 ∞ /ε2 + α ln3 (n + 2) Q0 − Q∗ ∞ /ε2 + α n2 ln2 (n + 2) ,                             (16)
+
+where we use the same estimations as in the proof of Theorem 3.2.
+Theorem 4.2. Assume (S), r(s, a) ∈ [0, 1] for all (s, a) ∈ S × A, and n = ⌈10/((1−γ)ε)⌉. Let (Qn , T n , π n ) be the output
+of SAVID(Q0 , n, ϵ/10, δ, γ) with Q0 = 0 and ε ≤ 1/(1−γ). Then, with probability at least (1 − δ) we have
+                                              ∥Qn − Tγ (Qn )∥∞ ≤ ε
+with sample and time complexity O Lγ |S||A|/((1−γ)2 ε2 ) where Lγ = ln(2|S||A|/((1−γ)εδ)) ln3 (2/((1−γ)ε)).
+                                                        
+
+
+Proof. The proof follows directly from Theorem B.4 and the bound ∥Q∗ ∥∞ ≤ 1/(1−γ).
+
+                                                            21
+                                   Near-Optimal Sample Complexity for MDPs via Anchoring
+
+B.2. Proofs of Section 4.3
+We now proceed to establish the complexity of the algorithm SAVID+. Again, the proof is almost the same as in the average
+reward case, where some of the constants must be estimated differently. Precisely, the time in which the inner loop in
+SAVID+ stops will now depend on Q0 − Q∗ ∞ .
+Under a slight abuse of notation, we define the stopping time of SAVID+ as
+
+                                        N = inf{ni ∈ N : ∥Qni − T ni ∥∞ ≤ 11 ε},
+
+where T ni and Qni ’s are the iterates generated in each loop of SAVID+(Q0 , ε, δ, γ). As before, we let i0 ∈ N be the
+smallest integer satisfying ni0 ≥ Q0 − Q∗ ∞ /ε, so that either i0 = 0 and ni0 = 1 or ni0 −1 = ni0 /2 < Q0 − Q∗ ∞ /ε,
+which combined imply ni0 ≤ 1 + 2 Q0 − Q∗ ∞ /ε. Also, as in the average reward setting, we consider the events
+
+                Si = {∥Qni − T ni ∥∞ ≤ 11 ε}          and   Gi = { T k − Tγ (Qk ) ∞ ≤ ε, ∀k = 0, . . . , ni },
+
+with Qk and T k ’s the inner iterates generated during the execution of SAVID(Q0 , ni , ε, δi , γ) in the i-th loop of SAVID+.
+Lemma B.5. Assume (S). Then, for all i ≥ i0 we have that P(Si ) ≥ P(Gi ) ≥ 1 − δi .
+
+Proof. The proof is the same as its average reward counterpart Lemma A.3 by just observing that, if i ≥ i0 then, for all
+ω ∈ Gi ,
+                  ∥Qni (ω) − T ni (ω)∥∞ ≤ ∥Qni (ω) − Tγ (Qni )(ω)∥∞ + ∥Tγ (Qni )(ω) − T ni (ω)∥∞
+                                                8∥Q0 −Q∗ ∥
+                                            ≤      ni +2
+                                                          ∞
+                                                            + 2ε + ε
+                                            ≤ 11 ε.
+
+Theorem B.6. Assume (S) and let (QN , T N , π N ) be the output of SAVID+(Q0 , ε, δ, γ). Then, with probability at least
+(1 − δ) we have
+                                              QN − Tγ (QN ) ∞ ≤ 12 ε
+with sample and time complexity
+                                                                              
+                                       b γ |S||A| ( Q0      0    ∗     2 2
+                                    O L                ∞
+                                                         + Q  − Q  ∞
+                                                                     )  /ε + 1    ,
+
+      b γ = ln |S||A| (1+2 Q0 − Q∗   /ε)/δ ln4 (1+2 Q0 − Q∗ ∞ /ε).
+                                          
+where L                            ∞
+
+                                                T∞
+Proof. Consider the events A = {I ≤ i0 } and B = i=0 Gi . Using the exact same argument as in the proof of Theorem 3.4,
+now through Proposition B.1 and Lemma B.5, we know that P(A ∩ B) ≥ 1 − δ. Also, on the event A ∩ B and from the
+definition of N , we have
+
+                      QN − Tγ (QN ) ∞ ≤ QN − T N ∞ + T N − Tγ (QN ) ∞ ≤ 11 ε + ε = 12 ε.
+
+Now, using (16) in the proof of Theorem B.4 the total sample complexity M of the algorithm can be estimated, as in the
+average reward case, by
+                           i0                                                                   
+                           X          2                               2
+              M ≤ |S||A|      O αi Q0 ∞ /ε2 + αi ln3 (ni + 2) Q0 − Q∗ ∞ /ε2 + αi n2i ln2 (ni + 2) ,
+                             i=0
+
+where αi = ln(2|S||A|(ni +1)/δi ) is the parameter defined in the i-th cycle of SAVID+. Again, as for SAVIA+, we use
+                                                     2
+that n2i0 ≤ (1 + 2 Q0 − Q∗ ∞ /ε)2 = O( Q0 − Q∗ ∞ /ε2 + 1), to get
+                                2
+                                                                                                         
+                                                                          2
+        M ≤ |S||A| O αi0 Q0 ∞ /ε2 ln(ni0 + 2) + αi0 ln4 (ni0 + 2) Q0 − Q∗ ∞ /ε2 + αi0 n2i0 ln4 (ni0 + 2)
+          ≤ |S||A| αi0 ln4 (ni0 + 2) O ( Q0 ∞ + Q0 − Q∗ ∞ )2 /ε2 + 1 .
+                                                                     
+
+
+
+
+                                                               22
+                                  Near-Optimal Sample Complexity for MDPs via Anchoring
+
+Finally, we state our claimed complexity result for SAVID+, whose proof follows directly from Proposition B.1, Theorem B.6,
+and the fact that ∥Q∗ ∥∞ ≤ 1/(1−γ).
+Theorem 4.3. Assume (S), r(s, a) ∈ [0, 1] for all (s, a) ∈ S × A, and ∥Q∗ ∥∞ ≥ 1. Let (QN , T N , π N ) be the output of
+SAVID+(Q0 , ε(1−γ)/24, δ, γ) with Q0 = 0 and ε ≤ 1/(1−γ). Then, with probability at least (1 − δ) we have
+                                    ∥Q∗ − QπN ∥∞ ≤ 2 QN − Tγ (QN ) ∞ /(1−γ) ≤ ε
+with sample and time complexity                                                
+                                             O Le γ |S||A| ∥Q∗ ∥2 /((1−γ)2 ε2 )
+                                                                ∞
+
+      e γ = ln 2|S||A|/((1−γ)εδ) ln4 2/((1−γ)ε) .
+                                              
+where L
+
+C. The Anchored Value Iteration as Halpern’s iteration on a quotient space
+The recursion (1) involves the unknown optimal value g ∗ . However, since T (Q + c) = T (Q) + c is homogeneous under
+addition of constants c ∈ R, this prompts us to consider the map Te : M → M defined by Te ([Q]) = [T (Q)] on the quotient
+space M = RS×A /E with E the subspace of constant matrices, endowed with the induced quotient norm
+                                                                            1
+                                             [Q] E = min Q + c ∞ =            ∥Q∥sp .
+                                                        c∈R                 2
+
+One can readily check that Te is nonexpansive for the norm ∥ · ∥E and moreover
+C LAIM : Q∗ ∈ Fix(Tg∗ ) if and only if [Q∗ ] ∈ Fix(Te ).
+Proof. If Q∗ = Tg∗ (Q∗ ) then [Q∗ ] = [T (Q∗ −g ∗ )] = Te ([Q∗ −g ∗ ]) = Te ([Q∗ ]). Conversely, if [Q∗ ] = Te ([Q∗ ]) = [T (Q∗ )]
+then Q∗ = T (Q∗ ) + c for some c ∈ R, and Puterman (2014, Theorem 9.1.2) gives c = −g ∗ so that Q∗ ∈ Fix(Tg∗ ).                □
+
+Projecting (1) on the quotient space M it follows that the equivalence classes [Qk ] = Qk + E of the iterates {Qk }k∈N
+generated by (1) satisfy the following Halpern’s iteration for Te (·)
+
+                                         [Qk+1 ] = (1 − βk+1 )[Q0 ] + βk+1 Te ([Qk ]).
+
+In this projected iteration the unknown g ∗ plays no role. Moreover, the equivalence classes [Qn ] coincide with those
+generated by the implementable modification (Anc-VI) in which g ∗ is ignored. This shows that, modulo constants, both (1)
+and (Anc-VI) are equivalent and their corresponding residuals in span seminorm coincide.
+Finally, using the identity ∥Q − T (Q)∥sp = 2 [Q] − Te ([Q]) , any error bound for Halpern’s iteration as applied to Te
+directly transfers into a bound for ∥Qk − T (Qk )∥sp . In particular, for βk = k/(k + 2) we get
+
+                                            ∥Qk − T (Qk )∥sp ≤ k+1
+                                                                4
+                                                                   ∥Q0 − Q∗ ∥sp .
+
+
+
+
+                                                               23
+

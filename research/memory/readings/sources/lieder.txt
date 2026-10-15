@@ -1,0 +1,678 @@
+    On the Convergence Rate of the Halpern-Iteration
+                                        Felix Lieder 1
+
+                                          15.2.2019
+1 Mathematisches Institut, Heinrich-Heine-Universität , D–40225 Düsseldorf, Germany,
+
+ B lieder@opt.uni-duesseldorf.de
+
+
+Abstract
+In this work, we give a tight estimate of the rate of convergence for the Halpern-Iteration
+for approximating a fixed point of a nonexpansive mapping in a Hilbert space. Specifically,
+using semidefinite programming and duality we prove that the norm of the residuals is upper
+bounded by the distance of the initial iterate to the closest fixed point divided by the number
+of iterations plus one.
+
+Key words: Halpern-Iteration, fixed point methods, first order methods, semidefinite pro-
+gramming
+
+
+
+
+1    Introduction
+Let H be a Hilbert space equipped with a symmetric inner product h., .i : H × H → R. Let
+T : H → H be a nonexpansive mapping and consider for fixed x0 ∈ H the Halpern-Iteration
+(named after Benjamin Halpern, who introduced it in [3])
+
+                               xk+1 := λk x0 + (1 − λk )T (xk )                           (1)
+              1
+                                                                  p
+with λk := k+2   for approximating a fixed point of T . Let kxk := hx, xi denote the induced
+norm and F ix(T ) := {x ∈ H : x = T (x)} the set of fixed points of T . It is well known
+that, if the set F ix(T ) is nonempty, then the sequence {xk }k∈N0 will converge to x∗ ∈
+F ix(T ) minimizing the distance to x0 ; see [9] Theorem 2, and [10] for generalizations of
+this remarkable property. As a consequence the norm of the residuals xk − T (xk ) tends to
+zero, i.e. limk→∞ kxk − T (xk )k = 0. Our goal here is to quantify their rate of convergence.
+A first result of this type was generated via proof mining in [4] in normed spaces. Here,
+we improve the result for the setting of Hilbert spaces. Our proof technique is not based
+on proof mining, but on semidefinite programming, and is strongly motivated by the recent
+work of Taylor et al.[8] on worst case performance of first order minimization methods. Our
+methodology and focus here are, however, slightly different. We present two new proofs
+below. The first one is short and uses a parameter choice derived from [8]. The second proof
+
+                                              1
+based on semidefinite programming is self-contained and adapts the framework of [8] to fixed
+point problems. The second approach can also be applied to other choices of parameters λk
+and to other fixed point methods, for example the Krasnoselski-Mann (KM) iteration, which
+has recently gained new attention due to [1]. The rates for the KM iteration are however in
+general not obvious.
+
+
+2     Main Result
+Theorem 2.1. Let x0 ∈ H be arbitrary but fixed. If T has fixed points, i.e. F ix(T ) 6= ∅,
+then the iterates defined in (1) satisfy
+
+                    1                  kx0 − x∗ k
+                    2 kxk − T (xk )k ≤            ∀k ∈ N0    ∀x∗ ∈ F ix(T )               (2)
+                                         k+1
+Remark 2.1. A generalization of the Halpern iteration, the sequential averaging method
+(SAM), was analyzed in the recent paper [7], where for the first time a rate of convergence
+of order O(1/(k + 1)) could be established for SAM. The rate of convergence in (2) is even
+slightly faster than the one established for the more general framework in [7] (by a factor of
+4). More importantly, however, as shown by Example 3.1 below, the estimate (2) is actually
+tight, in the sense that for every k ∈ N0 there exists a Hilbert space H and a non-expansive
+operator T with some fixed point x∗ such that the inequality (2) is not strict.
+    Estimate (2) refers to the popular step length λk := 1/(k + 2). The restriction to this
+choice is motivated by problem (17) below in the proof based on semidefinite programming;
+in numerical tests for small for dimensions k these coefficients provided a better worst-case
+complexity than any other choice of coefficients.
+   Next, an elementary direct proof of Theorem 2.1 is given.
+Direct proof based on a weighted sum:
+The iteration (1) with λk = 1/(k + 2) implies for 1 ≤ j ≤ k:
+                                j
+                       1
+                 xj = j+1 x0 + j+1 T (xj−1 ) or T (xj−1 ) = j+1     1
+                                                             j xj − j x0 .                (3)
+
+By nonexpansiveness the following inequalities hold:
+
+                       kT (xk ) − x∗ k2 ≤ kxk − x∗ k2   for x∗ ∈ F ix(T )                 (4)
+
+and
+                   kT (xj ) − T (xj−1 )k2 ≤ kxj − xj−1 k2   for j = 1, . . . , k.         (5)
+Below we reformulate the following weighted sum of (5):
+
+               0 ≥ kj=1 j(j + 1) kT (xj ) − T (xj−1 )k2 − kxj − xj−1 k2 .
+                    P                                                  
+                                                                                          (6)
+
+Using the second relation in (3) the first terms in the summation (6) are
+
+        j(j + 1)kT (xj ) − T (xj−1 )k2
+                                 1
+      = j(j + 1)kxj − T (xj ) + (xj − x0 )k2
+                                 j
+      = j(j + 1)kxj − T (xj )k + 2(j + 1)hxj − T (xj ), xj − x0 i + j+1
+                               2                                                 2
+                                                                     j kxj − x0 k ,       (7)
+
+                                               2
+and using the first relation in (3) it follows for the second terms in (6)
+                          −j(j + 1)kxj − xj−1 k2
+                                  1
+                    = −j(j + 1)k j+1 (x0 − T (xj−1 )) + T (xj−1 ) − xj−1 k2
+                         j
+                    = − j+1 kx0 − T (xj−1 )k2 − 2jhx0 − T (xj−1 ), T (xj−1 ) − xj−1 i
+
+                                                     − j(j + 1)kT (xj−1 ) − xj−1 k2 .                     (8)
+
+Observe (using again the second relation in (3)) that the first term in (8)
+                   j                         j
+                − j+1 kx0 − T (xj−1 )k2 = − j+1 k j+1    j+1    2   j+1
+                                                   j x0 − j xj k = − j kx0 − xj k
+                                                                                  2                       (9)
+cancels the third term in (7). Summing up the second terms in (8) for j = 1, . . . , k we shift
+the summation index,
+          k
+          X                                               k−1
+                                                          X
+      −         2jhx0 − T (xj−1 ), T (xj−1 ) − xj−1 i =          2(j + 1)hxj − T (xj ), x0 − T (xj )i,
+          j=1                                             j=0
+
+so that summing up the second terms in (7) and in (8) for j = 1, . . . , k results in
+                                        k−1
+                                        X
+ 2(k + 1)hxk − T (xk ), xk − x0 i + 2         (j + 1)hxj − T (xj ), xj − T (xj )i + 2kx0 − T (x0 )k2 . (10)
+                                        j=1
+
+Shifting again the index in the summation of the third terms in (8)
+                  k
+                  X                                        k−1
+                                                           X
+              −         j(j + 1)kxj−1 − T (xj−1 )k2 = −        (j + 1)(j + 2)kxj − T (xj )k2
+                  j=1                                      j=0
+
+and summing up the first terms in (7) and the third terms in (8) for j = 1, . . . , k gives
+                                              k−1
+                                              X
+              k(k + 1)kxk − T (xk )k2 − 2         (j + 1)kxj − T (xj )k2 − 2kx0 − T (x0 )k2              (11)
+                                              j=1
+
+where the sum in the middle cancels the sum in the middle of (10) and the terms 2kx0 − T (x0 )k2
+cancel as well. The only remaining terms are the first terms in (10) and (11).
+   Thus, inserting (9), (10), and (11) in (6) leads to
+                    0 ≥ k(k + 1)kxk − T (xk )k2 + 2(k + 1)hxk − T (xk ), xk − x0 i.                      (12)
+Applying the Cauchy-Schwarz inequality to the second term in (12) leads to
+                                     1                 1
+                                       kxk − T (xk )k ≤ kxk − x0 k
+                                     2                 k
+which may be interesting in its own right. To prove the theorem, (12) is divided by k + 1
+and then (4) is added:
+     0 ≥ kkxk − T (xk )k2 + 2hxk − T (xk ), xk − x0 i + kT (xk ) − x∗ k2 − kxk − x∗ k2
+                 k+1              2   2            2   2            k+1               2
+          =       2 kxk − T (xk )k − k+1 kx0 − x∗ k + k+1 kx0 − x∗ − 2 (xk − T (xk ))k .                 (13)
+
+                                                      3
+To see the last equation, the last two terms in (13) can be combined, and then a straightfor-
+ward but tedious multiplication of the terms a := xk − T (xk ), b := xk − x0 , c := T (xk ) − x∗ ,
+a + c = xk − x∗ , and a + c − b = x0 − x∗ reveals the identity.
+   Omitting the last term in (13) one obtains
+                                                   2
+                             kxk − T (xk )k2 ≤ k+12
+                                                       kx0 − x∗ k2
+
+which proves the theorem when taking square roots on both sides.
+    The above proof is somewhat unintuitive as the choice of the weights with which the
+inequalities (4) and (5) are added in (6) and (13) is far from obvious. In fact we owe the
+suggestion of these weights to an extremely helpful anonymous referee, who extracted it
+from a more complex construction in [8] which was also the basis for the initial proof of
+this paper based on semidefinite programming. We state this proof next since it offers a
+generalizable approach for analyzing fixed point iterations; it can be modified to the KM
+iteration, for example in the recent thesis [5] – though this modification is quite technical.
+The proof based on semidefinite programming also led to Example 3.1 below showing that
+the rate of convergence is tight.
+Proof based on semidefinite programming: Let x∗ ∈ F ix(T ). The Halpern-Iteration
+was stated in the form (1) to comply with existing literature. For our proof however, it is
+more convenient to consider the shifted sequence x̄1 := x0 and x̄k := xk−1 ∀k ∈ N6=0 :=
+{1, 2, 3, ...} and to show a shifted statement
+
+                            1                    kx̄1 − x∗ k
+                            2 kx̄k − T (x̄k )k ≤      k
+                                                             ∀k ∈ N6=0                       (14)
+
+Let us define g(x) := 12 (x − T (x)). It is well known that g is firmly nonexpansive. For sake
+of completeness the argument is repeated here:
+
+                         kg(x) − g(y)k2 − hg(x) − g(y), x − yi
+                                                      2
+                       = g(x) − g(y) − 21 (x − y)         − 14 kx − yk2
+                       = 14 kT (x) − T (y)k2 − 14 kx − yk2 ≤ 0 ∀x, y ∈ H.
+
+Nonexpansiveness and the Cauchy-Schwarz inequality also imply kg(x) − g(y)k ≤ kx − yk
+∀x, y ∈ H. For k = 1 the statement (14) follows immediately since g(x∗ ) = 0 and therefore
+1                                               ∗     kx̄1 −x∗ k
+2 kx̄1 − T (x̄1 )k = kg(x̄1 )k = kg(x̄1 ) − g(x̄ )k ≤      1     .
+For fixed k ≥ 2 we first consider the differences x̄j − x̄1 for j ∈ {2, .., k}
+
+                       x̄j − x̄1 = xj−1 − x̄1
+                               = λj−2 x0 + (1 − λj−2 )T (xj−2 ) − x̄1
+                               = 1j x0 + (1 − 1j )T (xj−2 ) − x̄1
+                               = ( 1j − 1)x̄1 + (1 − 1j )T (x̄j−1 )
+                               = ( 1j − 1)x̄1 + (1 − 1j )(x̄j−1 − 2g(x̄j−1 ))
+                               = (1 − 1j )(x̄j−1 − x̄1 ) − 2(1 − 1j )g(x̄j−1 )
+                               = j−1                  j−1
+                                  j (x̄j−1 − x̄1 ) − 2 j g(x̄j−1 )
+
+
+                                                 4
+which inductively leads to
+                                                      j−1
+                                                      X
+                                                            l
+                                    x̄j − x̄1 = −2          j g(x̄l ).
+                                                      l=1
+
+Let us shorten the notation slightly and define gi := g(x̄i ), R := kx̄1 − x∗ k ≥ 0, the vector
+b = (hgi , x̄1 − x∗ i)ki=1 , the matrices A := (hgi , gj i)ki,j=1 and
+
+                                          0 21 31 . . .         1 
+                                        
+                                                                k
+                                        0 0 2 . . .            2 
+                                                 3             k 
+                                L := −2  ... ... 0 . . .       ..  ∈ Rk×k .
+                                        
+                                                                . 
+                                                                   
+                                        0 0 0 0               k−1 
+                                                                k
+                                          0 0 0 0               0
+Let bT denote the transpose of b. Note that
+                                 2 T
+                                  R b
+                                            ∈ R(k+1)×(k+1)
+                                   b A
+
+is a Gramian matrix formed from x̄1 − x∗ , g1 , .., gk ∈ H and is therefore symmetric and
+positive semidefinite. We proceed by expressing the inequalities from firm nonexpansiveness
+in terms of the Gram-Matrix. Since L often is of much lower dimension than H, this is
+sometimes referred
+              Pj−1to   as ’Kernel-Trick’. Keeping in mind that we can rewrite the differences
+                     l
+x̄j − x̄1 = −2 l=1 j gl for j ∈ {1, .., k}, we arrive at
+
+                                   AL = (hgi , x̄j − x̄1 i)ki,j=1 .
+Let e ∈ Rk denote the vector of all ones. Then
+
+                           diag(AL)eT − AL = (hgi , x̄i − x̄j i)ki,j=1 ,
+
+where diag(.) denotes the diagonal of its matrix argument, holds true. Hence
+
+             diag(AL)eT + e diag(AL)T − AL − LT A = (hgi − gj , x̄i − x̄j i)ki,j=1
+
+and
+                                beT + AL = (hgi , x̄j − x∗ i)ki,j=1 ,
+
+                      diag(A)eT + e diag(A)T − 2A = (kgi − gj k2 )ki,j=1 .
+
+The firm nonexpansiveness inequalities kgi − gj k2 ≤ hgi − gj , x̄i − x̄j i are equivalent to the
+component-wise inequality
+
+        diag(A)eT + e diag(A)T − 2A ≤ diag(AL)eT + e diag(AL)T − AL − LT A.                  (15)
+                 2
+Note that only k 2−k of these componentwise inequalities are non redundant. From
+g∗ := g(x∗ ) = 0 we obtain another k inequalities, i.e. kgi k2 ≤ hgi , x̄i − x∗ i, which translate
+to
+                                 diag(A) ≤ b + diag(AL).                                      (16)
+
+
+                                                  5
+Defining U := I − L , relations (15) and (16) can be shortened slightly to
+
+                                  diag(AU )eT + e diag(AU )T ≤ AU + U T A
+
+and
+                                                      diag(AU ) ≤ b.
+Let ek ∈ Rk denote the k-th unit vector, Sn := {X ∈ Rn×n | X = X T } denote the space of
+symmetric matrices and Sn+ := {X ∈ Sn |xT Xx ≥ 0 ∀x ∈ Rn } the convex cone of positive
+semidefinite matrices. Consider the chain of inequalities
+
+
+                                                               y0 y1T
+                                                                       
+                 2
+          kg(x̄k )k =      maximize            (Y2 )kk |                    ∈ Sk+1       2
+                                                                               + , y0 ≤ R , diag(Y2 U ) ≤ y1
+                        y0 ∈R,y1 ∈Rk ,Y2 ∈Sk                   y1 Y2
+                                                       | diag(Y2 U )eT + e diag(U T Y2 )T ≤ Y2 U + U T Y2
+                                                       | y0 = R2 , y1 = b, Y2 = A
+
+
+                                               y0 y1T
+                                                     
+          ≤       maximize          (Y2 )kk |           ∈ Sk+1       2
+                                                           + , y0 ≤ R , diag(Y2 U ) ≤ y1
+                       k       T
+            y0 ∈R,y1 ∈R ,Y2 =Y2 ∈Sk            y1 Y 2
+                                                                                                                 (17)
+                                                 | diag(Y2 U )eT + e diag(U T Y2 )T ≤ Y2 U + U T Y2
+
+
+
+                                                        − 12 diag(X)T
+                                                                                                   
+                                               ξ                                             0   0
+      ≤      minimize            2
+                               R ξ|        1                                              −             ∈ Sk+1
+          ξ∈R+ ,X∈Sk ∩Rk×k
+                       +
+                                         − 2 diag(X) U F (X) + F (X)U T                      0 ek eTk      +
+
+                                                                                                                 (18)
+for
+                                 F (X) := Diag(Xe) + 12 Diag(diag(X)) − X,                                       (19)
+where Diag(.) denotes the square diagonal matrix with its vector argument on the diagonal.
+The first equality follows from construction, the first inequality from relaxing, and the
+second inequality from weak conic duality as detailed in Section 5. We conclude the proof
+by showing feasibility of ξˆ := k12 > 0 and
+                                                                            
+                  0    1·2       0          ...            ...          0
+              
+              1 · 2                                                    ..   
+                        0     2·3           0             ...           .   
+                                                                             
+            1  0
+                               . .         . .            . .           .
+                                                                         .   
+                       2·3          .           .              .         .
+     X̂ := 2                                                                 ∈ Rk×k
+                                                                             
+           k  ..       ..      ..          ..
+                           .        .           .
+                                                                             
+               .
+                                                    (k − 2)(k − 1)     0    
+                                                                             
+               0       ...      0    (k − 2)(k − 1)        0       (k − 1)k 
+                  0     ...      0           0          (k − 1)k       2k
+
+for the last optimization problem (18). First note that X̂ = X̂ T is symmetric and nonneg-
+ative. A short computation reveals, that the equality
+
+                                           U F (X̂) + F (X̂)U T = 2ek eTk
+
+                                                                 6
+holds true: Define the diagonal matrix D := k1 Diag([1, . . . , k]T ) ∈ Rk×k , together with the
+strict upper triangular matrix
+                                                  
+                                     0 1 ... 1
+                                    . . . . .. 
+                                        .     . . ∈ Rk×k
+                              P := 
+                                           ..                                             (20)
+                                              . 1
+                                                 0
+
+and the bidiagonal matrix                                      
+                                         1 0
+                                       ..          ..    
+                                      1   .             . ∈ Sk .
+                                                          
+                                 B := 
+                                       ..          ..    
+                                          .           . 1
+                                                     1 0
+The matrices U, X̂ and F (X̂) can now be expressed as
+                                2
+    U = I + 2DP D−1 , X̂ = DBD + ek eTk and                      F (X̂) = 2D2 − ek eTk − DBD.   (21)
+                                k
+Combining the equalities (21), Dek = ek and D−1 ek = ek , yields
+
+              U F (X̂) =2D2 − ek eTk − DBD + 4DP D − 2DP ek eTk − 2DP BD
+                                                                                                (22)
+                       =D(2I − ek eTk − B + 4P − 2P ek eTk − 2P B)D
+
+and using (22) we compute
+
+     U F (X̂) + F (X̂)U T − 2ek eTk
+   =D(4I − 2ek eTk − 2B + 4P − 2P ek eTk − 2P B + 4P T − 2ek eTk P T − 2BP T − 2ek eTk )D
+                 T
+   =D(4I                  T
+                                P ek eTk − 2ek eTk P T −2B − 2P B − 2BP T )D
+           {z+ 4P } −4ek ek − 2 |{z}
+      | + 4P                                   | {z }
+             =4eeT                     e−ek                  eT −eT
+                                                                  k
+
+   =D(4eeT −2eeTk − 2ek eT − 2B − 2P B − 2BP T )D
+           |                 {z              }
+                              =−4eeT
+   =0,
+
+which implies U F (X̂) + F (X̂)U T = 2ek eTk as we claimed above. Consequently
+
+                ξˆ
+                                                              1
+                            − 21 diag(X̂)T                              − k1 eTk
+                                                                              
+                                                   0    0         k 2
+                                               −             =                     0
+         − 12 diag(X̂) U F (X̂) + F (X̂)U T        0 ek eTk     − k1 ek ek eTk
+
+is positive semidefinite and as a result, ξˆ and X̂ is feasible for (18). Hence
+
+                                                             kx̄1 − x∗ k2
+                                kg(x̄k )k2 ≤ R2 ξˆ =                      ,
+                                                                  k2
+which yields the desired result after taking the square root.
+
+
+                                                7
+Remark 2.2. The matrix X̂ in the above proof carrying the weights j(j + 1) used in
+(6) were obtained by solving (18) with YALMIP [2] in combination with the SDP solver
+Sedumi [6] for small values of k. In order to provide a theoretical proof that the points ξˆ
+and X̂ above are not only feasible but actually optimal for (18) and to prove tightness of
+the derived bound, we refer to Example 3.1 below, which was derived from a, numerically
+obtained, low-rank optimal solution of (17). More precisely, after numerically determining
+the optimal value of (18) a linear equation was added to (18) requiring that (Y2 )kk equals
+this value, and then the trace of Y2,2 was minimized with the intention to find the optimal
+solution with minimum rank. This optimal solution was then used to derive Example 3.1
+below proving the tightness of (2). In fact for any optimal solution of the SDP relaxation
+(17), there exists at least one Lipschitz continuous operator T̃k : Rd → Rd for appropriately
+chosen d with some fixed point x∗ such that the inequality in (18) is tight: This follows from
+appropriately labeling the columns of the symmetric square root of such an optimal solution
+and a Lipschitz extension argument.
+
+
+3    Tightness and choice of step lengths
+Example 3.1. We consider the following one-dimensional real example with fixed point
+x∗ = 0 and starting point x0 6= 0. Let k ∈ N be given. A nonexpansive mapping proving
+tightness of (2) can then be set up as follows: Let T : R → R be defined via
+                                  
+                                         2R              R
+                                  x + k+1 if x ≤ − k+1
+                                  
+                         T (x) := −x                  R         R
+                                                if − k+1 < x < k+1               (23)
+                                        2R        R
+                                    x − k+1 if k+1 ≤ x
+                                  
+
+for some fixed k ∈ N and R := ||x0 − x∗ ||2 with x0 ∈ R and x∗ := 0. Note that T satisfies
+T (x∗ ) = 0 = x∗ and is 1-Lipschitz continuous, i.e. nonexpansive, because it is piece-wise
+linear, continuous and the derivative is bounded in norm by one (|T 0 | ≤ 1) whenever it
+exists. We will now show that applying the Halpern-Iteration results in an equality in (2)
+for the k-th iterate, i.e.
+                              || 21 (xk − T (xk ))||2 = ||x0k+1
+                                                            −x∗ ||2
+
+
+is satisfied. This means that the bound (2) can not be improved without making further
+assumptions, as the operator above would otherwise pose a counterexample. For the first k
+iterates of the Halpern-Iteration (1) we can obtain
+                                            j
+                              xj = x0 (1 − k+1 ) for j ∈ 0, .., k
+                                      | {z }
+                                            1
+                                         ≥ k+1
+
+
+
+
+                                              8
+inductively: For x0 = 0 = x∗ there is nothing to prove. The case 0 < x0 = ||x0 − x∗ ||2 = R
+follows by using the definition of T and considering for j ∈ {0, .., k − 1} the iterates
+                                  x0         1
+                          xj+1 = j+2 + (1 − j+2 )T (         xj       )
+                                                            |{z}
+                                                           x0    R
+                                                        ≥ k+1 = k+1
+                                    x0         1          2R
+                                 = j+2 + (1 − j+2 )(xj − k+1 )
+                                    x0         1             j      2x0
+                                 = j+2 + (1 − j+2 )(x0 (1 − k+1 ) − k+1 )
+                                        1          1         j     2
+                                 =x0 ( j+2 + (1 − j+2 )(1 − k+1 − k+1 ))
+                                        1        j+2    1     1
+                                 =x0 ( j+2 + 1 − k+1 − j+2 + k+1 )
+                                          j+1
+                                 =x0 (1 − k+1 ),
+                                     | {z }
+                                            1
+                                         ≥ k+1
+
+
+which imply, that
+
+     || 12 (xk − T (xk ))||2 = || 21 (x0 (1 − k+1
+                                               k                k
+                                                  ) − (x0 (1 − k+1      2R
+                                                                   ) − k+1          R
+                                                                           ))||2 = k+1 = ||x0k+1
+                                                                                             −x∗ ||2
+
+
+holds true. The case x0 < 0 follows from the operators point symmetry, i.e. T (−x) = −T (x).
+This completes the proof of tightness.
+
+    While Example 3.1 shows that the bound (2) is best possible for the original Halpern
+iteration, the rate of convergence could be improved for this example, if the values λk were
+chosen appropriately less than 1/(k + 2).
+    A simple example leading to the choice λk = 1/(k + 2) is the following: Let H be a
+Hilbert space with a countable orthonormal Schauder basis {ej }j∈N and T be the linear
+operator defined by T (ej ) = ej+1 for j ∈ N. Hence the unique fixed point is x∗ = 0. When
+choosing x0 = e1 , then for any choice of step lengths λj ∈ [0, 1], the k-th iterate always lies
+in the convex hull of e1 , . . . , ek+1 , and the choice of λj minimizing the error kxk − x∗ k is
+precisely the step length λj = 1/(j + 2) for all 1 ≤ j ≤ k. This step length leads to a slightly
+                                                                                  kx0 −x∗ k
+faster rate of convergence than (2) for this example, namely 21 kxk −T (xk )k ≤ √   2(k+1)
+                                                                                            . While
+this step length does not minimize the residual 21 kxk − T (xk )k it shows that smaller values
+of λj such as λj := ρ/(j + 2) for all j with ρ ∈ [0, 1) lead to larger residuals. On the other
+hand larger values λj > 1/(j + 2) for all j lead to larger residuals for Example 3.1.
+
+
+4    Conclusions
+We have derived a new and tight complexity bound for the Halpern-Iteration with coefficients
+                  1
+chosen as λk = k+2  . The proof based on semidefinite programming can in principle be
+adapted for other choices of parameters and fixed point iterations, again leading to tight
+complexity bounds. For the KM-Iteration with some constant stepsize t ∈ [ 12 , 1]
+
+                                    xk+1 := (1 − t)xk + t T (xk )
+
+
+
+                                                    9
+a proof can be found in [5] (Theorem 4.9), where
+                                                          
+                                      0 t t ...         t
+                                    0 0 t . . .        t
+                                                          
+                            L := −2  ... ... 0 . . .   ..  ∈ Rk×k
+                                    
+                                                        .
+                                    0 0 0 0            t
+                                      0 0 0 0           0
+
+is used to to define inequalities of the form (15). However, while in practice the KM-Iteration
+with constant stepsize may often perform much better than the Halpern-Iteration, its worst-
+case complexity is an order of magnitude worse – and the convergence analysis based on
+semidefinite programming is considerably longer.
+
+
+5     Appendix, a technical duality result
+While the duality used in (6) and (7) is the well known weak conic duality the format of
+the problems (6) and (7) is quite intricate. Here, the explicit derivation of the dual problem
+therefore is derived in detail: Define the Euclidean space E := R × Sk × Sk+1 and the
+closed convex cone K := R+ × (Sk ∩ Rk×k            k+1
+                                           + ) × S+ . We denote the trace inner product
+A • B := trace(AB) for all symmetric matrices A, B. Then K is self-dual with respect to
+the canonical inner product hX, Y iE := xT1 y1 + X2 • Y2 + X3 • Y3 , which we define for any
+                                        
+                                        x1     y1
+                                     X2  , Y2  ∈ E.
+                                       X3      Y3
+
+We proceed by restating problems (17) and (18) in standard form and exploit (weak) conic
+duality. In fact, by adding slack variables S ∈ K, we can write (6) equivalently as a conic
+optimization problem in dual standard form
+
+                         maximize {B̃ • Y | A∗ (Y ) + S = e
+                                                          C, S ∈ K}                       (24)
+                        Y ∈Sn+1 , S∈E
+
+for                                           2
+                                              R
+                                       C̃ :=  0  ∈ E,
+                                               0
+                                                   
+                                           0   0
+                                    B̃ =              ∈ Sk+1                              (25)
+                                           0 ek eTk
+and the linear operator A∗ : Sn+1 → E
+                                                                                               
+                                                        y0
+      y yT        diag(Y2 U )eT + e diag(U T Y2 )T − (Y2 U + U T Y2 ) + Diag(diag(Y2 U ) − y1 )
+           
+A∗ ( 0 1 ) :=                                                                                  .
+                                                       y0 y1T
+                                                             
+      y1 Y2                                                                                    
+                                                   −
+                                                       y1 Y2
+                                                                                         (26)
+
+                                              10
+The constraint A∗ (Y ) + S = C, e S ∈ K is a direct translation of the constraints in (6) except
+for the diagonal entries. Here it is used that the term diag(Y2 U )eT +e diag(U T Y2 )T −(Y2 U +
+U T Y2 ) has an all zero diagonal, which is why we can ”place ” the constraints diag(Y2 U )−y1 ≤
+0 on the diagonal.
+Recall that the optimal value of the conic optimization problem (12) in dual standard form
+is upper bounded by the optimal value of the conic optimization in primal standard form
+
+                      minimize{hC, e E | A(X)
+                                e Xi               e ∈ E, X
+                                           e = B̃, X      e ∈ K}                           (27)
+                         X∈E
+
+where the linear operators A∗ : Sn+1 → E and A : E → Sn+1 are adjoint, i.e. A is the
+unique operator that satisfies
+
+                                     hA∗ (Y ), X̃iE = Y • A(X̃)                            (28)
+
+for all Y ∈ Sn+1 , X̃ ∈ E. The ”Y2 -part” of the adjoint of the second component of A∗ can
+be obtained from
+ (diag(Y2 U )eT + e diag(U T Y2 )T − (Y2 U + U T Y2 ) + Diag(diag(Y2 U ))) • X1
+=Y2 • (U (Diag(X1 e) + 12 Diag(diag(X1 )) − X1 ) + (Diag(X1 e) + 12 Diag(diag(X1 )) − X1 )U T )
+          |                {z                }     |                 {z                }
+                          =F (X1 )                                   =F (X1 )
+                                                                                           (29)
+leading to the full description of A
+                      
+                       ξ
+                                                     − 21 diag(X1 )T
+                                                                       
+                                         ξ
+                 A( X1 ) =                                                − X2             (30)
+                                  − 21 diag(X1 ) U F (X1 ) + F (X1 )U T
+                         
+                       X2
+where, as before F (X) = Diag(Xe) + 21 Diag(diag(X)) − X. This shows that we can rewrite
+(15) in the claimed form (7) by eliminating the (semidefinite) variable X2 . This establishes
+the inequality in (6) and (7).
+
+Acknowledgment
+I would like to thank Florian Jarre for careful proofreading of this paper. I would also like
+to sincerely thank the anonymous referees for their constructive criticism that helped to
+improve the presentation of the paper and that led to the direct proof based on a weighted
+sum.
+
+
+References
+ 1. Cominetti, R., Soto, J. A., Vaisman, J. (2014). On the rate of convergence of
+    Krasnoselskii-Mann iterations and their connection with sums of Bernoullis. Israel Jour-
+    nal of Mathematics, 199(2), 757-772.
+
+ 2. Lofberg, J. (2004, September). YALMIP: A toolbox for modeling and optimization in
+    MATLAB. In Computer Aided Control Systems Design, 2004 IEEE International Sym-
+    posium on (pp. 284-289). IEEE.
+
+                                                11
+ 3. Halpern, B. (1967). Fixed points of nonexpanding maps. Bulletin of the American Math-
+    ematical Society, 73(6), 957-961.
+
+ 4. Leustean, L. (2007). Rates of Asymptotic Regularity for Halpern Iterations of Nonex-
+    pansive Mappings. J. UCS, 13(11), 1680-1691.
+
+ 5. Lieder, F. (2018). Projection Based Methods for Conic Linear Programming - Optimal
+    First Order Complexities and Norm Constrained Quasi Newton Methods, (Doc-
+    toral dissertation, Universitäts-und Landesbibliothek der Heinrich-Heine-Universität
+    Düsseldorf). https://docserv.uni-duesseldorf.de/servlets/DerivateServlet/
+    Derivate-49971/Dissertation.pdf
+
+ 6. Sturm, "Implementation of Interior Point Methods for Mixed Semidefinite and Second
+    Order Cone Optimization Problems" Optimization Methods and Software, 17 (6), pp.
+    1105 - 1154, 2002.
+
+ 7. Sabach, S., & Shtern, S. (2017). A first order method for solving convex bilevel opti-
+    mization problems. SIAM Journal on Optimization, 27(2), 640-660.
+
+ 8. Taylor, A. B., Hendrickx, J. M., Glineur, F. (2017). Smooth strongly convex interpola-
+    tion and exact worst-case performance of first-order methods. Mathematical Program-
+    ming, 161(1-2), 307-345.
+
+ 9. Wittmann, R. (1992). Approximation of fixed points of nonexpansive mappings. Archiv
+    der Mathematik, 58(5), 486-491.
+
+10. Xu, H. K. (2002). Iterative algorithms for nonlinear operators. Journal of the London
+    Mathematical Society, 66(1), 240-256.
+
+The author declares that he has no competing interests.
+
+
+
+
+                                           12
+

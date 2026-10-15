@@ -1,0 +1,161 @@
+[
+  {
+    "name": "bot",
+    "url": "https://www.mat.univie.ac.at/~rabot/",
+    "final_url": "https://www.mat.univie.ac.at/~rabot/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 1273
+  },
+  {
+    "name": "csetnek",
+    "url": "https://www.mat.univie.ac.at/~csercser/index.htm",
+    "final_url": "https://www.mat.univie.ac.at/~csercser/index.htm",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 1468
+  },
+  {
+    "name": "nguyen",
+    "url": "https://www.mat.univie.ac.at/~rabot/group.html",
+    "final_url": "https://www.mat.univie.ac.at/~rabot/group.html",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 2069
+  },
+  {
+    "name": "chenchene",
+    "url": "https://www.mat.univie.ac.at/~rabot/group.html",
+    "final_url": "https://www.mat.univie.ac.at/~rabot/group.html",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 2069
+  },
+  {
+    "name": "fadili",
+    "url": "https://fadili.users.greyc.fr/",
+    "final_url": "https://fadili.users.greyc.fr/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 495
+  },
+  {
+    "name": "trandinh",
+    "url": "https://quoctd.web.unc.edu/",
+    "final_url": "https://quoctd.web.unc.edu/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 9254
+  },
+  {
+    "name": "nguyentrung",
+    "url": "https://nghiant01.github.io/",
+    "final_url": "https://nghiant01.github.io/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 2506
+  },
+  {
+    "name": "ryu",
+    "url": "https://ernestryu.com/",
+    "final_url": "https://ernestryu.com/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 1686
+  },
+  {
+    "name": "yoon",
+    "url": "https://tetrzim.github.io/CV/",
+    "final_url": "https://tetrzim.github.io/CV/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 2385
+  },
+  {
+    "name": "loizou",
+    "url": "https://nicolasloizou.github.io/index.html",
+    "final_url": "https://nicolasloizou.github.io/index.html",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 6956
+  },
+  {
+    "name": "bravo",
+    "url": "https://sites.google.com/site/mbravogon/",
+    "final_url": "https://sites.google.com/site/mbravogon/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 622
+  },
+  {
+    "name": "cominetti",
+    "url": "https://www.uai.cl/profesores/ingenieria-y-ciencias/roberto-cominetti",
+    "final_url": "https://www.uai.cl/profesores/ingenieria-y-ciencias/roberto-cominetti",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 19787
+  },
+  {
+    "name": "contreras",
+    "url": "https://citylog.udp.cl/persona/juan-pablo-contreras/",
+    "final_url": "https://citylog.udp.cl/persona/juan-pablo-contreras/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 2819
+  },
+  {
+    "name": "combettes",
+    "url": "https://pcombet.math.ncsu.edu/",
+    "final_url": "https://pcombet.math.ncsu.edu/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 66041
+  },
+  {
+    "name": "pesquet",
+    "url": "https://jc.pesquet.eu/",
+    "final_url": "https://jc.pesquet.eu/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 1439
+  },
+  {
+    "name": "diakonikolas",
+    "url": "https://www.jelena-diakonikolas.com/",
+    "final_url": "https://www.jelena-diakonikolas.com/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 43244
+  },
+  {
+    "name": "salzo",
+    "url": "https://www.open.diag.uniroma1.it/users/saverio_salzo",
+    "final_url": "https://www.open.diag.uniroma1.it/users/saverio_salzo",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 4277
+  },
+  {
+    "name": "alacaoglu",
+    "url": "https://ahmetalacaoglu.github.io/",
+    "final_url": "https://ahmetalacaoglu.github.io/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 1296
+  },
+  {
+    "name": "hermant",
+    "url": "https://j-hermant.github.io/",
+    "final_url": "https://j-hermant.github.io/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "text_length": 829
+  },
+  {
+    "name": "pesquet_biography",
+    "url": "https://jc.pesquet.eu/biography/",
+    "status": 200,
+    "checked": "2026-10-14",
+    "institution": "CentraleSupélec / Université Paris-Saclay"
+  }
+]

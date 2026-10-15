@@ -1,0 +1,164 @@
+\documentclass[11pt]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx}
+\usepackage[authoryear,round]{natbib}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{array}
+
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+
+\begin{document}
+
+\setcounter{section}{1}
+\section{基础凸随机}
+
+\subsection{设定}
+
+$f$ 凸、$L$-光滑，$x^\star\in\arg\min f$，$S:=\arg\min f$，$D:=\|x_0-x^\star\|$，$\Delta_t:=f(x_t)-f^\star$。SGD \citep{robbins1951} 为
+\[
+x_{t+1}=x_t-s_t\bigl(\nabla f(x_t)+e_t\bigr),
+\qquad
+\E_t[e_t]=0,
+\quad
+\E_t\|e_t\|^2\le\sigma^2,
+\]
+其中 $\E_t[\cdot]:=\E[\cdot\mid\F_t]$。
+
+\subsection{一步不等式}
+
+当 $s_t\le 1/(2L)$ 时，
+\begin{equation}
+\boxed{\;
+\E_t\|x_{t+1}-x^\star\|^2+s_t\bigl(f(x_t)-f^\star\bigr)
+\le \|x_t-x^\star\|^2+s_t^2\sigma^2 .
+\;}
+\tag{SGD}
+\end{equation}
+三个要素：条件无偏性消掉交叉项；凸性给出函数值间隙；光滑性给出 $\|\nabla f(x)\|^2\le 2L\bigl(f(x)-f^\star\bigr)$ \citep[Theorem~2.1.5]{nesterov2004}。
+% 推导见附录~\ref{app:sgd}，
+框架同 \citet{nemirovski2009} 与 \citet{bottou2018}。
+
+\subsection{偏差--方差界}
+
+对 (SGD) 从 $0$ 到 $k-1$ 求和，再用 Jensen 不等式。记
+\[
+S_k:=\sum_{t<k}s_t,
+\qquad
+\widetilde x_k:=\frac1{S_k}\sum_{t<k}s_tx_t ,
+\]
+得到 \citep{nemirovski2009,bottou2018}
+\begin{equation}
+\boxed{\;
+\E[f(\widetilde x_k)-f^\star]
+\le
+\underbrace{\frac{D^2}{S_k}}_{\text{偏差}}
++\underbrace{\frac{\sigma^2\sum_{t<k}s_t^2}{S_k}}_{\text{方差}} .
+\;}
+\tag{9}
+\end{equation}
+这是本部分的核心公式。第 1 部分中 JOTA 的界与它同构，只是把 $S_k$ 换成 $s_kt_k^2$。
+
+\subsection{由 (9) 得到的速率}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X l >{\raggedright\arraybackslash}X@{}}
+\toprule
+步长 & 期望速率（加权平均点） & 说明 \\
+\midrule
+常数 $s\asymp\min\{1/L,\,D/(\sigma\sqrt T)\}$，已知 $T$ & $O\bigl(LD^2/T+\sigma D/\sqrt T\bigr)$ & 平衡 $D^2/(sT)$ 与 $s\sigma^2$ \citep{nemirovski2009} \\
+$s_t\asymp t^{-p}$，$p<1/2$ & $O(k^{-p})$ & 方差主导 \\
+$p=1/2$ & $O(\log k/\sqrt k)$ & 与 $T$ 无关的最好选择 \\
+$1/2<p<1$ & $O(k^{-(1-p)})$ & $\sum_t s_t^2<\infty$ \citep{robbins1951} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+后三行是把 $s_t\asymp t^{-p}$ 直接代入 (9) 的计算。
+
+\subsection{下界：加速只能改善偏差项}
+
+在凸光滑、方差有界的随机一阶 oracle 模型下，minimax 下界为
+\[
+\Omega\Bigl(\frac{LD^2}{T^2}+\frac{\sigma D}{\sqrt T}\Bigr).
+\]
+\begin{itemize}
+  \item 偏差项的下界来自确定性一阶方法的下界 \citep[Theorem~2.1.7]{nesterov2004}；
+  \item 噪声项的下界来自信息论论证 \citep{nemirovski1983,agarwal2012}；
+  \item 加速方法 AC-SA 同时达到两项 \citep{lan2012}。
+\end{itemize}
+所以 SGD 在噪声项上已经最优，加速只把偏差项从 $LD^2/T$ 改进到 $LD^2/T^2$。当 $k\to\infty$ 时，渐近阶由 $\sigma D/\sqrt k$ 决定：\textbf{持续噪声下不存在渐近意义的加速。}
+
+\subsection{几乎必然分析的入口}
+
+若 $\sum_t s_t=\infty$、$\sum_t s_t^2<\infty$ \citep{robbins1951}，对 (SGD) 应用 Robbins--Siegmund 引理 \citep{robbins1971}，a.s.\ 有：
+\begin{enumerate}
+  \item 对每个 $x^\star\in S$，$\|x_t-x^\star\|$ 收敛（因此轨道有界）；
+  \item $\sum_t s_t\bigl(f(x_t)-f^\star\bigr)<\infty$。
+\end{enumerate}
+由第 2 条和 Jensen 不等式，加权平均点满足
+\[
+f(\widetilde x_k)-f^\star=O\bigl(1/S_k\bigr)\quad\text{a.s.}
+\]
+取 $s_t\asymp t^{-p}$，$p\in(1/2,1)$，即为 $O(k^{-(1-p)})$，\textbf{任意接近但达不到} $k^{-1/2}$。换用适当的平均方式可以把 $O$ 改进为 $o$ \citep{sebbouh2021}。
+
+由第 1 条加上聚点论证，迭代点 a.s.\ 收敛到某个随机极小点 \citep{opial1967,combettes2015}。概率一事件依赖于 $x^\star\in S$，而 $S$ 通常不可数，需要取可数稠密子集处理这一量词问题 \citep{combettes2015}。末次迭代 $x_t$ 的 a.s.\ 速率需要另外的论证 \citep{sebbouh2021,liu2022}。
+
+\textbf{与第 1 部分的对应：}Robbins--Siegmund 对应``能量收敛''，$\sum_t s_t\Delta_t<\infty$ 对应 (K1$^+$) 的余量，Opial 对应迭代点收敛。
+
+% \appendix
+% \section{一步不等式的推导}\label{app:sgd}
+
+% 由 $x_{t+1}=x_t-s_t\bigl(\nabla f(x_t)+e_t\bigr)$ 展开距离平方：
+% \begin{equation}
+% \begin{aligned}
+% \|x_{t+1}-x^\star\|^2
+% ={}&\|x_t-x^\star\|^2
+% -2s_t\langle\nabla f(x_t),x_t-x^\star\rangle
+% -2s_t\langle e_t,x_t-x^\star\rangle\\
+% &+s_t^2\|\nabla f(x_t)+e_t\|^2 .
+% \end{aligned}
+% \tag{A.1}
+% \end{equation}
+% 取条件期望。由 $\E_t[e_t]=0$，线性交叉项消失：
+% \begin{equation}
+% \E_t\|x_{t+1}-x^\star\|^2
+% =\|x_t-x^\star\|^2
+% -2s_t\langle\nabla f(x_t),x_t-x^\star\rangle
+% +s_t^2\E_t\|\nabla f(x_t)+e_t\|^2 .
+% \tag{A.2}
+% \end{equation}
+% 由凸性，
+% \begin{equation}
+% \langle\nabla f(x_t),x_t-x^\star\rangle\ge f(x_t)-f^\star=\Delta_t .
+% \tag{A.3}
+% \end{equation}
+% 由凸性和 $L$-光滑性 \citep[Theorem~2.1.5]{nesterov2004}，
+% \begin{equation}
+% \|\nabla f(x_t)\|^2\le 2L\Delta_t .
+% \tag{A.4}
+% \end{equation}
+% 条件无偏性还给出
+% \begin{equation}
+% \E_t\|\nabla f(x_t)+e_t\|^2
+% =\|\nabla f(x_t)\|^2+\E_t\|e_t\|^2
+% \le 2L\Delta_t+\sigma^2 .
+% \tag{A.5}
+% \end{equation}
+% 将 (A.3)--(A.5) 代入 (A.2)：
+% \begin{equation}
+% \E_t\|x_{t+1}-x^\star\|^2
+% \le\|x_t-x^\star\|^2-s_t(2-2Ls_t)\Delta_t+s_t^2\sigma^2 .
+% \tag{A.6}
+% \end{equation}
+% 当 $s_t\le1/(2L)$ 时 $2-2Ls_t\ge1$，即得 (SGD)：
+% \begin{equation}
+% \E_t\|x_{t+1}-x^\star\|^2+s_t\Delta_t\le\|x_t-x^\star\|^2+s_t^2\sigma^2 .
+% \tag{A.7}
+% \end{equation}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

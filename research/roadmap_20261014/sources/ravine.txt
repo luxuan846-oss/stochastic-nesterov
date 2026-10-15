@@ -1,0 +1,2599 @@
+Journal of Optimization Theory and Applications (2026) 209:5
+https://doi.org/10.1007/s10957-026-02940-4
+
+
+
+
+The Stochastic Ravine Accelerated Gradient Method
+with General Extrapolation Coefficients
+
+Hedy Attouch1 · Jalal Fadili2              · Vyacheslav Kungurtsev3
+
+Received: 18 December 2024 / Accepted: 24 January 2026 / Published online: 14 March 2026
+© The Author(s), under exclusive licence to Springer Science+Business Media, LLC, part of Springer
+Nature 2026
+
+
+Abstract
+In a real Hilbert space domain setting, we study the convergence properties
+of the stochastic Ravine accelerated gradient method for convex differentiable
+optimization. We consider the general form of this algorithm where the extrap-
+olation coefficients can vary with each iteration, and where the evaluation of the
+gradient is subject to random errors. This general treatment models a breadth
+
+Communicated by Radu Ioan Bot.
+
+The insight and motivation for the study of the Ravine method, in light of its resemblance to
+Nesterov’s, as well as many of the derivations in this paper, was the work of our beloved friend
+and colleague Hedy Attouch. As one of the final contributions of Hedy’s long and illustrious
+career before his unfortunate recent departure, the other authors are fortunate to have worked
+with him on this topic, and hope that the polished manuscript is a valuable step in honoring his
+legacy.
+
+B Jalal Fadili
+    Jalal.Fadili@greyc.ensicaen.fr
+    Hedy Attouch
+    hedy.attouch@umontpellier.fr
+    Vyacheslav Kungurtsev
+    vyacheslav.kungurtsev@fel.cvut.cz
+
+1   IMAG CNRS UMR 5149, Université Montpellier, Place Eugène Bataillon, 34095
+    Montpellier CEDEX 5, France
+2   GREYC CNRS UMR 6072, Ecole Nationale Supérieure d’Ingénieurs de Caen, 14050
+    Caen Cedex, France
+3   Department of Computer Science, Faculty of Electrical Engineering, Czech Technical
+    University, 12000 Prague, Czechia
+
+
+                                                                                       123
+5   Page 2 of 51                  Journal of Optimization Theory and Applications (2026) 209:5
+
+
+of practical algorithms and numerical implementations. We show that, under
+a proper tuning of the extrapolation parameters, and when the error variance
+associated with the gradient evaluations or the step-size sequences vanish suf-
+ficiently fast, the Ravine method provides fast convergence of the values both
+in expectation and almost surely. We also improve the convergence rates from
+O(·) to o(·) in almost sure sense. Moreover, we show almost sure summability
+property of the gradients, which implies the fast convergence of the gradients
+towards zero. This property reflects the fact that the high-resolution ODE of
+the Ravine method includes a Hessian-driven damping term. When the space is
+also separable, our analysis allows to establish almost sure weak convergence
+of the sequence of iterates provided by the algorithm. We finally specialize
+the analysis to consider different parameter choices, including vanishing and
+constant (heavy ball method with friction) damping parameter, and present
+a comprehensive landscape of the tradeoffs in speed and accuracy associated
+with these parameter choices and statistical properties on the sequence of errors
+in the gradient computations. We provide a thorough discussion of the simi-
+larities and differences with the Nesterov accelerated gradient which satisfies
+similar asymptotic convergence rates.
+
+Keywords Ravine method · Nesterov accelerated gradient method · General
+extrapolation coefficient · Stochastic errors · Hessian driven damping ·
+Convergence rates · Lyapunov analysis
+
+Mathematics Subject Classification 37N40 · 46N10 · 49M30 · 65B99 ·
+65K05 · 65K10 · 90B50 · 90C25
+
+
+1 Introduction
+
+Given a real Hilbert space H, our work is concerned with fast numerical res-
+olution of the convex minimization problem
+
+                               min { f (x) : x ∈ H} ,                                    (P)
+
+where we make the following standing assumptions:
+
+f : H → R is differentiable, ∇ f is L − Lipschitz continuous, S = argminH f  = ∅.
+(sk )k∈N is a positive sequence with sk L ∈]0, 1].
+                                                                                         (H)
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5         Page 3 of 51    5
+
+
+   To solve (P), we consider the Ravine Accelerated Gradient algorithm
+((RAGγk ) for short), which generates iterates (yk , wk )k∈N satisfying
+                           ⎧
+                           ⎨wk = yk − sk ∇ f (yk ),
+                                                                         (RAGγk )
+                           ⎩y
+                               k+1 = wk + γk (wk − wk−1 ) .
+
+Let us indicate the role of the different parameters involved in the above algo-
+rithm:
+a) The positive parameter sequence (sk )k∈N is the step-size sequence applied
+    to the gradient based update.
+b) The non-negative inertial/extrapolation/momentum parameters (γk )k∈N are
+    linked to the inertial character of the algorithm. They can be viewed as
+    control parameters for optimization purposes.
+c) In order to inform about the practical performance of algorithms realiz-
+    ing this method in common applications, we will analyze the convergence
+    properties when the gradient terms are calculated with stochastic errors.
+    Formally, we consider ∇ f (yk ) + ek instead of ∇ f (yk ) in (RAGγk ) where,
+    conditioned on yk , ek is a zero-mean stochastic noise term.
+   One of the motivations for this additive perturbation model comes from
+stochastic optimization, where the gradient may be evaluated only approxi-
+mately, either because of physical, numerical or computational reasons. The
+prototype example we think of is the stochastic optimization problem of the
+form
+                 
+         f (x) =     F(x, ξ )dμ(ξ ) := Eξ ∼μ F(x, ξ ), F : H × Ξ → R,        (1)
+                     Ξ
+
+where (Ξ , F, μ) is a probability space, F(x, ·) is μ-integrable for any x ∈ H,
+and F(·, ξ ) ∈ C 1 (H) for any ξ . Problem (1) is very popular in many applica-
+tion domains that include machine learning and signal processing. Computing
+∇ f (x) (or even f (x)) is either impossible, when F can only be sampled in
+an online streaming manner, or computationally very expensive, when it is the
+empirical risk across a very large number of data samples. The popular alter-
+native is to draw m independent samples of ξ , say (ξi )1≤i≤m , and compute the
+empirical average estimate
+
+                                                
+                                                m
+                                f (x) = 1
+                                ∇                     ∇ F(x, ξi ).                  (2)
+                                         m
+                                                i=1
+
+
+                                                                        123
+5   Page 4 of 51               Journal of Optimization Theory and Applications (2026) 209:5
+
+
+The stochastic error at iteration k of an algorithm based on the first-order
+                                               f (xk ). Denote Fk the sub-σ -
+information ∇ f (xk ) is then ek = ∇ f (xk ) − ∇
+algebra generated by σ (xi , ei−1 : i ≤ k). Observe that conditioned on Fk , and
+by drawing independently m k samples of ξ at iteration k, one has
+
+                                       1
+    E ek | Fk = 0 and E   ek 2 | Fk =      Eξ [ ∇ F(xk , ξ ) 2 | Fk ] − ∇ f (xk ) 2
+                                       mk
+                                       1
+                                     ≤    Eξ [ ∇ F(xk , ξ ) 2 | Fk ].
+                                       mk
+
+
+Thus if the gradient is bounded almost surely, then
+
+
+                          E   ek 2 | Fk = O(1/m k ).
+
+
+The boundedness assumption on the gradient is quite common in the literature,
+and it holds for some popular functions such as the logistic loss, or if the
+sequence of iterates is assumed a priori to be almost surely bounded. Therefore
+to make this variance decay fast enough with k, which will be made precise
+in our analysis, one has to take m k as increasing with k at a fast enough rate.
+We will show in particular that this decay rate will depend on the choice of
+the sequences sk and γk and presents a trade-off between stability to stochastic
+perturbation and fast convergence of (RAGγk ); see the detailed description of
+our contributions in Section 1.2 and the thorough discussion after Theorem 3.1.
+
+1.1 Previous Work
+
+1.1.1 Exact Inertial Dynamics and Algorithms
+
+Damped inertial dynamics have a natural mechanical and physical interpreta-
+tion. Asymptotically, they tend to stabilize the system at a minimizer of the
+global energy function, that is mitigate oscillations of overshoot. As such, they
+offer an intuitive way to develop fast and efficient optimization methods. B.
+Polyak [36, 37] initiated the use of inertial dynamics to accelerate the gradient
+method in optimization based on a second order in time inertial dynamical
+system with a fixed viscous damping coefficient; the so-called Heavy Ball
+with Friction (HBF) method. (HBF) provided momentum to the dynamics that
+accelerated the convergence for strongly convex objectives. A discretization
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5               Page 5 of 51   5
+
+                                                    yk−1
+                                             yk     •
+                                             •
+                                                   • wk−1 = yk−1 − s∇f (yk−1 )
+                                           • wk = yk − s∇f (yk )
+                                  • yk+1 = wk + s (wk − wk−1 )
+
+
+
+              S = argmin f
+
+
+
+
+Fig. 1 Ravine Accelerated Gradient method
+
+
+
+of HBF, that we refer to as HBF algorithm, leads to the iterative scheme [36]
+
+                      xk+1 = xk + βk (xk − xk−1 ) − sk ∇ f (xk ).                (HBFβk )
+
+With an appropriate and iteration-independent choice of sk and βk > 0 in
+the strongly convex case, that depends on the objective conditioning, (HBFβk )
+inherits the optimal linear convergence properties of the continuous dynamics.
+   The Ravine method (RAGγk ) was introduced by Gelfand and Tsetlin [17] in
+1961 in the case of a fixed positive extrapolation coefficient γk ≡ γ > 0. This
+method mimics the flow of water in the mountains which first flows rapidly
+downhill through small, steep ravines and then flows along the main river in the
+valley, hence its name. A geometric view of the Ravine Accelerated Gradient
+method is shown in Figure 1.
+   The Ravine method was a precursor of the accelerated gradient methods.
+It has long been ignored but has recently appeared at the forefront of cur-
+rent research in numerical optimization, see for example [9, 38, 42]. It comes
+naturally into the picture when considering optimized first-order methods for
+smooth convex minimization, see [14, 23, 35].
+   When γk = 1 − αk , which, for α ≥ 3, the Ravine method (RAGγk ) is
+closely related with the Nesterov accelerated gradient (NAG for short) method
+(see (NAGαk ) [32, 33]), with which it has often been confused. In fact, the
+Ravine and Nesterov acceleration methods are both based on the operations
+of extrapolation and gradient descent, but in a reverse order. Furthermore, up
+to a slight change in the extrapolation coefficients, the two algorithms are
+
+                                                                                 123
+5   Page 6 of 51                Journal of Optimization Theory and Applications (2026) 209:5
+
+
+associated with the same equations, each of them describing the evolution
+of different variables, explaining how the two methods have been casually
+confused for each other in some of the literature. Their precise correspondence
+will be clearly elucidated in Section 2.
+   Notably, recent research concerning the understanding of accelerated first-
+order optimization methods, seen as temporal discretized dynamic systems, has
+made it possible to clarify the correspondence between these two methods; see
+the recent work by some of the authors in [1, 9]. In particular, these works have
+shown that while both algorithms share the same low-resolution ODE (i.e. of
+order 0 in the step-size), their super-resolution ODEs (i.e. of order 2 in the
+step-size) are fundamentally distinct. This was also confirmed by numerical
+experiments.
+
+1.1.2 Inexact and Stochastic Inertial Dynamics
+
+Due to the importance of the subject in optimization and control, several papers
+have been devoted to the study of perturbations in dissipative inertial systems
+and in the corresponding accelerated first-order algorithms that can be modeled
+as these systems’ dynamics’ discretizations. This topic was first considered in
+the case of a fixed viscous damping and deterministic perturbations in [8, 21].
+Then it was studied as far as implications for the accelerated gradient method
+of Nesterov, from the standpoint of the corresponding inertial dynamics with
+vanishing viscous damping; see [5, 7, 12, 40, 42, 45]. These results were
+extended to stochastic continuous time inertial dynamics in [30, 31].
+
+1.1.3 Stochastic Inertial Algorithms
+
+Stochastic gradient descent methods with inertia/momentum are at the core of
+optimization subroutines in many data science applications such as machine
+learning and data processing. Rigorously speaking, these methods have prov-
+able acceleration over gradient descent only for convex objectives with exact
+gradients, or when the objective is in the form of a large finite sum of determin-
+istic functions and the algorithm incorporates variance reduction techniques.
+In fact, with standard choices of step-size and inertia parameters, numerical
+experiments show that inertial algorithms may lose their superiority in con-
+vergence rate over simple gradient descent in the noisy setting, or can even
+diverge [15]. See also [22], who proved that for quadratic problems, there are
+situations in which it is impossible for any stochastic first-order oracle method
+to improve upon stochastic gradient descent (SGD). Yet, numerical studies
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5        Page 7 of 51   5
+
+
+have also shown that carefully tuned constant step-size and inertia momentum
+parameters can lead to improvements over stochastic gradient descent (SGD)
+in deep learning [44]. Overall, there has been a growing interest for obtaining
+convergence guarantees for stochastic extrapolation/momentum methods by
+considering narrowly particular parameter choices; see e.g., [2, 13, 16, 18, 20,
+22, 24–29, 34, 41, 46]. This list is not exhaustive but is representative of most
+works related to ours.
+Rates in expectation on the objective Many works provided guarantees of
+sublinear convergence rates in expectation on the objective for stochastic
+momentum/inertial methods. Most of these works assume (conditional) unbi-
+asedness of the gradient and boundedness of its variance.
+   [18, 25] developed an adaptation of (NAGαk ) to stochastic√(composite)
+convex optimization problems and obtained an optimal O(1/ k) rate for
+appropriate choice of the step-size and the extrapolation/momentum param-
+eter; see also [26]. By relying on a Lyapunov function that dates back√to the
+work of Attouch and co-authors, [24] obtain the convergence rate O(1/ k) for
+(SNAGαk ) with non-vanishing noise and a step-size sk decreasing sufficiently
+fast together with a specific choice of αk+1 tied to the step-size. An accelerated
+rate O(1/k) was also obtained for the strongly convex case under appropriate
+choices for the parameters. [20] analyze (SNAGαk ) with relative noise on the
+gradient, i.e. the noise variance is proportional to the squared magnitude of the
+actual gradient. For αk = k+3  k
+                                 , i.e. the standard Nesterov scheme, they prove
+convergence at the same accelerated rate O(1/k 2 ) as in the deterministic case,
+but only if the constant of proportionality in the noise is strictly less that 1.
+   [46] provided an analysis of the stochastic versions of (HBFβk ) (that we
+coin SHBF) and (SNAGαk ) with constant momentum/inertial
+                                                   √               parameters and
+asymptotically vanishing step-size sk = 1/ k, under some boundedness
+assumptions of the  √ gradient or its stochastic estimate. In the convex setting,
+they proved O(1/ k) ergodic (and not pointwise) convergence rates. See also
+[34] for similar results. [16] obtained a number of sublinear convergence guar-
+antees for SHBF, including a O(1/k c ) convergence rate, for any c < 1, in the
+strongly convex case when applying the decaying step-size O(1/k c ) and an
+appropriately chosen inertial/memory parameter sequence.
+   In the strongly convex case, several works have studied convergence rates
+in expectation of stochastic inertial methods. [19] obtained an optimal O(1/k)
+convergence rate under a boundedness assumption of the iterates. [2] showed
+a linear convergence rate of (SNAGαk ) to a noise dominated region1 at the
+1 See Remark 3.2 and (7) for a definition.
+
+
+
+                                                                       123
+5   Page 8 of 51                       Journal of Optimization Theory and Applications (2026) 209:5
+
+
+same accelerated rate as in the deterministic setting, provided that sk and αk are
+constant and appropriately chosen according to the objective condition number.
+[13] show that with a specific choice of constant parameters, the distribution
+of the iterates of (SNAGαk ) converges at an accelerated linear rate to a ball
+centered at a unique invariant distribution in the 1-Wasserstein metric, as long
+as the noise variance is small enough. They also prove linear convergence of
+the objective in expectation to a noise dominated region. For the specialized
+setting of a quadratic objective function, it has been shown that the SHBF
+iterates converge linearly at an accelerated rate, but only in expectation [29].
+Almost sure guarantees While convergence guarantees in expectation are
+extensive, as reviewed above, the literature is much scarcer when it comes
+to almost sure guarantees, in particular for extrapolation/momentum methods
+when minimizing (1). This covers both convergence rates and more impor-
+tantly, convergence of the sequence of iterates. The rare exceptions typically
+assume a finite sum objective and apply variance reduction, which as mentioned
+are beyond the scope of our work. For convergence theory that establishes
+guarantees in an almost sure sense, the Robbins-Siegmund lemma [39] (see
+Lemma A.1) turns out to be instrumental.
+   The almost sure convergence of SHBF to a local minimizer for sufficiently
+smooth coercive non-convex functions, verifying a Morse-Sard condition, was
+proven in [16] using the center stable manifold theorem, provided that the
+noise verifies an appropriate decrease and uniform ellipticity conditions so
+that SHBF is not trapped into spurious critical points.
+   By relying on an iterate averaging/memory viewpoint of SHBF, [41] √    showed
+that the function values converge almost surely at a rate close to o(1/ k) for
+an appropriate choice of parameters and under a slightly modified assumption
+of a bounded variance on the stochastic gradient evaluations. They have also
+claimed that the iterates of SHBF "converges to a minimizer"2 almost surely.
+The derivation of almost sure convergence rates for SHBF heavily relied on the
+Lyapunov analysis of [11]. The work of [28] complemented the results of [41]
+by providing an almost sure convergence rate analysis for SHBF and (SNAGαk )
+for strongly convex objectives, non-convex ones as well as general convex ones.
+They considered vanishing step-sizes and constant extrapolation/momentum
+parameters in ]0, 1[. For the convex case, as in our work, they provided an
+
+
+2 We take their terminology here, which is, strictly speaking, not rigorous. Indeed, as the iterates
+correspond to a random process, their limits are random variables and one should rather say that
+the sequence of iterates converges almost surely to a random variable taking values in the set of
+minimizers. From now on, we will use the latter.
+
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5         Page 9 of 51   5
+
+
+almost sure rate O(1/k 1/3− ) for sk scaling as 1/k 2/3+ ,  ∈]0, 1/3[. They
+have also claimed almost sure convergence of the iterates of these algorithms.
+
+1.2 Contributions
+
+In this work, we propose and analyse both the stochastic Nesterov and
+Ravine methods (resp. (SNAGαk ) and (SRAGαk+1 )) with general extrapola-
+tion coefficient αk for solving optimization problems of the form (P) in an
+infinite-dimensional real separable Hilbert space setting. In addition to the
+fact that this has not been done in the literature before–and in fact not for
+the Nesterov method as well, we are motivated by understanding the role of
+extrapolation on the convergence and stability properties of inertial systems.
+As we will explain in more detail later, considering a general framework with-
+out narrow assumptions on αk provides a broad picture of the convergence
+properties of this class of algorithms and reveals the precise role of αk for bal-
+ancing the trade-off between stability and fast convergence. Our contributions
+are the following:
+
+• Comprehensive convergence analysis for the Stochastic Ravine method
+  with general extrapolation parameters: we provide a unified analysis of
+  the convergence properties of the Ravine method subject to noise in the gra-
+  dient computation over a large range of values for the extrapolation sequence
+  parameter.
+• Complexity estimates in expectation and almost sure sense: we will
+  establish fast convergence rates in expectation and in the almost sure sense,
+  both in big-O and little-o, for the objective values, the gradient and the
+  velocity.
+• Almost sure weak convergence guarantees for the iterate sequence: we
+  will prove that the sequence of iterates provided by the Ravine method
+  converges weakly almost surely to a random variable valued in the set of
+  minimizers.
+• The precise impact of the extrapolation sequence on the convergence
+  properties: our results will highlight the trade-off between the choice of
+  αk , that of the step-sizes sk , and the decrease of the error variance and their
+  influence on the convergence of the values and gradients. In particular, some
+  choices of the extrapolation parameter (and step-size sequence) will entail
+  less stringent summability conditions on the error variance for convergence,
+  but will result in slower a convergence rate, and vice-versa. We will see
+  that a specific parametrization of the extrapolation parameters provides fast
+
+                                                                        123
+5   Page 10 of 51              Journal of Optimization Theory and Applications (2026) 209:5
+
+
+    convergence properties of the Ravine algorithm resembling those of the
+    Nesterov method. Moreover, our results show the flexibility of the method,
+    the results being unchanged taking for example αk = k+α
+                                                          k
+                                                               instead of αk =
+         α
+    1 − k , as two of the many variations of the method.
+
+1.3 Relation to Prior Work
+
+Compared to all previous literature reviewed in Section 1.1.3 in the convex
+case, where each work essentially focuses on a specific algorithm with a cer-
+tain choice of step-size and momentum parameters, our work is the first to
+deliver a unified analysis for both the stochastic Ravine and Nesterov algo-
+rithms with general parameters. Moreover, we are not aware of any work that
+tackles this problem in the infinite dimensional Hilbertian setting. Our proof
+relies a general Lyapunov analysis inspired by the one in [5] in the determinis-
+tic case. However, our extension from the deterministic to stochastic errors is
+quite involved and requires a novel careful analysis and several additional argu-
+ments, especially when it comes to establishing almost sure guarantees. Beyond
+a new Lyapunov analysis for properly isolating the moments of the martingale
+difference noise, we rely on the Robbins-Siegmund lemma (Lemma A.1) and
+its key consequence in Lemma A.2 for establishing the little-o guarantees of
+(SRAGαk+1 ). To the best our knowledge, the latter is new and can be of inde-
+pendent interest. The proof of almost sure weak convergence of the iterates
+also necessitates a non-trivial density argument before applying Opial’s lemma
+that relies on the separability of the Hilbert space.
+    Our convergence rates on the objective in expectation cover all those
+obtained in [2, 16, 18, 24–27, 34, 46] as special cases for appropriate choice
+of the step-size and the inertial parameters. Our analysis does not require any
+boundedness assumption on the gradient or the noise, unlike for instance [34,
+46].
+    Our convergence rate results are provided both in expectation and almost
+surely. While the former is standard in the literature, the latter is much less
+common, and the analysis less straightforward, as argued above. Notably, the
+almost sure weak convergence of the iterates is often overlooked by the over-
+whelming majority of existing works. In this respect, the only and closest
+work to ours is that of [41] and [28]. The algorithms analyzed in [41] and [28]
+are SHBF for the former, and SHBF and stochastic Nesterov’s method with
+constant momentum for the latter. Here we analyze the stochastic Ravine and
+Nesterov’s methods for general parameters. Our setting allows for a broader
+
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5        Page 11 of 51   5
+
+
+class of flexible and physically meaningful (in terms of the corresponding ODE
+dynamics) choice of the parameters, as well as conditions on the noise variance,
+including constant variance. Although both works apply a Lyapunov analysis,
+ours is different and appears, in our view, to be more transparently informa-
+tive. For the convergence rates, both in expectation and almost sure sense, we
+recover the same big-O and little-o rates on the objective as [41], and better
+than that of [28] (who did not provide little-o guarantees for the convex case),
+when we specify particular regimes for the parameters sk and αk . We have
+several additional and new results, including almost sure summability guaran-
+tees on the objective value, the velocity and the gradient. In our work (resp.
+[28, 41]), almost sure (weak) convergence of the iterates of our algorithms
+(resp. theirs) to an argminH f -valued random variable is proved. However, we
+would like to point out that while the claim on almost sure convergence of the
+iterates in these two papers is true, a close inspection of their proofs shows that
+the arguments are unfortunately flawed. More precisely, these authors show
+that for any x ∈ argminH f , limk→∞ xk − x exists almost surely. How-
+ever, the set of events of probability 1 on which this convergence event holds
+depends on x . Thus, one cannot invoke Opial’s Lemma directly, as they did,
+as the order of first order logical quantifiers present is inconsistent with their
+argument. To circumvent this difficulty, one has to use a non-trivial density
+argument (see the proof of Theorem 3.1(i)). Note that this is the only claim for
+which we need H to be separable in infinite dimension.
+
+1.4 A Model Result
+
+Taking αk+1 = 1 − αk in (SRAGαk+1 ) yields fast convergence the values and
+of the gradients towards zero at the same fast rate as in the deterministic case,
+provided that the noise decreases sufficiently fast. Specifically, let the sequence
+(yk )k∈N generated by the stochastic Ravine method with constant step-size
+
+
+                         wk = yk − s(∇ f (yk ) + ek ),
+                                             
+                         yk+1 = wk + 1 − αk (wk − wk−1 ) ,
+
+
+where s ∈]0, 1/L], (ek )k∈N is a zero-mean stochastic noise. Let Fk be the
+sub-σ -algebra generated by y0 and (wi )i≤k−1 . If α > 3, E [ek | Fk ] = 0
+             
+and +∞ k=1 kE ek |
+                    2 | F 1/2 < +∞ almost surely, then according to Corol-
+                         k
+
+
+                                                                        123
+5   Page 12 of 51                   Journal of Optimization Theory and Applications (2026) 209:5
+
+
+lary 4.1, the following convergence properties hold:
+
+                                        
+                          1
+f (yk ) − min f = o                and         k 2 ∇ f (yk ) 2 < +∞ almost surely.
+            H             k2
+                                           k
+
+
+In addition, if H is also separable, then the sequence (yk )k∈N converges weakly
+almost surely to a random variable valued in argminH f . Clearly, we recover
+the optimal convergence and summability rates known for the determinis-
+tic case [11] as soon as the noise variance vanishes fast enough. Our results
+in Section 4 will be established for a much larger lass of the extrapolation
+sequence beyond 1 − α/k. In particular, these results will emphasize the trade-
+off between the decrease of the error variance and fast convergence of the
+values and gradients; see the discussion after each Corollary in Section 4 as
+well as Remark 3.1, Remark 3.2 and Remark 3.3.
+
+1.5 Contents
+
+In Section 2, we start by making the link between the Ravine and the Nesterov
+method. This is instrumental because it makes it possible to transfer some
+known results of the Nesterov method. Section 3 is devoted to the study of the
+convergence properties of the stochastic Ravine method, with as an important
+result the fast convergence in mean of the gradients towards zero. Section 4
+contains illustration and discussion of our results for various special choices
+of the extrapolation sequence γk . Finally we provide some conclusions.
+
+
+2 From Nesterov to Ravine and Vice Versa
+
+Let us first recall some basic facts concerning the NAG method. The latter with
+general extrapolation coefficients (αk )k∈N , as studied in [5], reads
+
+                               yk = xk + αk (xk − xk−1 ),
+                                                                                    (NAGαk )
+                               xk+1 = yk − sk ∇ f (yk ).
+
+Its central role in optimization is due to the fact that a wise choice of the
+coefficients (αk )k∈N provides an optimal convergence rate of the values (in the
+worst case).
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                  Page 13 of 51    5
+
+
+   Specifically, taking αk = 1 − αk gives a scheme which, for α ≥ 3, generates
+iterates (xk )k∈N satisfying
+                                                         
+                                                     1
+                       f (xk ) − min f = O                    as k → +∞,                      (3)
+                                      H              k2
+
+and the fast convergence towards zero of the gradients (see [9])
+                                
+                                      k 2 ∇ f (xk ) 2 < +∞.
+                                  k
+
+In addition, when α > 3,
+                                                    
+                      1
+  f (xk ) − min f = o 2               as k → +∞,              k( f (xk ) − min f ) < +∞, (4)
+             H        k                                                  H
+                                                          k
+
+and there is weak convergence of the iterates (xk )k∈N to optimal solutions, see
+[3, 4, 7, 11, 43].
+   The reason we used the subscript γk (resp. αk ) for the extrapolation coeffi-
+cient in (RAGγk ) (resp. (NAGαk )) was precisely to underline the difference and
+avoid confusion between the Ravine and Nesterov algorithms. A remarkable
+fact is that the variable yk which enters the definition of (NAGαk ) follows the
+(RAGγk ) algorithm, with γk = αk+1 . This generalizes the observation already
+made in [9] for the specific choice αk = 1 − αk . Although this is an elementary
+result, we give a detailed account of it in the following theorem, due to its
+importance.
+
+Theorem 2.1 (i) Let (xk )k∈N be the sequence generated by the Nesterov
+      algorithm (NAGαk ). Then the associated sequence (yk )k∈N also follows
+      the equations of the Ravine algorithm (RAGγk ) with γk = αk+1
+ (ii) Conversely, if (yk )k∈N is the sequence associated to the Ravine method
+      (RAGγk ), then the sequence (xk )k∈N defined by xk+1 := yk − sk ∇ f (yk )
+      follows the Nesterov algorithm (NAGαk ) with αk = γk−1 .
+
+Proof      (i) Suppose that (xk )k∈N follows (NAGαk ). According to the definition
+        of yk
+
+        yk+1 = xk+1 + αk+1 (xk+1 − xk )
+             = yk − sk ∇ f (yk ) + αk+1 yk − sk ∇ f (yk ) − (yk−1 − sk−1 ∇ f (yk−1 )) .
+
+
+                                                                                  123
+5     Page 14 of 51                 Journal of Optimization Theory and Applications (2026) 209:5
+
+
+        Set wk := yk − sk ∇ f (yk ) (which is nothing but xk+1 ). We obtain that
+        (yk )k∈N follows (RAG)αk+1 , i.e.
+                                  ⎧
+                                  ⎨wk = yk − sk ∇ f (yk ),
+                      (RAG)αk+1
+                                  ⎩y
+                                     k+1 = wk + αk+1 (wk − wk−1 ) .
+
+
+    (ii) Conversely, suppose that (yk )k∈N follows the Ravine method (RAGγk ).
+         According to the definition of yk+1 and wk , we have
+
+        yk+1 = yk −sk ∇ f (yk )+γk yk −sk ∇ f (yk )−(yk−1 −sk−1 ∇ f (yk−1 )) .
+
+        By definition of xk+1 = yk − sk ∇ f (yk ), we deduce that
+
+                             yk+1 = xk+1 + γk (xk+1 − xk ) .
+
+        Equivalently
+                              yk = xk + γk−1 (xk − xk−1 ) .
+        Putting together the above relations and the definition of xk+1 , we obtain
+        that (xk )k∈N follows (NAG)γk−1 , i.e.
+                                    
+                                        yk = xk + γk−1 (xk − xk−1 ),
+                        (NAG)γk−1
+                                        xk+1 = yk − sk ∇ f (yk ).
+
+        This completes the proof.
+                                                                                              
+                                                                                              
+   Though the two methods are intimately linked as we have just seen, it is only
+recent advances in the dynamical system interpretation of the two methods that
+revealed their close relationship and also their differences. This is explained
+in the next section, where we consider the case of the Ravine method with
+general extrapolation coefficients, hence generalizing the work of [9] beyond
+the case αk = 1 − α/k.
+
+
+3 Convergence Properties of the Stochastic Ravine Method
+
+In this section, we analyze the convergence properties of both the Ravine and
+Nesterov methods with stochastic errors in the evaluation of the gradients. We
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5     Page 15 of 51    5
+
+
+first start by proving the results for the Nesterov method before transferring
+them to the Ravine method thanks to Theorem 2.1. We will examine the fast
+convergence of the values and the convergence of iterates, and then we will
+show the fast convergence of the gradients towards zero. This section considers
+the algorithmic and stochastic version of the results obtained by the authors
+for the corresponding continuous dynamical systems with deterministic errors
+[10].
+
+3.1 Values Convergence Rates and Convergence of the Iterates
+
+We consider a stochastic version of (SNAGαk ) which reads for k ≥ 1
+
+                             yk = xk + αk (xk − xk−1 )
+                                                                     (SNAGαk )
+                             xk+1 = yk − sk (∇ f (yk ) + ek ),
+
+where sk ∈]0, 1/L] is a sequence of step-sizes, (ek )k∈N is a sequence of H-
+valued random variables. (SNAGαk ) is initialized with x0 = x1 , where x0 a
+H-valued, squared integrable random variable.
+   Taking the objective function f ≡ 0 and ek ≡ 0 in (SNAGαk ) already
+reveals insights for choosing the best parameters. In this case, the algorithm
+(SNAGαk ) becomes xk+1 − xk − αk (xk − xk−1 ) = 0. This implies that for
+every k ≥ 1,                    ⎛             ⎞
+                                  
+                                  k−1 i
+                      xk = x1 + ⎝         α j ⎠ (x1 − x0 ).
+                                           i=1 j=1
+                                               +∞ i
+Therefore, (xk )k∈N converges if and only if i=1        j=1 α j < +∞. We are
+naturally led to introduce the sequence (tk )k∈N defined by
+
+                                                +∞ 
+                                                  i
+                                   tk := 1 +               αj.                   (5)
+                                                 i=k j=k
+
+
+The above formula may seem complicated at a first glance. In fact, the inverse
+transform, which makes it possible to pass from tk to αk has the following,
+simpler form
+                                     tk − 1
+                              αk =          .                              (6)
+                                      tk+1
+
+                                                                     123
+5   Page 16 of 51                   Journal of Optimization Theory and Applications (2026) 209:5
+
+
+Formula (6) will ease the path of the analysis and we shall make regular use
+of it in the sequel.
+   From now on, we denote by (Ω, F, P) a probability space. We assume that
+H is a real separable Hilbert space endowed with its Borel σ -algebra, B (H).
+We denote a filtration on (Ω, F, P) by F := (Fk )k∈N where Fk is a sub-σ -
+algebra satisfying, for each k ∈ N, Fk ⊂ Fk+1 ⊂ F. Furthermore, given a set
+of random variables {a0 , . . . , ak } we denote by σ (a0 , . . . , ak ) the σ -algebra
+generated by a0 , . . . , ak . Finally, a statement (P) is said to hold (P-a.s.) if
+
+                             P ({ω ∈ Ω : (P) holds}) = 1.
+
+Using the above notation, we denote the canonical filtration associated to the
+iterates of algorithm (SNAGαk ) as F with, for all k ∈ N,
+
+                              Fk := σ (xi , ei−1 : i ≤ k) ,
+
+such that all iterates up to xk are completely determined by Fk .
+   For the remainder of the paper, all equalities and inequalities involving
+random quantities should be understood as holding (P-a.s.) even if it is not
+explicitly written.
+
+Definition 3.1 Given a filtration F , we denote by + (F ) the set of sequences
+of [0, +∞[-valued random variables (ak )k∈N such that, for each k ∈ N, ak
+is Fk -measurable. Then, for p ∈]0, +∞[, we also define the following set of
+p-summable random variables,
+                                                                                
+            p
+                                                          p
+            + (F ) :=       (ak )k∈N ∈   + (F ) :         ak < +∞ (P-a.s.)           .
+                                                    k∈N
+
+                                                                                             p
+The set of non-negative p-summable (deterministic) sequences is denoted + .
+
+    The following theorem summarizes our main results.
+Theorem 3.1 Assume that (H) holds and the sequence (αk )k∈N satisfies
+
+                                         +∞ 
+                                           i
+                             ∀k ≥ 1,                α j < +∞,                            (K 0 )
+                                         i=k j=k
+
+                               ∀k ≥ 1, tk+1
+                                        2
+                                            − tk2 ≤ tk+1 .                               (K 1 )
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                              Page 17 of 51        5
+
+
+Consider the algorithm (SNAGαk ) where sk ∈]0, 1/L] is a non-increasing
+sequence and (ek )k∈N is a sequence of stochastic errors such that
+
+              E [ek | Fk ] = 0 (P-a.s.) and (sk tk σk )k∈N ∈                         + (F ),
+                                                                                     2
+                                                                                                     (K 2 )
+                    
+where σk2 := E          ek 2 | Fk . Then,
+  (i) we have the following rate of convergence in almost sure and mean sense:
+                                                                        
+                                                                  1
+                             f (xk ) − min f = O                             (P-a.s.) ,
+                                                                sk tk2
+
+      and
+                                                                                      k 2 2 
+                                  s1 t12 E [ f (x0 ) − min f ] + 21 E dist(x0 , S)2 + 4 i=1 si ti E ei 2
+        E [ f (xk ) − min f ] ≤                                                                            .
+                                                                    sk tk2
+
+
+ (ii) Assume in addition that, for m ∈ [0, 1[,
+
+                               2
+                              tk+1 − tk2 ≤ m tk+1             for every k ≥ 1,                      (K 1+ )
+
+      then
+                                                                               2
+            sk tk+1 ( f (xk )−min f ) < +∞ and                      tk xk − xk−1  < +∞ (P-a.s.) .
+      k∈N                                                    k∈N
+
+                            tk+1
+      If moreover         k∈N t 2 = +∞, then
+                               k
+
+                                                                                     
+                              1                                                        1
+        f (xk ) − min f = o                         and       xk − xk−1 = o               (P-a.s.) .
+                            sk tk2                                                     tk
+
+(iii) If αk ∈ [0, 1] for every k ≥ 1, inf k sk > 0, (K 1+ ) holds and (K 2 ) is
+      strengthened to
+
+             E [ek | Fk ] = 0 (P-a.s.) and (sk tk σk )k∈N ∈                          + (F ),
+                                                                                     1
+                                                                                                    (K 2+ )
+
+      then the sequence (xk )k∈N converges weakly (P-a.s.) to an argminH f -
+      valued random variable.
+
+                                                                                               123
+5   Page 18 of 51                Journal of Optimization Theory and Applications (2026) 209:5
+
+
+   The little-o statements of claim (ii) can be modified to get the same rate as
+in the deterministic case in [5, Theorem 3.4] but only at the price of a stronger
+summability assumption on the noise variance.
+   Before delving into the proof, a few remarks are in order. Overall, the
+discussion in these remarks will clearly illustrate the trade-off between the
+choice of αk (hence tk ), that of the step-sizes sk , and the decrease of the error
+variance and their role on the convergence rates of the values and gradients;
+see also Section 4.
+
+Remark 3.1 (Vanishing noise variance) From claim (i), we have, for sk con-
+stant and bounded away from 0, convergence at the rate O(1/tk2 ) (resp.
+O(log(k)/tk2 )) in the objective in expectation if (tk σk )k∈N ∈ 2+ (F ) (resp.
+     
+tk2 E σk2 = O(1/k)). For tk = (k−1)/(α−1), α ≥ 3, which corresponds to the
+standard Ravine or Nesterov algorithms (see Section 4.1), one gets the acceler-
+ated rate O(1/k 2 ) (in fact even o(1/k 2 ) (P-a.s.)), which is known to be optimal
+in the deterministic case. This is of course faster than the rate O(1/k) one would
+                                                         √
+get for SGD, but under the weaker assumption of            kσk       ∈ 2+ (F ).
+                                                                    k∈N
+   If theabove summability assumption is weakened to (σk )k∈N ∈ 2+ (F )
+(resp. E σk2 = O(1/k)) such that σk is allowed to vanish at a slower rate,
+then the step-size must anneal at the rate sk ∼ 1/tk to compensate for this.
+The price to pay is then that the rate on the objective value in expectation goes
+from O(1/tk2 ) to O(1/tk ) (resp. from O(log(k)/tk2 ) to O(log(k)/tk )), and from
+o(1/tk2 ) to o(1/tk ) in the almost sure sense.
+
+Remark 3.2 (Non-vanishing noise variance, vanishing step-size) Now consider
+non-vanishing noise with bounded variance (i.e. lim inf k σk > 0 (P-a.s.) and
+supk E[σk2 ] = B < ∞). Consider the choice of tk ∼ k r , where r ∈]1/2, 1]
+(see Section 4.1 and Section 4.2). Then setting the step-size to be sk = c/k δ ,
+with c ∈]0, 1/L] and δ ∈]1, 2r [, results in the convergence rates
+
+                                ⎧           
+                                ⎪        δ−1            δ ∈]1, r + 1/2[,
+                                ⎨ O 1/k              
+         E [ f (xk ) − min f ] = O log(k)/k    r −1/2   δ = r + 1/2,
+                                ⎪
+                                ⎩  2r −δ 
+                                  O 1/k                 δ ∈]r + 1/2, 2r [.
+
+
+The choice r = 1 corresponds to the parameters in the standard Ravine or
+Nesterov algorithms (see Section 4.1), in which case one gets the convergence
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                       Page 19 of 51    5
+
+
+rates                                ⎧           
+                                     ⎪
+                                     ⎪        δ−1                   δ ∈]1, 3/2[,
+                                     ⎨ O 1/k       √
+              E [ f (xk ) − min f ] = O log(k)/ k                   δ = 3/2,
+                                     ⎪
+                                     ⎩ O 1/k 2−δ 
+                                     ⎪
+                                                         δ ∈]3/2, 2[.
+                                    √
+The best rate approaches O(1/ k), obtained√       for δ = 3/2. In fact, from our
+results, the rate even approaches o(1/ k) in the almost sure sense, similarly
+to the results in [41] and better than the near O(1/k 1/3 ) rate proved in [28].
+   On the other hand, for r = 1, if sk only decreases as 1/tk = O(1/k), then
+we have                                                 
+                                                   1
+                       E [ f (xk ) − min f ] = O     +B .                     (7)
+                                                   k
+This means that lim supk→+∞ E [ f (xk ) − min f ] ≤ B, i.e. E [ f (xk )] con-
+verges to a noisy region of size B around the minimal value (a.k.a. noise
+dominated region). However, one cannot say anything about the convergence
+of the iterates in this case.
+    Note that we cannot afford taking r ∈ [0, 1/2], as otherwise, the bounds
+above both in big-O and little would be vacuous (in fact diverge). This means
+that for such parameter choice with non-vanishing noise variance, our conver-
+gence rates are not valid. However, one can still get convergence guarantees
+if the noise vanishes fast enough; see the discussion after Corollary 4.2 and
+Corollary 4.3.
+
+Remark 3.3 (Ergodic convergence rate) Taking the full expectation in (19)
+and using Jensen’s inequality, we have under (K 1+ ), the following ergodic
+convergence rate in expectation
+                                                                              k
+                     s1 t12 E [ f (x0 ) − min f ] + 21 E dist(x0 , S)2 + 4         2 2
+                                                                               i=1 si ti E   ei 2
+ E f (x̄k ) − min f ≤                                      k                                       ,
+                                                   (1 − m) i=1     si ti+1
+
+             k                   k
+where x̄k √= i=1     si ti+1 xi /( i=1  si ti+1 ). For constant noise
+                                                                  √ variance, taking
+sk = c/( ktk+1 ), c ∈]0, 1/L], we get a rate O(log(k)/ k). This general-
+izes the result in [46] beyond constant momentum parameter and without any
+boundedness assumption on the gradient. Taking tk ≡ 1, i.e. αk ≡ 0, we
+recover the SGD algorithm√       for which get the known ergodic rate obtained with
+                                                                                √
+step-size sequence c/ k. Note that this ergodic rate was improved to o(1/ k)
+in the almost sure sense in [41].
+
+
+                                                                                        123
+5    Page 20 of 51                     Journal of Optimization Theory and Applications (2026) 209:5
+
+
+Proof Our proof is based on a (stochastic) Lyapunov analysis with appropri-
+ately chosen energy functionals.
+(i) Denote f k (x) := f (x) + ek , x and recall S = argminH f . Define the
+sequence
+
+                                  1
+Vk := sk tk2 ( f (xk ) − f (x )) + dist(z k , S)2 and z k := xk−1 + tk (xk − xk−1 ) .
+                                  2
+
+Since f is convex and L-smooth, so is f k . Let us apply (46) in Lemma A.3 on
+f k successively at y = yk and x = xk , then at y = yk and x = x ∈ S. We get
+
+                                                               sk
+           f k (xk+1 ) ≤ f k (xk ) + ∇ f k (yk ), yk − xk  −    ∇ f k (yk ) 2 ,              (8)
+                                                                2
+                                                              sk
+           f k (xk+1 ) ≤ f k (x ) + ∇ f k (yk ), yk − x −         ∇ f k (yk ) 2 .              (9)
+                                                               2
+
+Multiplying (8) by tk+1 − 1 (which is non-negative by definition), then adding
+the (9), we derive that
+
+                                                        
+    tk+1 f k (xk+1 ) ≤ (tk+1 − 1) f k (xk ) + f k (x ) + ∇ f k (yk ), (tk+1 − 1)(yk − xk ) + yk − x
+                                                                          sk
+                                                                        − tk+1 ∇ f k (yk ) 2 . (10)
+                                                                          2
+
+It is immediate to see, using (6) and the definitions of yk and z k , that
+
+    (tk+1 − 1)(yk − xk ) + yk = xk + tk+1 (yk − xk ) = xk−1 + (1 + tk+1 αk )(xk − xk−1 )
+                                                         = xk−1 + tk (xk − xk−1 ) = z k .
+
+
+Inserting this into (10) and rearranging, we get
+
+                                                                        
+    tk+1 ( f k (xk+1 ) − f k (x )) ≤ (tk+1 − 1)( f k (xk ) − f k (x )) + ∇ f k (yk ), z k − x
+          sk
+      − tk+1 ∇ f k (yk ) 2 .                                                                 (11)
+          2
+
+Straightforward computation, using again (6) and the definition of yk and z k ,
+yields the expression,
+
+                              z k+1 − z k = −sk tk+1 ∇ f k (yk ).                            (12)
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                            Page 21 of 51     5
+
+
+Thus
+                                  
+z k+1 − x 2 = z k − x 2 − 2sk tk+1 ∇ f k (yk ), z k − x                  + sk2 tk+1
+                                                                                    2   ∇ f k (yk ) 2 .
+
+Dividing this by 2 and adding to (11), after multiplying the latter by sk tk+1 ,
+cancels all terms containing ∇ f (yk ) and we arrive at
+
+                                         1           
+       2
+   sk tk+1 ( f k (xk+1 ) − f k (x )) +     z k+1 − x 2 ≤ sk tk+1 (tk+1 − 1)( f k (xk ) − f k (x ))
+                                         2
+          1         
+     +      z k − x 2 .                                                                             (13)
+          2
+
+Let us take x as the closest point to z k in S. Thus (13) is equivalent to
+
+                                         1
+       2
+   sk tk+1 ( f k (xk+1 ) − f k (x )) +     dist(z k+1 , S)2 ≤ sk tk+1 (tk+1 − 1)( f k (xk ) − f k (x ))
+                                         2
+          1
+      +     dist(z k , S)2 .                                                                          (14)
+          2
+
+Let us now isolate the error terms. Inequality (14) is then equivalent to
+
+       2 ( f (x                1              2
+   sk tk+1      k+1 )−min f )+ dist(z k+1 , S) ≤ sk tk+1 (tk+1 −1)( f (x k )−min f )
+                               2
+        1                 !                                                   "
+    + dist(z k , S)2 − sk ek , tk+1
+                                2 (x
+                                     k+1 − x ) − tk+1 (tk+1 − 1)(x k − x ) . (15)
+        2
+
+We have
+
+           2
+          tk+1 (xk+1 − x ) − tk+1 (tk+1 − 1)(xk − x ) = tk+1 (z k+1 − x ).
+
+In turn, using also that sk is non-increasing, (15) becomes
+
+         2 ( f (x                          1
+   sk+1 tk+1      k+1 ) − min f ) +          dist(z k+1 , S)2 + sk (tk2 − tk+1
+                                                                           2   + tk+1 )( f (xk ) − min f ) ≤
+                                           2
+                                                              1                       
+                               sk tk2 ( f (xk ) − min f ) + dist(z k , S)2 − sk tk+1 ek , z k+1 − x .
+                                                              2
+
+In view of the definition of Vk , this is equivalent to
+                                                                
+Vk+1 ≤ Vk + sk (tk+1
+                 2
+                     − tk+1 − tk2 )( f (xk ) − min f ) + sk tk+1 ek , z k+1 − x .
+                                                                              (16)
+
+                                                                                              123
+5    Page 22 of 51                       Journal of Optimization Theory and Applications (2026) 209:5
+
+
+Taking the expectation conditionally on Fk in (16), we obtain
+                                                                         
+ E Vk+1 | Fk ≤ Vk + sk (tk+1
+                         2
+                             − tk+1 − tk2 )( f (xk ) − min f ) − sk tk+1 E ek , z k+1 − x    | Fk . (17)
+
+
+We have
+                                                                
+            E ek , z k+1 − x    | Fk = E ek , z k+1 − z k  | Fk + E [ek | Fk ] , z k − x
+                                      = −sk tk+1 E [ek , ∇ f k (yk ) | Fk ]
+                                      = −sk tk+1 E [ek , ∇ f (yk ) + ek  | Fk ]
+                                                   
+                                      = −sk tk+1 E ek 2 | Fk = −sk tk+1 σk2 ,
+
+
+where we used (12) in the second equality, and conditional unbiasedness (first
+part of (K 2 )) in both the second and last inequalities, together with the fact
+that yk , z k and x are deterministic conditionally on Fk . Plugging this into (17)
+yields
+     
+    E Vk+1 | Fk ≤ Vk + sk (tk+1
+                            2
+                                − tk+1 − tk2 )( f (xk ) − min f ) + sk2 tk+1
+                                                                         2
+                                                                             σk2
+                       ≤ Vk + sk (tk+1
+                                   2
+                                       − tk+1 − tk2 )( f (xk ) − min f ) + 4sk2 tk2 σk2 ,
+                                                                                      (18)
+
+where we used that assumption (K 1 ) implies tk+1 ≤ 2tk ; see [5, Remark 3.3].
+Using again (K 1 ), the second term in the rhs of (18) is non-positive and can
+then be dropped. Now, thanks to the second part of (K 2 ), we are in position to
+apply Lemma A.1 to (18) to see that Vk converges (P-a.s.), and consequently
+it is bounded (P-a.s.). Thus, there exists a [0, +∞[-valued random variable ξ
+such that supk∈N Vk ≤ ξ < +∞ (P-a.s.). Therefore, for all k ≥ 1,
+
+                  sk tk2 ( f (xk ) − min f ) ≤ Vk ≤ ξ < +∞ (P-a.s.) .
+
+Moreover, taking the total expectation in (18) and iterating gives
+
+                                                                      
+                                                                      k
+    sk tk2 E [ f (xk ) − min f ] ≤ E [Vk ] ≤ E [V1 ] + 4                    si2 ti2 E    ei 2 ≤
+                                                                    i=1
+                                                                   +∞
+                                                                   
+                              1
+s1 t12 E [ f (x0 ) − min f ] + E dist(x0 , S)2 + 4                        si2 ti2 E     ei 2 < +∞,
+                              2
+                                                                    i=1
+
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5             Page 23 of 51   5
+
+
+where we used in the last inequality that x0 = x1 by assumption, and that
+the rhs is finite thanks to Fubini-Tonelli’s Theorem together with (K 2 ). This
+proves the first claim in the theorem.
+(ii) Using (K 1+ ) in (18), we get
+     
+    E Vk+1 | Fk ≤ Vk − sk (1 − m)tk+1 ( f (xk ) − min f ) + 4sk2 tk2 σk2 .          (19)
+
+We can again invoke Lemma A.1 to get that
+                    
+                           sk tk+1 ( f (xk ) − min f ) < +∞ (P-a.s.) .              (20)
+                     k≥1
+
+Let
+                                              1
+                   Wk := sk ( f (xk ) − min f ) + xk − xk−1 2 .
+                                              2
+Combining [5, Proposition 2.1] with the fact that sk is non-increasing, we have
+that
+                        1 − αk2
+         Wk+1 ≤ Wk −             xk − xk−1 2 − sk ek , xk+1 − xk  .
+                           2
+Taking the expectation conditionally on Fk , we obtain
+
+                  1 − αk2                   
+E Wk+1 | Fk ≤ Wk −         xk − xk−1 2 − sk E ek , xk+1 − xk  | Fk .
+                      2
+                                                                                    (21)
+
+We have
+                                        
+             E ek , xk+1 − xk  | Fk = E ek , xk+1 − yk  | Fk
+                = −sk E [ek , ∇ f k (yk ) | Fk ] = −sk E     ek 2 | Fk ,
+
+where we used the algorithm update of xk+1 in the second inequality, and
+conditional unbiasedness (first part of (K 2 )) in the second and last inequalities
+together with xk , yk being conditionally deterministic on Fk . Inserting this into
+(21) yields
+
+                                1 − αk2
+              E Wk+1 | Fk ≤ Wk −         xk − xk−1 2 + sk2 σk2 .                    (22)
+                                    2
+
+                                                                             123
+5     Page 24 of 51                        Journal of Optimization Theory and Applications (2026) 209:5
+
+                     2
+Multiplying (22) by tk+1 and rearranging entails
+
+                                                1 − αk2             
+         2 W
+      E tk+1             2         2
+             k+1 | Fk ≤ tk+1 Wk − tk+1
+                                                         xk − xk−1 2 + s 2 t 2 σ 2
+                                                    2                      k k+1 k
+
+                                                       t 2   − tk − tk+1 (1 − αk2 ) 
+                                                                2    2                         
+      = tk2 Wk + sk (tk+1
+                      2   − tk2 )( f (xk ) − min f ) + k+1                          xk − xk−1 2
+                                                                    2
+       + sk2 tk+1
+              2 σ2
+                  k
+                                                  t             2
+      ≤ tk2 Wk + msk tk+1 ( f (xk ) − min f ) − k xk − xk−1  + 4sk2 tk2 σk2 .                  (23)
+                                                  2
+
+In the equality, we used the expression of Wk . In the second inequality we used
+(K 1+ ) and that tk = 1 + tk+1 αk and (K 1 ) which gives
+
+           2
+          tk+1 − tk2 − tk+1
+                        2
+                            (1 − αk2 ) = (tk − 1)2 − tk2 = −2tk + 1 ≤ −tk ,
+
+since tk ≥ 1. We have already proved above (see (20)) that
+(sk tk+1 ( f (xk ) − min f ))k∈N ∈ 1+ (F ). Combining this with the second part
+of (K 2 ) allows us to invoke again Lemma A.1 on (23) to deduce that
+                             
+                                   tk xk − xk−1 2 < +∞ (P-a.s.) .                                (24)
+                             k≥1
+
+
+Moreover, Lemma A.1 also implies that tk2 Wk converges (P-a.s.). On the other
+hand, we have
+
+                                                  tk+1           
+    tk+1 Wk = sk tk+1 ( f (xk ) − min f ) +            xk − xk−1 2 ≤ sk tk+1 ( f (xk ) − min f )
+                                                    2
+                   2
+    +tk xk − xk−1  ,
+
+
+and thus (20) and (24) imply that
+                                   
+                                         tk+1 Wk < +∞ (P-a.s.) .
+                                   k≥1
+
+
+In turn                                   tk+1
+                            tk+1 Wk =                 tk2 Wk < +∞ (P-a.s.) ,
+                      k≥1                 k≥1
+                                                tk2
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                   Page 25 of 51    5
+
+
+which entails that lim inf k→+∞ tk2 Wk = 0 (P-a.s.). This together with (P-a.s.)
+convergence of tk2 Wk shown just above gives that
+                                                      
+                                               1
+                                       Wk = o 2            .
+                                              tk
+
+Returning to the definition of Wk proves the assertions.
+(iii) The crux of the proof consists in applying Opial’s Lemma on a set of
+events of probability one. Observe that (K 2+ ) implies (K 2 ). Thus Lemma A.1
+applied to (23) ensures also that tk2 Wk converges (P-a.s.). In particular, this
+implies that tk xk − xk−1 is bounded (P-a.s.). From the proof of claim (i),
+we also know that (P-a.s.), Vk converges, hence (z k )k∈N is bounded. In view
+of the definition of z k , we obtain that (xk )k∈N is bounded (P-a.s.). Moreover,
+since tk ≥ 1 and s = inf k sk > 0, we get from (ii) that (P-a.s.)
+                                    
+          s    ( f (xk ) − min f ) ≤   sk tk+1 ( f (xk ) − min f ) < +∞,
+              k≥1                         k≥1
+
+
+and thus limk→+∞ f (xk ) = min f (P-a.s.).
+  Let Ω̂ be the set of events on which the last statement holds and Ω̌ on
+which boundedness of (xk )k∈N holds. Both sets are of probability one. For any
+ω ∈ Ω̂ ∩ Ω̌, let (xk j (ω)) j≥1 be any converging subsequence, and x̄(ω) its
+weak cluster point.
+
+               f (x̄(ω)) = lim f (xk j (ω)) = lim f (xk (ω)) = min f ,
+                             j→∞                      k→∞
+
+
+which means that x̄(ω) ∈ S. This implies that (P-a.s.) each weak cluster point
+of (xk )k∈N belongs to S = argminH f . In other words, the second condition
+of Opial’s lemma holds (P-a.s.).
+   Let x ∈ S and define h k := 21 xk − x 2 . We now show that limk→+∞ h k
+exists (P-a.s.). For this, we use a standard argument that can be found e.g. in
+[5, 11]. By [5, Proposition 2.3], we have
+
+                                   α (1 + αk )            
+                                               xk − xk−1 2 − sk ( f k (xk+1 ) − f k (x )
+ h k+1 − h k − αk (h k − h k−1 ) ≤ k
+                                        2
+                                             2                                 
+                                 ≤ xk − xk−1  − sk ( f (xk+1 ) − min f ) − sk ek , xk+1 − x
+                                             2      
+                                 ≤ xk − xk−1  − sk ek , xk+1 − x .
+
+
+                                                                                   123
+5    Page 26 of 51               Journal of Optimization Theory and Applications (2026) 209:5
+
+
+In the second inequality we used that αk ∈ [0, 1], and the last one minimality of
+x . Almost sure boundedness of xk implies that there exists a [0, +∞[-valued
+random variable η such that supk∈N xk − x ≤ η < +∞ (P-a.s.). Thus
+
+            h k+1 − h k − αk (h k − h k−1 ) ≤ xk − xk−1 2 + ηsk ek .                   (25)
+
+Multiplying (25) by tk+1 , taking the positive part and the conditional expecta-
+tion, we end up having
+     
+    E tk+1 (h k+1 − h k )+ | Fk ≤ tk+1 αk (h k − h k−1 )+ + tk+1 xk − xk−1 2
+                                + ηsk tk+1 E [ ek | Fk ]
+                                 ≤ (tk − 1)(h k − h k−1 )+ + tk+1 xk − xk−1 2
+                                                                  1/2
+                                 + 2ηsk tk E          ek 2 | Fk
+                                 = tk (h k − h k−1 )+ − (h k − h k−1 )+
+                                 + tk+1 xk − xk−1 2 + 2ηsk tk σk .
+
+where we used that tk = 1+tk+1 αk , that tk+1 ≤ 2tk and Jensen’s inequality. As
+the last two terms in the rhs are summable (P-a.s.), we get using Lemma A.1
+that ((h k − h k−1 )+ )k∈N ∈ 1+ (F ) (P-a.s.). In turn, since h k is non-negative,
+we get by a classical argument that limk→+∞ h k exists.
+   Note that the set of events of probability 1 on which limk→+∞ h k exists
+depends on x . To make this uniform on S we use a separability argument.
+   Indeed, we have just shown that there exists a set of events Ωx (that depends
+on x ) such that P(Ωx ) = 1 and for all ω ∈ Ωx , ( xk (ω) − x )k∈N con-
+verges. We now show that there exists a set of events independent of x , whose
+probability is one and such that the above still holds on this set. Since H
+is separable,
+      #        there exists a countable set U ⊆ S, such that cl(U ) = S. Let
+Ω̃ = u∈U Ωu . Since U is countable, a union bound shows
+                                                
+                                     $                     
+                 P(Ω̃) = 1 − P             Ωuc       ≥1−         P(Ωuc ) = 1.
+                                     u∈U                   u∈U
+
+For arbitrary x ∈ S, there exists a sequence (u j ) j∈N ⊂ U such that u j
+converges strongly to x . Thus for every j ∈ N there exists τ j : Ωu j → R+
+such that                          
+                 lim xk (ω) − u j  = τ j (ω), ∀ω ∈ Ωu j .             (26)
+                     k→+∞
+
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                 Page 27 of 51   5
+
+
+Now, let ω ∈ Ω̃. Since Ω̃ ⊂ Ωu j for any j ≥ 1, and using the triangle
+inequality and (26), we obtain that
+                                                                                   
+τ j (ω) − u j − x  ≤ lim inf xk (ω) − x  ≤ lim sup xk (ω) − x  ≤ τ j (ω) + u j − x  .
+                        k→+∞                      k→+∞
+
+
+Passing to j → +∞, we deduce
+                                                           
+lim sup τ j (ω) ≤ lim inf xk (ω) − x  ≤ lim sup xk (ω) − x  ≤ lim inf τ j (ω),
+j→+∞                 k→+∞                            k→+∞                        j→+∞
+
+
+whence we deduce that lim j→+∞ τ j (ω) exists for all ω ∈ Ω̃. In turn, (P-a.s.),
+limk→+∞ xk − x exists and is equal to lim j→+∞ τ j for any x ∈ S.
+   We are now in position to apply Opial’s Lemma at any ω ∈ Ω̂ ∩ Ω̌ ∩ Ω̃,
+since P(Ω̂ ∩ Ω̌ ∩ Ω̃) = 1, to conclude.                                       
+                                                                              
+
+   Let us now return to the Ravine algorithm. A simple adaptation of the proof
+of Theorem 2.1 applied to (SNAGαk ) (just replace f by f + ek , ·, and follow
+similar algebraic manipulations) gives that the associated sequence (yk )k∈N
+defined by
+                          yk = xk + αk (xk − xk−1 ),
+follows the stochastic Ravine accelerated gradient algorithm with γk = αk+1 ,
+i.e. for all k ≥ 1
+
+                   wk = yk − sk (∇ f (yk ) + ek ),
+                                                                              (SRAGαk+1 )
+                    yk+1 = wk + αk+1 (wk − wk−1 ) .
+
+(SRAGαk+1 ) is initialized with y0 and w−1 = y0 , where y0 is a H-valued,
+squared integrable random variable. According to this relationship between
+the Nesterov and the Ravine method highlighted in Theorem 2.1, the results
+of Theorem 3.1 can now be transposed to (SRAGαk+1 ). For this, we denote the
+canonical filtration associated to (SRAGαk+1 ) as F = (Fk )k∈N with, ∀k ≥ N,
+Fk = σ (y0 , (wi )i≤k−1 ).
+
+Theorem 3.2 Assume the conditions presented in (H). Let (yk )k∈N be the
+sequence generated by (SRAGαk+1 ) where sk ∈]0, 1/L] is a non-increasing
+                                                             
+sequence, (αk )k∈N ⊂ [0, 1] satisfies (K 0 ) and (K 1+ ) with k∈N tk+1
+                                                                   t2
+                                                                       = +∞,
+                                                                                k
+and (ek )k∈N is a sequence of stochastic errors satisfying (K 2+ ). Then, the
+
+                                                                                    123
+5   Page 28 of 51                     Journal of Optimization Theory and Applications (2026) 209:5
+
+
+sequence (yk )k∈N satisfies
+                                                                                          
+                                                                   1
+         sk tk+1 ( f (yk ) − min f ) < +∞ and f (yk ) − min f = o
+     k∈N
+                                                         H        sk tk2
+       as k → +∞ (P-a.s.) .
+
+Moreover, if inf k sk > 0, then the sequence (yk )k∈N converges weakly (P-a.s.)
+to an argminH f -valued random variable.
+
+Proof According to Theorem 2.1, the sequence (xk )k∈N defined by
+
+                             xk+1 = yk − sk (∇ f (yk ) + ek )                               (27)
+
+is equivalent to Algorithm (SNAGαk ). It then follows from Theorem 3.1(ii)
+that
+                                                    
+                           1                            1
+  f (xk ) − min f = o        2
+                                 and xk − xk−1 = o          (P-a.s.) . (28)
+                        s k tk                          t k
+
+
+In addition, in view of condition (K 2+ ), we can apply Lemma A.2 with εk =
+(sk tk σk )k∈N to infer that
+
+                            +∞
+                            
+                                   sk tk ek < +∞ (P-a.s.) ,                                 (29)
+                             k=1
+
+and thus                                      
+                                              1
+                              sk ek       =o     (P-a.s.) .                                 (30)
+                                              tk
+Rearrange the terms in (27) to obtain the expression ∇ f (yk ) = − s1k (xk+1 −
+yk )−ek . Using, successively, the convexity of f , the Cauchy-Schwartz inequal-
+ity, and the triangle inequality, we obtain
+                                        1 
+    f (yk ) − min f ≤ f (xk ) − min f +     xk+1 − yk + sk ek , xk − yk
+             H                 H        sk
+                                        1                          
+                    ≤ f (xk ) − min f +      xk+1 − yk + sk ek        xk − yk
+                                H       sk
+                                        1                                    
+                    ≤ f (xk ) − min f +      xk+1 − xk + xk − yk + sk ek        xk − yk .
+                                H       sk
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                        Page 29 of 51   5
+
+
+                                                                                               (31)
+
+Using again the link between (SRAGαk+1 ) and (SNAGαk ), we have
+
+                                yk = xk + αk (xk − xk−1 ) .
+
+Therefore, since αk ∈ [0, 1],
+
+                                 yk − xk ≤ xk − xk−1 .                                         (32)
+
+Combining (28), (30), (31) and (32) we obtain
+                                        1                                
+ f (yk ) − min f ≤ f (xk ) − min f +        xk+1 − xk + xk − xk−1 + sk ek   xk − xk−1
+           H                   H       sk
+                             
+                         1
+                 =o              (P-a.s.) ,
+                       sk tk2
+
+where we used that tk+1 ≤ 2tk in the last equality. In addition, using Young’s
+inequality, that (xk )k∈N is bounded (P-a.s.), (29) and the summability claims
+of Theorem 3.1(ii), we get that (P-a.s.),
+                                                                         tk+1
+         sk tk+1 ( f (yk )−min f ) ≤         sk tk+1 ( f (xk )−min f )+                xk+1 −xk 2
+                                                                                2
+   k∈N                                 k∈N                                k∈N
+                                                                    
+                                  +3         tk xk − xk−1 2 + 4η           tk sk ek < +∞,
+                                       k∈N                           k∈N
+
+where η is the [0, +∞[-valued random variable such that supk∈N xk ≤ η <
++∞ (P-a.s.).
+   Now, from (28) and (32), we also have yk − xk = o t1k (P-a.s.). Conse-
+quently, yk −xk converges strongly (P-a.s.) to zero. Since the sequence (xk )k∈N
+converges weakly, it follows that the sequence (yk )k∈N converges weakly
+(P-a.s.) to the same limit as (xk )k∈N , and we know from Theorem 3.1(iii) that
+the latter indeed converges weakly (P-a.s.) to an argminH f -valued random
+variable.                                                                      
+                                                                               
+
+3.2 Fast Convergence of the Gradients
+
+In this section, the previous results on the stochastic Ravine method
+(SRAGαk+1 ) are completed in also showing the fast convergence towards zero
+
+                                                                                        123
+5    Page 30 of 51                        Journal of Optimization Theory and Applications (2026) 209:5
+
+
+of the gradients. This will necessitate a specific and intricate Lyapunov anal-
+ysis3 .
+   Recall f k (x) := f (x)+ek , x from the proof of Theorem 3.1. The formula
+in Lemma 3.1 hereafter will play a key role in our Lyapunov analysis, and
+will serve as the constitutive formulation of the algorithm. It corresponds to
+the Hamiltonian formulation of the algorithm involving the discrete velocities
+which are defined by, for each k ∈ N
+
+                                               1
+                                     vk :=       (yk − yk−1 ),                                  (33)
+                                               h
+                                 √
+where we recall that h =             s.
+
+Lemma 3.1 Let (yk )k∈N be generated by (SRAGαk+1 ). Then, for all k ∈ N
+
+ tk+1 (vk + h∇ f k−1 (yk−1 )) − (tk − 1)(vk−1 + h∇ f k−2 (yk−2 )) = −h(tk − 1)∇ f k−1 (yk−1 ).
+                                                                                                (34)
+
+Proof According to the algorithm recursion, we have
+
+yk = yk−1 − h 2 ∇ f k−1 (yk−1 ) + αk yk−1 − h 2 ∇ f k−1 (yk−1 ) − yk−2 − h 2 ∇ f k−2 (yk−2 )
+
+    = yk−1 + αk (yk−1 − yk−2 ) − h 2 ∇ f k−1 (yk−1 ) + αk ∇ f k−1 (yk−1 ) − ∇ f k−2 (yk−2 )          .
+
+
+Equivalently,
+
+     0 = (yk − yk−1 ) − αk (yk−1 − yk−2 ) + h 2 ∇ f k−1 (yk−1 )
+       + h 2 αk (∇ f k−1 (yk−1 ) − ∇ f k−2 (yk−2 ))
+       = αk (yk − yk−1 ) − αk (yk−1 − yk−2 ) + (1 − αk )(yk − yk−1 ) + h 2 ∇ f k−1 (yk−1 )
+         + h 2 αk (∇ f k−1 (yk−1 ) − ∇ f k−2 (yk−2 )).
+
+
+Let us make vk appear by multiplying this equality by hα1 k . We then get
+
+                    1 − αk         h
+    0 = vk − vk−1 +         vk +     ∇ f k−1 (yk−1 ) + h(∇ f k−1 (yk−1 ) − ∇ f k−2 (yk−2 ))
+                       αk         αk
+                                                               1 − αk       h
+     = (vk + h∇ f k−1 (yk−1 )) − (vk−1 + h∇ f k−2 (yk−2 )) +          vk +      ∇ f k−1 (yk−1 ).
+                                                                 αk         αk
+
+3 Observe that embarking from (8)-(9) and using the refined estimate in (46) is not sufficient to
+get the result.
+
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                        Page 31 of 51    5
+
+                         αk
+After multiplication by 1−α k
+                              , we arrive at
+
+        αk                               αk                                       h
+   0=        (vk + h∇ f k−1 (yk−1 )) −        (vk−1 + h∇ f k−2 (yk−2 )) + vk +          ∇ f k−1 (yk−1 )
+      1 − αk                           1 − αk                                  1 − αk
+                 
+              αk                                αk
+    = 1+            (vk + h∇ f k−1 (yk−1 )) −        (vk−1 + h∇ f k−2 (yk−2 )) − h∇ f k−1 (yk−1 )
+           1 − αk                             1 − αk
+                                                                              h
+                                                                         +         ∇ f k−1 (yk−1 ).
+                                                                            1 − αk
+
+We thus obtain
+   1                               αk                                  hαk
+       (vk + h∇ f k−1 (yk−1 )) −        (vk−1 + h∇ f k−2 (yk−2 )) = −        ∇ f k−1 (yk−1 ).
+1 − αk                           1 − αk                               1 − αk
+
+Equivalently
+
+ (vk + h∇ f k−1 (yk−1 )) − αk (vk−1 + h∇ f k−2 (yk−2 )) = −hαk ∇ f k−1 (yk−1 ).
+                                                                            (35)
+In view of (6), the last equality is also equivalent to (34). This completes the
+proof of the Lemma.                                                            
+                                                                               
+
+  Recall the canonical filtration associated to (SRAGαk+1 ) as F = (Fk )k∈N
+with, ∀k ≥ N, Fk = σ (y0 , (wi )i≤k−1 ).
+Theorem 3.3 Let us assume the conditions defined in (H). Let (yk )k∈N be the
+sequence generated by (SRAGαk+1 ) where sk ≡ s ∈]0, 1/L], (αk )k∈N ⊂ [0, 1]
+satisfy (K 0 ) and (K 1+ ). Assume that (ek )k∈N is a sequence of stochastic errors
+subject to conditions (K 2+ ). Then the sequence of gradients (∇ f (yk ))k∈N con-
+verges to zero with
+                         
+                                2
+                               tk+1 ∇ f (yk ) 2 < +∞ (P-a.s.) .
+                         k∈N
+
+Proof Our Lyapunov analysis is based on the sequence (E k )k∈N defined as
+
+                                                           1
+          E k := h 2 (tk+1 − 1)tk+1 ( f (yk−1 ) − min f ) + dist(z k , S)2 ,
+                                                           2
+           z k := yk + h(tk+1 − 1) vk + h∇ f k−1 (yk−1 ) .
+
+Let x be the closest point to z k in S. By definition of E k , we have
+
+
+                                                                                         123
+5     Page 32 of 51                         Journal of Optimization Theory and Applications (2026) 209:5
+
+
+     E k+1 − E k ≤ h 2 (tk+1 − 1)tk+1 ( f (yk ) − f (yk−1 ))
+                                                                       1               2− 1 z −x
++ h 2 (tk+2 − 1)tk+2 − (tk+1 − 1)tk+1 ( f (yk ) − min f ) +              z k+1 − x           k
+                                                                                                             2.
+                                                                       2                    2
+                                                                                                             (36)
+
+Let us compute this last expression with the help of the elementary identity
+
+1                             1                              1
+  z k+1 − x           2
+                          −      = z k+1 − z k , z k+1 − x − z k+1 − z k 2 .
+                                zk − x       2
+2                             2                               2
+                                                                        (37)
+Recall the constitutive equation given by (34) that we write as follows
+
+tk+2 (vk+1 + h∇ f k (yk )) − (tk+1 − 1)(vk + h∇ f k−1 (yk−1 )) = −h(tk+1 − 1)∇ f k (yk ).
+                                                                                                             (38)
+Using successively the definition of z k and (38), we obtain
+
+      z k+1 − z k = (yk+1 − yk ) + h(tk+2 − 1) vk+1 + h∇ f k (yk )
+
+                          −h(tk+1 − 1) vk + h∇ f k−1 (yk−1 )
+
+                      = hvk+1 − h vk+1 + h∇ f k (yk )                   − h 2 (tk+1 − 1)∇ f k (yk )
+                      = −h 2 tk+1 ∇ f k (yk ).
+
+This together with the definition of z k yields
+
+       z k+1 = z k − h 2 tk+1 ∇ f k (yk ) = yk + h(tk+1 − 1) vk + h∇ f k−1 (yk−1 ) − h 2 tk+1 ∇ f k (yk ).
+
+
+Plugging this into (37), we deduce that
+    1                     1                1
+       z k+1 − x 2 −         z k − x 2 = − h 4 tk+12     ∇ f k (yk ) 2
+    2                     2                2
+              !                                                                             "
+    −h 2 tk+1 ∇ f k (yk ), yk − x + h(tk+1 − 1) vk + h∇ f k−1 (yk−1 ) − h 2 tk+1 ∇ f k (yk )
+      1                                 !                                                        "
+    = h 4 tk+1
+            2   ∇ f k (yk ) 2 − h 2 tk+1 ∇ f k (yk ), yk − x + h(tk+1 − 1) vk + h∇ f k−1 (yk−1 ) .
+      2
+
+Let us arrange the above expression so as to group the products of ∇ f k (yk ).
+For this, we use (34) again, written as,
+
+(tk+1 −1)(vk +h∇ f k−1 (yk−1 )) = tk+2 (vk+1 +h∇ f k (yk ))+h(tk+1 −1)∇ f k (yk ).
+                                                                           (39)
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                   Page 33 of 51   5
+
+
+Therefore,
+
+
+        yk − x + h(tk+1 − 1) vk + h∇ f k−1 (yk−1 )
+         = yk − x + htk+2 (vk+1 + h∇ f k (yk )) + h 2 (tk+1 − 1)∇ f k (yk )
+         = yk − x + htk+2 vk+1 + h 2 (tk+2 + tk+1 − 1)∇ f k (yk ).
+
+
+Collecting the above results we obtain
+
+
+   1                         1                    1 4 2
+     z k+1 − x       2
+                         −     zk − x     2
+                                              =    h t  ∇ f k (yk ) 2
+   2     !                   2                    2 k+1                      "
+−h 2 tk+1 ∇ f k (yk ), yk − x + htk+2 vk+1 + h 2 (tk+2 + tk+1 − 1)∇ f k (yk ) .
+
+
+Inserting this in (36) we get
+
+
+      E k+1 − E k ≤ h 2 (tk+1 − 1)tk+1 ( f (yk ) − f (yk−1 ))
+                                                                    1
+      + h 2 (tk+2 − 1)tk+2 − (tk+1 − 1)tk+1 ( f (yk ) − min f ) + h 4 tk+1
+                                                                         2     ∇ f k (yk ) 2
+                                                                    2
+                !                                                                   "
+      − h 2 tk+1 ∇ f k (yk ), yk − x + htk+2 vk+1 + h 2 (tk+2 + tk+1 − 1)∇ f k (yk ) .       (40)
+
+
+In view of the basic gradient inequality for convex differentiable functions
+whose gradient is L-Lipschitz continuous, we have
+
+
+                                                             1
+  f (yk−1 ) ≥ f (yk ) + ∇ f (yk ), yk−1 − yk  +              ∇ f (yk ) − ∇ f (yk−1 ) 2 .
+                                                            2L
+                                          1
+    min f ≥ f (yk ) + ∇ f (yk ), x − yk +    ∇ f (yk ) 2 .
+                                          2L
+
+
+Combining the above inequalities with (40), and using ∇ f k (yk ) = ∇ f (yk ) +
+ek , we get
+
+                                                                                    123
+5    Page 34 of 51                      Journal of Optimization Theory and Applications (2026) 209:5
+
+                                                                      1
+    E k+1 − E k ≤ −h 2 (tk+1 − 1)tk+1        ∇ f (yk ), yk−1 − yk +      ∇ f (yk ) − ∇ f (yk−1 ) 2
+                                                                      2L
+    + h 2 (tk+2 − 1)tk+2 − (tk+1 − 1)tk+1 ( f (yk ) − min f ) − h 2 tk+1 ( f (yk ) − min f )
+      1                                  !                                                          "
+    + h 4 tk+1
+             2   ∇ f k (yk ) 2 − h 2 tk+1 ∇ f k (yk ), htk+2 vk+1 + h 2 (tk+2 + tk+1 − 1)∇ f k (yk )
+      2
+               
+    − h 2 tk+1 yk − x , ek .                                                                     (41)
+
+Next rearrange the last inequality by grouping terms on the right hand side with
+common expressions. To begin with, rewrite the second and third summand as
+follows:
+
+    h 2 (tk+2 − 1)tk+2 − (tk+1 − 1)tk+1 ( f (yk ) − min f ) − h 2 tk+1 ( f (yk ) − min f ) =
+
+                                               − h 2 tk+1
+                                                      2      2
+                                                          − tk+2 + tk+2 ( f (yk ) − min f ).
+
+For the following expression grouping two of the summands above, we use the
+definition of vk for the first equality, and the constitutive equation (39) for the
+third,
+                                                        
+ − h 2 (tk+1 − 1)tk+1 ∇ f (yk ), yk−1 − yk − h 2 tk+1 ∇ f k (yk ), htk+2 vk+1
+                                                      
+ = h 3 (tk+1 − 1)tk+1 ∇ f (yk ), vk  − h 3 tk+1 tk+2 ∇ f k (yk ), vk+1
+                                                                    
+ = h 3 tk+1 ∇ f (yk ), (tk+1 − 1)vk − tk+2 vk+1 − h 3 tk+1 tk+2 vk+1 , ek
+               
+ = h 3 tk+1 ∇ f (yk ), −h(tk+1 − 1)∇ f k−1 (yk−1 ) + h(tk+1 + tk+2 − 1)∇ f k (yk )
+                 
+ − h 3 tk+1 tk+2 vk+1 , ek
+               
+ = h 4 tk+1 ∇ f (yk ), −(tk+1 − 1)∇ f (yk−1 ) + (tk+1 + tk+2 − 1)∇ f (yk )
+                 
+ − h 3 tk+1 tk+2 vk+1 , ek + h 4 tk+1 (tk+1 + tk+2 − 1) ∇ f (yk ), ek 
+                        
+ − h 4 tk+1 (tk+1 − 1) ∇ f (yk ), ek−1 .
+
+     In addition
+             1 4 2
+              h t     ∇ f k (yk ) 2 − h 4 tk+1 (tk+2 + tk+1 − 1) ∇ f k (yk ) 2
+             2 k+1
+                 1
+             = − h 4 tk+1 (2tk+2 + tk+1 − 2) ∇ f k (yk ) 2 .
+                 2
+Collecting the last three estimates and applying the inequalities to (41), we
+obtain
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5          Page 35 of 51   5
+
+
+E k+1 − E k + h 2 tk+1
+                   2
+                       − tk+2
+                          2
+                              + tk+2 ( f (yk ) − min f )
+       h2
+≤−        (tk+1 − 1)tk+1 ∇ f (yk ) − ∇ f (yk−1 ) 2
+       2L
++ h 4 tk+1 ∇ f (yk ), −(tk+1 − 1)∇ f (yk−1 ) + (tk+1 + tk+2 − 1)∇ f (yk )
+  1
+− h 4 tk+1 (2tk+2 + tk+1 − 2) ∇ f (yk ) + ek 2
+  2
+          
+− h 2 tk+1 ek , yk − x − h 3 tk+1 tk+2 vk+1 , ek 
++ h 4 tk+1 (tk+1 + tk+2 − 1) ∇ f (yk ), ek  − h 4 tk+1 (tk+1 − 1) ∇ f (yk ), ek−1  .
+
+After developing the expression ∇ f (yk ) + ek 2 , we arrive at
+
+
+E k+1 − E k + h 2 tk+1
+                   2
+                       − tk+2
+                          2
+                              + tk+2 ( f (yk ) − min f )
+       h2
+≤−        (tk+1 − 1)tk+1 ∇ f (yk ) − ∇ f (yk−1 ) 2
+       2L
++ h 4 tk+1 ∇ f (yk ), −(tk+1 − 1)∇ f (yk−1 ) + (tk+1 + tk+2 − 1)∇ f (yk )
+  1
+− h 4 tk+1 (2tk+2 + tk+1 − 2) ∇ f (yk ) 2 + ek 2 + 2 ∇ f (yk ), ek 
+  2
+          
+− h 2 tk+1 ek , yk − x − h 3 tk+1 tk+2 vk+1 , ek 
++ h 4 tk+1 (tk+1 + tk+2 − 1) ∇ f (yk ), ek  − h 4 tk+1 (tk+1 − 1) ∇ f (yk ), ek−1  .
+
+Taking the expectation conditionally on Fk and using conditional unbiasedness
+in (K 2+ ), we get that (P-a.s.)
+
+  
+ E E k+1 | Fk − E k + h 2 tk+1
+                           2
+                               − tk+2
+                                  2
+                                      + tk+2 ( f (yk ) − min f )
+        h2
+ ≤−        (tk+1 − 1)tk+1 ∇ f (yk ) − ∇ f (yk−1 ) 2
+        2L
+ + h 4 tk+1 ∇ f (yk ), −(tk+1 − 1)∇ f (yk−1 ) + (tk+1 + tk+2 − 1)∇ f (yk )
+  1                                         1
+ − h 4 tk+1 (2tk+2 + tk+1 − 2) ∇ f (yk ) 2 − h 4 tk+1 (2tk+2 + tk+1 − 2)σk2
+  2                                         2
+                                         1/2
+ + h 3 tk+1 tk+2 E      vk+1 2 | Fk            σk ,
+
+
+                                                                          123
+5    Page 36 of 51               Journal of Optimization Theory and Applications (2026) 209:5
+
+
+where we used Cauchy-Schwartz inequality in the last term. Now we rely on
+Theorem 3.1, and in particular on (28) and (32) to infer that (P-a.s.),
+
+              1             1                 1               1
+    vk+1 =      yk+1 − yk ≤   yk+1 − xk+1 +      xk+1 − xk +    xk − yk
+              h             h                 h               h
+                            2               1
+                          ≤   xk+1 − xk +     xk − xk−1
+                            h           h            
+                                 1        1            1
+                          =o          +o       =o           .
+                               tk+1       tk         tk+1
+
+In the last equality we used again that (K 1+ ) implies tk+1 ≤ 2tk . Therefore,
+there exists a non-negative random variable η with ess sup η < +∞ such that
+                 1/2
+E vk+1 2 | Fk         ≤ η/tk+1 , and in turn
+
+ 
+E E k+1 | Fk − E k + h 2 tk+1
+                          2
+                              − tk+2
+                                 2
+                                     + tk+2 ( f (yk ) − min f )
+       h2
+≤−        (tk+1 − 1)tk+1 ∇ f (yk ) − ∇ f (yk−1 ) 2
+       2L
++ h 3 tk+1 ∇ f (yk ), −h(tk+1 − 1)∇ f (yk−1 ) + h(tk+1 + tk+2 − 1)∇ f (yk )
+ 1
+− h 4 tk+1 (2tk+2 + tk+1 − 2) ∇ f (yk ) 2 + 4ηh 3 tk σk ,
+ 2
+
+where we used again that tk+2 ≤ 4tk and we discarded the term involving σk2
+since tk ≥ 1 and thus 2tk+2 + tk+1 − 2 ≥ 1. Equivalently,
+          
+         E E k+1 | Fk − E k + h 2 tk+1
+                                   2
+                                       − tk+2
+                                          2
+                                              + tk+2 ( f (yk ) − min f )
+         ≤ −R(∇ f (yk−1 ), ∇ f (yk )) + 4ηh 3 tk σk ,                                  (42)
+
+where R is the quadratic form
+
+                  h2                             1
+     R(X , Y ) =       (tk+1 − 1)tk+1 Y − X 2 + h 4 tk+1 (2tk+2 + tk+1 − 2) Y 2
+                  2L                             2
+                 − h 3 tk+1 (Y , −h(tk+1 − 1)X + h(tk+1 + tk+2 − 1)Y ) . (43)
+
+To conclude, we just need to prove that R is nonnegative. A standard procedure
+consists in computing a lower-bound min X R(X , Y ) for fixed Y . By taking the
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5              Page 37 of 51   5
+
+
+derivative of R with respect to X , we obtain that the minimum is achieved at
+X̄ with X̄ − Y = −h 2 LY . Therefore,
+
+                    h2 L                           1
+ min R(X , Y ) =           (tk+1 − 1)tk+1 h 4 Y 2 + h 4 tk+1 (2tk+2 + tk+1 − 2) Y 2
+  X                    2                           2
+                               !                                                  "
+                  − h 3 tk+1 Y , −h(tk+1 − 1)(1 − h 2 L)Y + h(tk+1 + tk+2 − 1)Y .
+
+After reduction, we get
+
+                                 h 4 tk+1
+            min R(X , Y ) =               (tk+1 − 1)(2 − h 2 L) − 1      Y 2.         (44)
+              X                      2
+
+According to assumption (K 1+ ), the coefficient of f (yk ) − min f in (42) is
+positive. We therefore discard this term in the rest of the proof. Combining
+(44) with (42), we obtain
+
+                     h 4 tk+1
+E E k+1 | Fk −E k ≤ −          (tk+1 − 1)(2 − h 2 L) − 1          ∇ f (yk ) 2 +4ηh 3 tk σk .
+                           2
+
+Since h 2 ∈]0, 1/L] and tk ≥ 1, this can also be bounded as
+
+                    h 2 tk+1                                                   4ηh
+E E k+1 | Fk ≤ E k −            (tk+1 − 1)(2 − h 2 L) − 1 ∇ f (yk ) 2 +             tk σk
+                        2L                                                       L
+                     h 2 tk+1 (tk+1 − 2)                    4ηh
+             ≤ Ek −                         ∇ f (yk ) 2 +        tk σk
+                              2L                             L
+                          2
+                     h 2 tk+1                  h 2 tk+1                 4ηh
+             = Ek −             ∇ f (yk ) 2 +            ∇ f (yk ) 2 +       tk σk
+                        2L                         L                     L
+                          2
+                     h 2 tk+1                                                  4ηh
+             ≤ Ek −             ∇ f (yk ) 2 + 2h 2 tk+1 ( f (yk ) − min f ) +      tk σk ,
+                        2L                                                       L
+
+where we used co-coercivity of ∇ f in the last inequality. The summability
+assumption in (K 2+ ) together with the summability result in Theorem 3.2 allow
+then to invoke Lemma A.1 to get the claim. Observe that this also gives that
+E k converges (P-a.s.) to a non-negative valued random variable.              
+                                                                              
+
+Remark 3.4 Since tk ≥ 1, a direct consequence of the gradient summability
+shown in Theorem 3.3 is that the gradient sequence (∇ f (yk ))k∈N tends to zero
+(P-a.s.) at least as quickly as at the rate o(1/tk ). Observe also that this analysis
+gives another proof for the fast convergence of the function values (just carry on
+
+                                                                              123
+5   Page 38 of 51                  Journal of Optimization Theory and Applications (2026) 209:5
+
+
+the proof starting from (42) without discarding the term involving the function
+values).
+   Note that the above proof has been notably simplified by using the conclu-
+sions already obtained in Theorem 3.2, and in particular to properly bound the
+terms involving vk+1 (which are not in Fk ). Extending this proof to the case
+where the step-size sk is varying appears to be straightforward, but comes at
+the price of tedious and longer computations. We avoid this for the sake of
+brevity.
+
+
+4 Discussion of Particular Parameter Choices
+
+Let consider the theoretical guarantees obtained under the condition that there
+exists c ∈ [0, 1[ such that, for every k ≥ 1
+
+                                 1          1
+                                       −        ≤ c.                                     (45)
+                              1 − αk+1   1 − αk
+
+This implies some important properties of tk . One significant observation is
+a trade-off between stability to errors and fast convergence of (SRAGαk+1 ).
+Some choices of αk will be less stringent on the required summability of the
+error variance for convergence, but will result in slower convergence rate and
+vice-versa.
+   In presenting the details, let us start with the following results that were
+obtained in [4, Proposition 3.3, 3.4]. The first one presents some general con-
+ditions on (αk ) and c that ensure the satisfaction of (K 0 ) and (K 1 ) (resp. (K 1+ )).
+The second one provides an explicit expression of tk as a function of αk .
+
+Proposition 4.1 Let c ∈ [0, 1[ and let (αk )k∈N be a sequence satisfying αk ∈
+[0, 1[ together with inequality (45) for every k ≥ 1. Then condition (K 0 ) is
+satisfied. Moreover, we have for every k ≥ 1,
+
+                                              1
+                              tk+1 ≤                    .
+                                       (1 − c)(1 − αk )
+
+If c ≤ 1/3 (resp. c < 1/3), then condition (K 1 ) (resp. (K 1+ )) is fulfilled.
+
+
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5              Page 39 of 51   5
+
+
+Proposition 4.2 Let (αk )k∈N be a sequence such that αk ∈ [0, 1[ for every
+k ≥ 1. Given c ∈ [0, 1[, assume that
+
+                                    1          1
+                              lim         −        = c.
+                            k→+∞ 1 − αk+1   1 − αk
+
+Then, we have
+                                        1
+                       tk+1 ∼                            as k → +∞.
+                                 (1 − c)(1 − αk )
+Let us now consider several possible iterative regimes defining αk .
+
+                            ˛
+4.1 Case 1: ˛k = 1 −          ,˛ > 1
+                            k
+This corresponds to the choice made in the (deterministic) Nesterov and Ravine
+methods studied in [9]. In this case, for every k ≥ 1,
+
+                          1          1     k+1  k 1
+                                −        =     − = .
+                       1 − αk+1   1 − αk    α   α α
+
+Therefore, condition (45) is satisfied with c = α1 . If α ≥ 3 (resp. α > 3), we
+have c ∈]0, 1/3] (resp. c ∈]0, 1/3[). According to Proposition 4.2, we have
+for every k ≥ 1,
+
+                                    1            α k     k
+                   tk+1 ∼                     =       =     .
+                             (1 − c)(1 − αk )   α−1 α   α−1
+
+Indeed, one can easily show that the equality tk+1 = α−1
+                                                      k
+                                                         is satisfied. Moreover,
+                                                                  tk+1
+    tk+1 /tk2 = k(α − 1)/(k − 1)2 ≥ (α − 1)/(k − 1) ⇒                         = +∞.
+                                                                 k∈N
+                                                                        tk2
+
+Thus, specializing Theorem 3.2 and Theorem 3.3, we obtain the following
+statement.
+Corollary 4.1 Assume that (H) holds. Let (yk )k∈N be the sequence generated
+by (SRAGαk+1 ) with αk = 1 − αk where α > 3, and sk ∈]0, 1/L] is a non-
+increasing sequence. Assume that
+
+              E [ek | Fk ] = 0 (P-a.s.) and (ksk σk )k∈N ∈            + (F ).
+                                                                      1
+
+
+
+                                                                                123
+5     Page 40 of 51             Journal of Optimization Theory and Applications (2026) 209:5
+
+
+Then, the following holds (P-a.s.):
+                                                          
+     (i) f (yk ) − minH f = o s 1k 2 and yk − yk−1 = o k1 ;
+                                   k         
+    (ii)     ksk ( f (yk ) − min f ) < +∞ and   k yk − yk−1 2 < +∞ ;
+                         H
+        k∈N                              k∈N
+(iii) If moreover inf k sk > 0, then k∈N k 2 ∇ f (yk ) 2 < +∞ and (yk )k∈N
+      converges weakly (P-a.s.) to an argminH f -valued random variable.
+   Another possible choice would be αk = k+α k
+                                                in which case we obtain exactly
+the same results as in Corollary 4.1. This corresponds to the popular choice of
+the Nesterov extrapolation parameter. For (SNAGαk ) with this choice of αk ,
+we recover and complete some results obtained in the literature as discussed
+in Section 1.3, Remark 3.1 and Remark 3.2.
+   Recalling the example of risk minimization as (1) and the
+                                                            discussion there-
+after, the summability assumption of Corollary 4.1 reads k∈N √skmk < +∞,
+                                                                     k
+where m k is the number of samples in the stochastic gradient estimate (2).
+Thus, choosing m k = O(k 4+δ ), with δ > 0, one can apply a constant step-size
+sk ≡ s ∈]0, 1/L], and get, in the almost sure sense, guarantees of the fast con-
+vergence rate o(1/k 2 ) on the objective and squared gradient as well as weak
+convergence of yk to a random variable in the set of minimizers. The rate of
+the objective
+          √ decrease becomes      o(1/k) if m k = O(k 2+δ ) and sk = 1/(Lk),
+and o(1/ k) if m k = O(k ) and sk = 1/(Lk 3/2 ).
+                            1+δ
+
+
+                        ˛
+4.2 Case 2: ˛k = 1 −       , ˛ > 0, r ∈]0, 1[
+                        kr
+In this case, we have
+
+       1          1     1            1
+             −        = (k + 1)r − k r
+    1 − αk+1   1 − αk   α            α
+                        kr                r
+                      =     (1 + 1/k)r − 1 ∼ k r −1 → 0 as k → +∞.
+                        α                   α
+For each c > 0, the condition 1/(1 − αk+1 ) − 1/(1 − αk ) ≤ c is satisfied
+for k large enough. On the other hand, we deduce from Proposition 4.2 that
+      kr                               k
+                                                   1
+tk ∼     as k → +∞. This implies that      ti ∼           k 1+r as k → +∞.
+      α                                         α(1 + r )
+                                       i=1
+Theorem 3.2 and Theorem 3.3 under this specification yields the following
+result.
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                 Page 41 of 51   5
+
+
+Corollary 4.2 Assume that (H) holds. Let (yk )k∈N be the sequence generated
+by (SRAGαk+1 ) with αk = 1 − kαr where α > 0 and r ∈]0, 1[, and sk ∈]0, 1/L]
+is a non-increasing sequence. Assume that
+                                                        r     
+             E [ek | Fk ] = 0 (P-a.s.) and              k sk σk k∈N ∈    + (F ).
+                                                                         1
+
+
+Then, the following holds (P-a.s.):
+                                                           
+  (i) f (yk ) − minH f = o s 1k 2r and yk − yk−1 = o k1r ;
+                                  k          
+ (ii)     k r sk ( f (yk ) − min f ) < +∞ and   k r yk − yk−1 2 < +∞ ;
+                               H
+      k∈N                                  k∈N
+(iii) If moreover inf k sk > 0, then k∈N k 2r ∇ f (yk ) 2 < +∞ and (yk )k∈N
+      converges weakly (P-a.s.) to an argminH f -valued random variable.
+   We are not aware of any result considering this case in the literature. See
+also the discussion in Remark 3.2 for the case of non-vanishing noise vari-
+ance. On the other hand, the above result shows that this choice of αk allows
+for a less stringent summability condition on the stochastic errors than the case
+of Section 4.1, but this comes at the price of a slower convergence rate. For
+instance, for the risk minimization example in (1), the summability assump-
+                                   sk k r
+tion of Corollary 4.2 reads k∈N √     m
+                                           < +∞. This entails the almost sure
+                                                k
+convergence rate o(1/k 2r ) on the objective and squared gradient with constant
+step-size provided that m k = O(k 4r +δ ) with δ such that r +δ/2 > 1. The algo-
+rithm also exhibits almost sure weak convergence of yk to a random variable
+in the set of minimizers.
+
+4.3 Case 3: ˛k Constant
+
+This corresponds to the choice made in the Polyak’s HBF method [36, 37],
+though the algorithms are different (the gradient is not evaluated at the same
+point). Since αk ≡ α ∈ [0, 1[ for every k ≥ 1, condition (45) is clearly satisfied
+with c = 0. In turn, tk ≡ 1/(1 − α) for all k ≥ 1. Applying Theorem 3.2 and
+Theorem 3.3 we get the following.
+Corollary 4.3 Assume that (H) holds. Let (yk )k∈N be the sequence generated
+by (SRAGαk+1 ) with αk ≡ α ∈ [0, 1[, and sk ∈]0, 1/L] is an non-increasing
+sequence. Assume that
+
+               E [ek | Fk ] = 0 (P-a.s.) and (sk σk )k∈N ∈              + (F ).
+                                                                        1
+
+
+
+                                                                                   123
+5     Page 42 of 51              Journal of Optimization Theory and Applications (2026) 209:5
+
+
+Then, the following holds (P-a.s.):
+                                        
+ (i)     sk ( f (yk ) − min f ) < +∞ and   yk − yk−1 2 < +∞ ;
+                          H
+        k∈N                              k∈N
+    (ii) If moreover inf k sk > 0, then k∈N ∇ f (yk ) 2 < +∞ and (yk )k∈N
+         converges weakly (P-a.s.) to an argminH f -valued random variable.
+    Recall from Remark 3.2 that for constant noise variance and constant αk ,
+the (pointwise) big-O and little-o rates are vacuous. The reason is that the step-
+size will have to decrease fast enough to be summable, but this will hamper
+the convergence rates that scale as 1/s√  k . Note that one can nevertheless get
+an ergodic convergence rate O(log(k)/ k) on the objective in expectation as
+discussed in Remark 3.3, hence recovering the result in [46].
+    For the risk minimization
+                            example in (1)–(2), the summability assumption
+of Corollary 4.3 reads as k∈N √smk < +∞. Consider the case of vanishing
+                                      k
+noise variance, i.e. the sample size m k increases with k. If sk ≡ s ∈]0, 1/L]
+and m k = O(k 2δ ), δ > 1, then almost surely, one has f (yk ) − minH f → 0
+and yk converges weakly to a random variable in the set of minimizers. If m k
+                   √ at a slower rate, say m k = O(k ),  > 0, then sk must
+is allowed to increase                                  1+
+
+decrease as 1/(L k) to ensure the error summability. But this would entail
+only that lim inf k→∞ f (yk ) − minH f → 0 almost surely. It is not clear what
+one could say about the convergence of the gradient and the iterates themselves
+in this situation.
+
+
+A Auxiliary Lemmas
+
+We here collect some important results that play a crucial role in the conver-
+gence analysis of (SNAGαk ).
+Lemma A.1 (Convergence of non-negative almost supermartingales [39])
+Given a filtration R = (Rk )k∈N and the sequences of real-valued random
+variables (rk )k∈N ∈ + (R), (ak )k∈N ∈ + (R), and (z k )k∈N ∈ 1+ (R) satis-
+fying, for each k ∈ N
+                       
+                      E rk+1 | Rk − rk ≤ −ak + z k (P-a.s.) .
+
+It holds that (ak )k∈N ∈ 1+ (R) and (rk )k∈N converges (P-a.s.) to a random
+variable valued in [0, +∞[.
+   The following lemma is a consequence of Lemma A.1; see also the discus-
+sion in [39, Section 3].
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                   Page 43 of 51    5
+
+
+Lemma A.2 Given a filtration R = (Rk )k∈N , let the sequence of random
+                                                  1/2
+variables (εk )k∈N ∈ + (R) such that E εk2 | Rk−1            ∈ 1+ (R).
+                                                         k∈N
+Then                    
+                            εk < +∞ (P-a.s.) .
+                                   k∈N
+
+
+                                        k      2
+Proof Let ζk = εk − E εk | Rk−1 and rk =  i=1 ζi . We obviously have
+  
+E ζk+1 | Rk = 0. Thus
+
+                  ⎛      ⎞2
+                  k        
+                             k
+                                   
+    E rk+1 | Rk = ⎝   ζi ⎠ +                       2
+                               ζi E ζk+1 | Rk + E ζk+1 | Rk
+                          i=1           i=1
+                              2
+                    = rk + E ζk+1                  2
+                                  | Rk = rk + Var εk+1                2
+                                                       | Rk ≤ rk + E εk+1 | Rk .
+
+
+                                   1/2
+It is easy to see that E εk2 | Rk−1            ∈ 1+ (R) implies
+  2                                     k∈N
+ E εk | Rk−1 k∈N ∈ 1+ (R), and we can apply Lemma A.1 to get that
+limk→+∞ rk exists and is finite (P-a.s.). Using Jensen’s inequality, we have
+
+
+      
+      k             
+                    k            
+                                 k
+                                                     1/2
+                                                          
+                                                          k
+                                                                                          1/2
+ 0≤          εi =         ζi +         E εi | Ri−1 ≤ rk +   E εi2 | Ri−1                        .
+       i=1          i=1          i=1                              i=1
+
+
+                                                2        1/2
+Passing to the limit using that                E εk | Rk−1              ∈   1 (R) proves the
+                                                                            +
+                                                                  k∈N
+claim.                                                                                          
+                                                                                                
+
+Lemma A.3 (Extended descent lemma) Let g : H → R be a convex func-
+tion whose gradient is L-Lipschitz continuous. Let s ∈]0, 1/L]. Then for all
+(x, y) ∈ H2 , we have
+
+                                                       s          s
+g(y−s∇g(y)) ≤ g(x)+∇g(y), y − x−                       ∇g(y) 2 − ∇g(x) − ∇g(y) 2 .
+                                                       2          2
+                                                                             (46)
+
+See e.g. [6, Lemma 1]
+
+                                                                                   123
+5    Page 44 of 51                         Journal of Optimization Theory and Applications (2026) 209:5
+
+
+B The Ravine Method from a Dynamic Perspective
+
+In this section, we consider the high resolution ODE of the Ravine method, and
+show that it exhibits damping governed by the Hessian. This will explain the
+fast convergence towards zero of the gradients satisfied by the Ravine method.
+
+B.1 Dynamic Tuning of the Extrapolation Coefficients
+
+Let us first explain how to tune the extrapolation coefficients in the Ravine
+method, in order to obtain a dynamic interpretation of the algorithm. Critical
+to the understanding is the link between the Ravine method and the Nesterov
+method, as explained in Section 2, and the dynamic interpretation of the Nes-
+terov method, due to Su, Boyd and Candès [43]. Consider the inertial gradient
+system
+                      ẍ(t) + γ (t)ẋ(t) + ∇ f (x(t)) = 0,           ((IGS)γ )
+
+which involves a general viscous damping coefficient γ (·). The implicit time
+discretization of (IGS)γ , with time step-size h > 0, xk = x(τk ), and τk = kh
+4 , gives
+
+
+             xk+1 − 2xk + xk−1          xk − xk−1
+                               + γ (kh)           + ∇ f (xk+1 ) = 0.
+                    h2                      h
+
+Let s := h 2 . After multiplication by s, we obtain
+
+    (xk+1 − xk ) − (xk − xk−1 ) + hγ (kh)(xk − xk−1 ) + s∇ f (xk+1 ) = 0. (47)
+
+Equivalently
+
+              xk+1 + s∇ f (xk+1 ) = xk + (1 − hγ (kh)) (xk − xk−1 ),                             (48)
+
+which gives
+
+                     xk+1 = proxs f (xk + (1 − hγ (kh)) (xk − xk−1 )) .                          (49)
+
+4 We take the τ notation instead of the usual t , because t will be used with a different meaning,
+               k                               k           k
+and it is used extensively in the paper.
+
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5     Page 45 of 51   5
+
+
+We obtain the inertial proximal algorithm
+
+                   yk = xk + (1 − hγ (kh)) (xk − xk−1 ),
+                   xk+1 = proxs f (yk ) .
+
+Following the general procedure described in [9], which consists in replacing
+the proximal step by a gradient step, we obtain (NAGαk ) with αk = 1−hγ (kh).
+Taking γ (t) = αt , we obtain (NAGαk ) with αk = 1 − αk , which provides fast
+convergence results. Observe that Algorithm (NAGαk ) makes sense for any
+arbitrarily given sequence of positive numbers (αk )k∈N . But for this algorithm
+to be directly connected by temporal discretization to the continuous dynamic
+(IGS)γ , it is necessary to take αk = 1 − hγ (kh). Note that the case γ (t) = αt
+is special, since due to the homogeneity property of γ (·), in this case αk does
+not depend on h.
+   Let us now use the relations established in Section 2 between the Nesterov
+and the Ravine methods. Since (xk )k∈N satisfies (NAGαk ) with αk = 1 −
+hγ (kh), we have that the associated sequence (yk )k∈N follows (RAGγk ) with
+γk = αk+1 = 1 − hγ ((k + 1)h).
+
+B.2 High Resolution ODE of the Ravine Method
+
+Let us now proceed with the high resolution ODE of the Ravine method
+(RAGγk ). The√idea is not to let h → 0, but to take into account the terms
+of order h = s in the asymptotic expansion, and to neglect the term of order
+h 2 = s. The high resolution method is extensively used in fluid mechanics,
+where physical phenomena occur at multiple scales. Indeed, by following an
+approach similar to that developed by Shi, Du, Jordan, and Su in [42], and
+Attouch and Fadili in [9], we are going to show that the Hessian-driven damp-
+ing appears in the associated continuous inertial equation. Let us make this
+precise in the following result.
+                                                                 √
+Theorem B.1 The high resolution ODE with temporal step size h = s of the
+Ravine method (RAGγk ) with γk = hγ ((k + 1)h) gives the inertial dynamic
+with Hessian driven damping
+               √                                     √       
+                  s             √ 2                      s
+ÿ(t)+γ (t) 1 +     γ (t) ẏ(t)+ s∇ f (y(t)) ẏ(t)+ 1 +    γ (t) ∇ f (y(t)) = 0.
+                2                                       2
+                                                                            (50)
+
+                                                                     123
+5    Page 46 of 51                     Journal of Optimization Theory and Applications (2026) 209:5
+
+
+Proof Set γk = 1 − hγ ((k + 1)h). By definition of the Ravine method
+
+     yk+1 = yk − s∇ f (yk ) + γk yk − s∇ f (yk )) − (yk−1 − s∇ f (yk−1 )) .
+
+Equivalently
+
+(yk+1 − yk )−(yk − yk−1 )+(1−γk )(yk − yk−1 )+s∇ f (yk )+sγk ∇ f (yk )−∇ f (yk−1 ) = 0.
+
+
+After dividing by s = h 2 , we obtain
+
+yk+1 − 2yk + yk−1          yk − yk−1
+                  +(1−γk )           +∇ f (yk )+γk (∇ f (yk )−∇ f (yk−1 )) = 0.
+       h2                      h2
+                                                                                             (51)
+Notice then that
+
+                     yk − yk−1   yk+1 − yk   yk+1 − 2yk + yk−1
+                               =           −                   .
+                        h2          h2              h2
+
+So, (51) can be formulated equivalently as follows
+
+     yk+1 − 2yk + yk−1          yk+1 − yk
+γk                     +(1−γk )           +∇ f (yk )+γk (∇ f (yk )−∇ f (yk−1 )) = 0.
+            h2                     h2
+                                                                                             (52)
+After dividing by γk , we get
+
+yk+1 − 2yk + yk−1 1 − γk yk+1 − yk  1
+                 +                 + ∇ f (yk )+(∇ f (yk )−∇ f (yk−1 )) = 0.
+       h2          hγk       h      γk
+                                                                            (53)
+Building on (53), we use Taylor expansions taken at a higher order (here, order
+four) than for the low resolution ODE. For each k ∈ N, set τk = (k +c)h, where
+c is a real parameter that will be adjusted further. Assume that yk = Y (τk ) for
+some smooth curve τ → Y (τ ) defined for τ ≥ t0 > 0. Performing a Taylor
+expansion in powers of h, when h is close to zero, of the different quantities
+involved in (53), we obtain
+
+                                                   1 2            1 ...
+          yk+1 = Y (τk+1 ) = Y (τk ) + h Ẏ (τk ) +  h Ÿ (τk ) + h 3 Y (τk ) + O(h 4 ),     (54)
+                                                   2              6
+                                                   1              1 ...
+          yk−1 = Y (τk−1 ) = Y (τk ) − h Ẏ (τk ) + h 2 Ÿ (τk ) − h 3 Y (τk ) + O(h 4 ).    (55)
+                                                   2              6
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                Page 47 of 51   5
+
+
+By adding (54) and (55) we obtain
+
+                          yk+1 − 2yk + yk−1
+                                            = Ÿ (τk ) + O(h 2 ).
+                                 h2
+
+Moreover, (54) gives
+
+                         yk+1 − yk             1
+                                   = Ẏ (τk ) + h Ÿ (τk ) + O(h 2 ).
+                             h                 2
+
+By Taylor expansion of ∇ f we have
+
+
+             ∇ f (yk ) − ∇ f (yk−1 ) = h∇ 2 f (Y (τk ))Ẏ (τk ) + O h 2 .
+
+
+Plugging all of the above results into (53), we obtain
+
+                               %                               &
+                        1 − γk             1
+   [Ÿ (τk ) + O(h )] +
+                     2
+                                 Ẏ (τk ) + h Ÿ (τk ) + O(h )
+                                                            2
+                         hγk               2
+                      1
+                  + ∇ f (Y (τk )) + h∇ 2 f (Y (τk ))Ẏ (τk ) + O h 2                = 0.
+                     γk
+
+                hγk
+Multiplying by 1−γ  k
+                      , we obtain in an equivalent way
+
+                hγk                         1               h
+                       Ÿ (τk ) + Ẏ (τk ) + h Ÿ (τk ) +        ∇ f (Y (τk ))
+               1 − γk                       2             1 − γk
+                    h 2 γk 2
+                 +          ∇ f (Y (τk ))Ẏ (τk ) + O(h 3 ) = 0.
+                   1 − γk
+
+After reduction of the terms involving Ÿ (tk ), we obtain
+
+                    h(1 + γk )                         h
+                               Ÿ (τk ) + Ẏ (τk ) +        ∇ f (Y (τk ))
+                    2(1 − γk )                       1 − γk
+                         h 2 γk 2
+                     +          ∇ f (Y (τk ))Ẏ (τk ) + O(h 3 ) = 0.
+                        1 − γk
+
+                                                                                 123
+5    Page 48 of 51                         Journal of Optimization Theory and Applications (2026) 209:5
+
+                  2(1−γk )
+Multiplication by h(1+γk)
+                           then yields
+
+                                   2(1 − γk )              2
+                     Ÿ (τk ) +               Ẏ (τk ) +        ∇ f (Y (τk ))
+                                   h(1 + γk )            1 + γk
+                               2hγk 2
+                          +          ∇ f (Y (τk ))Ẏ (τk ) + O(h 2 ) = 0.                        (56)
+                              1 + γk
+
+According to γk = 1 − hγ ((k + 1)h), and τk = (k + 1)h, we obtain
+
+                                  γ (τk )                          1
+                Ÿ (τk ) +                      Ẏ (τk ) +                    ∇ f (Y (τk ))
+                               1 − h2 γ (τk )                1 − h2 γ (τk )
+                          1 − hγ (τk )
+                     +h                    ∇ 2 f (Y (τk ))Ẏ (τk ) + O(h 2 ) = 0.
+                          1 − h2 γ (τk )
+
+                                                                                                  √
+By neglecting the term of order s = h 2 , and keeping the terms of order h =                          s,
+we obtain the inertial dynamic with Hessian driven damping
+                      √                                          √       
+                        s               √                            s
+    Ÿ (t) + γ (t) 1 +    γ (t) Ẏ (t) + s∇ 2 f (Y (t))Ẏ (t) + 1 +    γ (t) ∇ f (Y (t)) = 0.
+                       2                                            2
+
+
+This completes the proof.                                                                             
+                                                                                                      
+
+Remark B.1 The high resolution ODE of the Ravine method exhibits Hessian
+driven damping. In addition,√it incorporates a gradient correcting term weighted
+with a coefficient of 1 + 2s γ (t) . This is in accordance with [9] and [42].
+Surprisingly, there is√also a correction which appears in the viscosity term,
+the coefficient 1 + 2s γ (t) in front of the velocity. Indeed as we already
+observed, the Nesterov case is very specific. When γ (t) = αt , we have s =
+                            α
+1 − hγ ((k + 1)h) = 1 − k+1     . Returning to (56), we have
+
+                                   2(1 − s)        α
+                                            =                .
+                                   h(1 + s)   h(k + 1 − α2 )
+
+Taking τk = h(k + 1 − α2 ) gives γ (·) as the viscosity coefficient of the limit
+equation.
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                        Page 49 of 51    5
+
+
+References
+ 1. Adly, S., Attouch, H., Fadili, J.: Comparative analysis of accelerated gradient algorithms for
+    convex optimization: High and super resolution ODE approach. Optimization (2024)
+ 2. Assran, M., Rabbat, M.: On the convergence of Nesterov’s accelerated gradient method in
+    stochastic settings. In: The 37th International Conference on Machine Learning (ICML), vol.
+    119, pp. 410–420. PMLR (2020)
+ 3. Attouch, H., Cabot, A.: Asymptotic stabilization of inertial gradient dynamics with time-
+    dependent viscosity. J. Differ. Equ. 263(9), 5412–5458 (2017). https://doi.org/10.1016/j.jde.
+    2017.06.024
+ 4. Attouch, H., Cabot, A.: Convergence rates of inertial forward-backward algorithms. SIAM
+    J. Optim. 28(1), 849–874 (2018). https://doi.org/10.1137/17M1114739
+ 5. Attouch, H., Cabot, A., Chbani, Z., Riahi, H.: Inertial forward-backward algorithms with
+    perturbations: application to Tikhonov regularization. J. Optim. Theory Appl. 179(1), 1–36
+    (2018). https://doi.org/10.1007/s10957-018-1369-3
+ 6. Attouch, H., Chbani, Z., Fadili, J., Riahi, H.: First-order optimization algorithms via inertial
+    systems with Hessian driven damping. Math. Program. 193(1, Ser. A), 113–155 (2022).
+    https://doi.org/10.1007/s10107-020-01591-1
+ 7. Attouch, H., Chbani, Z., Peypouquet, J., Redont, P.: Fast convergence of inertial dynamics and
+    algorithms with asymptotic vanishing viscosity. Math. Program. 168(1–2, Ser. B), 123–175
+    (2018). https://doi.org/10.1007/s10107-016-0992-8
+ 8. Attouch, H., Czarnecki, M.O.: Asymptotic control and stabilization of nonlinear oscillators
+    with non-isolated equilibria. J. Differ. Equ. 179(1), 278–310 (2002). https://doi.org/10.1006/
+    jdeq.2001.4034
+ 9. Attouch, H., Fadili, J.: From the Ravine method to the Nesterov method and vice versa: a
+    dynamical system perspective. SIAM J. Optim. 32(3), 2074–2101 (2022). https://doi.org/10.
+    1137/22M1474357
+10. Attouch, H., Fadili, J., Kungurtsev, V.: On the effect of perturbations in first-order optimization
+    methods with inertia and Hessian driven damping. Evol. Equ. Control Theory 12(1), 71–117
+    (2023). https://doi.org/10.3934/eect.2022022
+11. Attouch, H., Peypouquet, J.: The rate of convergence of Nesterov’s accelerated forward-
+    backward method is actually faster than 1/k 2 . SIAM J. Optim. 26(3), 1824–1834 (2016).
+    https://doi.org/10.1137/15M1046095
+12. Aujol, J.F., Dossal, C.: Stability of over-relaxations for the forward-backward algorithm,
+    application to FISTA. SIAM J. Optim. 25(4), 2408–2433 (2015). https://doi.org/10.1137/
+    140994964
+13. Can, B., Gurbuzbalaban, M., Zhu, L.: Accelerated linear convergence of stochastic momentum
+    methods in Wasserstein distances. In: The 36th International Conference on Machine Learning
+    (ICML). PMLR (2019). arXiv:abs/1901.07445
+14. Drori, Y., Teboulle, M.: Performance of first-order methods for smooth convex minimization:
+    a novel approach. Math. Program. 145(1–2, Ser. A), 451–482 (2014). https://doi.org/10.1007/
+    s10107-013-0653-0
+15. Flammarion, N., Bach, F.: From averaging to acceleration, there is only a step-size. In: The
+    28th Conference on Learning Theory (COLT), vol. 40, pp. 658–695. PMLR (2015). https://
+    proceedings.mlr.press/v40/Flammarion15.html
+16. Gadat, S., Panloup, F., Saadane, S.: Stochastic heavy ball. Electron. J. Stat. 12(1), 461–529
+    (2018). https://doi.org/10.1214/18-EJS1395
+
+
+
+
+                                                                                         123
+5   Page 50 of 51                      Journal of Optimization Theory and Applications (2026) 209:5
+
+
+17. Gelfand, I., Tsetlin, M.: Printszip nelokalnogo poiska v sistemah avtomatich. Optimizatsii,
+    Dokl. AN SSSR 137, 295–298 (1961). (in Russian)
+18. Ghadimi, S., Lan, G.: Optimal stochastic approximation algorithms for strongly convex
+    stochastic composite optimization i: A generic algorithmic framework. SIAM J. Optim. 22(4),
+    1469–1492 (2012). https://doi.org/10.1137/110848864
+19. Ghadimi, S., Lan, G.: Optimal stochastic approximation algorithms for strongly convex
+    stochastic composite optimization, ii: Shrinking procedures and optimal algorithms. SIAM
+    J. Optim. 23(4), 2061–2089 (2013). https://doi.org/10.1137/110848876
+20. Gupta, K., Siegel, J.W., Wojtowytsch, S.: Nesterov acceleration despite very noisy gradi-
+    ents. In: The International Conference on Neural Information Processing Systems (NeurIPS)
+    (2024). arXiv:abs/2302.05515
+21. Haraux, A., Jendoubi, M.A.: On a second order dissipative ODE in Hilbert space with an
+    integrable source term. Acta Math. Sci. Ser. B (Engl. Ed.) 32(1), 155–163 (2012). https://doi.
+    org/10.1016/S0252-9602(12)60009-5
+22. Kidambi, R., Netrapalli, P., Jain, P., Kakade, S.: On the insufficiency of existing momentum
+    schemes for stochastic optimization. In: Information Theory and Applications Workshop
+    (ITA), pp. 1–9. IEEE (2018)
+23. Kim, D., Fessler, J.A.: Optimized first-order methods for smooth convex minimization. Math.
+    Program. 159(1–2, Ser. A), 81–107 (2016). https://doi.org/10.1007/s10107-015-0949-3
+24. Laborde, M., Oberman, A.: A Lyapunov analysis for accelerated gradient methods: from
+    deterministic to stochastic case. In: The Twenty Third International Conference on Artifi-
+    cial Intelligence and Statistics (AISTATS), vol. 108, pp. 602–612. PMLR (2020). https://
+    proceedings.mlr.press/v108/laborde20a.html
+25. Lan, G.: An optimal method for stochastic composite optimization. Math. Program. 133(1),
+    365–397 (2012). https://doi.org/10.1007/s10107-010-0434-y
+26. Lan, G.: First-order and Stochastic Optimization Methods for Machine Learning. Springer
+    Series in the Data Sciences. Springer, Cham (2020). https://doi.org/10.1007/978-3-030-
+    39568-1
+27. Lin, H., Mairal, J., Harchaoui, Z.: Catalyst acceleration for first-order convex optimization:
+    from theory to practice. J. Mach. Learn. Res. 18(212), 54 (2017)
+28. Liu, J., Yuan, Y.: On almost sure convergence rates of stochastic gradient methods. In: The
+    35th Conference on Learning Theory (COLT), vol. 178, pp. 2963–2983. PMLR (2022).
+    https://proceedings.mlr.press/v178/liu22d.html
+29. Loizou, N., Richtárik, P.: Momentum and stochastic momentum for stochastic gradient, New-
+    ton, proximal point and subspace descent methods. Comput. Optim. Appl. 77(3), 653–710
+    (2020). https://doi.org/10.1007/s10589-020-00220-z
+30. Maulen-Soto, R., Fadili, J., Attouch, H., Ochs, P.: An SDE perspective on stochastic inertial
+    gradient dynamics with time-dependent viscosity and hessian-driven damping. Optimization
+    (2025)
+31. Maulen-Soto, R., Fadili, J., Attouch, H., Ochs, P.: Stochastic inertial dynamics via time scaling
+    and averaging. Stochastic Systems (2025)
+32. Nesterov, Y.: Introductory Lectures on Convex Optimization, Applied Optimization, vol. 87.
+    Kluwer Academic Publishers, Boston, MA (2004). https://doi.org/10.1007/978-1-4419-
+    8853-9. A basic course
+33. Nesterov, Y.E.: A method for solving the convex programming problem with convergence
+    rate O(1/k 2 ). Dokl. Akad. Nauk SSSR 269(3), 543–547 (1983)
+34. Orvieto, A., Kohler, J., Lucchi, A.: The role of memory in stochastic optimization. In: the 35th
+    Conference on Uncertainty in Artificial Intelligence (UAI) (2020). arXiv:abs/1907.01678
+
+
+
+123
+Journal of Optimization Theory and Applications (2026) 209:5                         Page 51 of 51    5
+
+                                            √
+35. Park, C., Park, J., Ryu, E.K.: Factor- 2 acceleration of accelerated gradient methods. Appl.
+    Math. Optim. 88(3), 77 (2023). https://doi.org/10.1007/s00245-023-10047-9
+36. Polyak, B.T.: Some methods of speeding up the convergence of iterative methods. Ž. Vyčisl.
+    Mat i Mat. Fiz. 4, 791–803 (1964)
+37. Polyak, B.T.: Introduction to Optimization. Translations Series in Mathematics and Engi-
+    neering. Optimization Software, Inc., Publications Division, New York (1987)
+38. Polyak, B.T.: Accelerated gradient methods revisited. In: Workshop on Variational Analysis
+    and Applications. Erice, Italy (August 28-September 5, 2018)
+39. Robbins, H., Siegmund, D.: A convergence theorem for non negative supermartingales and
+    some applications. Optimizing Methods in Statistics pp. 233–257 (1971). https://doi.org/10.
+    1016/B978-0-12-604550-5.50015-8
+40. Schmidt, M., Roux, N.L., Bach, F.: Convergence rates of inexact proximal-gradient meth-
+    ods for convex optimization. In: The 24th International Conference on Neural Information
+    Processing Systems (NeurIPS), pp. 1458–1466 (2011)
+41. Sebbouh, O., Gower, R.M., Defazio, A.: Almost sure convergence rates for stochastic gradient
+    descent and stochastic heavy ball. In: The 34th Conference on Learning Theory (COLT), vol.
+    134, pp. 3935–3971. PMLR (2021). https://proceedings.mlr.press/v134/sebbouh21a.html
+42. Shi, B., Du, S.S., Jordan, M.I., Su, W.J.: Understanding the acceleration phenomenon via high-
+    resolution differential equations. Math. Program. 195(1–2, Ser. A), 79–148 (2022). https://
+    doi.org/10.1007/s10107-021-01681-8
+43. Su, W., Boyd, S., Candès, E.J.: A differential equation for modeling Nesterov’s accelerated
+    gradient method: theory and insights. J. Mach. Learn. Res. 17(153), 43 (2016)
+44. Sutskever, I., Martens, J., Dahl, G., Hinton, G.: On the importance of initialization and momen-
+    tum in deep learning. In: The 30th International Conference on Machine Learning (ICML),
+    vol. 28, pp. 1139–1147. PMLR, Atlanta, Georgia, USA (2013). https://proceedings.mlr.press/
+    v28/sutskever13.html
+45. Villa, S., Salzo, S., Baldassarre, L., Verri, A.: Accelerated and inexact forward-backward
+    algorithms. SIAM J. Optim. 23(3), 1607–1633 (2013). https://doi.org/10.1137/110844805
+46. Yang, T., Lin, Q., Li, Z.: Unified convergence analysis of stochastic momentum methods for
+    convex and non-convex optimization. In: The 27th International Joint Conference on Artificial
+    Intelligence (IJCAI) (2018). arXiv:abs/1604.03257
+
+
+Publisher’s Note Springer Nature remains neutral with regard to jurisdictional claims in published
+maps and institutional affiliations.
+
+Springer Nature or its licensor (e.g. a society or other partner) holds exclusive rights to this article
+under a publishing agreement with the author(s) or other rightsholder(s); author self-archiving of
+the accepted manuscript version of this article is solely governed by the terms of such publishing
+agreement and applicable law.
+
+
+
+
+                                                                                          123
+

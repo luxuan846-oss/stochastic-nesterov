@@ -1,0 +1,883 @@
+     Accelerated Algorithms for Smooth Convex-Concave Minimax Problems
+                 with O(1/k 2 ) Rate on Squared Gradient Norm
+
+
+                                                TaeHo Yoon 1 Ernest K. Ryu 1
+
+
+                         Abstract                                 value for quantifying suboptimality. Moreover, the notion is
+     In this work, we study the computational complex-            meaningful for differentiable non-convex-concave minimax
+     ity of reducing the squared gradient magnitude               games. Interestingly, very few prior works have analyzed
+     for smooth minimax optimization problems. First,             convergence rates on the gradient norm for minimax prob-
+     we present algorithms with accelerated O(1/k 2 )             lems, and the optimal convergence rate or corresponding
+     last-iterate rates, faster than the existing O(1/k)          algorithms were hitherto unknown.
+     or slower rates for extragradient, Popov, and gra-
+     dient descent with anchoring. The acceleration               Contributions. In this work, we introduce the extra an-
+     mechanism combines extragradient steps with an-              chored gradient (EAG) algorithms for smooth convex-
+     choring and is distinct from Nesterov’s accelera-            concave minimax problems and establish an accelerated
+     tion. We then establish optimality of the O(1/k 2 )          k∇L(zk )k2 ≤ O(R2 /k 2 ) rate, where R is the Lipschitz
+     rate through a matching lower bound.                         constant of ∇L. The rate improves upon the O(R2 /k) rates
+                                                                  of prior algorithms and is the first O(R2 /k 2 ) rate in this
+                                                                  setup. We then provide a matching Ω(R2 /k 2 ) complex-
+1. Introduction                                                   ity lower bound for gradient-based algorithms and thereby
+                                                                  establish optimality of EAG.
+Minimax optimization problems, or minimax games, of the
+form                                                              Beyond establishing the optimal complexity, our results
+                                                                  provide the following observations. First, different subop-
+               minimize
+                    n
+                        maximize
+                             m
+                                 L(x, y)                   (1)    timality measures lead to materially different acceleration
+                  x∈R          y∈R
+                                                                  mechanisms, since reducing the duality gap is done opti-
+have recently gained significant interest in the optimization     mally by the extragradient algorithm (Nemirovski, 2004;
+and machine learning communities due to their application         Nemirovsky, 1992). Also, since our optimal accelerated
+in adversarial training (Goodfellow et al., 2015; Madry et al.,   convergence rate is on the non-ergodic last iterate, neither
+2018) and generative adversarial networks (GANs) (Good-           averaging nor keeping track of the best iterate is necessary
+fellow et al., 2014).                                             for optimally reducing the gradient magnitude in the deter-
+Prior works on minimax optimization often consider com-           ministic setup.
+pact domains X, Y for x, y and use the duality gap
+                                                                  1.1. Preliminaries and notation
+      Errgap (x, y) := sup L(x, ỹ) − inf L(x̃, y)
+                        ỹ∈Y             x̃∈X                     We say a saddle function L : Rn × Rm → R is convex-
+to quantify suboptimality of algorithms’ iterates in solving      concave if L(x, y) is convex in x ∈ Rn for all fixed
+(1). However, while it is a natural analog of minimization        y ∈ Rm and L(x, y) is concave in y ∈ Rm for all
+error for minimax problems, the duality gap can be difficult      fixed x ∈ Rn . We say (x? , y? ) is a saddle point of L
+to measure directly in practice, and it is unclear how to         if L(x? , y) ≤ L(x? , y? ) ≤ L(x, y? ) for all x ∈ Rn and
+generalize the notion to non-convex-concave problems.             y ∈ Rm . Solutions to the minimax problem (1) are defined
+                                                                  to be saddle points of L. For notational conciseness, write
+In contrast, the squared gradient magnitude k∇L(x, y)k2 ,         z = (x, y). When L is differentiable, define the saddle
+when L is differentiable, is a more directly observable           operator of L at z = (x, y) by
+   1
+     Department of Mathematical Sciences, Seoul National Uni-                                             
+                                                                                               ∇x L(x, y)
+versity, Seoul, Korea. Correspondence to: Ernest K. Ryu                           GL (z) =                   .            (2)
+<ernestryu@snu.ac.kr>.                                                                        −∇y L(x, y)
+
+Proceedings of the 38 th International Conference on Machine      (When clear from the context, we drop the subscript L.)
+Learning, PMLR 139, 2021. Copyright 2021 by the author(s).        The saddle operator is monotone (Rockafellar, 1970), i.e.,
+           Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+hG(z1 )−G(z2 ), z1 −z2 i ≥ 0 for all z1 , z2 ∈ Rn ×Rm . We      an algorithm parameter; see Section A). Notably, anchor-
+say L is R-smooth if GL is R-Lipschitz continuous. Note         ing resembles the Halpern iteration (Halpern, 1967; Lieder,
+that ∇L 6= GL due to the sign change in the y gradient, but     2020), which was used in Diakonikolas (2020) to develop a
+k∇Lk = kGL k, and we use the two forms interchangeably.         regularization-based algorithm with near-optimal (optimal
+Because z? = (x? , y? ) is a saddle point of L if and only if   up to logarithmic factors) complexity with respect to the
+0 = GL (z? ), the squared gradient magnitude is a natural       gradient norm of the last iterate. Anchoring turns out to be
+measure of suboptimality at a given point for smooth convex-    the second main component of the acceleration; combining
+concave problems.                                               EG steps with anchoring, we obtain the optimal last-iterate
+                                                                convergence rate of O(R2 /k 2 ).
+1.2. Prior work
+                                                                Structured minimax problems. For structured minimax
+Extragradient-type algorithms. The first main compo-            problems of the form
+nent of our proposed algorithm is the extragradient (EG)
+algorithm of Korpelevich (1977). EG and its variants, in-                  L(x, y) = f (x) + hAx, yi − g(y),
+cluding the algorithm of Popov (1980), have been studied in
+the context of saddle point and variational inequality prob-    where f, g are convex and A is a linear operator, primal-
+lems and have appeared in the mathematical programming          dual splitting algorithms (Chambolle & Pock, 2011; Con-
+literature (Solodov & Svaiter, 1999; Tseng, 2000; Noor,         dat, 2013; Vũ, 2013; Yan, 2018; Ryu & Yin, 2021) and
+2003; Censor et al., 2011; Lyashko et al., 2011; Malitsky       Nesterov’s smoothing technique (Nesterov, 2005a;b) have
+& Semenov, 2014; Malitsky, 2015; 2020). More recently           also been extensively studied (Chen et al., 2014; He &
+in the machine learning literature, similar ideas such as op-   Monteiro, 2016). Notably, when g is of “simple” form,
+timism (Chiang et al., 2012; Rakhlin & Sridharan, 2013a),       Neterov’s
+                                                                         smoothing  framework achieves an accelerated
+                                                                         kAk     Lf
+prediction (Yadav et al., 2018), and negative momentum          rate O k + k2 on duality gap. Additionally, Cham-
+(Gidel et al., 2019; Zhang et al., 2020) have been presented    bolle & Pock (2016) have shown that splitting algorithms
+and used in the context of multi-player games (Daskalakis       can achieve O(1/k 2 ) or linear convergence rates under ap-
+et al., 2011; Rakhlin & Sridharan, 2013b; Syrgkanis et al.,     propriate strong convexity and smoothness assumptions on
+2015; Antonakopoulos et al., 2021) and GANs (Gidel et al.,      f and g, although they rely on proximal operations. Kolos-
+2018; Mertikopoulos et al., 2019; Liang & Stokes, 2019;         soski & Monteiro (2017); Hamedani & Aybat (2018); Zhao
+Peng et al., 2020).                                             (2019); Alkousa et al. (2020) generalized these accelerated
+                                                                algorithms to the setting where the coupling term hAx, yi is
+O(R/k) rates on duality gap. For minimax problems               replaced by non-bilinear convex-concave function Φ(x, y).
+with an R-smooth L and bounded domains for x and y,
+Nemirovski (2004) presented the mirror-prox algorithm           Complexity   lower bounds.
+                                                                                                Ouyang & Xu (2021) pre-
+generalizing EG and established ergodic O(R/k) conver-                       kAk     Lf
+                                                                sented a Ω k + k2 complexity lower bound on duality
+gence rates on Errgap . Nesterov (2007); Monteiro & Svaiter
+                                                                gap for gradient-based algorithms solving bilinear mini-
+(2010; 2011) extended the O(R/k) complexity analysis to
+                                                                max problems with proximable g, establishing optimality
+the case of unbounded domains. Mokhtari et al. (2020b)
+                                                                of Nesterov’s smoothing. Zhang et al. (2019) presented
+showed that the optimistic descent converges at O(R/k)
+                                                                lower bounds for strongly-convex-strongly-concave prob-
+rate with respect to Errgap . Since there exists Ω(R/k) com-
+                                                                lems. Golowich et al. (2020) proved that with the narrower
+plexity lower bound on Errgap for black-box gradient-based
+                                                                class of 1-SCLI algorithms, which includes EG but not EAG,
+minimax optimization algorithms (Nemirovsky, 1992; Ne-
+                                                                the squared gradient norm of the last iterate cannot be re-
+mirovski, 2004), in terms of duality gap, these algorithms
+                                                                duced beyond O(R2 /k) in R-smooth minimax problems.
+are order-optimal.
+                                                                These approaches are aligned with the information-based
+                                                                complexity analysis, introduced in (Nemirovsky & Yudin,
+Convergence rates on squared gradient norm. Us-                 1983) and thoroughly studied in (Nemirovsky, 1991; 1992)
+ing standard arguments (e.g. (Solodov & Svaiter, 1999,          for the special case of linear equations.
+Lemma 2.3)), one can show min kG(zi )k2 ≤ O(R2 /k)
+                             i=0,...,k
+convergence rate of EG, provided that L is R-smooth. Ryu        Other problem setups. Nesterov (2009) and Nedić &
+et al. (2019) showed that optimistic descent algorithms also    Ozdaglar (2009) proposed subgradient algorithms for non-
+attain O(R2 /k) convergence in terms of the best iterate        smooth minimax problems. Stochastic minimax and vari-
+and proposed simultaneous gradient descent with anchor-         ational inequality problems were studied in (Nemirovski
+ing, which pulls iterates toward the initial point z0 , and     et al., 2009; Juditsky et al., 2011; Lan, 2012; Ghadimi &
+established O(R2 /k 2−2p ) convergence rates in terms of        Lan, 2012; 2013; Chen et al., 2014; 2017; Hsieh et al.,
+squared gradient norm of the last iterate (where p > 21 is      2019). Strongly monotone variational inequality problems
+           Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+or strongly-convex-strongly-concave minimax problems             α > 0 satisfies
+were studied in (Tseng, 1995; Nesterov & Scrimali, 2011;
+                                                                              1 − 3αR − α2 R2 − α3 R3 ≥ 0
+Gidel et al., 2018; Mokhtari et al., 2020a; Lin et al., 2020b;                                                              (4)
+Wang & Li, 2020; Zhang et al., 2020; Azizian et al., 2020).                   1 − 8αR + α2 R2 − 2α3 R3 ≥ 0.
+Recently, minimax problems with objectives that are either
+                                                                 Then EAG-C converges with rate
+strongly convex or nonconvex in one variable were stud-
+ied in (Rafique et al., 2018; Thekumparampil et al., 2019;                             4(1 + αR + α2 R2 ) kz0 − z? k2
+                                                                      k∇L(zk )k2 ≤
+Jin et al., 2019; Nouiehed et al., 2019; Ostrovskii et al.,                               α2 (1 + αR)      (k + 1)2
+2020; Lin et al., 2020a;b; Lu et al., 2020; Wang & Li, 2020;
+                                                                 for k ≥ 0.
+Yang et al., 2020; Chen et al., 2021). Minimax optimiza-
+                                                                                                                   1
+                                                                                                                     
+tion of composite objectives with smooth and nonsmooth-          Corollary 1. In the setup of Theorem 1, α ∈ 0, 8R     satis-
+                                                                                                          1
+but-proximable convex-concave functions were studied in          fies (4), and the particular choice α = 8R yields
+(Tseng, 2000; Csetnek et al., 2019; Malitsky & Tam, 2020;
+                                                                                              260R2 kz0 − z? k2
+Bùi & Combettes, 2021).                                                      k∇L(zk )k2 ≤
+                                                                                                  (k + 1)2
+
+2. Accelerated algorithms: Extra anchored                        for k ≥ 0.
+   gradient                                                      While EAG-C is simple in its form, its convergence proof
+                                                                 (presented in the appendix) is complicated. Furthermore, the
+We now present two accelerated EAG algorithms that are
+                                                                 constant 260 in Corollary 1 seems large and raises the ques-
+qualitatively very similar but differ in the choice of step-
+                                                                 tion of whether it could be reduced. These issues, to some
+sizes. The two algorithms present a tradeoff between the
+                                                                 extent, are addressed by the following alternative version of
+simplicity of the step-size and the simplicity of the conver-
+                                                                 EAG.
+gence proof; one algorithm has a varying step-size but a
+simpler convergence proof, while the other algorithm has a
+simpler constant step-size but has a more complicated proof.     EAG with varying step-size (EAG-V)
+                                                                                      1
+                                                                     zk+1/2 = zk +        (z0 − zk ) − αk G(zk )
+2.1. Description of the algorithms                                                   k+2
+                                                                                      1
+The proposed extra anchored gradient (EAG) algorithms                  zk+1 = zk +        (z0 − zk ) − αk G(zk+1/2 ),
+                                                                                     k+2
+have the following general form:
+                                                                 where α0 ∈ 0, R1 and
+                                                                                  
+      zk+1/2 = zk + βk (z0 − zk ) − αk G(zk )
+                                                                                                 (k + 2)2
+                                                                                                                   
+                                                          (3)                    αk                             2 2
+         zk+1 = zk + βk (z0 − zk ) − αk G(zk+1/2 )                   αk+1 =              1 −                  α  R
+                                                                             1 − αk2 R2       (k + 1)(k + 3) k
+                                                                                                        αk2 R2
+                                                                                                                
+for k ≥ 0, where z0 ∈ Rn ×Rm is the starting point. We use                                   1
+                                                                          = αk 1 −                                    (5)
+G defined in (2) rather than describing the x- and y- updates                         (k + 1)(k + 3) 1 − αk2 R2
+separately to keep the notation concise. We call αk > 0
+                                                                 for k ≥ 0.
+step-sizes and βk ∈ [0, 1) anchoring coefficients. Note
+that when βk = 0, EAG coincides with the unconstrained           As the recurrence relation (5) may seem unfamiliar, we
+extragradient algorithm.                                         provide the following lemma describing the behavior of the
+                                                                 resulting sequence.
+The simplest choice of {αk }k≥0 is the constant one. To-                                 3
+                                                                                           
+gether with the choice βk = k+21
+                                  (which we clarify later),      Lemma 1. If α0 ∈ 0, 4R      , then the sequence {αk }k≥0 of
+we get the following simpler algorithm.                          (5) monotonically decreases to a positive limit. In particular,
+                                                                 when α0 = 0.618
+                                                                               R , we have limk→∞ αk ≈ R .
+                                                                                                              0.437
+
+EAG with constant step-size (EAG-C)                              We now state the convergence results for EAG-V.
+                    1                                            Theorem 2. Assume L : Rn × Rm → R is an R-smooth
+     zk+1/2 = zk +     (z0 − zk ) − αG(zk )                                                                     ?
+                   k+2                                                        function with a saddle point z . Assume
+                                                                 convex-concave
+                                                                           3
+                    1                                            α0 ∈ 0, 4R , and define α∞ = limk→∞ αk . Then EAG-V
+       zk+1 = zk +     (z0 − zk ) − αG(zk+1/2 )                  converges with rate
+                   k+2
+                                                                                                     
+where α > 0 is fixed.                                                        k 2     4 1 + α0 α∞ R2 kz0 − z? k2
+                                                                     k∇L(z )k ≤             2
+                                                                                           α∞          (k + 1)(k + 2)
+Theorem 1. Assume L : Rn × Rm → R is an R-smooth
+convex-concave function with a saddle point z? . Assume          for k ≥ 0.
+             Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+Corollary 2. EAG-V with α0 = 0.618
+                               R satisfies                       where (a) follows from the monotonicity inequality
+                                                                 hG(zk ), zk − z? i ≥ 0, (b) follows from Young’s inequal-
+                              27R2 kz0 − z? k2
+               k∇L(zk )k2 ≤                                      ity, (c) follows from plugging in Ak = αk (k+1)(k+2)
+                                                                                                              2       and
+                               (k + 1)(k + 2)
+                                                                 Bk = k + 1, and (d) follows from Lemma 1 (αk ↓ α∞ ).
+for k ≥ 0.                                                       Reorganize to get
+
+2.2. Proof outline                                                α∞                                  1
+                                                                     (k + 1)(k + 2)kG(zk )k2 ≤ Vk +      kz0 − z? k2
+We now outline the convergence analysis for EAG-V, whose           4                                 α∞
+                                                                                                      
+proof is simpler than that of EAG-C. The key ingredient                                             1
+                                                                                      ≤ α0 R2 +          kz0 − z? k2 ,
+of the proof is a Lyapunov analysis with a nonincreasing                                          α∞
+Lyapunov function, the Vk of the following lemma.
+Lemma 2. Let {βk }k≥0 ⊆ (0, 1) and α0 ∈ 0, R1
+                                                       
+                                                                 and divide both sides by α4∞ (k + 1)(k + 2).
+be given. Define the sequences {Ak }k≥0 , {Bk }k≥0 and
+{αk }≥0 by the recurrence relations                              2.3. Discussion of further generalizations
+                   αk
+            Ak =       Bk                            (6)         The algorithms and results of Sections 2.1 and 2.2 remain
+                   2βk
+                                                                 valid when we replace G with an R-Lipschitz continuous
+                       Bk
+            Bk+1 =                                   (7)         monotone operator; neither the definition of the EAG algo-
+                     1 − βk                                      rithms nor any part of the proofs of Theorems 1 and 2 utilize
+                     αk βk+1 (1 − αk2 R2 − βk2 )                 properties of saddle functions beyond the monotonicity of
+            αk+1 =                                   (8)
+                      βk (1 − βk )(1 − αk2 R2 )                  their subdifferentials.
+for k ≥ 0, where B0 = 1. Suppose that αk ∈ (0, R1 ) holds        For EAG-C, the step-size conditions (4) in Theorem 1 can
+for all k ≥ 0. Assume L is R-smooth and convex-concave.          be relaxed to accommodate larger values of α. However,
+Then the sequence {Vk }k≥0 defined as                            we do not pursue such generalizations to keep the already
+                                                                 complicated and arduous analysis of EAG-C manageable.
+          Vk := Ak kG(zk )k2 + Bk hG(zk ), zk − z0 i      (9)
+                                                                 Also, larger step-sizes are more naturally allowed in EAG-V
+for EAG iterations in (3) is nonincreasing.                      and Theorem 2. Finally, although (4) holds for values of α
+                                1
+                                                                 up to 0.1265                                           1
+                                                                          R , we present a slightly smaller range 0, 8R in
+In Lemma 2, the choice of βk = k+2 leads to Bk = k + 1,          Corollary 1 for simplicity.
+Ak = αk (k+2)(k+1)
+            2       , and (5). Why the Lyapunov function                                         1
+                                                                 For EAG-V, the choice βk = k+2    was obtained by roughly,
+of Lemma 2 leads to the convergence guarantee of The-
+                                                                 but not fully, optimizing the bound on EAG-V originating
+orem 2 may not be immediately obvious. The following                                                    1
+                                                                 from Lemma 2. If one chooses βk = k+δ    with δ > 1, then
+proof provides the analysis.
+                                                                 (6) and (7) become
+                                 1
+Proof of Theorem 2. Let βk = k+2     as specified by the defi-
+nition of EAG-V. By Lemma 2, the quantity Vk defined by                     αk (k + δ)(k + δ − 1)             k+δ−1
+                                                                     Ak =                         ,    Bk =         .
+(9) is nonincreasing in k. Therefore,                                              2(δ − 1)                    δ−1
+   Vk ≤ · · · ≤ V0 = α0 kG(z0 )k2 ≤ α0 R2 kz0 − z? k2 .
+                                                                 As the proof of Theorem 2 illustrates, linear growth of Bk
+Next, we have                                                    and quadratic growth of Ak leads to O(1/k 2 ) convergence
+ Vk = Ak kG(zk )k2 + Bk hG(zk ), zk − z0 i                       of kG(zk )k2 . The value α0 = 0.618    R    in Lemma 1 and
+    (a)
+                                                                 Corollary 2 was obtained by numerically minimizing the
+    ≥ Ak kG(zk )k2 + Bk hG(zk ), z? − z0 i                       constant α42 1 + α0 α∞ R2 in Theorem 2 in the case of
+                                                                              ∞
+                                                                 δ = 2. The choice δ = 2, however, is not optimal. Indeed,
+    (b)                   Ak            B2
+    ≥ Ak kG(zk )k2 −         kG(zk )k2 − k kz0 − z? k2           the constant 27 of Corollary 2 can be reduced to 24.44
+                          2             2Ak
+                                                                 with (δ ? , α0? ) ≈ (2.697, 0.690/R), which was obtained by
+    (c)   αk
+    =        (k + 1)(k + 2)kG(zk )k2                             numerically optimizing over δ and α0 . Finally, there is a
+          4                                                                                                               1
+                                                                 possibility that a choice of βk not in the form of βk = k+δ
+                 k+1                                             leads to an improved constant.
+            −             kz0 − z? k2
+               αk (k + 2)
+                                                                 In the end, we choose to present EAG-C and EAG-V with
+    (d) α                        1                                                        1
+    ≥
+         ∞
+        (k + 1)(k + 2)kG(z )k −   k   2
+                                   kz0 − z? k2 ,                 the simple choice βk = k+2  . As we establish in Section 3,
+      4                         α∞                               the EAG algorithms are optimal up to a constant.
+            Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+3. Optimality of EAG via a matching                               Since smooth biaffine functions are special cases of smooth
+   complexity lower bound                                         convex-concave functions, Theorem 3 implies the optimal-
+                                                                  ity of EAG applied to smooth convex-concave mimimax
+Upon seeing an accelerated algorithm, it is natural to ask        optimization problems.
+whether the algorithm is optimal. In this section, we present
+                                                                  Corollary 3. For R-smooth convex-concave minimax prob-
+a Ω(R2 /k 2 ) complexity lower bound for the class of de-
+                                                                  lems, an algorithm in Asep cannot attain a worst-case con-
+terministic gradient-based algorithms for smooth convex-
+                                                                  vergence rate better than
+concave minimax problems. This result establishes that
+EAG is indeed optimal.                                                                  R2 kz0 − z? k2
+For the class of smooth minimax optimization problems, a                                (2bk/2c + 1)2
+deterministic algorithm A produces iterates (xk , yk ) = zk       with respect to k∇L(zk )k2 . Since EAG-C and EAG-V have
+for k ≥ 1 given a starting point (x0 , y0 ) = z0 and a saddle     rates O(R2 kz0 − z? k2 /k 2 ), they are optimal, up to a con-
+function L, and we write zk = A(z0 , . . . , zk−1 ; L) for        stant factor, in Asep .
+k ≥ 1. Define Asim as the class of algorithms satisfying
+                                                                  3.1. Outline of the worst-case biaffine construction
+     zk ∈ z0 + span{GL (z0 ), . . . , GL (zk−1 )},        (10)
+                                                                  Consider biaffine functions of the form
+and Asep as the class of algorithms satisfying
+                                                                                 L(x, y) = hAx − b, y − ci,
+x ∈ x + span ∇x L(x0 , y0 ), . . . , ∇x L(xk−1 , yk−1 )
+ k     0
+              
+                                                                  where A ∈ Rn×n and b, c ∈ Rn . Then, ∇x L(x, y) =
+yk ∈ y0 + span ∇y L(x0 , y0 ), . . . , ∇y L(xk−1 , yk−1 ) .
+              
+                                                                  A| (y − c), ∇y L(x, y) = Ax − b, G is kAk-Lipschitz,
+                                                      (11)        and solutions to
+
+To clarify, algorithms in Asim access and utilize the x- and y-             minimize maximize hAx − b, y − ci
+                                                                               x∈X        y∈Y
+subgradients simultaneously. So Asim contains simultaneous
+gradient descent, extragradient, Popov, and EAG (if we            are characterized by Ax − b = 0 and A| (y − c) = 0.
+also count intermediate sequences zk+1/2 as algorithms’
+                                                                  Through translation, we may assume without loss of gener-
+iterates). On the other hand, algorithms in Asep can access
+                                                                  ality that x0 = 0, y0 = 0. In this case, (11) becomes
+and utilize the x- and y-subgradients separately. So Asim ⊂
+Asep , and alternating gradient descent-ascent belongs to Asep                                                     k−1
+                                                                  xk ∈ span{A| c, A| (AA| )c, . . . , A| (AA| )b 2 c c}
+but not to Asim .                                                                                                     k
+                                                                       + span{A| b, A| (AA| )b, . . . , A| (AA| )b 2 c−1 b}
+In this section, we present a complexity lower bound that                                                 k−1
+applies to all algorithms in Asep , not just the algorithms       yk ∈ span{b, (AA| )b, . . . , (AA| )b 2 c b}
+in Asim . Although EAG-C and EAG-V are in Asim , we                                                   k
+                                                                       + span{AA| c, . . . , (AA| )b 2 c c}               (13)
+consider the broader class Asep to rule out the possibility
+that separately updating the x- and y-variables provides an       for k ≥ 2. (We detail these arguments in the appendix.)
+improvement beyond a constant factor.                             Furthermore let A = A| and b = A| c = Ac. Then the
+                                                                  characterization of Asep further simplifies to
+We say L(x, y) is biaffine if it is an affine function of x
+for any fixed y and an affine function of y for any fixed x.      xk , yk ∈ Kk−1 (A; b) := span{b, Ab, A2 b, . . . , Ak−1 b}.
+Biaffine functions are, of course, convex-concave. We first
+establish a complexity lower bound on minimiax optimiza-          Note that Kk−1 (A; b) is the order-(k − 1) Krylov subspace.
+tion problems with biaffine loss functions.
+                                                                  Consider the following lemma. Its proof, deferred to the
+Theorem 3. Let k ≥ 0 be fixed. For any n ≥ k + 2, there           appendix, combines arguments from Nemirovsky (1991;
+exists an R-smooth biaffine function L on Rn × Rn for             1992).
+which                                                             Lemma 3. Let R > 0, k ≥ 0, and n ≥ k + 2. Then
+                               R2 kz0 − z? k2                     there exists A = A| ∈ Rn×n such that kAk ≤ R and
+               k∇L(zk )k2 ≥                               (12)    b ∈ R(A), satisfying
+                               (2bk/2c + 1)2
+                                                                                                  R2 kx? k2
+holds for any algorithm in Asep , where b·c is the floor func-                  kAx − bk2 ≥                               (14)
+                                                                                                (2bk/2c + 1)2
+tion and z? is the saddle point of L closest to z0 . Moreover,
+this lower bound is optimal in the sense that it cannot be        for any x ∈ Kk−1 (A; b), where x? is the minimum norm
+improved with biaffine functions.                                 solution to the equation Ax = b.
+           Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+Take A and b as in Lemma 3 and c = x? . Then z? =               for n ≥ k + 2.
+(x? , x? ) is the saddle point of L(x, y) = hAx − b, y − ci
+                                                                As an aside, the argument of Corollary 3 can be expressed
+with minimum norm. Finally,
+                                                                as: for any A ∈ Asep , we have
+   k∇L(xk , yk )k2 = kA| (yk − c)k2 + kAxk − bk2                                                                             
+                                                                C A; PLR (Rn ×Rn ) , D, k ≥ C Asep ; PLR (Rn ×Rn ) , D, k
+                    = kAyk − bk2 + kAxk − bk2                                                                                  
+                        R2 kx? k2         R2 kx? k2                                        ≥ C Asep ; PLbiaff
+                                                                                                        R     (R n ×Rn ) , D, k
+
+                    ≥              2
+                                      +
+                      (2bk/2c + 1)      (2bk/2c + 1)2                                                   R2 D 2
+                                                                                              ≥                   .
+                      R2 kz? − z0 k2                                                                (2bk/2c + 1)2
+                    =                ,
+                      (2bk/2c + 1)2
+                                                                The first inequality follows from A ∈ Asep , the second from
+for any xk , yk ∈ Kk−1 (A; b). This completes the construc-     Lbiaff
+                                                                 R ⊂ LR , and the third from Theorem 3.
+tion of the biaffine L of Theorem 3.
+                                                                Optimality of lower bound of Theorem 3. Using above
+3.2. Optimal complexity lower bound                             notations, our goal is to prove that for n ≥ k + 2,
+We now formalize the notion of complexity lower bounds.                                                       R2 D 2
+This formulation will allow us to precisely state and prove        C Asep ; PLbiaff (R n ×Rn ) , D, k   =                 .   (16)
+                                                                              R                             (2bk/2c + 1)2
+the second statement of Theorem 3 regarding the optimality
+of the lower bound.                                             We establish this claim with the chain of inequalities:
+Let F be a function class, PF = {Pf }f ∈F a class of opti-             R2 D 2                                        
+mization problems (with some common form), and E(·; Pf )                        2
+                                                                                  ≤ C Asep ; PLbiaff (Rn ×Rn ) , D, k         (17)
+                                                                   (2bk/2c + 1)                 R
+a suboptimality measure for the problem Pf . Define the                                                               
+worst-case complexity of an algorithm A for PF at the k-th                        ≤ C Asim ; PLbiaff
+                                                                                                R    (R n ×Rn ) , D, k        (18)
+iteration given the initial condition kz0 − z? k ≤ D, as                             
+                                                                                              2n,skew
+                                                                                                           
+                                                                                  ≤ C Alin ; PR,D , k                         (19)
+                                         E z k ; Pf ,
+                                                   
+        C (A; PF , D, k) :=       sup                                                         2n
+                                                                                                       
+                            z0 ∈B(z? ;D)                                          ≤ C Alin ; PR,D ,k                          (20)
+                                f ∈F
+                                                                                                2    2
+                                                                                              R D
+where zj = A(z0 , . . . , zj−1 ; f ) for j = 1, . . . , k and                         ≤                 .                     (21)
+                                                                                          (2bk/2c + 1)2
+B(z; D) denotes the closed ball of radius D centered at
+z. The optimal complexity lower bound with respect to an        Inequality (17) is what we established in Section 3.1. In-
+algorithm class A is                                            equality (18) follows from Asim ⊂ Asep and the fact that the
+                                                                infimum over a larger class is smaller. Roughly speaking,
+     C (A; PF , D, k) : = inf C (A; PF , D, k)                  the quantities in lines (19) and (20) are the complexity lower
+                          A∈A
+                                                                bounds for solving linear equations using only matrix-vector
+                                             E z k ; Pf .
+                                                       
+                        = inf      sup
+                          A∈A z0 ∈B(z? ;D)                      products, which were studied thoroughly in (Nemirovsky,
+                                   f ∈F                         1991; 1992). We will show inequalities (19), (20), and (21)
+A complexity lower bound is a lower bound on the optimal        by establishing the connection of Nemirovsky’s work with
+complexity lower bound.                                         our setup of biaffine saddle problems. Once this is done,
+                                                                equality holds throughout and (16) is proved.
+Let LR (Rn ×Rm ) be the class of R-smooth convex-concave                                                 2n
+functions on Rn × Rm , PL the minimax problem (1), and          We first provide the definitions. Let PR,D    be the collec-
+E(z; PL ) = k∇L(z)k2 . With this notation, the results of       tion of linear equations with 2n × 2n matrices B satisfying
+Section 2 can be expressed as                                   kBk ≤ R and v = Bz? for some z? ∈ B(0; D). Let
+                                                                  2n,skew       2n
+                                         2 2                  PR,D       ⊂ PR,D   be the subclass of equations with skew-
+                                         R D                   symmetric B. Let Alin be the class of iterative algorithms
+      C EAG; PLR (Rn ×Rm ) , D, k = O             .
+                                            k2                  solving linear equations Bz = v using only matrix multi-
+                                                                plication by B and B| in the sense that
+            n       m
+Let Lbiaff
+      R (R × R ) be the class of R-smooth biaffine func-
+           n      m
+tions on R × R . Then the first statement of Theorem 3,                            zk ∈ span{v0 , . . . , vk },               (22)
+the existence of L, can be expressed as
+                                                                where v0 = 0, v1 = v, and for k ≥ 2,
+                                       R2 D 2
+   C Asep ; PLbiaff       , D, k   ≥                (15)
+                                                                      vk = Bvj or B| vj for some j = 0, . . . , k − 1.
+                      n n
+               R (R ×R )             (2bk/2c + 1)2
+           Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+The optimal complexity lower bound for a class of linear        Theorem 4 (Informal). Let n ≥ 3k + 2. For any gradient-
+equation instances is defined as                                based deterministic algorithm, there exists an R-smooth
+                                                     2          biaffine function L on Rn × Rn such that (12) holds.
+           2n
+                                         Bzk − v .
+                  
+ C Alin ; PR,D , k := inf        sup
+                       A∈Alin      kBk≤R                        Although we do not formally pursue this, the requirement
+                                v=Bz? ,kz? k≤D
+                                                                that the algorithm is not randomized can also be removed
+                                                                using the techniques of Woodworth & Srebro (2016), which
+                           
+                 2n,skew
+Define C Alin ; PR,D     , k analogously.
+                                                                exploit near-orthogonality of random vectors in high dimen-
+Now we relate the optimal complexity lower bounds for           sions.
+biaffine minimax problems to those for linear equations. For
+L(x, y) = b| x + x| Ay − c| y, we have                          3.4. Discussion
+                                    
+                         O      A x           b                 We established that one cannot improve the lower bound of
+          GL (x, y) =                     +      .
+                        −A| O y               c                 Theorem 3 using biaffine functions, arguably the simplest
+                                                      n
+                                                                family of convex-concave functions. Furthermore, this opti-
+Therefore, the minimax problem PL for L ∈ Lbiaff R (R ×         mality statement holds for both algorithm classes Asep and
+  n
+R ) is equivalent
+                  to solving
+                                     equation Bz = v
+                              the linear                        Asim as established through the chain of inequalities in Sec-
+             O −A                    b                          tion 3.2. However, as demonstrated by Drori (2017), who
+with B =                 and v =         ∈ R2n , which be-
+             A| O                    c                          introduced a non-quadratic lower bound for smooth con-
+          2n,skew
+longs to PR,D     with D = kz ? k.                              vex minimization that improves upon the classical quadratic
+For both algorithm classes Asim and Alin , we may assume        lower bounds of Nemirovsky (1992) and Nesterov (2013),
+without loss of generality that z0 = 0 through translation.     a non-biaffine construction may improve the constant. In
+Then, the span condition (10) for Asim becomes                  our setup, there is a factor-near-100 difference between the
+                                                                upper and lower bounds. (Note that each EAG iteration
+                    zk ∈ Kk−1 (B; v).                   (23)    requires 2 evaluations of the saddle subdifferential oracle.)
+                                                                We suspect that both the algorithm and the lower bound can
+Note that (22) reduces to (23) as B is skew-symmetric, so       be improved upon, but we leave this to future work.
+Asim and Alin are effectively the same class of algorithms
+                                           2n,skew
+under the identification PLbiaff n  n ⊂ P          .            Golowich et al. (2020) establishes that for the class of 1-
+                           R (R ×R )       R,D
+                                                                SCLI algorithms (S is for stationary), a subclass of Asim
+Since the supremum over a larger class of problems is larger,   for biaffine objectives, one cannot achieve a rate faster than
+inequality (19) holds. Similarly, inequality (20) follows       k∇L(zk )k2 ≤ O(1/k). This lower bound applies to EG but
+        2n,skew    2n
+from PR,D       ⊂ PR,D .                                        not EAG; EAG is not 1-SCLI, as its anchoring coefficients
+                                                                  1
+Finally, (21) follows from the following lemma, using argu-     k+2 vary over iterations, and its convergence rate breaks
+ments based on Chebyshev-type matrix polynomials from           the 1-SCLI lower bound. On the other hand, we can view
+Nemirovsky (1992). Its proof is deferred to the appendix.       EAG as a non-stationary CLI algorithm (Arjevani & Shamir,
+Lemma 4. Let R > 0 and k ≥ 0. Then there exists A ∈             2016, Definition 2). We further discuss these connections in
+Alin such that for any m ≥ 1, B ∈ Rm×m , and v = Bz?            the appendix, Section E.
+satisfying kBk ≤ R and kz? k ≤ D, the zk -iterate produced
+by A satisfies                                                  4. Experiments
+                         2           R2 D 2                     We now present experiments illustrating the accelerated
+               Bzk − v       ≤                 .
+                                 (2bk/2c + 1)2                  rate of EAG. We compare EAG-C and EAG-V against the
+                                                                prior algorithms with convergence guarantees: EG, Popov’s
+3.3. Broader algorithm classes via resisting oracles            algorithm (or optimistic descent) and simultaneous gradient
+                                                                descent with anchoring (SimGD-A). The precise forms of
+In (10) and (11), we assumed the subgradient queries are
+                                                                the algorithms are restated in the appendix.
+made within the span of the gradients at the previous iter-
+ates. This requirement (the linear span assumption) can be      Figure 1(a) presents experiments on our first example, con-
+removed, i.e., a similar analysis can be done on general de-    structed as follows. For  > 0, define
+terministic black-box gradient-based algorithms (formally                             (
+                                                                                        |u| − 1 2 if |u| ≥ ,
+defined in the appendix, Section C.5), using the resisting                   f (u) = 1 2 2
+oracle technique (Nemirovsky & Yudin, 1983) at the cost                                 2u           if |u| < .
+of slightly enlarging the required problem dimension. We        Next, for 0 <   δ  1, define
+informally state the generalized result below and provide
+details in the appendix.                                          Lδ, (x, y) = (1 − δ)f (x) + δxy − (1 − δ)f (y), (24)
+                                Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+
+
+               100                                                                                                 106
+
+
+                                                                                                                   104
+              10−2
+
+                                                                                                                   102
+
+
+||G(z k)||2                                                                                         ||G(z k)||2
+                   −4
+              10
+                                                                                                                   100
+
+                               EG                                                                                                EG
+              10−6                                                                                                10−2
+                               Popov                                                                                             Popov
+                               EAG-V                                                                                             EAG-V
+                               EAG-C                                                                              10−4           EAG-C
+              10−8
+                               SimGD-A                                                                                           SimGD-A
+
+                        100           101       102         103         104         105                                   100          101      102         103       104       105   106
+                                                Iteration count                                                                                       Iteration count
+                          (a) Two-dimensional example Lδ, of (24)                                                       (b) Lagrangian of linearly constrained QP of (25)
+
+                              Figure 1. Plots of kG(zk )k2 versus iteration count. Dashed lines indicate corresponding theoretical upper bounds.
+
+
+
+                               1.0                                                                                              1.0
+
+
+
+
+                               0.5                                                                                              0.5
+
+
+
+
+                               0.0                                                                                              0.0
+
+
+
+                              −0.5                                                                                          −0.5
+                                             EG
+                                             EAG-C                                                                                           Regularized subdifferential flow
+                                             SimGD-A                                                                                         Anchored subdifferential flow
+                              −1.0                                                                                          −1.0
+                                     −1.0     −0.5     0.0        0.5         1.0                                                     −1.0    −0.5        0.0        0.5        1.0
+
+
+                                     (a) Discrete trajectories with Lδ,                         (b) Moreau–Yosida regularized flow with λ = 0.01 and the anchored
+                                                                                                 flow with L(x, y) = xy
+
+         Figure 2. Comparison of the discrete trajectories and their corresponding continuous-time flow. Trajectories from EAG-C and SimGD-A
+         virtually coincide and resemble the anchored flow. However, SimGD-A progresses slower due to its diminishing step-sizes.
+
+         where x, y ∈ R. Since f is a 1-smooth convex function,                                  provide a lower bound on duality gap. The exact forms of H,
+         Lδ, has smoothness parameter 1, which is almost tight                                   h, A, and b are restated in the appendix. We use n = 200,
+         due to the quadratic behavior of Lδ, within the region                                  N = 106 , α = 0.5 for EG and Popov, α = 0.1265 for
+         |x|, |y| ≤ . This construction was inspired by Drori &                                  EAG-C and α0 = 0.618 for EAG-V. Finally, we use the
+         Teboulle (2014), who presented f as the worst-case in-                                  initial point z0 = 0.
+         stance for gradient descent. We choose the step-size α = 0.1
+         as this value is comfortably within the theoretical range of                             ODE Interpretation Figure 2(a) illustrates the algo-
+         convergent parameters for EG, EAG-C, and Popov. For                                      rithms applied to (24). For |x|, |y|  ,
+         EAG-V, we set α0 = 0.1. We use N = 105 , δ = 10−2 , and                                                                              
+          = 5 × 10−5 , and the initial point z0 has norm 1.                                                               (1 − δ) + δy         y
+                                                                                                         GLδ, (x, y) =                     ≈δ     ,
+                                                                                                                           (1 − δ) − δx        −x
+          Figure 1(b) presents experiments on our second example
+                                            1 |                                                   so the algorithms roughly behave as if the objective is the
+                        L(x, y) =             x Hx − h| x − hAx − b, yi,                  (25)    bilinear function δxy. When δ is sufficiently small, trajecto-
+                                            2
+                                                                                                  ries of the algorithms closely resemble the corresponding
+         where x, y ∈ Rn , A ∈ Rn×n , b ∈ Rn , H ∈ Rn×n is                                        continuous-time flows with L(x, y) = xy.
+         positive semidefinite, and h ∈ Rn . Note that this is the
+         Lagrangian of a linearly constrained quadratic minimization                              Csetnek et al. (2019) demonstrated that Popov’s algorithm
+         problem. We adopted this saddle function from Ouyang &                                   can be viewed as discretization of the Moreau–Yosida regu-
+                                                                                                                                    −1
+         Xu (2021), where the authors constructed H, h, A and b to                                larized flow ż(t) = − G−(Id+λG)
+                                                                                                                               λ       (z(t)) for some λ > 0,
+           Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+and a similar analysis can be performed with EG. This con-      References
+nection explains why EG’s trajectory in Figure 2(a) and the
+                                                                Alkousa, M., Gasnikov, A., Dvinskikh, D., Kovalev, D.,
+regularized flow depicted in Figure 2(b) are similar.
+                                                                  and Stonyakin, F. Accelerated methods for saddle-point
+On the other hand, EAG and SimGD-A can be viewed as a             problem. Computational Mathematics and Mathematical
+discretization of the anchored flow ODE                           Physics, 60(11):1787–1809, 2020.
+                              1                                 Antonakopoulos, K., Belmega, E. V., and Mertikopoulos, P.
+            ż(t) = −G(z(t)) + (z0 − z(t)).
+                              t                                  Adaptive extra-gradient methods for min-max optimiza-
+The anchored flow depicted in Figure 2(b) approaches the          tion and games. ICLR, 2021.
+solution much more quickly due to the anchoring term damp-      Arjevani, Y. and Shamir, O. On the iteration complexity
+ening the cycling behavior. The trajectories of EAG and           of oblivious first-order optimization algorithms. ICML,
+SimGD-A iterates in Figure 2(a) are very similar to the           2016.
+anchored flow. However, SimGD-A requires diminishing
+            1−p
+step-sizes (k+1) p (both theoretically and experimentally)      Arjevani, Y., Shalev-Shwartz, S., and Shamir, O. On lower
+and therefore progresses much slower.                             and upper bounds in smooth and strongly convex opti-
+                                                                  mization. Journal of Machine Learning Research, 17(1):
+5. Conclusion                                                     4303–4353, 2016.
+
+This work presents the extra anchored gradient (EAG) al-        Azizian, W., Mitliagkas, I., Lacoste-Julien, S., and Gidel, G.
+gorithms, which exhibit accelerated O(1/k 2 ) rates on the        A tight and unified analysis of gradient-based methods
+squared gradient magnitude for smooth convex-concave              for a whole spectrum of differentiable games. AISTATS,
+minimax problems. The acceleration combines the extragra-         2020.
+dient and anchoring mechanisms, which separately achieve
+                                                                Bùi, M. N. and Combettes, P. L. A warped resolvent
+O(1/k) or slower rates. We complement the O(1/k 2 ) rate
+                                                                  algorithm to construct nash equilibria. arXiv preprint
+with a matching Ω(1/k 2 ) complexity lower bound, thereby
+                                                                  arXiv:2101.00532, 2021.
+establishing optimality of EAG.
+At a superficial level, the acceleration mechanism of EAG       Censor, Y., Gibali, A., and Reich, S. The subgradient ex-
+seems to be distinct from that of Nesterov; anchoring damp-       tragradient method for solving variational inequalities
+ens oscillations, but momentum provides the opposite effect       in Hilbert space. Journal of Optimization Theory and
+of dampening. However, are the two accelerations phe-             Applications, 148(2):318–335, 2011.
+nomena entirely unrelated? Finding a common structure, a
+                                                                Chambolle, A. and Pock, T. A first-order primal-dual algo-
+connection, between the two acceleration phenomena would
+                                                                  rithm for convex problems with applications to imaging.
+be an interesting direction of future work.
+                                                                  Journal of Mathematical Imaging and Vision, 40(1):120–
+                                                                  145, 2011.
+Acknowledgements
+                                                                Chambolle, A. and Pock, T. On the ergodic convergence
+TY and EKR were supported by the National Research Foun-          rates of a first-order primal–dual algorithm. Mathematical
+dation of Korea (NRF) Grant funded by the Korean Govern-          Programming, 159(1-2):253–287, 2016.
+ment (MSIP) [No. 2020R1F1A1A01072877], the National
+Research Foundation of Korea (NRF) Grant funded by the          Chen, Y., Lan, G., and Ouyang, Y. Optimal primal-dual
+Korean Government (MSIP) [No. 2017R1A5A1015626],                  methods for a class of saddle point problems. SIAM
+by the New Faculty Startup Fund from Seoul National Uni-          Journal on Optimization, 24(4):1779–1814, 2014.
+versity, and by the AI Institute of Seoul National University
+(AIIS) through its AI Frontier Research Grant (No. 0670-        Chen, Y., Lan, G., and Ouyang, Y. Accelerated schemes
+20200015) in 2020. We thank Jaewook Suh and Jongmin               for a class of variational inequalities. Mathematical Pro-
+Lee for reviewing the manuscript and providing valuable           gramming, 165(1):113–149, 2017.
+feedback. We thank Jelena Diakonikolas for the discussion
+                                                                Chen, Z., Zhou, Y., Xu, T., and Liang, Y. Proximal gradient
+on the prior work on parameter-free near-optimal meth-
+                                                                  descent-ascent: Variable convergence under KŁ geometry.
+ods for the smooth minimax setup. Finally, we thank the
+                                                                  ICLR, 2021.
+anonymous referees for bringing to our attention the recent
+complexity lower bound on the class of 1-SCLI algorithms        Chiang, C.-K., Yang, T., Lee, C.-J., Mahdavi, M., Lu, C.-J.,
+by Golowich et al. (2020).                                        Jin, R., and Zhu, S. Online optimization with gradual
+                                                                  variations. COLT, 2012.
+           Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+Condat, L. A primal–dual splitting method for convex opti-      Hamedani, E. Y. and Aybat, N. S. A primal-dual algorithm
+  mization involving Lipschitzian, proximable and linear          for general convex-concave saddle point problems. arXiv
+  composite terms. Journal of Optimization Theory and             preprint arXiv:1803.01401, 2018.
+  Applications, 158(2):460–479, 2013.
+                                                                He, Y. and Monteiro, R. D. An accelerated HPE-type al-
+Csetnek, E. R., Malitsky, Y., and Tam, M. K. Shadow               gorithm for a class of composite convex-concave saddle-
+  Douglas–Rachford splitting for monotone inclusions. Ap-         point problems. SIAM Journal on Optimization, 26(1):
+  plied Mathematics & Optimization, 80(3):665–678, 2019.          29–56, 2016.
+
+Daskalakis, C., Deckelbaum, A., and Kim, A. Near-optimal        Hsieh, Y.-G., Iutzeler, F., Malick, J., and Mertikopoulos,
+  no-regret algorithms for zero-sum games. SODA, 2011.            P. On the convergence of single-call stochastic extra-
+                                                                  gradient methods. NeurIPS, 2019.
+Diakonikolas, J. Halpern iteration for near-optimal and
+  parameter-free monotone inclusion and strong solutions        Jin, C., Netrapalli, P., and Jordan, M. I. Minmax optimiza-
+  to variational inequalities. COLT, 2020.                         tion: Stable limit points of gradient descent ascent are
+                                                                   locally optimal. arXiv preprint arXiv:1902.00618, 2019.
+Drori, Y. The exact information-based complexity of smooth
+                                                                Juditsky, A., Nemirovski, A., and Tauvel, C. Solving varia-
+  convex minimization. Journal of Complexity, 39:1–16,
+                                                                  tional inequalities with stochastic mirror-prox algorithm.
+  2017.
+                                                                  Stochastic Systems, 1(1):17–58, 2011.
+Drori, Y. and Teboulle, M. Performance of first-order meth-     Kolossoski, O. and Monteiro, R. D. An accelerated non-
+  ods for smooth convex minimization: A novel approach.           euclidean hybrid proximal extragradient-type algorithm
+  Mathematical Programming, 145(1-2):451–482, 2014.               for convex–concave saddle-point problems. Optimization
+                                                                  Methods and Software, 32(6):1244–1272, 2017.
+Ghadimi, S. and Lan, G. Optimal stochastic approxima-
+  tion algorithms for strongly convex stochastic composite      Korpelevich, G. Extragradient method for finding saddle
+  optimization I: A generic algorithmic framework. SIAM           points and other problems. Matekon, 13(4):35–49, 1977.
+ Journal on Optimization, 22(4):1469–1492, 2012.
+                                                                Lan, G. An optimal method for stochastic composite op-
+Ghadimi, S. and Lan, G. Optimal stochastic approxima-             timization. Mathematical Programming, 133(1-2):365–
+  tion algorithms for strongly convex stochastic composite        397, 2012.
+  optimization, II: Shrinking procedures and optimal algo-
+  rithms. SIAM Journal on Optimization, 23(4):2061–2089,        Liang, T. and Stokes, J. Interaction matters: A note on non-
+  2013.                                                           asymptotic local convergence of generative adversarial
+                                                                  networks. AISTATS, 2019.
+Gidel, G., Berard, H., Vignoud, G., Vincent, P., and Lacoste-
+  Julien, S. A variational inequality perspective on genera-    Lieder, F. On the convergence rate of the halpern-iteration.
+  tive adversarial networks. ICLR, 2018.                          Optimization Letters, pp. 1–14, 2020.
+
+                                                                Lin, T., Jin, C., and Jordan, M. On gradient descent ascent
+Gidel, G., Hemmat, R. A., Pezeshki, M., Le Priol, R., Huang,
+                                                                  for nonconvex-concave minimax problems. ICML, 2020a.
+  G., Lacoste-Julien, S., and Mitliagkas, I. Negative mo-
+  mentum for improved game dynamics. AISTATS, 2019.             Lin, T., Jin, C., Jordan, M., et al. Near-optimal algorithms
+                                                                  for minimax optimization. COLT, 2020b.
+Golowich, N., Pattathil, S., Daskalakis, C., and Ozdaglar,
+ A. Last iterate is slower than averaged iterate in smooth      Lu, S., Tsaknakis, I., Hong, M., and Chen, Y. Hybrid
+  convex-concave saddle point problems. COLT, 2020.               block successive approximation for one-sided non-convex
+                                                                  min-max problems: Algorithms and applications. IEEE
+Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B.,             Transactions on Signal Processing, 68:3676–3691, 2020.
+ Warde-Farley, D., Ozair, S., Courville, A., and Bengio, Y.
+  Generative adversarial nets. NeurIPS, 2014.                   Lyashko, S., Semenov, V., and Voitova, T. Low-cost modi-
+                                                                  fication of Korpelevich’s methods for monotone equilib-
+Goodfellow, I. J., Shlens, J., and Szegedy, C. Explaining         rium problems. Cybernetics and Systems Analysis, 47(4):
+  and harnessing adversarial examples. ICLR, 2015.                631, 2011.
+
+Halpern, B. Fixed points of nonexpanding maps. Bulletin         Madry, A., Makelov, A., Schmidt, L., Tsipras, D., and
+  of the American Mathematical Society, 73(6):957–961,           Vladu, A. Towards deep learning models resistant to
+ 1967.                                                           adversarial attacks. ICLR, 2018.
+           Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+Malitsky, Y. Projected reflected gradient methods for mono-     Nemirovsky, A. S. On optimality of Krylov’s information
+ tone variational inequalities. SIAM Journal on Optimiza-         when solving linear operator equations. Journal of Com-
+ tion, 25(1):502–520, 2015.                                       plexity, 7(2):121–130, 1991.
+Malitsky, Y. Golden ratio algorithms for variational inequal-   Nemirovsky, A. S. Information-based complexity of linear
+ ities. Mathematical Programming, 184:383–410, 2020.              operator equations. Journal of Complexity, 8(2):153–175,
+                                                                 1992.
+Malitsky, Y. and Tam, M. K. A forward-backward splitting
+ method for monotone inclusions without cocoercivity.           Nemirovsky, A. S. and Yudin, D. B. Problem Complexity
+ SIAM Journal on Optimization, 30(2):1451–1472, 2020.             and Method Efficiency in Optimization. 1983.
+Malitsky, Y. V. and Semenov, V. An extragradient algorithm      Nesterov, Y. Excessive gap technique in nonsmooth convex
+ for monotone variational inequalities. Cybernetics and           minimization. SIAM Journal on Optimization, 16(1):
+ Systems Analysis, 50(2):271–277, 2014.                           235–249, 2005a.
+Mason, J. C. and Handscomb, D. C. Chebyshev Polynomials.
+                                                                Nesterov, Y. Smooth minimization of non-smooth functions.
+ 2002.
+                                                                  Mathematical Programming, 103(1):127–152, 2005b.
+Mertikopoulos, P., Zenati, H., Lecouat, B., Foo, C.-S., Chan-
+ drasekhar, V., and Piliouras, G. Optimistic mirror descent     Nesterov, Y. Dual extrapolation and its applications to solv-
+ in saddle-point problems: Going the extra (gradient) mile.       ing variational inequalities and related problems. Mathe-
+ ICLR, 2019.                                                      matical Programming, 109(2-3):319–344, 2007.
+
+Mokhtari, A., Ozdaglar, A., and Pattathil, S. A unified         Nesterov, Y. Primal-dual subgradient methods for convex
+ analysis of extra-gradient and optimistic gradient meth-         problems. Mathematical Programming, 120(1):221–259,
+ ods for saddle point problems: Proximal point approach.          2009.
+ AISTATS, 2020a.
+                                                                Nesterov, Y. Introductory Lectures on Convex Optimization:
+Mokhtari, A., Ozdaglar, A. E., and Pattathil, S. Convergence      A Basic Course. 2013.
+ rate of O(1/k) for optimistic gradient and extragradient
+ methods in smooth convex-concave saddle point prob-            Nesterov, Y. and Scrimali, L. Solving strongly monotone
+ lems. SIAM Journal on Optimization, 30(4):3230–3251,             variational and quasi-variational inequalities. Discrete &
+ 2020b.                                                           Continuous Dynamical Systems – A, 31(4):1383–1396,
+                                                                  2011.
+Monteiro, R. D. and Svaiter, B. F. On the complexity of the
+ hybrid proximal extragradient method for the iterates and      Noor, M. A. New extragradient-type methods for general
+ the ergodic mean. SIAM Journal on Optimization, 20(6):          variational inequalities. Journal of Mathematical Analysis
+ 2755–2787, 2010.                                                 and Applications, 277(2):379–394, 2003.
+
+Monteiro, R. D. and Svaiter, B. F. Complexity of variants       Nouiehed, M., Sanjabi, M., Huang, T., Lee, J. D., and Raza-
+ of Tseng’s modified FB splitting and Korpelevich’s meth-         viyayn, M. Solving a class of non-convex min-max games
+ ods for hemivariational inequalities with applications to        using iterative first order methods. NeurIPS, 2019.
+ saddle-point and convex optimization problems. SIAM
+ Journal on Optimization, 21(4):1688–1720, 2011.                Ostrovskii, D. M., Lowy, A., and Razaviyayn, M. Effi-
+                                                                  cient search of first-order Nash equilibria in nonconvex-
+Nedić, A. and Ozdaglar, A. Subgradient methods for saddle-       concave smooth min-max problems. arXiv preprint
+  point problems. Journal of Optimization Theory and              arXiv:2002.07919, 2020.
+  Applications, 142(1):205–228, 2009.
+                                                                Ouyang, Y. and Xu, Y. Lower complexity bounds of first-
+Nemirovski, A. Prox-method with rate of convergence               order methods for convex-concave bilinear saddle-point
+  O(1/t) for variational inequalities with Lipschitz contin-      problems. Mathematical Programming, 185:1–35, 2021.
+  uous monotone operators and smooth convex-concave
+  saddle point problems. SIAM Journal on Optimization,          Peng, W., Dai, Y.-H., Zhang, H., and Cheng, L. Train-
+ 15(1):229–251, 2004.                                             ing GANs with centripetal acceleration. Optimization
+                                                                  Methods and Software, 35(5):955–973, 2020.
+Nemirovski, A., Juditsky, A., Lan, G., and Shapiro, A. Ro-
+  bust stochastic approximation approach to stochastic pro-     Popov, L. D. A modification of the Arrow–Hurwicz method
+  gramming. SIAM Journal on Optimization, 19(4):1574–             for search of saddle points. Mathematical Notes of the
+ 1609, 2009.                                                      Academy of Sciences of the USSR, 28(5):845–848, 1980.
+           Accelerated O(1/k2 ) Rate for Smooth Convex-Concave Minimax Problems on Squared Gradient Norm
+
+Rafique, H., Liu, M., Lin, Q., and Yang, T. Non-convex min-     Woodworth, B. and Srebro, N. Tight complexity bounds for
+  max optimization: Provable algorithms and applications         optimizing composite objectives. NeurIPS, 2016.
+  in machine learning. arXiv preprint arXiv:1810.02060,
+  2018.                                                         Yadav, A., Shah, S., Xu, Z., Jacobs, D., and Goldstein,
+                                                                  T. Stabilizing adversarial nets with prediction methods.
+Rakhlin, A. and Sridharan, K. Online learning with pre-           ICLR, 2018.
+  dictable sequences. COLT, 2013a.
+                                                                Yan, M. A new primal–dual algorithm for minimizing the
+Rakhlin, S. and Sridharan, K. Optimization, learning, and         sum of three functions with a linear operator. Journal of
+  games with predictable sequences. NeurIPS, 2013b.               Scientific Computing, 76(3):1698–1717, 2018.
+
+Rockafellar, R. T. Monotone operators associated with           Yang, J., Zhang, S., Kiyavash, N., and He, N. A catalyst
+  saddle-functions and minimax problems. Nonlinear Func-          framework for minimax optimization. NeurIPS, 2020.
+  tional Analysis, 18(part 1):397–407, 1970.
+                                                                Zhang, G., Bao, X., Lessard, L., and Grosse, R. A uni-
+Ryu, E. K. and Yin, W. Large-Scale Convex Optimization            fied analysis of first-order methods for smooth games
+  via Monotone Operators. Draft, 2021.                            via integral quadratic constraints.     arXiv preprint
+                                                                  arXiv:2009.11359, 2020.
+Ryu, E. K., Yuan, K., and Yin, W. ODE analysis of
+  stochastic gradient methods with optimism and anchor-         Zhang, J., Hong, M., and Zhang, S. On lower iteration
+  ing for minimax problems and GANs. arXiv preprint               complexity bounds for the saddle point problems. arXiv
+  arXiv:1905.10899, 2019.                                         preprint arXiv:1912.07481, 2019.
+
+Solodov, M. V. and Svaiter, B. F. A hybrid approximate          Zhao, R. Optimal stochastic algorithms for convex-concave
+  extragradient–proximal point algorithm using the enlarge-       saddle-point problems. arXiv preprint arXiv:1903.01687,
+  ment of a maximal monotone operator. Set-Valued Analy-          2019.
+  sis, 7(4):323–345, 1999.
+
+Syrgkanis, V., Agarwal, A., Luo, H., and Schapire, R. E.
+  Fast convergence of regularized learning in games.
+  NeurIPS, 2015.
+
+Taylor, A. and Bach, F. Stochastic first-order methods: Non-
+  asymptotic and computer-aided analyses via potential
+  functions. COLT, 2019.
+
+Taylor, A. B., Hendrickx, J. M., and Glineur, F. Smooth
+  strongly convex interpolation and exact worst-case per-
+  formance of first-order methods. Mathematical Program-
+  ming, 161(1-2):307–345, 2017.
+
+Thekumparampil, K. K., Jain, P., Netrapalli, P., and Oh, S.
+  Efficient algorithms for smooth minimax optimization.
+  NeurIPS, 2019.
+
+Tseng, P. On linear convergence of iterative methods for the
+  variational inequality problem. Journal of Computational
+  and Applied Mathematics, 60(1-2):237–252, 1995.
+
+Tseng, P. A modified forward-backward splitting method for
+  maximal monotone mappings. SIAM Journal on Control
+  and Optimization, 38(2):431–446, 2000.
+
+Vũ, B. C. A splitting algorithm for dual monotone inclusions
+  involving cocoercive operators. Advances in Computa-
+  tional Mathematics, 38(3):667–681, 2013.
+
+Wang, Y. and Li, J. Improved algorithms for convex-concave
+ minimax optimization. NeurIPS, 2020.
+

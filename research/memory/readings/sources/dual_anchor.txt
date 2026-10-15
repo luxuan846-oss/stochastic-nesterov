@@ -1,0 +1,1755 @@
+                                                 Dual-Anchor Acceleration Is Near-Optimal for Stochastic
+                                                               Monotone Root-Finding
+                                                                           TaeHo Yoon*                  Nicolas Loizou*
+
+                                                                                               Abstract
+
+
+
+
+arXiv:2609.36033v1 [math.OC] 28 Sep 2026
+                                                     Among distinct optimal acceleration mechanisms for deterministic monotone root-finding prob-
+                                                 lems and fixed-point problems, dual-anchoring has recently been shown to admit a more robust
+                                                 direct stochastic extension than standard anchor acceleration. However, without additional strong
+                                                 monotonicity, the existing stochastic dual-anchoring guarantee by Yoon and Loizou [46] has two
+                                                 limitations: first, it requires cocoercivity in expectation, and second, it attains only O(ϵ−3 ) oracle
+                                                 complexity, leaving a gap to the near-optimal O(ϵe −2 ) complexity achieved by other methods. In this
+                                                 work, we address both of these limitations by combining dual-anchoring with stochastic resolvent ap-
+                                                 proximation and optimized variance control. For unbiased stochastic oracles with variance bounded
+                                                 by σ 2 , where sample operators are monotone and uniformly L-Lipschitz, our algorithm finds a point
+                                                 xϵ satisfying E [∥𝔽(xϵ )∥] ≤ ϵ with a near-optimal oracle complexity of O((LD/ϵ)ℓ+(σ 2 /ϵ2 )ℓ2 ), where
+                                                 ℓ = log(1 + LD/ϵ) and D is the initial distance to a solution. This result improves the best known
+                                                 oracle complexity in the noise-dominated regime under these samplewise assumptions, reducing the
+                                                 poly-logarithmic factor from cubic to quadratic.
+
+
+                                           1     Introduction
+                                           We consider stochastic root-finding problem for an operator 𝔽 : Rd → Rd :
+
+                                                                                find x⋆ ∈ Rd    such that    𝔽(x⋆ ) = 0                                    (1)
+
+                                           where 𝔽(x) = E [𝔽(x; ξ)] is monotone. This formulation includes convex minimization [1, 38], convex-
+                                           concave minimax optimization [31, 32, 18, 24], fixed-point problems [21, 25, 16, 44] or multiplayer game
+                                           theory [14, 41]. Our goal is to efficiently find a point with small operator norm ∥𝔽(·)∥, using only an
+                                           unbiased stochastic oracle that returns a sample operator 𝔽(x; ξ). Here, the efficiency is measured by
+                                           the number of oracle accesses required to achieve E [∥𝔽(x)∥] ≤ ϵ.
+                                               In deterministic root-finding, Halpern-type or anchoring algorithms reduce the operator norm at
+                                           the accelerated, optimal rate ∥𝔽(xN )∥ = O(1/N ) [19, 10, 47]. However, the acceleration achieved
+                                           by these algorithms does not directly transfer to stochastic settings due to accumulation of noise.
+                                           Existing work that attempted to extend anchor acceleration to stochastic settings used diminishing
+                                           variance assumption or variance reduction techniques [22, 4, 5, 12]. On the other hand, another type
+                                           of deterministic acceleration mechanism called dual-anchoring [49] has been recently shown to be more
+                                           robust against oracle perturbation and stochastic noise, while enjoying the same optimal deterministic
+                                           convergence guarantee as Halpern-type methods [45, 46]. In particular, Yoon and Loizou [46] showed
+                                           that a simple stochastic dual-anchoring algorithm called S-Dual-OHM with constant mini-batch size
+                                           B achieves
+                                                                                       h             i 4L2 ∥x − x ∥2      6σ 2
+                                                                                2                  2           0   ⋆
+                                                                 E [∥𝔽(xN −1 )∥] ≤ E ∥𝔽(xN −1 )∥ ≤                     +                         (2)
+                                                                                                              N2           B
+                                           for problems with cocoercive 𝔽(x; ξ), where σ 2 denotes a bound on the oracle variance. Hence, taking
+                                           N = O(ϵ−1 ) and B = O(ϵ−2 ) gives O(ϵ−3 ) oracle complexity for achieving E [∥𝔽(x)∥] ≤ ϵ, which al-
+                                           ready offers a clean improvement over stochastic anchoring-based approaches, which required additional
+                                           algorithmic techniques to achieve the same complexity.
+                                              ∗ Department of Applied Mathematics and Statistics & Mathematical Institute for Data Science, Johns Hopkins Uni-
+
+                                           versity. {tyoon7, nloizou}@jhu.edu
+
+
+                                                                                                   1
+     On the other hand, the result (2) was limited to cocoercive problems and did not cover the more
+general monotone stochastic root-finding problems. Furthermore, the O(ϵ−3 ) complexity derived by (2)
+still has a significant gap to the Ω(ϵ−2 ) lower bound from [7]. In this work, we address both of these
+issues and develop a conceptually simple, near-optimal algorithm for monotone stochastic problems based
+on dual-anchoring. More precisely, we provide the following technical contributions.
+
+1.1    Main contributions
+First, we show that S-Dual-OHM with optimized scheduling of batch sizes Bk in fact attains an
+improved, near-optimal complexity of O(ϵ  e −2 ) for stochastic cocoercive root-finding (Theorem 2.2 &
+Corollary 2.3). Interestingly, this is achieved without fundamentally changing the update rule of S-
+Dual-OHM or its convergence analysis, and the algorithm remains single-loop.
+    Second, we extend the near-optimality of S-Dual-OHM with optimized variance control to stochas-
+tic monotone root-finding by using subroutines for approximately computing the resolvents. Assuming
+that each 𝔽(·; ξ) is monotone and L-Lipschitz, the proposed algorithm has the complexity
+
+                                            σ2
+                                                                                  
+                           L ∥x0 − x⋆ ∥                                 L ∥x0 − x⋆ ∥
+                     O ℓ+               ℓ + 2 ℓ2 where ℓ = log 1 +                                  (3)
+                                 ϵ          ϵ                                ϵ
+(Corollary 3.6). This complexity is near-optimal, and improves upon the previous state-of-the-art
+algorithm RAIN [7] that has cubic poly-logarithmic dependence on L∥x0ϵ−x⋆ ∥ in the dominant term,
+although RAIN only requires monotonicity and Lipschitzness of 𝔽.
+
+1.2    Related work
+Halpern-type acceleration and its stochastic extension. Halpern iteration [16] originates in
+the theory of fixed point problems, which find a point x⋆ such that x⋆ = 𝕋(x⋆ ) for nonexpansive
+𝕋 : Rd → Rd ; it can accelerate the residual convergence of fixed-point iterations [39, 9] and in fact,
+attain exact optimal complexity matching the lower bound without even a constant factor gap [23, 33]:
+                                               1       k+1
+                                     xk+1 =       x0 +     𝕋xk .                                 (OHM)
+                                              k+2      k+2
+This idea, also called anchoring in the literature, was adapted to develop accelerated algorithms for
+monotone root-finding and minimax optimization [10, 47, 22, 43, 6]. In stochastic problems, Cai et al. [4,
+5] combined Halpern iteration with variance reduction to achieve either O(ϵ−3 ) or improved complexity
+                                                                 O(ϵ−2 ) with gradual Halpern method
+in certain finite-sum regime. Diakonikolas [12] improved this to e
+[11] for samplewise nonexpansive fixed-point problems. Bravo and Contreras [3] studied stochastic
+Halpern iteration in more general normed spaces.
+
+Algorithms and complexity for stochastic root-finding problems. Using stochastic variants
+of classical methods such as extragradient [20] or optimistic gradient [34, 35, 36] typically yields a
+suboptimal O(ϵ−4 ) oracle complexity [13, 15, 8]. Extending the plain anchoring mechanism of OHM
+results in accumulation of errors [22], which is why variance reduction was used in prior work [4, 5]
+that explored stochastic Halpern-type algorithms. Chen and Luo [7] proposed the Recursive Anchored
+Iteration (RAIN) algorithm together with a complexity lower bound, which  uses amortized scheduling
+                                                                e LD + σ22 for stochastic monotone
+of regularization strength to achieve a near-optimal complexity O      ϵ    ϵ
+root-finding problems. Yoon and Loizou [46] considered an alternative approach of extending a distinct
+form of acceleration from deterministic fixed-point problem setting developed by Yoon et al. [49]:
+                                            N −k−1
+                              xk+1 = xk +          (𝕋(xk ) − 𝕋(xk−1 ))                    (Dual-OHM)
+                                             N −k
+where the total iteration number N is predetermined. They showed that Dual-OHM is more robust
+to stochastic noise, and O(ϵ−3 ) complexity can be more easily attained without variance reduction or
+recursive regularization as in the case of stochastic anchoring methods, albeit for a narrower class of
+cocoercive stochastic root-finding problems.
+
+
+                                                    2
+Proximal view of root-finding problems. Proximal-point methods provide a classical frame-
+work for solving monotone inclusions and convex-concave minimax problems using resolvent operations
+[26, 37]. Resolvents are often considered as implicit operations that are generally not computable. Ap-
+proximating resolvents using forward/explicit evaluations of 𝔽 is a well-established algorithmic principle
+in the literature. Extragradient and optimistic gradient methods admit interpretations as approxima-
+tions to proximal-point iterations [29, 30, 27, 28, 17], This viewpoint was also combined with anchor
+acceleration to design more efficient algorithms [19, 10] or to establish a formal connection between
+implicit and explicit algorithms [42, 48]. Our algorithmic design combines the idea of approximate
+resolvent computation with stochastic proximal point methods [2, 40].
+
+1.3    Preliminaries and assumptions
+We assume throughout the paper that (1) has a solution x⋆ .               We say 𝔽 is monotone if
+⟨𝔽(x) − 𝔽(y), x − y⟩ ≥ 0 for all x, y ∈ Rd , and L-Lipschitz if ∥𝔽(x) − 𝔽(y)∥ ≤ L ∥x − y∥ for all
+                                                                           2
+x, y ∈ Rd . It is 1/L-cocoercive if ⟨𝔽(x) − 𝔽(y), x − y⟩ ≥ L1 ∥𝔽(x) − 𝔽(y)∥ for all x, y ∈ Rd . While
+cocoercivity implies monotonicity and Lipschitz continuity, the converse need not hold. We say an
+operator 𝕋 : Rd → Rd is nonexpansive if ∥𝕋(x) − 𝕋(y)∥ ≤ ∥x − y∥ for all x, y ∈ Rd .
+    Denote the identity operator by 𝕀. For a monotone continuous 𝔽, its resolvent 𝕁α𝔽 = (𝕀 + α𝔽)−1
+is well defined operator on Rd and is (firmly) nonexpansive for any α > 0, and fixed points of 𝕁α𝔽 are
+precisely the zeros of 𝔽. When 𝔽 is 1/L-cocoercive, 𝕀 − α𝔽 is nonexpansive for 0 < α ≤ L2 [1].
+
+
+Assumption 1.1 (Stochastic oracle). The stochastic oracle operator 𝔽(x; ξ) is jointly measurable,
+unbiased and has bounded variance. That is, there exists σ > 0 such that for every x ∈ Rd ,
+                                                h                   i
+                                                                  2
+                       E [𝔽(x; ξ)] = 𝔽(x),    E ∥𝔽(x; ξ) − 𝔽(x)∥ ≤ σ 2 .
+
+Furthermore, for each sampled ξ, the stochastic operator 𝔽(·; ξ) can be evaluated at multiple points.
+
+              P k, we can draw a mini-batch Bk containing Bk independent samples, which defines
+   At iteration
+𝔽Bk (x) = B1k ξ∈Bk 𝔽(x; ξ). Whenever we use them, mini-batches are independent across iterations,
+newly drawn samples being independent of all previously drawn ones.
+
+
+2     Stochastic cocoercive root-finding and fixed-point problems
+We first consider stochastic root-finding problems with cocoercive 𝔽 = E [𝔽(·; ξ)]. This can be recast into
+stochastic fixed-point problem by taking 𝕋(·; ξ) = 𝕀 − α𝔽(·; ξ) for appropriate α, so that 𝕋 = E [𝕋(·; ξ)]
+is nonexpansive. For the analysis, we will take this fixed-point view. Throughout the section, x⋆ will
+denote a fixed point of 𝕋, or equivalently, a zero of 𝔽.
+    The main result of this section is to improve the O(ϵ−3 ) complexity bound for S-Dual-OHM
+provided in [46] by optimizing the variance term contributed by each iteration number k. For the
+convergence analysis, it is convenient to consider the following abstraction: hat iteration k, consider
+                                                                                                     i
+                                                                                                   2
+using a random map 𝕋k at each iteration k such that E [𝕋k (u)] = 𝕋(u) and E ∥𝕋k (u) − 𝕋(u)∥ ≤ σk2
+for all deterministic u ∈ Rd . In particular, for any u, v ∈ Rd it satisfies
+              h                   i                        h                   i
+                                2                   2                        2   2
+             E ∥𝕋k (u) − 𝕋(v)∥ = ∥𝕋(u) − 𝕋(v)∥ + E ∥𝕋k (u) − 𝕋(u)∥ ≤ ∥u − v∥ + σk2 .                   (4)
+
+We will additionally require each 𝕋k to be square-nonexpansive in expectation. Together, we state:
+
+
+
+
+                                                    3
+ Condition 2.1. The jointly measurable random maps 𝕋k are independent across iterations, and for
+ every deterministic u, v ∈ Rd , satisfy
+               h                    i              h                  i
+                                  2       2                         2           2
+             E ∥𝕋k (u) − 𝕋(v)∥ ≤ ∥u − v∥ + σk2 , E ∥𝕋k (u) − 𝕋k (v)∥ ≤ ∥u − v∥ ,             (5)
+
+ where σk2 ≥ 0 is deterministic and the expectation is taken over randomness in 𝕋k .
+
+   Now fix N ≥ 2 and consider the following formulation of S-Dual-OHM:
+                                  N −k−1
+                   xk+1 = xk +           (𝕋k (xk ) − 𝕋k−1 (xk−1 ))                             (S-Dual-OHM)
+                                   N −k
+for k = 0, . . . , N − 2, where 𝕋−1 (x−1 ) := x0 . Its final output, xN −1 , has small fixed-point residual.
+
+
+ Theorem 2.2. S-Dual-OHM run with random maps 𝕋0 , . . . , 𝕋N −2 satisfying Condition 2.1 and
+                                                                1
+ x0 ∈ Rd such that ∥x0 − x⋆ ∥ ≤ D satisfies: with aN,k = (N −k)(N −k−1) ,
+
+                              h                     i 4D2     N
+                                                              X −2
+                                                  2
+                             E ∥xN −1 − 𝕋(xN −1 )∥ ≤      + 6      aN,k σk2 .
+                                                      N2
+                                                                      k=0
+
+   Observe that k aN,k = 1 − N1 , so if each 𝕋k is a mini-batch operator with a constant batch-size B,
+                  P
+                          2 2                                                          2 2
+then we can take σk2 ≡ α Bσ and the summation of variance terms is bounded by 6αBσ , independently
+of N . This case precisely recovers [46, Theorem 4.1]. We note that while Theorem 2.2 is more general
+than [46, Theorem 4.1], their proof essentially provides all ideas necessary to prove this result.
+   Our new insight here is that the noise terms from earlier iterations are much less costly than the later
+                                                  1
+ones because they are weighted by aN,k = (N −k)(N   −k−1) . Therefore, we may allow larger σk for early k
+and enforce smaller σk later. For the special case with mini-batching, this means that we can allocate
+smaller batches to the earlier iterations without affecting the total noise term much. Optimizing this
+batch schedule yields a significant oracle complexity improvement, as detailed below.
+
+2.1    Mini-batching and optimized allocation of the oracle budget
+Consider
+  h      the case where
+                    i     𝕋(·; ξ) his an unbiased stochastic
+                                                       i        oracle such that E [𝕋(x; ξ)] = 𝕋(x),
+                  2                                  2               2
+E ∥𝕋(x; ξ) − 𝕋(x)∥ ≤ τ 2 and E ∥𝕋(x; ξ) − 𝕋(y; ξ)∥ ≤ ∥x − y∥ for any deterministic x, y ∈ Rd ,
+and we use the mini-batch operator
+                                                1 X
+                                       𝕋k (x) =         𝕋(x; ξ)                                  (6)
+                                                Bk
+                                                         ξ∈Bk
+
+where each Bk is a uniformly and independently sampled mini-batch of size Bk . In this case, Condi-
+                                 τ2
+tion 2.1 is satisfied with σk2 = B k
+                                     , and one evaluation of 𝕋k costs Bk oracle evaluations. The total noise
+                                                                      PN −2 a
+term given by Theorem 2.2 is therefore proportional to AN := k=0 BN,k          k
+                                                                                 . Now treating batch-sizes
+                                                                                     PN −2
+as real numbers, and assuming the total oracle access (complexity) constraint k=0 Bk ≤ Q, we can
+optimize Bk to minimize the noise term, using Cauchy–Schwarz:
+                                  N  −2
+                                               !2     N −2
+                                                                ! N −2 !
+                                   X    √              X   aN,k     X
+                                          aN,k    ≤                     Bk .                             (7)
+                                                            Bk
+                                  k=0                  k=0         k=0
+                                                                      √
+                                               √                    Q a               PN −2 √
+Equality holds when Bk is proportional to   aN,k .       Hence Bk = SNN,k , where SN = k=0 aN,k , is
+                                        2
+                                       SN
+the optimal allocation satisfying AN = Q . Now rounding up each Bk yields
+                           √                N −2                           N −2
+                           Q aN,k                                                        S2
+                                            X                              X      aN,k
+                   Bk =             ,               Bk ≤ Q + N − 1,                     ≤ N.                   (8)
+                            SN                                                      Bk    Q
+                                             k=0                            k=0
+
+
+                                                        4
+                 PN −2    1
+Note that SN ≤     k=0 N −k−1 ≤ 1 + log N .
+
+
+
+Corollary 2.3. Let ϵ > 0. S-Dual-OHM run with the mini-batch operators (6), with
+
+                                                              8τ 2 SN
+                                                                    2
+                                                                 
+                                        4D
+                          N = max 2,           , Q = max 1,
+                                          ϵ                      ϵ2
+                                    h                     i
+                                                        2
+and the batch schedule (8) attains E ∥xN −1 − 𝕋(xN −1 )∥ ≤ ϵ2 using
+
+                                                                            2 !
+                                     D τ2
+                                                                  
+                                                                    D
+                                   O   + 2              1 + log 1 +                                      (9)
+                                     ϵ   ϵ                          ϵ
+
+oracle evaluations.
+Proof. By Theorem 2.2 and (8), we have
+                                i 4D2        N −2
+          h
+                              2            2
+                                             X    aN,k   4D2   6τ 2 SN
+                                                                     2
+                                                                         ϵ2   3ϵ2
+         E ∥xN −1 − 𝕋(xN −1 )∥ ≤      + 6τ             ≤     +         ≤    +     = ϵ2 .
+                                  N2               Bk    N2       Q      4     4
+                                                         k=0
+                                           2  2                2        2
+                                         8τ SN
+                                                  ≤ 1 + 8τ (1+log N)
+                   4D 
+Because N ≤ 2 +       ϵ    and Q ≤ 1 +     ϵ2                ϵ2      , the total complexity is at most
+                  N −2                                                   2
+                                                     8τ 2
+                                                                
+                  X                            4D                     4D
+                          Bk ≤ Q + N − 1 ≤ 2 +      + 2 1 + log 2 +           .
+                                                ϵ     ϵ                ϵ
+                  k=0
+
+
+
+
+2.2    Specialization to stochastic cocoercive root-finding
+Consider the operator oracle of Assumption 1.1. Suppose additionally that 𝔽(·; ξ) is cocoercive in
+expectation, i.e., for every u, v ∈ Rd ,
+                              h                     i
+                                                  2
+                             E ∥𝔽(u; ξ) − 𝔽(v; ξ)∥ ≤ L ⟨𝔽(u) − 𝔽(v), u − v⟩ .                 (10)
+
+For 0 < α ≤ 2/L, taking 𝕋 = 𝕀 − α𝔽, 𝕋(·; ξ) = 𝕀 − α𝔽(·; ξ) and 𝕋k = 𝕀 − α𝔽Bk satisfies Condition 2.1
+                             2 2
+with τ 2 = α2 σ 2 and σk2 = αBσk , and Theorem 2.2 gives
+                                                            N −2
+                                  h
+                                              2
+                                                i  4D2      X    aN,k
+                                 E ∥𝔽(xN −1 )∥ ≤ 2 2 + 6σ 2           .
+                                                  α N             Bk
+                                                                            k=0
+                                                                              h             i
+                                                                                          2
+With batch-sizes (8) and α = L1 , Corollary 2.3 with αϵ in place of ϵ yields E ∥𝔽(xN −1 )∥ ≤ ϵ2 in
+
+                                                 LD σ 2
+                                                                          
+                                                                       LD
+                                         O          + 2 log2
+                                                  ϵ   ϵ                 ϵ
+operator evaluations.
+
+
+3     Stochastic monotone root-finding
+Now we extend the result of the previous section to stochastic root-finding for monotone and Lipschitz
+operators. Recall that the resolvent 𝕋 = 𝕁α𝔽 of a maximally monotone operator 𝔽 is nonexpansive; we
+leverage this connection to again take the fixed-point view as in Section 2. Because resolvents are not
+exactly computable, we run inner loops to compute them approximately. These will yield random maps
+𝕋k , which may no longer be unbiased estimators of 𝕋 satisfying Condition 2.1. We instead require the
+following weaker condition. Later, we show how to select concrete 𝕋k satisfying it.
+
+
+                                                          5
+Condition 3.1. The jointly measurable random maps 𝕋k are independent across iterations, and for
+every deterministic u, v ∈ Rd , satisfy
+                   h                    i                               
+                                      2     2              2           2
+                 E ∥𝕋k (u) − 𝕋(v)∥ ≤ ∥u − v∥ + ρk ∥u − x⋆ ∥ + ∥v − x⋆ ∥ + σk2              (11)
+                  h                     i                                    
+                                      2     2              2           2
+               E ∥𝕋k (u) − 𝕋k (v)∥ ≤ ∥u − v∥ + ρk ∥u − x⋆ ∥ + ∥v − x⋆ ∥ + σk2              (12)
+
+where σk2 , ρk ≥ 0 are deterministic and the expectation is taken over randomness in 𝕋k .
+
+
+3.1    Outer bound under generalized condition on 𝕋k
+Now we present an analogue of Theorem 2.2 under the relaxed Condition 3.1. This result exactly
+recovers Theorem 2.2 as a special case with ρk ≡ 0, so the proof of Theorem 3.2, which we present in
+Appendix A, accounts for the results from the previous section.
+
+Theorem 3.2. S-Dual-OHM run with random maps 𝕋0 , . . . , 𝕋N −2 satisfying Condition 3.1 and
+                                                               1
+                                                                               PN −2
+x0 ∈ Rd such that ∥x0 − x⋆ ∥ ≤ D satisfies: with aN,k = (N −k)(N −k−1) and R =  k=0 ρk ,
+
+                                                             N −2                            −2
+                                                                                           N
+                                                                                                          !
+                h
+                                         2
+                                             i     4D2     X                               X
+              E ∥xN −1 − 𝕋(xN −1 )∥              ≤     + 6   aN,k σk2 + 15ReR    D + 2
+                                                                                                  σk2         .
+                                                   N2
+                                                             k=0                           k=0
+
+   In particular, when 𝕋 = 𝕁α𝔽 , we obtain the following bound on the operator norm.
+
+
+Corollary 3.3. Let 𝔽 : Rd → Rd be monotone and L-Lipschitz, and 𝕋 = 𝕁α𝔽 for some α ∈ 0, L1 . Fix
+                                                                                          
+
+N ≥ 2, x0 ∈ Rd and let D = ∥x0 − x⋆ ∥. Let S-Dual-OHM be run with random maps 𝕋0 , . . . , 𝕋N −1
+                                                                     PN −1
+satisfying Condition 3.1, and set yN = 𝕋N −1 (xN −1 ). Then, with R = k=0 ρk ,
+                                                      N −1                                 −1
+                                                                                         N
+                                                                                                      !
+                    h
+                             2
+                                 i     8D2 24 X    σk2    30                             X
+                E ∥𝔽(yN )∥           ≤ 2 2+ 2            + 2 ReR                 2
+                                                                                D +             σk2       .       (13)
+                                      α N  α    (N − k)2  α
+                                                      k=0                                k=0
+
+
+
+3.2    Inner loop for stable approximate resolvents 𝕋k
+Our choice of inner loop algorithm, i.e., the construction of 𝕋k , will require the following samplewise
+monotonicity and Lipschitzness in addition to Assumption 1.1. Note that it implies the monotonicity
+and L-Lipschitzness of the mean operator 𝔽, but not vice versa.
+
+
+Assumption 3.4. 𝔽(·; ξ) is almost surely monotone and L-Lipschitz on Rd , with a common L > 0.
+
+   In Section 2, we achieved reduced variance σk2 by allocating more sample budgets to iteration k, via
+mini-batching. Here we aim to choose 𝕋k similarly, ensuring Condition 3.1 with smaller σk2 given a larger
+number of subroutine (inner loop) iterations. First, suppose ideally that we can compute stochastic
+proximal operations exactly. Given sample budget Bk ≥ 1, first consider 𝕋          bk defined by:
+                     
+                     z0 = u
+                     
+                                                              
+                       zj+1 = 𝕁αγj 𝔽(·;ξj ) (1 − γj )zj + γj u for j = 0, . . . , Bk − 1             (14)
+                     
+                       𝕋k (u) = zBk
+                     b
+
+                    1          2
+where we use α = 2L   , γj = j+2  and each ξj is a fresh sample drawn independently of all preceding
+ones. Following the technical treatment of stochastic proximal point methods similar to [40], we can
+show that 𝕋bk is almost surely nonexpansive, and additionally satisfies
+                                                                  4α2 σ 2
+                                                 
+                                                2
+                                                             2
+                              E b 𝕋k (u) − 𝕋(v)     ≤ ∥u − v∥ +                                 (15)
+                                                                  Bk + 1
+
+                                                             6
+Algorithm 1 Approximate resolvent 𝕋k
+Require: Input u, Sample budget Bk ≥ 1, Tolerance ρk ∈ (0, 1], Lipschitz constant L, Hyperparame-
+    ters α, γj
+ 1: w0 ← u,
+ 2: for j = 0, . . . , Bk − 1 do
+ 3:     Draw ξj
+ 4:     pj ← (1 − γj )wj +   l γj u m
+ 5:     q0 ← pj , mk,j ← log(16/ρ      k)
+                                log(j+2)
+ 6:     for r = 0, . . . , mk,j do
+ 7:        qr+1 ← pj − αγj 𝔽(qr ; ξj )
+ 8:     end for
+ 9:     wj+1 ← qmk,j +1
+10: end for
+11: 𝕋k (u) ← wBk
+12: return 𝕋k (u)
+
+
+
+for any u, v ∈ Rd , as we show in Appendix B. Hence 𝕋     bk satisfies Condition 2.1 with σ 2 = 4α2 σ2 .
+                                                                                           k    Bk +1
+    However, because 𝕁αγj 𝔽(·;ξj ) (pj ) is generally not directly computable, we can only compute it up
+to errors, via forward evaluations 𝔽(·; ξj ). Nevertheless, this is not a significant overhead because it
+is equivalent to finding the zero of a 1-strongly monotone operator z 7→ 𝕀 + αγj 𝔽(z; ξj ) − pj , which
+converges rapidly with simple operator descent using step-size 1. Algorithm 1 presents an approximate
+version of (14) replacing the resolvent step with this descent loop.
+
+
+Lemma 3.5. Under Assumptions 1.1 and 3.4, the random map 𝕋k defined    h via Algorithm   i1 with
+     1           2                                2   6α2 σ 2                 log(16/ρk )
+α = 2L and γj = j+2 satisfies Condition 3.1 with σk = Bk +1 and uses O Bk 1 + log(Bk +1)     oracle
+evaluations.
+   The parameter ρk appears in Condition 3.1 and controls the tolerance to violation of nonexpansive-
+ness in expectation. Bk is the sample budget, controlling the variance bound σk2 .
+
+3.3    Optimized allocation of Bk and complexity analysis
+Fix N ≥ 2 and choose ρk ≡ 2N1 3 , so that ReR = O N12 in Corollary 3.3, so together with Lemma 3.5,
+                                                       
+                                                                               PN −1        1
+the total variance term in (13) is bounded by a constant multiple of AN :=       k=0 (Bk +1)(N −k)2 ≤
+PN −1      1
+  k=0 Bk (N −k)2 . Lemma 3.5 also shows that the total complexity is
+
+              −1                 −1                                    −1
+            N                  N
+                                                !              "     N
+                                                                                          #!
+             X                 X        Bk                           X          Bk
+        O        Bk + log(eN )                    = O log(eN ) N +
+                                    log(Bk + 1)                           log(eN/(N − k))
+             k=0                   k=0                                    k=0
+
+where we show in Appendix B.3 that the latter bound holds for any Bk ≥ 1. Now to optimize the
+allocation of Bk , similarly as in Section 2.1, we temporarily view Bk as real numbers and use Cauchy-
+                                                PN   −1       Bk
+Schwarz to minimize AN while keeping Q := k=0 log(eN/(N           −k)) fixed:
+
+          N −1
+                                            ! 2      N −1
+                                                                        ! N −1                  !
+          X                  1                       X          1           X         Bk
+                                                ≤                                                 .
+                                                          (N − k)2 Bk
+                        p
+               (N − k) log(eN/(N − k))                                          log(eN/(N − k))
+          k=0                                        k=0                    k=0
+                                                   q
+Equality holds when Bk is proportional to N 1−k log NeN    −k . More precisely, we choose:
+                                     ( &               s                      ')
+                                             1024σ 2
+                                                                      
+                                                                         eN
+                           Bk = max 1, 2                 log(eN ) log                               (16)
+                                           ϵ (N − k)                    N −k
+for k = 0, . . . , N − 1. The resulting complexity bound is as follows, and we present its detailed proof in
+Appendix B.3.
+
+
+                                                     7
+ Corollary 3.6 (Oracle complexity for monotone
+                                             root-finding).     Under Assumptions 1.1 and 3.4, let
+ ϵ > 0, ∥x0 − x⋆ ∥ ≤ D. Choose N = max 2, 32LD                       1
+                                                     
+                                                  ϵ    and  ρ k ≡  2N 3 . Run S-Dual-OHM with 𝕋k
+ computed
+   h       byiAlgorithm 1, using batch schedule (16). Then its final output yN = 𝕋N −1 (xN −1 ) attains
+              2
+ E ∥𝔽(yN )∥       ≤ ϵ2 using
+
+                                                                        σ2
+                                                                                
+                                           LD               LD                2    LD
+                               O        1+          log 1 +            + 2 log 1 +                         (17)
+                                            ϵ                ϵ           ϵ          ϵ
+
+ operator evaluations.
+
+
+4     Numerical experiments
+We evaluate the empirical effectiveness of S-Dual-OHM for cocoercive and monotone stochastic root-
+finding problems.
+                 Weconsider two problems, both with stochastic oracle of the form 𝔽(x; ξ) = 𝔽(x) + ξ
+                     2
+where ξ ∼ N 0, σ dId , and use the residual norm ∥𝔽(xk )∥ as a measure of convergence.
+
+Baselines. Denote by Bk and Bk′ independent mini-batches of fixed size B, and let 𝔽Bk and 𝔽Bk′
+be the corresponding mini-batch operators. We consider the following basic algorithms: Stochastic
+Gradient Descent-Ascent (SGDA), Stochastic OHM (S-OHM) and Stochastic Extragradient (SEG),
+where the first two algorithms are used in Experiment 1 where 𝔽 is cocoercive, and SEG is used for
+both experiments. Their update rules are given by
+
+                     SGDA :         xk+1 = xk − η𝔽Bk (xk )
+                         SEG :      xk+1/2 = xk − η𝔽Bk (xk ),             xk+1 = xk − η𝔽Bk′ (xk+1/2 )
+                                               1       k+1
+                    S-OHM :         xk+1 =        x0 +     (xk − η𝔽Bk (xk ))
+                                              k+2      k+2
+In Experiment 2, we also include SEG with averaging, which uses separately tuned parameters. Both
+experiments also use the practical single-loop RAIN implementation from Chen and Luo [7]:
+                                                                                            
+        xk+1/2 = xk − η (𝔽Bk (xk ) + rk (xk )) ,  xk+1 = xk − η 𝔽Bk′ (xk+1/2 ) + rk (xk+1/2 )
+
+where
+                         k−1
+                         X                                                            a              c
+          rk (v) = λγ          (1 + γ)t (v − xt ),        γ = eg/T − 1,       λ=          ,    η=
+                         t=0
+                                                                                   eg − 1           L+a
+
+and g, a, c are tunable hyperparameters. For all baseline algorithms, we use a fixed oracle budget Q
+and take T = ⌊Q/B⌋ for SGDA and S-OHM, and T = ⌊Q/(2B)⌋ for SEG and RAIN.
+
+Experiment 1: Cocoercive problem. We use the worst-case affine operator construction from
+Park and Ryu [33], which has also been considered in Yoon and Loizou [46]. Let d = 1001, and define
+                                         
+                       2
+       ℍ(x) = xd − √ , −x1 , . . . , −xd−1 ,     𝔽(x) = ℍ(x − s) + (x − s),      𝕋 = 𝕀 − η𝔽
+                        d
+where s ∼ N (0, Id ) is drawn and fixed across all runs. The operator 𝔽 is 1/2-cocoercive and has a unique
+zero x⋆ = s+ √1d 1. We use x0 = 0, σ = 2, and a budget of 2×104 oracle calls. Our proposed algorithm is
+the scheduled version of S-Dual-OHM, which uses the allocation profile in (8), normalized to the oracle
+budget. We provide the full details in Appendix C. By contrast, S-Dual-OHM (constant) denotes the
+version using a constant batch-size B. For that algorithm, SGDA and S-OHM, we tune B over the
+grid {1, 2, 4, 8, 16, 32, 64, 128, 256}, and η over {0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 1}. SEG uses
+the same grid for B and η ∈ {0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.3, 0.45}. RAIN uses B ∈ {1, 4, 16, 64},
+
+
+                                                               8
+                       (a) Cocoercive operator                                     (b) Huber minimax operator
+                                                                        10−2
+
+
+          101
+
+
+
+‖F(xk)‖   100
+                                                              ‖F(xk)‖
+                                                                        10−3
+
+
+
+          10−1
+
+
+                 0.0   0.4    0.8    1.2    1.6     2.0                        0      4       8          12   16   20
+                                                      4
+                        Cumulative oracle calls ×10                                   Cumulative oracle calls ×104
+                               S-Dual-OHM (scheduled)         SGDA                  RAIN (single-loop)
+                               S-Dual-OHM (constant)          SEG                   SEG (averaged)
+                               S-OHM
+
+
+Figure 1: Mean residual norms over ten independent runs. The horizontal axis counts every sampled-
+operator evaluation, including all samples in mini-batches and inner solves.
+
+
+g ∈ {1, 3, 6}, a ∈ {0.001, 0.01, 0.1, 1}, and c ∈ {0.02, 0.05, 0.1, 0.2, 0.5, 0.8}. We observe that RAIN and
+S-Dual-OHM (constant) are the most competitive among the baselines, and notably, S-Dual-OHM
+(scheduled) outperforms its constant-batch counterpart by a large margin (Fig. 1(a)), even though they
+are sharing the same designing principle and only the batch schedule is chosen differently.
+
+Experiment 2: Beyond cocoercivity. We use the Huber minimax problem used in Chen and Luo
+[7]: writing cν (t) = min{ν, max{−ν, t}} componentwise, its saddle operator is
+                                                                                       
+                      𝔽(x(1) , x(2) ) = (1 − δ)cν x(1) + δx(2) , (1 − δ)cν x(2) − δx(1)
+                                                                              
+
+
+where x = (x(1) , x(2) ) ∈ R1024 and we use δ = 0.01, ν = 5 × 10−5 . This operator is monotone and
+1-Lipschitz but not cocoercive. We choose a fixed random unit vector x0 , σ = 0.032, and a budget of
+2 × 105 calls. Our scheduled S-Dual-OHM uses α = 21 and the allocation profile in (16), normalized
+to the oracle budget for each candidate N . We provide the full details in Appendix C. For Fig. 1(b),
+we use a practical variant of Algorithm 1 where we use constant-length loop steps (mk,j ≡ m), while
+we also report below the residual value from Algorithm 1 run with mk,j set precisely as the theory
+prescribes, which are more conservative at the tested oracle budget.
+    After an initial joint search over m and N , we fix m = 1 (two descent iterations per inner sample) and
+further tune N via refined grid search, separately for the two variants. We select N = 24000 for S-Dual-
+OHM (scheduled) and N = 3200 for S-Dual-OHM (constant). SEG selects B ∈ {1, 4, 16, 64, 256}
+and η ∈ {0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.4, 0.7, 0.9, 1, 2, 5, 10}. For RAIN, we first sweep the grid
+(B, g, a, c) ∈ {1, 8, 64} × {1, 3, 6} × {0.0001, 0.001, 0.01, 0.1, 1} × {0.02, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 2, 5, 10},
+and later refine the search using the union of {32, 64, 128} × {2, 3, 4, 6} × {0.003, 0.01, 0.03} ×
+{0.35, 0.5, 0.7} and {1} × {6} × {0.03, 0.1, 0.3} × {0.005, 0.01, 0.015, 0.02, 0.03, 0.05}.
+    Fig. 1(b) shows that the practical variant of scheduled S-Dual-OHM achieves the smallest residual
+of 2.55 × 10−4 . The final residual values were 1.47 × 10−3 for S-Dual-OHM (constant) and 1.41 × 10−3
+for RAIN. We also test the theoretically prescribed schedule following Algorithm 1 and Lemma 3.5,
+and observe that it reaches final residual norm 1.46 × 10−3 at its tuned horizon N = 2400.
+
+
+
+
+                                                          9
+5    Conclusion
+In this work, we show that the robustness of dual-anchor acceleration observed in recent prior work can
+be translated into near-optimal oracle efficiency for stochastic root-finding. This is achieved by carefully
+controlling how errors at different iterations contribute to the residual bound. In the cocoercive setting,
+without materially changing the underlying dual-anchor acceleration mechanism but only changing
+the batch-size schedules, we close the polynomial complexity gap to the lower bound. We show that
+the same principle extends to samplewise monotone and Lipschitz problems via stochastic resolvent
+approximations. These results strengthen the motivation for studying distinct deterministic acceleration
+mechanisms; their different responses to noise can provide alternative, clean routes to designing efficient
+stochastic algorithms.
+    Our analysis highlights the separation between choosing the acceleration mechanism governing the
+outer loop and constructing random maps that meet suitable requirements. While we have used inner
+loops to handle these requirements, the broader framework we propose is not necessarily confined to
+algorithms with nested loop structures. Natural directions for future work include designing a single-
+loop algorithm for monotone problems from the same principles, removing the logarithmic factors from
+oracle complexity, developing adaptive budget schedules that require less knowledge of the problem, or
+extending our framework to horizon-free algorithms.
+
+AI use statement
+The authors used AI tools to carry out the technical derivations quickly based on our initial conceptual
+ideas. We have carefully checked, rederived and significantly restructured the mathematical arguments.
+We have also used AI to assist with manuscript drafting and editing, and implementation of the nu-
+merical experiments. The authors checked every part of the paper and take full responsibility for its
+final content.
+
+
+Acknowledgments
+TaeHo Yoon’s contribution to this work was supported by NSF CCF 2504626. Nicolas Loizou’s contri-
+bution to this work was supported by NSF CCF 2504626 and NSF CAREER 2542902.
+
+
+References
+ [1] Heinz H. Bauschke and Patrick L. Combettes. Convex Analysis and Monotone Operator Theory
+     in Hilbert Spaces. Springer International Publishing, 2nd edition, 2017.
+ [2] Pascal Bianchi. Ergodic convergence of a stochastic proximal point algorithm. SIAM Journal on
+     Optimization, 26(4):2235–2260, 2016.
+ [3] Mario Bravo and Juan Pablo Contreras. Stochastic Halpern iteration in normed spaces and appli-
+     cations to reinforcement learning. Mathematical Programming, 2026.
+ [4] Xufeng Cai, Chaobing Song, Cristóbal A Guzmán, and Jelena Diakonikolas. Stochastic halpern
+     iteration with variance reduction for stochastic monotone inclusions. Neural Information Processing
+     Systems, 2022.
+ [5] Xufeng Cai, Ahmet Alacaoglu, and Jelena Diakonikolas. Variance reduced halpern iteration for
+     finite-sum monotone inclusions. International Conference on Learning Representations, 2024.
+ [6] Yang Cai and Weiqiang Zheng. Accelerated single-call methods for constrained min-max optimiza-
+     tion. International Conference on Learning Representations, 2023.
+ [7] Lesi Chen and Luo Luo. Near-optimal algorithms for making the gradient small in stochastic
+     minimax optimization. Journal of Machine Learning Research, 25(387):1–44, 2024.
+
+
+
+                                                    10
+ [8] Sayantan Choudhury, Eduard Gorbunov, and Nicolas Loizou. Single-call stochastic extragradient
+     methods for structured non-monotone variational inequalities: Improved analysis under weaker
+     conditions. Neural Information Processing Systems, 2023.
+ [9] Juan Pablo Contreras and Roberto Cominetti. Optimal error bounds for non-expansive fixed-point
+     iterations in normed spaces. Mathematical Programming, 199(1):343–374, 2023.
+[10] Jelena Diakonikolas. Halpern iteration for near-optimal and parameter-free monotone inclusion
+     and strong solutions to variational inequalities. Conference on Learning Theory, 2020.
+
+[11] Jelena Diakonikolas. Pushing the complexity boundaries of fixed-point equations: Adaptation to
+     contraction and controlled expansion. SIAM Journal on Optimization (To Appear), 2025.
+[12] Jelena Diakonikolas.       Solving stochastic fixed-point equations with high probability.
+     arXiv:2607.09097, 2026.
+
+[13] Jelena Diakonikolas, Constantinos Daskalakis, and Michael I. Jordan. Efficient Methods for Struc-
+     tured Nonconvex-Nonconcave Min-Max Optimization. International Conference on Artificial In-
+     telligence and Statistics, 2021.
+[14] Francisco Facchinei and Jong-Shi Pang. Finite-Dimensional Variational Inequalities and Comple-
+     mentarity Problems. Springer-Verlag, 2003.
+
+[15] Eduard Gorbunov, Hugo Berard, Gauthier Gidel, and Nicolas Loizou. Stochastic extragradient:
+     General analysis and improved rates. International Conference on Artificial Intelligence and Statis-
+     tics, 2022.
+[16] Benjamin Halpern. Fixed points of nonexpanding maps. Bulletin of the American Mathematical
+     Society, 73(6):957–961, 1967.
+[17] Ruichen Jiang and Aryan Mokhtari. Generalized optimistic methods for convex-concave saddle
+     point problems. SIAM Journal on Optimization, 35(3):2066–2097, 2025.
+[18] Anatoli Juditsky, Arkadi Nemirovski, and Claire Tauvel. Solving variational inequalities with
+     stochastic mirror-prox algorithm. Stochastic Systems, 1(1):17–58, 2011.
+
+[19] Donghwan Kim. Accelerated proximal point method for maximally monotone operators. Mathe-
+     matical Programming, 190(1–2):57–87, 2021.
+[20] G. M. Korpelevich. The extragradient method for finding saddle points and other problems.
+     Ekonomika i Matematicheskie Metody, 12(4):747–756, 1976.
+
+[21] M. A. Krasnosel’skii. Two remarks on the method of successive approximations. Uspekhi Matem-
+     aticheskikh Nauk, 10(1):123–127, 1955.
+[22] Sucheol Lee and Donghwan Kim. Fast extra gradient methods for smooth structured nonconvex–
+     nonconcave minimax problems. Neural Information Processing Systems, 2021.
+
+[23] Felix Lieder. On the convergence rate of the Halpern-iteration. Optimization Letters, 15(2):405–
+     418, 2021.
+[24] Tianyi Lin, Chi Jin, and Michael I. Jordan. Near-optimal algorithms for minimax optimization.
+     Conference on Learning Theory, 125, 2020.
+[25] William Robert Mann. Mean value methods in iteration. Proceedings of the American Mathematical
+     Society, 4(3):506–510, 1953.
+[26] B. Martinet. Régularisation d’inéquations variationnelles par approximations successives. Revue
+     Française d’Informatique et de Recherche Opérationnelle, Série Rouge, 4(3):154–158, 1970.
+
+
+
+
+                                                   11
+[27] Aryan Mokhtari, Asuman Ozdaglar, and Sarath Pattathil. A unified analysis of extra-gradient and
+     optimistic gradient methods for saddle point problems: Proximal point approach. International
+     Conference on Artificial Intelligence and Statistics, 2020.
+[28] Aryan Mokhtari, Asuman E. Ozdaglar, and Sarath Pattathil. Convergence rate of O(1/k) for
+     optimistic gradient and extragradient methods in smooth convex-concave saddle point problems.
+     SIAM Journal on Optimization, 30(4):3230–3251, 2020.
+[29] Renato D. C. Monteiro and B. F. Svaiter. On the complexity of the hybrid proximal extragradient
+     method for the iterates and the ergodic mean. SIAM Journal on Optimization, 20(6):2755–2787,
+     2010.
+[30] Renato D. C. Monteiro and Benar F. Svaiter. Iteration-complexity of a newton proximal extra-
+     gradient method for monotone variational inequalities and inclusion problems. SIAM Journal on
+     Optimization, 22(3):914–935, 2012.
+[31] Arkadi Nemirovski. Prox-method with rate of convergence O(1/t) for variational inequalities with
+     Lipschitz continuous monotone operators and smooth convex-concave saddle point problems. SIAM
+     Journal on Optimization, 15(1):229–251, 2004.
+[32] Yurii Nesterov. Dual extrapolation and its applications to solving variational inequalities and
+     related problems. Mathematical Programming, 109(2):319–344, 2007.
+[33] Jisun Park and Ernest K Ryu. Exact optimal accelerated complexity for fixed-point iterations.
+     International Conference on Machine Learning, 2022.
+[34] L. D. Popov. A modification of the Arrow–Hurwicz method for search of saddle points. Mathe-
+     matical Notes of the Academy of Sciences of the USSR, 28(5):845–848, 1980.
+[35] Alexander Rakhlin and Karthik Sridharan. Online learning with predictable sequences. Conference
+     on Learning Theory, 2013.
+[36] Sasha Rakhlin and Karthik Sridharan. Optimization, learning, and games with predictable se-
+     quences. Neural Information Processing Systems, 2013.
+[37] R. Tyrrell Rockafellar. Monotone operators and the proximal point algorithm. SIAM Journal on
+     Control and Optimization, 14(5):877–898, 1976.
+[38] Ernest K Ryu and Wotao Yin. Large-Scale Convex Optimization via Monotone Operators. Cam-
+     bridge University Press, 2022.
+[39] Shoham Sabach and Shimrit Shtern. A first order method for solving convex bilevel optimization
+     problems. SIAM Journal on Optimization, 27(2):640–660, 2017.
+[40] Abdurakhmon Sadiev, Laurent Condat, and Peter Richtárik. Stochastic Proximal Point Methods
+     for Monotone Inclusions under Expected Similarity. arXiv:2405.14255, 2024.
+[41] Gesualdo Scutari, Francisco Facchinei, Jong-Shi Pang, and Daniel P. Palomar. Real and complex
+     monotone communication games. IEEE Transactions on Information Theory, 60(7):4197–4231,
+     2014.
+[42] Jaewook J. Suh, Jisun Park, and Ernest K. Ryu. Continuous-time analysis of anchor acceleration.
+     Neural Information Processing Systems, 2023.
+[43] Quoc Tran-Dinh and Yang Luo. Halpern-type accelerated and splitting algorithms for monotone
+     inclusions. arXiv:2110.08150, 2021.
+[44] Rainer Wittmann. Approximation of fixed points of nonexpansive mappings. Archiv der Mathe-
+     matik, 58(5):486–491, 1992.
+[45] TaeHo Yoon and Benjamin Grimmer. A Theory of Composition and Duality of Extremal Optimal
+     Fixed-Point Algorithms. arXiv:2605.02231, 2026.
+
+
+                                                 12
+[46] TaeHo Yoon and Nicolas Loizou. Direct Acceleration of Stochastic Root-Finding Without Variance
+     Reduction and Regularization. Accepted to Neural Information Processing Systems, 2026.
+
+[47] TaeHo Yoon and Ernest K. Ryu. Accelerated algorithms for smooth convex-concave minimax
+     problems with O(1/k 2 ) rate on squared gradient norm. International Conference on Machine
+     Learning, 2021.
+[48] TaeHo Yoon and Ernest K. Ryu. Accelerated minimax algorithms flock together. SIAM Journal
+     on Optimization, 35(1):180–209, 2025.
+
+[49] TaeHo Yoon, Jaeyeon Kim, Jaewook J. Suh, and Ernest K. Ryu. Optimal acceleration for minimax
+     and fixed-point problems is not unique. International Conference on Machine Learning, 2024.
+
+
+
+
+                                                13
+Appendix
+Contents
+1 Introduction                                                                                            1
+  1.1 Main contributions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    2
+  1.2 Related work . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    2
+  1.3 Preliminaries and assumptions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       3
+
+2 Stochastic cocoercive root-finding and fixed-point problems                                             3
+  2.1 Mini-batching and optimized allocation of the oracle budget . . . . . . . . . . . . . . . .         4
+  2.2 Specialization to stochastic cocoercive root-finding . . . . . . . . . . . . . . . . . . . . .      5
+
+3 Stochastic monotone root-finding                                                                        5
+  3.1 Outer bound under generalized condition on 𝕋k . . . . . . . . . . . . . . . . . . . . . . .         6
+  3.2 Inner loop for stable approximate resolvents 𝕋k . . . . . . . . . . . . . . . . . . . . . . .       6
+  3.3 Optimized allocation of Bk and complexity analysis . . . . . . . . . . . . . . . . . . . .          7
+
+4 Numerical experiments                                                                                   8
+
+5 Conclusion                                                                                             10
+
+A Convergence of S-Dual-OHM with general random maps                                                     15
+  A.1 Identity for arbitrary evaluation maps . . . . . . . . . . . . . . . . . . . . . . . . . . . .     15
+  A.2 Proof of Theorem 3.2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   16
+  A.3 Proof of Corollary 3.3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   19
+
+B Analysis of approximate resolvents for monotone problems                                               20
+  B.1 Basic handy lemmas . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     20
+  B.2 Proof of Lemma 3.5 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     20
+  B.3 Proof of Corollary 3.6 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   23
+
+C Experimental details                                                                                   25
+
+
+
+
+                                                    14
+A     Convergence of S-Dual-OHM with general random maps
+We prove Theorem 3.2 and 3.3. With ρk = 0, Theorem 3.2 immediately recovers Theorem 2.2. Through-
+out the section, 𝕋 is nonexpansive and 𝕋(x⋆ ) = x⋆ .
+
+A.1     Identity for arbitrary evaluation maps
+The following identity holds for S-Dual-OHM run with arbitrary maps 𝕋0 , . . . , 𝕋N −2 .
+
+                                               1
+Lemma A.1 ([46], Lemma 4.2). Set aN,k = (N −k)(N −k−1) and
+
+                                     1              2                        2
+                                                                                
+                              Qk =      ∥xk − xN −1 ∥ − ∥𝕋k (xk ) − 𝕋(xN −1 )∥ .
+                                     2
+Then we have
+                                                                                        N −2
+           N −1                    2 1                                   N X
+      0=        ∥xN −1 − 𝕋(xN −1 )∥ + ⟨xN −1 − 𝕋(xN −1 ), xN −1 − x0 ⟩ +     aN,k Qk .            (18)
+             4                       2                                   2
+                                                                                        k=0
+
+Proof. Define the potential
+                             N −k−1                                           2
+                     Uk = −          ∥𝕋k−1 (xk−1 ) − xk + xN −1 − 𝕋(xN −1 )∥
+                              N −k
+                               2
+                           +      ⟨𝕋k−1 (xk−1 ) − xk + xN −1 − 𝕋(xN −1 ), xk − xN −1 ⟩ .
+                             N −k
+One can directly verify
+
+                                               Uk − Uk+1 = 2aN,k Qk                               (19)
+
+by substituting the update rule S-Dual-OHM and simplifying. This has been done in an equivalent
+form using 𝕋 = 𝕀 − α𝔽 for cocoercive operator 𝔽, in Yoon and Loizou [46, Lemma 4.2]. Because we
+have UN −1 = 0, using 𝕋−1 (x−1 ) = x0 , we have
+                          N −1                    2  2
+                U0 = −         ∥xN −1 − 𝕋(xN −1 )∥ +   ⟨xN −1 − 𝕋(xN −1 ), x0 − xN −1 ⟩ .
+                           N                         N
+Thus, summing (19) for k = 0, . . . , N − 2 and multiplying by N/4 proves the identity (18).
+    Observe that
+                                                             1                    2
+                           ⟨xN −1 − 𝕋(xN −1 ), xN −1 − x⋆ ⟩ − ∥xN −1 − 𝕋(xN −1 )∥
+                                                             2
+                              1               2                  2
+                                                                    
+                           =     ∥xN −1 − x⋆ ∥ − ∥𝕋(xN −1 ) − x⋆ ∥ ≥ 0
+                              2
+Using the above inequality and taking total expectation in (18) gives
+                                                                            N −2
+                    N                    2 1                                N X
+         0≥E          ∥xN −1 − 𝕋(xN −1 )∥ + ⟨xN −1 − 𝕋(xN −1 ), x⋆ − x0 ⟩ +        aN,k E [Qk ]
+                    4                      2                                2
+                                                                                            k=0
+                                                                      N −2
+               N     h
+                                      2   1i
+                                                      2  N            X
+           ≥     E ∥xN −1 − 𝕋(xN −1 )∥ −    ∥x0 − x⋆ ∥ +                     aN,k E [Qk ]
+               8                         2N              2
+                                                                      k=0
+
+and rearranging, we get
+                             h                     i 4D2     N
+                                                             X −2
+                                                 2
+                            E ∥xN −1 − 𝕋(xN −1 )∥ ≤      − 4      aN,k E [Qk ] .                  (20)
+                                                     N2
+                                                                  k=0
+
+
+                                                        15
+A.2     Proof of Theorem 3.2
+Unrolling the S-Dual-OHM recursion gives
+                                    j−2
+                              1     X                     N −j
+                          xj = x0 +     aN,t 𝕋t (xt ) +        𝕋j−1 (xj−1 )                                         (21)
+                              N     t=0
+                                                        N −j+1
+
+for j = 1, . . . , N − 1; see [46, Lemma 4.4]. Note that this is a convex combination. Define the common
+                                          PN −2
+moment bound in advance: with R = t=0 ρt , set
+                                                                   −2
+                                                                 N
+                                                                              !
+                                                                 X
+                                                 2     R    2
+                                        M =e               D +          σt2       .
+                                                                 t=0
+
+Taking v = x⋆ in (11) gives
+                                 h                i
+                                                2                     2
+                                E ∥𝕋k (u) − x⋆ ∥ ≤ (1 + ρk ) ∥u − x⋆ ∥ + σk2
+
+for k = 0, 1, . . . , N − 2. Therefore, using induction and the fact that xj is a convex combination of x0
+and 𝕋t (xt ) for t = 0, . . . , j − 1, we obtain
+                                                   j−1               j−1
+                                                                                      !
+                            h                i     Y                 X
+                                         2
+                          E ∥xj − x⋆ ∥           ≤    (1 + ρt ) D2 +     σt2              ≤ M 2.                    (22)
+                                                     t=0                      t=0
+
+  Now, write 𝕊k = E [𝕋k ] for the deterministic mean map. By setting u = v in (11) and using the
+moment bound (22), we see that
+                     h                       i  h                    i
+                                           2                       2
+             νk2 := E ∥𝕋k (xk ) − 𝕊k (xk )∥ ≤ E ∥𝕋k (xk ) − 𝕋(xk )∥ ≤ σk2 + 2ρk M 2         (23)
+                                         h                      i                              h                       i
+                                                              2                                                      2
+where the first inequality follows from E ∥𝕋k (xk ) − 𝕋(xk )∥                             =   E ∥𝕋k (xk ) − 𝕊k (xk )∥ +
+ h                     i
+                     2
+E ∥𝕊k (xk ) − 𝕋(xk )∥ .
+    Now suppose that we replace only 𝕋k by an independent copy 𝕋k′ , and keep all the other maps the
+                                         (k)
+same. Denote the resulting iterates by xj . The two trajectories agree through time k, and the copied
+trajectory has the same distribution as the original one, so
+                                                              
+                                                             2
+                 (k)                               (k)
+                xj = xj (0 ≤ j ≤ k),         E xt − x ⋆          ≤ M 2 (0 ≤ t ≤ N − 1).
+
+Conditional on xk , the evaluations 𝕋k (xk ) and 𝕋k′ (xk ) are independent and have the same mean 𝕊k (xk ).
+Therefore,
+           h                       i    h                        i   h                    i
+                                 2                             2                        2
+         E ∥𝕋k (xk ) − 𝕋k′ (xk )∥ = E ∥𝕋k (xk ) − 𝕊k (xk )∥ + E ∥𝕋k′ (xk ) − 𝕊k (xk )∥ = 2νk2 .
+
+                          (k)
+For t > k, the pair (xt , xt ) is independent of the 𝕋t , which is shared between the two trajectories.
+Thus we can use (12) and apply (22) to obtain
+                                                                     
+                             2                              2
+                       (k)                             (k)           (k)
+     E 𝕋t (xt ) − 𝕋t (xt )       = E E 𝕋t (xt ) − 𝕋t (xt )     xt , xt
+                                                        h                                   
+                                                2                           i           2
+                                            (k)                           2     (k)            2
+                                 ≤ E xt − x t       + ρt E ∥xt − x⋆ ∥ + E xt − x⋆           + σt
+                                                 
+                                                2
+                                            (k)
+                                 ≤ E xt − x t       + ρt (2M 2 + σt2 ).                            (24)
+
+
+
+
+                                                           16
+                                                                                     2
+Again, (21) is a convex combination, and squared norm ∥·∥ is convex, so using (24) we obtain
+                                                             j−2                                         
+                                      2                                                2
+                                (k)                                                (k)
+                                                               X
+              E       xj − x j                ≤ 2aN,k νk2 +           aN,t E xt − xt       + ρt (2M 2 + σt2 )
+                                                              t=k+1                                                           (25)
+                                                                                                      
+                                                   N −j                    (k)
+                                                                               2
+                                                +                E xj−1 − xj−1     + ρj−1 (2M 2 + σj−1
+                                                                                                   2
+                                                                                                       )
+                                                  N −j+1
+
+for j > k + 1. Using this bound, we will show by induction that, for j = k + 1, . . . , N − 1,
+                    
+                   2
+               (k)
+     E xj − x j
+                                                                j−1                                                           (26)
+                                            1                   X
+      ≤ νk2 (1 + aN,k (N − j)(N − j − 1)) +                            ρt (2M   2
+                                                                                    + σt2 ) (1 + aN,t (N − j)(N − j − 1)) .
+                                                           2
+                                                               t=k+1
+
+For j = k + 1, because xk and 𝕋k−1 (xk−1 ) are shared, we have
+                                       
+                                (k)
+                                      2     N −k−1 h                             2
+                                                                                   i
+                    E xk+1 − xk+1         ≤             E ∥𝕋k (xk ) − 𝕋k′ (xk )∥
+                                               N −k
+                                            2(N − k − 1) 2
+                                          =                νk
+                                                 N −k
+                                          = νk2 (1 + aN,k (N − k − 1)(N − k − 2)) ,
+
+which proves (26) at the base case. Now fix j ≥ k + 2 and suppose the bound holds through j − 1.
+Substituting it into (25) and interchanging the finite sums gives
+                            
+                           2
+                       (k)
+           E xj − x j
+                                              j−2
+                          "
+                                              X
+                  ≤ νk2       2aN,k +               aN,t (1 + aN,k (N − t)(N − t − 1))
+                                          t=k+1
+                                                                         #
+                                    N −j
+                               +          (1 + aN,k (N − j + 1)(N − j))
+                                 N −j+1
+                                                                                                                              (27)
+                           j−2                         j−2
+                                             "
+                        1 X           2   2
+                                                       X
+                      +         ρs (2M + σs ) 2aN,s +       aN,t (1 + aN,s (N − t)(N − t − 1))
+                        2                             t=s+1
+                          s=k+1
+                                                                                              #
+                                                       N −j
+                                                  +            (1 + aN,s (N − j + 1)(N − j))
+                                                     N −j+1
+                           N −j
+                      +          ρj−1 (2M 2 + σj−1
+                                               2
+                                                   ).
+                          N −j+1
+
+Note that for every k ≤ s ≤ j − 2, the identity aN,t = 1/(N − t − 1) − 1/(N − t) gives
+                              j−2
+                              X                  N −j               1      1    N −j
+            2aN,s +                 aN,t +             = 2aN,s +       −      +
+                          t=s+1
+                                                N −j+1           N −j+1 N −s−1 N −j+1
+                                                                         1
+                                                              =1−           + aN,s ,
+                                                                       N −s
+and
+                      j−2
+                      X                                                      N −j
+                               aN,t aN,s (N − t)(N − t − 1) +                      aN,s (N − j + 1)(N − j)
+                      t=s+1
+                                                                            N −j+1
+
+
+                                                                       17
+                                    j−2
+                                                               !
+                                    X
+                                                           2
+                  = aN,s                   1 + (N − j)
+                                   t=s+1
+
+                  = aN,s j − s − 2 + (N − j)2
+                                                               
+
+                  = aN,s (N − s − 2 + (N − j)(N − j − 1)) .
+
+Consequently, each square bracket simplifies to
+                j−2
+                X                                                               N −j
+      2aN,s +           aN,t (1 + aN,s (N − t)(N − t − 1)) +                          (1 + aN,s (N − j + 1)(N − j))
+                t=s+1
+                                                                               N −j+1
+               1
+       =1−          + aN,s + aN,s (N − s − 2 + (N − j)(N − j − 1))
+             N −s
+       = 1 + aN,s (N − j)(N − j − 1)
+
+and the coefficient of the last term also satisfies
+                                        N −j   1
+                                              = (1 + aN,j−1 (N − j)(N − j − 1)) .
+                                       N −j+1  2
+Substituting these identities into (27) proves (26), and completes the induction.
+                                                                     PN −2
+   In particular, setting j = N − 1 in (26) and using σt2 ≤ M 2 and t=k+1 ρt ≤ R gives
+                        
+                                                2
+                                                                    N −2
+                                         (k)                       1 X                            3
+                   E            xN −1 − xN −1           ≤ νk2 +           ρt (2M 2 + σt2 ) ≤ νk2 + RM 2 .               (28)
+                                                                   2                              2
+                                                                       t=k+1
+
+Now, conditional on the maps before iteration k, the error 𝕋k (xk ) − 𝕊k (xk ) has mean zero and is
+                (k)
+independent of xN −1 . Thus, Cauchy–Schwarz inequality, nonexpansivity of 𝕋, (23) and (28) imply
+                                                   hD                                         Ei
+                                                                     (k)
+         |E [⟨𝕋(xN −1 ), 𝕋k (xk ) − 𝕊k (xk )⟩]| = E 𝕋(xN −1 ) − 𝕋(xN −1 ), 𝕋k (xk ) − 𝕊k (xk )
+                                                 s                
+                                                          3                  3
+                                                    2 2
+                                                ≤ νk νk + RM     2    ≤ νk2 + RM 2 .             (29)
+                                                          2                  4
+
+Now for any u, v ∈ Rd , the identity E [𝕋k (u) − 𝕊k (u)] = 0 gives the variance decomposition
+                    h                   i                         h                   i
+                                      2                     2                       2
+                  E ∥𝕋k (u) − 𝕋(v)∥ = ∥𝕊k (u) − 𝕋(v)∥ + E ∥𝕋k (u) − 𝕊k (u)∥ .
+
+Subtracting the last term from (11) therefore yields
+                                                                                                h                   i
+                      2                    2                       2             2                               2
+    ∥𝕊k (u) − 𝕋(v)∥ ≤ ∥u − v∥ + ρk ∥u − x⋆ ∥ + ∥v − x⋆ ∥                               + σk2 − E ∥𝕋k (u) − 𝕊k (u)∥ .    (30)
+
+Here the expectation is taken over 𝕋k with u fixed, so both sides are deterministic functions of (u, v),
+and in particular (30) holds pathwise with (u, v) = (xk , xN −1 ). Thus, almost surely,
+                                   2
+     ∥𝕊k (xk ) − 𝕋(xN −1 )∥
+                            2                              2                      2
+                                                                                          h
+                                                                                                                2
+                                                                                                                   i    (31)
+      ≤ ∥xk − xN −1 ∥ + σk2 + ρk ∥xk − x⋆ ∥ + ∥xN −1 − x⋆ ∥                            − E ∥𝕋k (xk ) − 𝕊k (xk )∥ xk .
+
+Now we manipulate the quantities Qk appearing in (20) as follows:
+                     1                 2                           2
+                                                                      
+                Qk =    ∥xk − xN −1 ∥ − ∥𝕋k (xk ) − 𝕋(xN −1 )∥
+                     2
+                     1                 2                           2
+                                                                       1
+                                                                                            2
+                   =    ∥xk − xN −1 ∥ − ∥𝕊k (xk ) − 𝕋(xN −1 )∥ − ∥𝕋k (xk ) − 𝕊k (xk )∥
+                     2                                                    2
+                     − ⟨𝕊k (xk ), 𝕋k (xk ) − 𝕊k (xk )⟩ + ⟨𝕋(xN −1 ), 𝕋k (xk ) − 𝕊k (xk )⟩ .
+
+
+                                                                       18
+By independence of xk and 𝕋k , we have E [𝕋k (xk ) − 𝕊k (xk ) | xk ] = 0, which implies
+                E [⟨𝕊k (xk ), 𝕋k (xk ) − 𝕊k (xk )⟩] = E [⟨𝕊k (xk ), E [𝕋k (xk ) − 𝕊k (xk ) | xk ]⟩] = 0
+                  h h                               ii     h                         i
+                                             2                                     2
+                E E ∥𝕋k (xk ) − 𝕊k (xk )∥ xk = E ∥𝕋k (xk ) − 𝕊k (xk )∥ = νk2 .
+
+Taking expectations in the expansion of Qk and applying (31) now shows explicitly how the variance
+terms cancel:
+                            σ2    ρk  h              2
+                                                        i     h
+                                                                     2
+                                                                       i ν 2   ν2
+                E [Qk ] ≥ − k −       E ∥xk − x⋆ ∥ + E ∥xN −1 − x⋆ ∥     + k − k
+                            2     2                                        2    2
+                          + E [⟨𝕋(xN −1 ), 𝕋k (xk ) − 𝕊k (xk )⟩]
+                            σ2
+                         ≥ − k − ρk M 2 + E [⟨𝕋(xN −1 ), 𝕋k (xk ) − 𝕊k (xk )⟩] ,
+                             2
+where the last inequality uses (22). Finally, (29) and (23) yield
+                                          σ2                  3
+                               E [Qk ] ≥ − k − ρk M 2 − νk2 − RM 2
+                                           2                  4
+                                          σk2                          3
+                                       ≥−     − ρk M 2 − σk2 + 2ρk M 2 − RM 2
+                                           2                            4
+                                          3 2               3
+                                       = − σk − 3ρk M 2 − RM 2 .
+                                          2                 4
+Using this estimate in (20) gives
+                    h                     i 4D2     N
+                                                    X −2
+                                        2
+                   E ∥xN −1 − 𝕋(xN −1 )∥ ≤      + 6      aN,k σk2
+                                            N2
+                                                                    k=0
+                                                                   N
+                                                                   X −2                     N
+                                                                                            X −2
+                                                    + 12M 2               aN,k ρk + 3RM 2          aN,k .
+                                                                   k=0                      k=0
+
+                                   = 1 − 1/N < 1, the last two terms are bounded by 15RM 2 , proving
+                       P
+Since aN,k ≤ 1 and        k aN,k
+Theorem 3.2.
+
+A.3     Proof of Corollary 3.3
+For this result, we evaluate one more random map 𝕋N −1 because
+                                                             yN = 𝕋N −1 (xN −1 ) is the output of
+                                       PN −1         2    R    2
+                                                                 PN −1 2 
+the algorithm. Therefore, we let R = k=0 ρk and M = e D + k=0 σk . The same moment
+bound (22) still applies to xN −1 . Now by (11) we have
+                           h                              i
+                                                        2
+                          E ∥𝕋N −1 (xN −1 ) − 𝕋(xN −1 )∥ ≤ 2ρN −1 M 2 + σN
+                                                                         2
+                                                                           −1 .
+
+Observe that because 𝕋 = 𝕁α𝔽 , we have xN −1 − 𝕋(xN −1 ) = α𝔽(𝕋(xN −1 )), so
+                           2                                   2                       2
+              ∥𝔽(yN )∥ ≤ 2 ∥𝔽(yN ) − 𝔽(𝕋(xN −1 ))∥ + 2 ∥𝔽(𝕋(xN −1 ))∥
+                                                 2     2                  2
+                        ≤ 2L2 ∥yN − 𝕋(xN −1 )∥ + 2 ∥xN −1 − 𝕋(xN −1 )∥
+                                                       α
+                                                            2   2                  2
+                        = 2L2 ∥𝕋N −1 (xN −1 ) − 𝕋(xN −1 )∥ + 2 ∥xN −1 − 𝕋(xN −1 )∥ .
+                                                                α
+Taking expectation and applying the bounds from Theorem 3.2, we obtain
+         h
+                   2
+                     i   2 h                       2
+                                                     i        h
+                                                                                       2
+                                                                                         i
+        E ∥𝔽(yN )∥ ≤ 2 E ∥xN −1 − 𝕋(xN −1 )∥ + 2L2 E ∥𝕋N −1 (xN −1 ) − 𝕋(xN −1 )∥
+                        α
+                                    N −2                               N −2
+                                                                                           !
+                         8D2     12 X          2        2 2       2 30 X           2
+                       ≤ 2 2+ 2          aN,k σk + 2L σN −1 + M             ρk + 4L ρN −1 .
+                        α N      α                                  α2
+                                           k=0                                         k=0
+                             2
+Because αL ≤ 1 and aN,k ≤ (N −k) 2 , the last line is upper-bounded by (13), completing the proof.
+
+
+
+
+                                                          19
+B     Analysis of approximate resolvents for monotone problems
+The analysis below verifies Condition 3.1 for the finite maps computed by Algorithm 1. Exact sampled
+resolvents appear only in the proof of these map properties.
+
+B.1     Basic handy lemmas
+
+Lemma B.1. Let 𝔾 : Rd → Rd be single-valued and maximally monotone. For any x ∈ Rd , we have
+∥x − 𝕁𝔾 (x)∥ ≤ ∥𝔾(x)∥.
+
+Proof. Note that x = 𝕁𝔾 (x + 𝔾(x)), so
+
+                 ∥x − 𝕁𝔾 (x)∥ = ∥𝕁𝔾 (x + 𝔾(x)) − 𝕁𝔾 (x)∥ ≤ ∥(x + 𝔾(x)) − x∥ = ∥𝔾(x)∥ .
+
+
+
+
+Lemma B.2. Under Assumptions 1.1 and 3.4, for β > 0 and any deterministic u, v ∈ Rd ,
+                      h                         i
+                                              2            2
+                     E 𝕁β𝔽(·;ξ) (u) − 𝕁β𝔽 (v)     ≤ ∥u − v∥ + β 2 σ 2 .                            (32)
+
+Proof. Let y = 𝕁β𝔽 (v) and δξ = 𝔽(y; ξ) − 𝔽(y). Then we have v = y + β𝔽(y) = y + β𝔽(y; ξ) − βδξ .
+Therefore,
+
+                       y + β𝔽(y; ξ) = v + βδξ ⇐⇒ 𝕁β𝔽 (v) = y = 𝕁β𝔽(·;ξ) (v + βδξ ).
+
+This implies, for any u, v ∈ Rd ,
+                     h                        i    h                                    i
+                                            2                                         2
+                    E 𝕁β𝔽(·;ξ)(u) − 𝕁β𝔽 (v)     = E 𝕁β𝔽(·;ξ)(u) − 𝕁β𝔽(·;ξ) (v + βδξ )
+                                                   h                 i
+                                                                   2
+                                                ≤ E ∥u − v − βδξ ∥
+                                                            2
+                                                  ≤ ∥u − v∥ + β 2 σ 2
+                                          h       i
+                                                2
+where the last line uses E [δξ ] = 0 and E ∥δξ ∥ ≤ σ 2 .
+
+
+
+B.2     Proof of Lemma 3.5
+Let us denote the ideal iterates from (14) by zj (u), so that zBk (u) = 𝕋
+                                                                        bk (u). Because 𝕋 = 𝕁α𝔽 , for any
+     d
+v ∈ R , we have v = 𝕋(v) + α𝔽(𝕋(v)). Multiplying γj throughout and rearranging, we obtain
+
+           𝕋(v) + αγj 𝔽(𝕋(v)) = (1 − γj )𝕋(v) + γj v ⇐⇒ 𝕋(v) = 𝕁αγj 𝔽 ((1 − γj )𝕋(v) + γj v).
+
+Therefore, applying (32) with β = αγj , we obtain
+                  h                    i
+                                     2
+                E ∥zj+1 (u) − 𝕋(v)∥
+                     h                                                                       i
+                                                                                           2
+                = E 𝕁αγj 𝔽(·;ξj ) ((1 − γj )zj (u) + γj u) − 𝕁αγj 𝔽 ((1 − γj )𝕋(v) + γj v)
+                                                                     2
+                  ≤ ∥(1 − γj )zj (u) + γj u − ((1 − γj )𝕋(v) + γj v)∥ + α2 γj2 σ 2
+                                                            2
+                  = ∥(1 − γj )(zj (u) − 𝕋(v)) + γj (u − v)∥ + α2 γj2 σ 2
+                                              2              2
+                  ≤ (1 − γj ) ∥zj (u) − 𝕋(v)∥ + γj ∥u − v∥ + α2 γj2 σ 2
+
+
+
+
+                                                      20
+where the expectation is conditioned on the randomness revealed before ξj , and the last line uses
+                2                         2                                          2
+convexity of ∥·∥ . Now subtracting ∥u − v∥ from both sides of the above, using γj = j+2 and taking
+total expectation, we obtain
+        h
+                          2
+                            i
+                                    2               j  h               2
+                                                                          i
+                                                                                  2
+                                                                                      4α2 σ 2
+       E ∥zj+1 (u) − 𝕋(v)∥ − ∥u − v∥ ≤                 E ∥zj (u) − 𝕋(v)∥ − ∥u − v∥ +           .
+                                                   j+2                                (j + 2)2
+
+Multiplying by (j + 1)(j + 2) and chaining the resulting inequality for j = 0, . . . , Bk − 1 we obtain
+                                                              BXk −1
+                       h
+                                         2
+                                           i
+                                                   2
+                                                                    j+1
+           Bk (Bk + 1) E ∥zBk (u) − 𝕋(v)∥ − ∥u − v∥ ≤ 4α2 σ 2              ≤ 4α2 σ 2 Bk .
+                                                               j=0
+                                                                     j + 2
+
+Dividing both sides by Bk (Bk + 1) and using zBk (u) = 𝕋(u),
+                                                        b     we obtain (15).
+                    d
+   Fix k and u ∈ R . Consider the iterates wj from Algorithm 1 and the ideal iterates zj = zj (u) from
+(14), obtained by using a same sequence of samples. Below, we drop the u-dependence in zj and wj .
+Recall that pj = (1 − γj )wj + γj u and wj+1 is obtained by the following iteration: q0 = pj ,
+
+                                             qr+1 = pj − αγj 𝔽(qr ; ξj )
+
+for j = 0, . . . , mk,j , which is the Picard iteration with respect to the operator x 7→ pj − αγj 𝔽(x; ξj ),
+                                        1
+which has the contraction factor j+2       because
+
+                       ∥(pj − αγj 𝔽(x; ξj )) − (pj − αγj 𝔽(y; ξj ))∥
+                                                                                   1
+                          ≤ αγj ∥𝔽(x; ξj ) − 𝔽(y; ξj )∥ ≤ αLγj ∥x − y∥ =              ∥x − y∥
+                                                                                  j+2
+
+for any x, y ∈ Rd . Therefore,
+                                                          mk,j +1
+                                                       1
+                    wj+1 − 𝕁αγj 𝔽(·;ξj ) (pj ) ≤                      pj − 𝕁αγj 𝔽(·;ξj ) (pj )
+                                                     j+2
+                                                       ρk
+                                                ≤              pj − 𝕁αγj 𝔽(·;ξj ) (pj )
+                                                    16(j + 2)
+                                                     ρk αγj
+                                                ≤             ∥𝔽(pj ; ξj )∥                           (33)
+                                                    16(j + 2)
+                                  l               m
+where the second line uses mk,j = log(16/ρ
+                                      log(j+2)
+                                               k)
+                                                    and the last line uses Lemma B.1 with 𝔾 = αγj 𝔽(·; ξj ).
+On the other hand, we have
+
+             𝕁αγj 𝔽(·;ξj ) (pj ) − x⋆ ≤ 𝕁αγj 𝔽(·;ξj ) (pj ) − 𝕁αγj 𝔽(·;ξj ) (x⋆ ) + 𝕁αγj 𝔽(·;ξj ) (x⋆ ) − x⋆
+                                     ≤ ∥pj − x⋆ ∥ + αγj ∥𝔽(x⋆ ; ξj )∥                                          (34)
+
+where the last line again uses Lemma B.1 with 𝔾 = αγj 𝔽(·; ξj ), and
+
+            ∥𝔽(pj ; ξj )∥ ≤ ∥𝔽(pj ; ξj ) − 𝔽(x⋆ ; ξj )∥ + ∥𝔽(x⋆ ; ξj )∥ ≤ L ∥pj − x⋆ ∥ + ∥𝔽(x⋆ ; ξj )∥ .       (35)
+                                                                    h      i1/2
+                                                                         2
+   Now for any random quantities, consider their L2 -norms ∥X∥2 := E ∥X∥        . Using Minkowski
+inequality and (33)–(35), we have
+
+          ∥wj+1 − x⋆ ∥2 ≤ wj+1 − 𝕁αγj 𝔽(·;ξj ) (pj ) 2 + 𝕁αγj 𝔽(·;ξj ) (pj ) − x⋆ 2
+                            ρk αγj
+                        ≤            ∥𝔽(pj ; ξj )∥2 + ∥pj − x⋆ ∥2 + αγj ∥𝔽(x⋆ ; ξj )∥2
+                          16(j + 2)
+                            ρk αγj                                     
+                        ≤              L ∥pj − x⋆ ∥2 + ∥𝔽(x⋆ ; ξj )∥2 + ∥pj − x⋆ ∥2 + αγj σ
+                          16(j + 2)
+                               ρk γj                     ρk 
+                        ≤ 1+            ∥pj − x⋆ ∥2 + 1 +         αγj σ
+                                 32                         16
+
+                                                           21
+                               ρk γj                                            ρk 
+                           ≤ 1+         (1 − γj ) ∥wj − x⋆ ∥2 + γj ∥u − x⋆ ∥2 + 1 +      αγj σ
+                                32                                                16
+                                3γj                   5γj              3αγj σ
+                           ≤ 1−        ∥wj − x⋆ ∥2 +      ∥u − x⋆ ∥2 +
+                                 4                     4                  2
+             αL       1
+where we use j+2 = 2(j+2) ≤ 12 ,
+                                                 h                         i1/2
+                                                                         2
+                               ∥𝔽(x⋆ ; ξj )∥2 = E ∥𝔽(x⋆ ; ξj ) − 𝔽(x⋆ )∥        ≤ σ,
+
+and ρk ≤ 1. Noting that pj+1 is a convex combination of wj+1 and u, we can use induction starting
+from w0 = u to obtain
+                           
+                       max ∥wj − x⋆ ∥2 , ∥pj − x⋆ ∥2 ≤ 2 (∥u − x⋆ ∥ + ασ) .                  (36)
+
+Now
+
+      ∥wj+1 − zj+1 ∥2
+      ≤ wj+1 − 𝕁αγj 𝔽(·;ξj ) (pj ) 2 + 𝕁αγj 𝔽(·;ξj ) (pj ) − zj+1 2
+      ≤ wj+1 − 𝕁αγj 𝔽(·;ξj ) (pj ) 2 + 𝕁αγj 𝔽(·;ξj ) ((1 − γj )wj + γj u) − 𝕁αγj 𝔽(·;ξj ) ((1 − γj )zj + γj u) 2
+          ρk αγj
+      ≤            ∥𝔽(pj ; ξj )∥2 + ∥(1 − γj )(wj − zj )∥2
+        16(j + 2)
+                                    ρk γj
+      ≤ (1 − γj ) ∥wj − zj ∥2 +             (∥u − x⋆ ∥ + 2ασ),
+                                  16(j + 2)
+
+where the third inequality uses (33), and the last inequality combines (35) with (36). Chaining this
+                                                      QBk −1
+result for j = 0, . . . , Bk − 1 and using w0 = z0 and s=j+1 (1 − γs ) = (j+1)(j+2)
+                                                                         Bk (Bk +1) , we obtain
+                   s                   
+                                      2
+                    E 𝕋k (u) − b
+                               𝕋k (u)     = ∥wBk − zBk ∥2
+
+                                                    Bk −1
+                                                     X  j+1         ρk
+                                                ≤                           (∥u − x⋆ ∥ + 2ασ)
+                                                    j=0
+                                                        j + 2 8B k (Bk + 1)
+
+                                                       ρk
+                                                ≤             (∥u − x⋆ ∥ + 2ασ).                                   (37)
+                                                    8(Bk + 1)
+
+Now we use Young’s inequality with (15) and (37):
+                                                                                                 
+       h                 i      ρk                         2            8                         2
+                       2
+     E ∥𝕋k (u) − 𝕋(v)∥ ≤ 1 +           E 𝕋k (u) − 𝕋(v)
+                                            b                    + 1+           E 𝕋k (u) − 𝕋k (u)
+                                                                                               b
+                                  8                                       ρk
+                                                                                 
+                                                        2 2
+                                                                 ρ2 1 + 8
+                                ρk  
+                                                 2    4α σ            k        ρk
+                          ≤ 1+           ∥u − v∥ +                +                 (∥u − x⋆ ∥ + 2ασ)2
+                                  8                   Bk + 1        64(Bk + 1)2
+                                                    ρk 1 + ρ8k
+                                                                 
+                                ρk           2                             2
+                          ≤ 1+         ∥u − v∥ +                   ∥u − x⋆ ∥
+                                  8                 4(Bk + 1)2
+                                                                  
+                                   ρk       4            ρk
+                            + 1+                    +                α2 σ 2
+                                     8      Bk + 1 (Bk + 1)2
+                                                             !
+                                    2    ρk          1 + ρ8k                2     ρk           2
+                          ≤ ∥u − v∥ +         1+                  ∥u − x⋆ ∥ +         ∥v − x⋆ ∥
+                                          4        (Bk + 1)2                      4
+                                              ρ
+                                   ρk  4 + 2k 2 2
+                            + 1+                 α σ
+                                     8 Bk + 1
+                                    2
+                                            
+                                                       2              2
+                                                                             6α2 σ 2
+                          ≤ ∥u − v∥ + ρk ∥u − x⋆ ∥ + ∥v − x⋆ ∥ +
+                                                                             Bk + 1
+
+
+                                                            22
+                                             
+                                    ρ2k 1+ ρ8      ρ
+                                             ρk (1+ 8k )                                   2
+                                                                            2
+                                       k
+where the third inequality uses 64(Bk +1)2 = 8(B +1)2 and (∥u − x⋆ ∥ + 2ασ)
+                                                 k
+                                                                              ≤ 2 ∥u − x⋆ ∥ + 8α2 σ 2 ,
+                                         2                      2              2
+the fourth inequality uses ρ8k ∥u − v∥ ≤ ρ4k ∥u − x⋆ ∥ + ρ4k ∥v − x⋆ ∥ , and the last inequality follows
+                                                              2 2
+from Bk ≥ 1 and 0 < ρk ≤ 1, which proves (11) with σk2 = 6α    σ
+                                                            Bk +1 .                         
+   Now we turn to showing (12). First, since zj+1 (u) = 𝕁αγj 𝔽(·;ξj ) (1 − γj )zj (u) + γj u , we have
+                        ∥zj+1 (u) − zj+1 (v)∥ ≤ (1 − γj ) ∥zj (u) − zj (v)∥ + γj ∥u − v∥
+for any u, v ∈ Rd by nonexpansivity of 𝕁αγj 𝔽(·;ξj ) . Induction starting from z0 (u) = u and z0 (v) = v
+shows that 𝕋bk is pathwise nonexpansive, i.e.,
+
+                                       bk (v) = ∥zBk (u) − zBk (v)∥ ≤ ∥u − v∥ .
+                              bk (u) − 𝕋
+                              𝕋
+
+We use Young’s inequality multiple times with (37):
+      h                   i
+                        2
+    E ∥𝕋k (u) − 𝕋k (v)∥
+                                                                                                    2
+           ρk                         2             8                               
+    ≤ 1+         E 𝕋k (u) − 𝕋k (v)
+                      b        b            + 1+             E    𝕋k (u) − 𝕋k (u) − 𝕋k (v) − 𝕋k (v)
+                                                                               b                    b
+            8                                        ρk
+                                                                                                
+           ρk                         8                               2                           2
+                          2
+    ≤ 1+         ∥u − v∥ + 2 1 +               E 𝕋k (u) − 𝕋k (u)b            + E 𝕋k (v) − 𝕋k (v)
+                                                                                            b
+            8                          ρk
+                                            
+           ρk              2ρ2k 1 + ρ8k
+                          2
+                                                (∥u − x⋆ ∥ + 2ασ)2 + (∥v − x⋆ ∥ + 2ασ)2
+                                                                                              
+    ≤ 1+         ∥u − v∥ +
+            8                 64(Bk + 1)2
+                             ρk 1 + ρ8k 
+                                           
+           ρk           2                               2               2       2 2
+                                                                                      
+    ≤ 1+         ∥u − v∥ +                     ∥u  − x ⋆ ∥   + ∥v − x ⋆ ∥    + 8α  σ
+            8                 2(Bk + 1)2
+                                     ρk
+                                        !                                  4ρ 1 + ρk 
+              2   ρ k       2  1  +                       2               2        k
+    ≤ ∥u − v∥ +         1+            8
+                                              ∥u − x⋆ ∥ + ∥v − x⋆ ∥ +                     8
+                                                                                             α2 σ 2
+                   4        (Bk + 1)2                                             (Bk + 1)2
+                                                   6ρ α2 σ 2
+              2                  2               2          k
+    ≤ ∥u − v∥ + ρk ∥u − x⋆ ∥ + ∥v − x⋆ ∥ +
+                                                         Bk + 1
+where the last line again uses Bk ≥ 1 and 0 < ρk ≤ 1.
+   Finally, it remains to bound the number of oracle evaluations at iteration k, which is
+              BXk −1             BXk −1                                  Bk −1
+                                              log(16/ρk )                16 X          1
+                    (mk,j + 1) =         1+                  ≤ 2Bk + log                      .
+               j=0                j=0
+                                               log(j + 2)                ρ k  j=0
+                                                                                   log(j + 2)
+                                                  PBk −1       1       3(Bk +1)
+We can bound the final summation using              j=0    log(j+2) ≤ log(Bk +1) , which completes the proof.
+
+
+B.3     Proof of Corollary 3.6
+First fix N ≥ 2 and ρk = 1/(2N 3 ), and consider arbitrary deterministic integer lengths Bk ≥ 1. Since
+log ρ16k = log(32N 3 ) ≤ 4 log(eN ), Lemma 3.5 bounds the total oracle cost by
+                                        −1                 −1
+                                      N                  N
+                                                                          !
+                                      X                  X        Bk
+                                  O        Bk + log(eN )                    .
+                                                              log(Bk + 1)
+                                      k=0                       k=0
+
+For any b, t ≥ 1,
+                                                  b       2b    et/2
+                                                        ≤    +       .
+                                             log(b + 1)    t   log 2
+Indeed, the first term suffices whenPb ≥ et/2 , and the second
+                                                           √ suffices otherwise. Applying this with
+                                      N −1         −1/2
+b = Bk and t = log NeN−k , and using  k=0  (N −  k)     ≤ 2 N , we get
+                           N −1                  N −1                   √
+                           X          Bk         X          Bk         2 e
+                                              ≤2                     +      N.
+                                  log(Bk + 1)         log(eN/(N − k)) log 2
+                           k=0                       k=0
+
+
+                                                           23
+Also, log NeN
+            −k ≤ log(eN ) implies
+                                   N −1                     N −1
+                                   X                        X            Bk
+                                          Bk ≤ log(eN )                            .
+                                                                   log(eN/(N − k))
+                                   k=0                      k=0
+
+Consequently, for any choice of batch-sizes Bk ≥ 1, the total oracle cost is bounded by
+                                                 −1
+                                          "    N
+                                                                      #!
+                                               X           Bk
+                             O log(eN ) N +                               .                                 (38)
+                                                    log(eN/(N − k))
+                                                          k=0
+                                                                                       PN −1 1      1     1
+   We now specialize to Bk in (16) and N in Corollary 3.6. Note that R =                k=0 2N 3 = 2N 2 ≤ 8 . We
+                                           1
+use Corollary 3.3 and Lemma 3.5 with α = 2L  , and use e1/8 < 87 and
+                                      N −1                N −1          N −1
+                                      X               1 X 2     X    σk2
+                                  R          σk2 =        σ k ≤             ,
+                                                     2N 2         2(N − k)2
+                                      k=0                 k=0           k=0
+
+to obtain
+                                      i 704 L2 D2           N −1
+                           h
+                                    2               1728 2 X             1
+                          E ∥𝔽(yN )∥ ≤         2
+                                                  +      σ               2
+                                          7 N         7          (N − k) (Bk + 1)
+                                                             k=0
+                                                           −1
+                                                         N
+                                                                                !
+                                             L2 D2     2
+                                                         X           1
+                                       ≤ 256       +σ                             .
+                                               N2             (N − k)2 (Bk + 1)
+                                                                    k=0
+                      p
+Because x 7→ 1/(x     log(eN/x)) is a decreasing function on [1, N ],
+             N −1                                            Z N
+             X                1                     1                   dx
+                         p                   ≤p            +        p
+             k=0
+                  (N − k)  log(eN/(N   − k))      log(eN )    1   x   log(eN/x)
+                                                                                                            (39)
+                                                    1           p              p
+                                             =p            + 2 log(eN ) − 1 ≤ 2 log(eN ).
+                                                  log(eN )
+The batch allocation (16) therefore satisfies
+             N −1                                                N −1
+             X             1                ϵ2       X            1               ϵ2
+        σ2                 2
+                                     ≤     p                  p                ≤     .                      (40)
+                    (N − k) (Bk + 1)   1024 log(eN )   (N − k) log(eN/(N − k))   512
+             k=0                                                  k=0
+
+Since N ≥ 32LD
+            ϵ , we conclude
+
+                            i 256L2 D2          N −1
+                 h
+                          2                   2
+                                                X           1           ϵ2   ϵ2
+                E ∥𝔽(yN )∥ ≤       2
+                                       + 256σ               2
+                                                                      ≤    +    ≤ ϵ2 .
+                                 N                   (N − k) (Bk + 1)   4    2
+                                                            k=0
+
+To bound the complexity, observe that
+                                                        p         p
+                                              1024σ 2     log(eN ) log(eN/(N − k))
+                               Bk ≤ 1 +                                            .
+                                                        ϵ2             N −k
+Since log NeN
+            −k ≥ 1, we obtain from (39):
+             N −1                              p         N −1
+             X            Bk            1024σ 2 log(eN ) X               1
+                                    ≤N+
+                                               ϵ2
+                                                                     p
+                    log(eN/(N − k))                           (N − k) log(eN/(N − k))
+             k=0                                                          k=0
+                                          2048σ 2
+                                   ≤N+            log(eN ).
+                                            ϵ2
+Substituting this into (38) therefore bounds the total number of oracle evaluations by
+                                                      σ2
+                                                                  
+                                     O N log(eN ) + 2 log2 (eN ) .
+                                                      ϵ
+                   LD                               LD
+                                                           in the regime LD
+                                                       
+Since N = O 1 + ϵ and log(eN ) = Θ log 1 + ϵ                              ϵ ≫ 1, this proves (17).
+
+
+                                                             24
+C     Experimental details
+We further specify the tuning and budget normalization of S-Dual-OHM used in Section 4.
+
+Experiment 1. For scheduled S-Dual-OHM, we search the same stepsize grid as its constant-batch
+counterpart, η ∈ {0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 1}, and N − 1 ∈ {32, 47, 69, 101, 148, 217,
+317, 465, 682, 1000}. For each candidate N , we use
+                                                                            −2
+                   &                        '                             N
+                               C                                           X
+             Bk = p                           , k = 0, . . . , N − 2,          Bk ≤ Q = 20000,
+                       (N − k)(N − k − 1)                                 k=0
+
+and choose the largest feasible C > 0. This preserves the allocation in (8) while adhering the oracle
+budget constraint. Every candidate pair is evaluated on all three tuning seeds, and the selected values
+are η = 0.75 and N = 1001. The constant-batch counterpart selects η = 0.025 and B = 2, giving
+N = 10001 and the same total oracle cost.
+
+Experiment 2. For the practical variant of S-Dual-OHM (scheduled), we set
+                                                                          −1
+          ( & p                      ')                                 N
+                   log(eN/(N − k))                                      X
+  Bk = max 1, C                         , k = 0, . . . , N − 1, (m + 1)      Bk ≤ Q = 2 × 105 .
+                       N −k
+                                                                                k=0
+
+For each
+     j candidate
+           k     (m, N ), we choose the largest feasible C. The constant-batch counterpart uses
+         Q
+B =    (m+1)N   . For both versions, we test m ∈ {1, 2, 4, 7} and N ∈ {1200, 2400, 4800, 9600} on a
+tuning seed. We then fix m = 1 and refine N ∈ {4800, 9600, 16000, 24000, 40000} for the scheduled
+method and N ∈ {1600, 2400, 2500, 3200, 3333, 4800, 5000} for the constant-batch method, using all
+three tuning seeds. The selected scheduled run has N = 24000, and the selected constant run has
+N = 3200 and B = 31.
+    For the theory-prescribed version of scheduled S-Dual-OHM, we set ρk = 2N1 3 and use the schedule
+                                               PN −1 PBk −1
+Bk as above, and choose largest C satisfying k=0           j=0 (mk,j + 1) ≤ Q, with mk,j given by Algo-
+rithm 1. The final search uses N ∈ {1400, 1600, . . . , 3200} on all tuning seeds and selects N = 2400.
+
+
+
+
+                                                     25
+

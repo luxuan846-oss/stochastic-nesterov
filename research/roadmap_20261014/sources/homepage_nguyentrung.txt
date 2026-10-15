@@ -1,0 +1,40 @@
+Nghia Nguyen-Trung - Nghia Nguyen-Trung
+Nghia Nguyen-Trung
+Publications & Preprints
+News & Talks
+Teaching & Services
+CV
+Nghia Nguyen-Trung
+PhD Candidate in Statistics and Operations Research at University of North Carolina at Chapel Hill
+Follow
+Chapel Hill, North Carolina
+Email
+ResearchGate
+LinkedIn
+Github
+Google Scholar
+ORCID
+Nghia Nguyen-Trung
+I am a Ph.D. Candidate in the Department of Statistics and Operations Research at the University of North Carolina at Chapel Hill, advised by Prof. Quoc Tran-Dinh. My expected graduation date is May 2027.
+Research Interests
+My research lies in mathematical optimization, numerical algorithms, and continuous operator theory, with a focus on:
+First-Order Methods under Nonmonotonicity: Extragradient and its generalizations, operator splitting methods, Halpern and Krasnosel’skiǐ-Mann-type iterations, etc.
+Deterministic & Stochastic Methods: Scalable optimization schemes spanning classical deterministic frameworks to modern stochastic regimes, leveraging mini-batching, variance reduction, and block-coordinate techniques for large-scale problems.
+Distributed Computing: Asynchronous, parallel, and decentralized consensus frameworks designed for large-scale optimization over complex network architectures.
+Education & Background
+Ph.D. & M.S. in Statistics and Operations Research, UNC Chapel Hill (M.S. earned in 2025).
+Engineer in Mathematics and Informatics, Hanoi University of Science and Technology (2022).
+Honors: Valedictorian of the Class of 2022 (Ranked 1st); advised by Prof. Nguyen Thi Thu Thuy.
+Recent News
+[Nov 2026] Scheduled poster presentation at SIAM Conference on Mathematics of Data Science (MDS26) in Salt Lake City, Utah. NEW
+[Nov 2026] Scheduled contributed talk at INFORMS Annual Meeting 2026 in San Francisco, CA. NEW
+[May 2026] Received the Silver Reviewer Award at the 43rd International Conference on Machine Learning (ICML 2026). NEW
+[Mar 2026] Paper “Revisiting Extragradient-Type Methods: Part 1—Generalizations and Sublinear Convergence Rates” published in Computational Optimization and Applications (COAP).
+See all news & talks →
+Contact
+Nghia Nguyen-Trung, M.S. Department of Statistics and Operations Research Address: B48 Hanes Hall, University of North Carolina at Chapel Hill, Chapel Hill, NC 27516, USA Email: nghiant@unc.edu My name in native language: Nguyễn Trung Nghĩa (Nghĩa is my first name)
+Sitemap
+Follow:
+GitHub
+Feed
+© 2026 Nghia Nguyen-Trung. Powered by Jekyll & AcademicPages, a fork of Minimal Mistakes.

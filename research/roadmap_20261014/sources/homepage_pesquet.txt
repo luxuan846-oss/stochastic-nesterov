@@ -1,0 +1,46 @@
+Jean-Christophe Pesquet
+Toggle navigation
+pesquet.eu
+Research
+Publications
+Former PhD students
+Other collaborators
+Courses
+Activities
+Biography
+Links
+Resolution enhancement of an old video sequence from a French TV program (left: low resolution original data, right: high resolution generated data)
+Parallel methods in optimization
+Fixed point algorithms
+Inverse problems
+Machine learning
+Statistical signal and image processing
+Blind signal separation
+Stochastic models for impulsive/sparse phenomena
+Nonlinear multiresolution analysis
+Interests: Data Processing using Optimization Tools and Statistical/Nonlinear Methods
+Medical, microscopy imaging
+Satellite imaging
+Geophysics
+Gene regulatory networks
+Video processing
+Image compression
+Stereoscopy
+Spectrum analysis
+Sonar processing
+Traffic modelling
+Analysis of biomedical signals
+Digital communications
+Examples
+Example of a noisy multispectral satellite images with 90% missing samples.
+Restored image using a nonlocal structure tensor based variational approach.
+3D mesh from noisy measurements.
+Denoised mesh by a variational approach.
+Example of blurred microscopy image corrupted with Poisson-Gaussian noise.
+Restored image using Variational Bayes Approach with Non Local Total Variation prior.
+First acquired projection.
+Second acquired projection.
+Reconstruction from random projections using an online optimization algorithm.
+Previous
+Next
+jc.pesquet.eu © 2024 privacy policy

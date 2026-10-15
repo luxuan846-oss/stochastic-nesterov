@@ -1,0 +1,2315 @@
+Discrete and Continuous Dynamical Systems
+Vol. 51, 2026, pp. 439-474 (February 5, 2026)
+doi:10.3934/dcds.2026035
+
+
+
+      LONG-TIME ANALYSIS OF STOCHASTIC HEAVY BALL
+           DYNAMICS FOR CONVEX OPTIMIZATION
+               AND MONOTONE EQUATIONS
+
+
+                                          ∗
+                   Radu Ioan Bot,             and Chiara Schindler
+                    Faculty of Mathematics, University of Vienna, Austria
+
+                           (Communicated by Irena Lasiecka)
+
+         Abstract. In a separable real Hilbert space, we study the problem of mini-
+         mizing a convex function with Lipschitz continuous gradient in the presence of
+         noisy evaluations. To this end, we associate a stochastic Heavy Ball system,
+         incorporating a friction coefficient, with the optimization problem. We estab-
+         lish existence and uniqueness of trajectory solutions for this system. Under
+         a square integrability condition for the diffusion term, we prove almost sure
+         convergence of the trajectory process to an optimal solution, as well as almost
+         sure convergence of its time derivative to zero. Moreover, we derive almost
+         sure and expected convergence rates for the function values along the trajec-
+         tory towards the infimal value. Finally, we show that the stochastic Heavy Ball
+         system is equivalent to a Su-Boyd-Candès-type system for a suitable choice of
+         the parameter function, and we provide corresponding convergence rate results
+         for the latter.
+             In the second part of this paper, we extend our analysis beyond the opti-
+         mization framework and investigate a monotone equation induced by a mono-
+         tone and Lipschitz continuous operator, whose evaluations are assumed to be
+         corrupted by noise. As before, we consider a stochastic Heavy Ball system with
+         a friction coefficient and a correction term, now augmented by an additional
+         component that accounts for the time derivative of the operator. We estab-
+         lish analogous convergence results for both the trajectory process and its time
+         derivative, and derive almost sure as well as expected convergence rates for
+         the decay of the residual and the gap function along the trajectory. As a final
+         result, we show that a particular instance of the stochastic Heavy Ball system
+         for monotone equations is equivalent to a stochastic second-order dynamical
+         system with a vanishing damping term. Remarkably, this system exhibits fast
+         convergence rates for both the residual and gap functions.
+
+
+1. Introduction. For the minimization problem of a convex differentiable function
+f : H → R with L∇f -Lipschitz continuous gradient, where H denotes a separable
+real Hilbert space,
+                                           min f (y),                                      (1)
+                                           y∈H
+
+
+   2020 Mathematics Subject Classification. Primary: 34F05, 37N40, 47H05, 60H10.
+   Key words and phrases. Stochastic heavy ball method, convex optimization, monotone equa-
+tion, convergence of trajectories, convergence rates, time scaling.
+   The first author is partially supported by the Austrian Science Fund (FWF), project
+10.55776/P34922.
+   ∗ Corresponding author: Radu Ioan Bot.
+                                           ,
+
+
+
+
+                                                439
+440                   RADU IOAN BOT
+                                  , AND CHIARA SCHINDLER
+
+
+
+and assume that its set of solutions argmin f = {y ∗ ∈ H : f (y ∗ ) = inf H f } is
+nonempty. Here, inf H f ∈ R denotes the infimal value of f .
+   We attach to this minimization problem the stochastic Heavy Ball with friction
+system on [t0 , +∞), where t0 ≥ 0,
+         
+         dY (t) = X(t)dt
+         
+           dX(t) = (−λX(t) − b(t)∇f (Y (t)))dt + σY (t)dW (t)           (SHBF)
+         
+           Y (t0 ) = Y0 , X(t0 ) = X0 ,
+         
+
+defined on a filtered probability space (Ω, F , {Ft }t≥t0 , P), where W denotes a H-
+valued Brownian motion, the diffusion term, denoted by σY : [t0 , +∞) → L(H, H),
+is a measurable map, λ > 0 and b : [t0 , +∞) → (0, +∞) is a continuously differen-
+tiable and nondecreasing function.
+   Our first goal is to establish the existence and uniqueness of trajectory solutions
+of (SHBF) and to investigate their long-time behavior. Assuming that σY is square
+integrable with respect to the Hilbert–Schmidt norm ∥ · ∥HS on L(H,   H),
+                                                                          we derive
+                                                                     1
+for f (Y (t)) − inf H f an almost sure (a.s.) convergence rate of o b(t) and a con-
+                         
+                        1
+vergence rate of O b(t)      in expectation as t → +∞. Moreover, we show that the
+trajectory process Y (t) converges, almost surely, weakly to a minimizer of f , and
+that ∥X(t)∥ converges almost surely to 0 as t → +∞.
+   Note that (SHBF) is the stochastic counterpart of the deterministic system
+                          ÿ(t) + λẏ(t) + b(t)∇f (y(t)) = 0,                     (2)
+
+with Cauchy data y(t0 ) := Y0 and ẏ(t0 ) := X0 , which has recently been investigated
+in [2] from the viewpoint of its asymptotic properties. This system as its turn can
+be seen as the time parametrization of the Heavy Ball dynamics with friction
+                            ÿ(t) + λẏ(t) + ∇f (y(t)) = 0,                       (3)
+
+first introduced by Polyak in in [20, 21]. Álvarez later showed in [1] that the
+trajectory y(t) satisfies f (y(t)) → inf H f and converges weakly to a minimizer of f
+as t → +∞. According to [4], y(t) can be interpreted as the horizontal position of
+a heavy ball moving alongside the graph of f under viscous friction with coefficient
+λ. This interpretation gives the system its well-known name, the “Heavy Ball
+dynamics”.
+    Using the time–rescaling technique introduced in the deterministic setting by At-
+touch, Bot, and Ngyuen in [5], we relate the stochastic Heavy Ball dynamics (SHBF)
+to the following dynamics with vanishing damping of Su-Boyd-Candès type on
+[s0 , +∞), for s0 > 0 and α > 3,
+           
+           dZ(s) = Q(s)ds
+           
+              dQ(s) = − αs Q(s) − ∇f (Z(s)) ds + σZ (s)dW (s)
+                                               
+                                                                             (SAVD)
+           
+              Z(s0 ) = Z0 , Q(s0 ) = Q0 ,
+           
+
+and establish asymptotic properties for the latter by transferring them from the
+original system. In particular, we demonstrate that f (Z(s)) − inf H f = o s12
+almost surely, and E (f (Z(s)) − inf H f ) = O s12 , in addition to the almost sure
+weak convergence of Z(s) to a minimizer of f as s → +∞. In this way, we recover
+– via a different route – the results obtained by Maulen-Soto, Fadili, Attouch and
+                        STOCHASTIC HEAVY BALL DYNAMICS                              441
+
+
+Ochs in [16]. Observe that (SAVD) is indeed a stochastic version of the celebrated
+deterministic Su-Boyd-Candès system [22]
+                                    α
+                            z̈(s) + ż(s) + ∇f (z(s)) = 0,
+                                    s
+which shows a rate of convergence for f (z(s)) − inf H of O s12 as s → +∞, thus
+                                                                   
+
+outperforming the classical   gradient flow, which exhibits a rate of convergence for
+f (z(s)) − inf H of o 1s as s → +∞. Even more, according to [3], if α > 3, then
+                        
+
+f (z(s)) − inf H of o s12 , and the trajectory solution z(s) converges weakly to a
+minimizer of f as s → +∞. An explicit discretization of this system leads to
+the Nesterov accelerated gradient method [17, 11], which shares the asymptotic
+properties of the continuous time dynamics.
+   It is worth noting that the accelerated convergence of function values observed in
+the deterministic Su–Boyd–Candès dynamical system, when compared to the clas-
+sical gradient flow, also manifests in the stochastic setting. In particular, analogous
+improvements arise for the stochastic differential equation (SAVD), when compared
+with the stochastic gradient flow
+                      (
+                        dZ(s) = −∇f (Z(s))dt + σZ (s)dW (s)
+                        Z(s0 ) = Z0 ,
+that has been explored by Maulen-Soto, Fadili and Attouch in [15].
+   In the second part of the paper, we will generalize the framework to the problem
+of solving the monotone equation
+                                      V (y) = 0,                                   (4)
+where V : H → H is a monotone and LV -Lipschitz continuous operator. We assume
+that the set of zeros of V , zerV = {y ∗ ∈ H : V (y ∗ ) = 0}, is nonempty. The operator
+V is said to be monotone if
+                    ⟨V (y) − V (x), y − x⟩ ≥ 0 for every x, y ∈ H.
+The most illustrative examples of monotone operators include V = ∇f , the gra-
+dient of a convex and differentiable function f : H → R, and the resolvent V =
+(Id +M )−1 : H → H of a (set-valued) maximally monotone operator M : H → 2H ,
+where Id denotes the identity operator on H. A further example of a monotone
+operator is the saddle-point operator
+             V : H × G → H × G,      V (x, y) = (∇x Φ(x, y), −∇y Φ(x, y))
+of a convex-concave differentiable function Φ : H × G → R.
+   We attach to the monotone equation (4) the following stochastic Heavy Ball
+system on [t0 , +∞), for t0 ≥ 0,
+   
+   
+    dY (t) = X(t)dt
+   
+   dV (Y (t)) = H(t)dt
+                                                                   (SHBFOP)
+   
+   
+    dX(t) = (−λX(t) − µ(t)H(t) − γ(t)V (Y (t))) dt + σY (t)dW (t)
+     Y (t0 ) = Y0 , X(t0 ) = X0 ,
+   
+
+where X(·), Y (·) and V (Y (·)) are adapted stochastic processes with the property
+that there exists a continuous adapted process H(·) such that dV (Y (t)) = H(t)dt
+for every t ≥ t0 . In addition, we assume that λ > 0, µ : [t0 , +∞) → (0, +∞) is a
+continuously differentiable and nondecreasing function, and γ : [t0 , +∞) → (0, +∞)
+a continuous function. As in the optimization setting, first we establish the existence
+442                   RADU IOAN BOT
+                                  , AND CHIARA SCHINDLER
+
+
+
+and uniqueness of trajectory solutions of (SHBFOP). Assuming that σY is square
+integrable with respect to the Hilbert–Schmidt norm ∥ · ∥HS on L(H, H), we derive
+                                                           ∗                      ∗
+for the residual ∥V (Y (t))∥ and the gap function
+                                               ⟨Y (t) − y , V (Y (t))⟩, where y ∈
+                                                1                                    1
+zerV , an almost sure convergence rate of o    µ(t)   and a convergence rate of O   µ(t)
+in expectation as t → +∞. Moreover, we show that the trajectory process Y (t)
+converges, almost surely, weakly to a zero of V , and that ∥X(t)∥ converges almost
+surely to 0 as t → +∞.
+   Note that (SHBFOP) is the stochastic counterpart of the deterministic system
+                                      d
+                  ÿ(t) + λẏ(t) + µ(t)  V (y(t)) + γ(t)V (y(t)) = 0               (5)
+                                      dt
+with Cauchy data y(t0 ) := Y0 and ẏ(t0 ) := X0 , which has recently been investigated
+in [2] from the viewpoint of asymptotic properties. The trajectory solutions of (5)
+are understood in the strong global sense, meaning that the mapping t 7→ V (y(t))
+is differentiable almost everywhere, and the equation holds almost everywhere. The
+dynamical system (5) can be seen as a second-order regularization that improves
+the convergence behavior of
+                                   d
+                      ẏ(t) + µ(t)    V (y(t)) + µ(t)V (y(t)) = 0               (6)
+                                   dt
+with Cauchy data y(t0 ) = Y0 , introduced by Attouch and Svaiter in [6]. For this
+first-order system, it holds that ∥V (y(t))∥ → 0 as t → +∞, and the trajectory y(t)
+converges weakly to a zero of V .
+    Consider the first-order dynamical system, which directly mirrors the gradient
+flow approach,
+                                     ẏ(t) = V (y(t)).                                (7)
+This system does not provide the appropriate model for approaching the solution
+set of (4) when the operator V is monotone and Lipschitz continuous. Indeed, in
+                                            1
+                                                Rt
+this case only the ergodic trajectory t 7→ t−t0  t0
+                                                    y(s)ds converges to a zero of V
+as t → +∞ (see [7].) In general, the trajectory y(t) itself does not converge, as
+exemplified by the counterclockwise rotation operator by π2 radians in R2 (see [12]).
+Convergence of the trajectory y(t) arises only when V is cocoercive; that is, there
+exists ρ > 0 such that
+           ⟨V (y) − V (x), y − x⟩ ≥ ρ∥V (y) − V (x)∥2 for every x, y ∈ H.
+In this case, y(t) converges
+                           weakly
+                                  to a zero of V , while the residual ∥V (y(t))∥
+decays to zero with rate o √1t as t → +∞ (see [5]).
+   By applying the same time–rescaling technique as in the convex minimization
+setting, we connect (SHBFOP) with the following dynamics on [s0 , +∞), where
+s0 > 0 and α > 2 and β > 0,
+     
+     dZ(s) = Q(s)ds
+     
+     
+       dV (Z(s))= K(s)ds                                         (SFOGDA)
+     dQ(s) = − α Q(s) − βK(s) − αβ V (Z(s)) + σZ (s)dW (s).
+     
+     
+                   s                2s
+
+We then establish the asymptotic behavior of (SFOGDA) by transferring properties
+                                                                     = o 1s and
+                                                                           
+from the original system. In particular, we show that ∥V (Z(s))∥
+⟨Z(s) − z ∗ , V (z(s))⟩ = o 1s almost surely, E(∥V (Z(s))∥) = O 1s and E(⟨Z(s) −
+                                                                  
+                         STOCHASTIC HEAVY BALL DYNAMICS                               443
+
+
+z ∗ , V (Z(s))⟩) = O 1s , for every z ∗ ∈ zerV , in addition to the almost sure weak
+                       
+
+convergence of Z(s) to a zero of V as s → +∞.
+     Equation (SFOGDA) can be seen as a stochastic counterpart of the Fast Opti-
+mistic Gradient Descent Ascent (OGDA) system
+                           α           d            αβ
+                   z̈(s) +    ż(s) + β V (z(s)) +      V (z(s)) = 0,                 (8)
+                            s          ds            2s
+recently introduced by Bot, , Csetnek and Nguyen in [9] in connection with solving
+monotone equations (4). Beyond the weak convergence of trajectories to a zero
+of V , this system achieves convergence rates of order o 1s for both the residual
+∥V (z(s))∥ and the gap function ⟨z(s)−z ∗ , V (z(s))⟩, for every z ∗ ∈ zerV , as s → +∞.
+The Fast OGDA algorithm, obtained via an explicit discretization of (8), inherits
+these asymptotic guarantees. Remarkably, both the continuous- and discrete-time
+formulations of Fast OGDA currently yield the best known convergence rates for
+monotone equations in the literature.
+   It is worth noting that in [10] we have investigated the following stochastic dy-
+namical system (in a slightly more general form) on [0, +∞) – a stochastic coun-
+terpart of (6) in the finite-dimensional setting
+                                  
+          d Y (t) + µ(t)V (Y (t)) = −(γ(t) − µ̇(t))V (Y (t))dt + σY (t)dW (t),        (9)
+where µ : [0, +∞) → (0, +∞) and γ : [0, +∞) → (0, +∞) are bounded away from
+zero, with µ continuous differentiable and nonincreasing, and γ integrable. Assum-
+ing the diffusion term is square integrable, we have established ergodic convergence
+rates in expectation for both the norm square of the residual and the gap func-
+tion. We emphasize, however, that the asymptotic behavior of (8) significantly
+outperforms that of (9).
+
+2. The case of convex minimization problem. In this section we will investi-
+gate the stochastic Heavy Ball dynamics (SHBF)
+              
+              dY (t) = X(t)dt
+              
+               dX(t) = (−λX(t) − b(t)∇f (Y (t)))dt + σY (t)dW (t)
+              
+               Y (t0 ) = Y0 , X(t0 ) = X0
+              
+
+in relation to the convex minimization problem (1), where λ > 0 and b : [t0 , +∞) →
+(0, +∞) is a continuously differentiable and nondecreasing function.
+2.1. Long-time analysis of (SHBF). We begin by establishing the existence and
+uniqueness of trajectory solutions to (SHBF), drawing on results from the theory of
+stochastic differential equations. The relevant theorems and definitions are collected
+in the appendix.
+   The solution notion we will use in the subsequent statements is in accordance
+with Definition A.2.
+Theorem 2.1. If ∥σY (t)∥HS ≤ σ∗ for every t ≥ t0 , then (SHBF) has a unique
+                                               ν
+strong solution (Y, X). In addition, (Y, X) ∈ SH×H for every ν ≥ 2.
+Proof. Let t0 ≤ T . First, we prove that condition (1) in Theorem A.4 (i) is satisfied.
+Let Y, X ∈ C([t0 , T ], H), t0 ≤ t ≤ T and ω ∈ Ω be fixed. For y ∗ ∈ argmin f , it
+holds
+                                    
+                 X(ω, t)
+                                        + ∥σY (t)∥HS
+       −λX(ω, t) − b(t)∇f (Y (ω, t))
+444                       RADU IOAN BOT
+                                      , AND CHIARA SCHINDLER
+
+
+                                                   1
+ = ∥X(ω, t)∥2 + ∥λX(ω, t) + b(t)∇f (Y (ω, t))∥2 2 + ∥σY (t)∥HS
+                                                         1
+ ≤ ∥X(ω, t)∥2 (1 + 2λ2 ) + 2b(t)2 L2∇f ∥Y (ω, t) − y ∗ ∥2 2 + ∥σY (t)∥HS
+                                                                       1
+ ≤ ∥X(ω, t)∥2 (1 + 2λ2 ) + 4b(t)2 L2∇f ∥Y (ω, t)∥ + 4b(t)2 L2∇f ∥y ∗ ∥2 2 + ∥σY (t)∥HS
+      p                                                                
+ ≤ max      1 + 2λ2 , 2L∇f sup b(t), 2L∇f ∥y ∗ ∥ sup b(t) + σ∗
+                                     t0 ≤t≤T                   t0 ≤t≤T
+                                      
+                              X(ω, s)
+             1 + sup                       .
+                t0 ≤s≤T       Y (ω, s)
+Condition (2) in Theorem A.4 (i) is also satisfied. Indeed, let Y1 , X1 , Y2 , X2 ∈
+C([t0 , T ], H), t0 ≤ t ≤ T and ω ∈ Ω be fixed. It holds
+                                                                             
+                       X1 (ω, t)                           X2 (ω, t)
+                                             −
+           −λX1 (ω, t) − b(t)∇f (Y1 (ω, t))     −λX2 (ω, t) − b(t)∇f (Y2 (ω, t))
+         + ∥σY (t) − σY (t)∥HS
+      = ∥X1 (ω, t) − X2 (ω, t)∥2
+                                                                             1
+         +∥λ(X1 (ω, t) − X2 (ω, t)) + b(t)(∇f (Y1 (ω, t)) − ∇f (Y2 (ω, t)))∥2 2
+                                                                                 1
+      ≤ (1 + 2λ2 )∥X1 (ω, t) − X2 (ω, t)∥2 + 2b(t)2 L2∇f ∥Y1 (ω, t) − Y2 (ω, t)∥2 2
+                         √
+            p                                                                    
+                                                           X1 (ω, s)       X2 (ω, s)
+      = max    1 + 2λ2 , 2L∇f sup b(t) max                             −                .
+                                 t0 ≤t≤T       t0 ≤s≤T     Y1 (ω, s)        Y2 (ω, s)
+According to Theorem A.4 (i), (SHBF) has a unique strong solution on [t0 , T ]. Since
+t0 ≤ T has been arbitrarily chosen, the existence of a unique solution of (SHBF)
+on [t0 , +∞) follows by standard extension arguments.
+    By using the same estimates as in the verification of condition (2), one easily
+sees, by using Theorem A.4 (ii), that for every ν ≥ 2 the solution (Y, X) of (SHBF)
+          ν                                                 ν
+lies in SH×H [t0 , T ] for every t0 ≤ T , and therefore in SH×H .
+
+   For the long-time analysis of the trajectory solution of (SHBF), we shall assume
+that
+                                               sup ḃ(t)
+                                                   b(t) < λ.                            (10)
+                                               t≥t0
+
+                                                                  2
+Theorem 2.2. Let σY be square integrable, and let (Y, X) ∈ SH×H        be a strong
+solution of (SHBF). Then, the following statements are true:
+                                  
+                                 1
+  (i) f (Y (t)) − inf H f = o b(t)   and ∥X(t)∥ = o(1) as t → +∞ a.s.;
+                                       
+                                     1
+                                                       
+ (ii) E (f (Y (t)) − inf H f ) = O b(t)   and E ∥X(t)∥2 = O (1) as t → +∞;
+(iii) Y (t) converges weakly to a minimizer of f as t → +∞ a.s.
+Proof. Choose y ∗ ∈ argmin f and η such that
+                                              ḃ(t)
+                                         sup        < η < λ.
+                                         t≥t0 b(t)
+
+Consider the energy function
+                                               1                    1
+      Eη (t, y, x) := b(t) (f (y) − inf H f ) + ∥η(y − y ∗ ) + x∥2 + η(λ − η)∥y − y ∗ ∥2 .
+                                               2                    2
+                           STOCHASTIC HEAVY BALL DYNAMICS                                   445
+
+
+Applying Itô’s formula to this energy functional along the stochastic dynamics yields
+a decomposition of its evolution, providing insight into its long-term behaviour.
+   We have
+            d
+               Eη (t, y, x) = ḃ(t)(f (y) − inf H f )
+            dt
+            d
+               Eη (t, y, x) = b(t)∇f (y) + η(η(y − y ∗ ) + x) + η(λ − η)(y − y ∗ )
+           dy
+            d
+               Eη (t, y, x) = η(y − y ∗ ) + x
+           dx
+           d2
+               Eη (t, y, x) = Id,
+          dx2
+so, by Itô’s formula (see Proposition A.5),
+
+    dEη (t, Y (t), X(t))
+    
+   = ḃ(t)(f (Y (t)) − inf H f ) + ⟨b(t)∇f (Y (t)) + η 2 (Y (t) − y ∗ )
+      + ηX(t) + η(λ − η)(Y (t) − y ∗ ), X(t)⟩
+                                                                               
+      + ⟨η(Y (t) − y ∗ ) + X(t), −λX(t) − b(t)∇f (Y (t))⟩ + tr (σY (t)σY (t)∗ ) dt
+     + ⟨η(Y (t) − y ∗ ) + X(t), σY (t)dW (t)⟩
+    
+   = ḃ(t)(f (Y (t)) − inf H f ) + ⟨b(t)∇f (Y (t)) + ηX(t) + ηλ(Y (t) − y ∗ ), X(t)⟩
+      − ηλ⟨Y (t) − y ∗ , X(t)⟩ − ηb(t)⟨Y (t) − y ∗ , ∇f (Y (t))⟩ − λ∥X(t)∥2
+                                              
+      − b(t)⟨X(t), ∇f (Y (t))⟩ + ∥σY (t)∥2HS dt
+     + ⟨η(Y (t) − y ∗ ) + X(t), σY (t)dW (t)⟩
+                                                                                  
+   = ḃ(t)(f (Y (t)) − inf H f ) − ηb(t)⟨∇f (Y (t)), Y (t) − y ∗ ⟩ + (η − λ)∥X(t)∥2 dt
+        + ∥σY (t)∥2HS dt + ⟨η(Y (t) − y ∗ ) + X(t), σY (t)dW (t)⟩         ∀t ≥ t0 .
+
+By using the convexity of f , for every s ≥ t0 , we have
+
+            u(s) := ḃ(s)(f (Y (s)) − inf H f ) − ηb(s)⟨∇f (Y (s)), Y (s) − y ∗ ⟩
+                  ≤ (ḃ(s) − ηb(s))(f (Y (s)) − inf H f ) ≤ 0.
+
+Thus, for every t ≥ t0
+
+ Eη (t, Y (t), X(t)) = Eη (t0 , Y (t0 ), X(t0 ))
+                         Z t
+                       +         ḃ(s)(f (Y (s)) − inf H f ) − ηb(s)⟨∇f (Y (s)), Y (s) − y ∗ ⟩
+                           t0
+                        +(η − λ)∥X(s)∥2 ds
+                                              
+                                                                                            (11)
+                         Z t                      Z t
+                       +       ∥σY (s)∥2HS ds +       ⟨η(Y (s) − y ∗ ) + X(s), σY (s)dW (s)⟩
+                           t0                       t0
+                                                    Z t
+                    = Eη (t0 , Y (t0 ), X(t0 )) −     (λ − η)∥X(s)∥2 − u(s)ds
+                                                     t0
+                                                    |          {z           }
+                                                              =:U (t)
+446                          RADU IOAN BOT
+                                         , AND CHIARA SCHINDLER
+
+                                 Z t                         Z t
+                             +            ∥σY (s)∥2HS ds +     ⟨η(Y (s) − y ∗ ) + X(s), σY (s)dW (s)⟩,
+                                     t0                       t0
+                                 |            {z         }   |                   {z                 }
+                                            =:A(t)                            =:N (t)
+
+where A(·) and U (·) are increasing processes fulfilling U (t0 ) = 0 = A(t0 ) a.s. Ac-
+                                                                    2
+cording to Proposition A.5, N (·) is a martingale, since (Y, X) ∈ SH×H  and for every
+t ≥ t0
+     Z t                                      
+   E      ∥σY∗ (s)(η(Y (s) − y ∗ ) + X(s))∥2 ds
+        t0
+       Z t                                                  
+            3∥σY (s)∥2 η 2 (∥Y (s)∥2 + ∥y ∗ ∥2 ) + ∥X(s)∥2 ds
+                                                          
+ ≤E
+         t0
+                                                            !! Z
+                                                                                 t
+ ≤ 3E         η 2 sup ∥Y (s)∥2 + sup ∥X(s)∥2 + η 2 ∥y ∗ ∥2                           ∥σY (s)∥2 ds < +∞.
+                s∈[t0 ,t]                    s∈[t0 ,t]                          t0
+
+From the square-integrability of σY , we obtain the existence of limt→+∞ A(t) <
++∞. Therefore, by Theorem A.6, the limits limt→+∞ Eη (t, Y (t), X(t)) and limt→+∞
+U (t) exist and are finite a.s.
+   To obtain (ii), we only need to take the expectation in (11). We obtain, for every
+t ≥ t0 , that
+                                                             Z t               
+  E (Eη (t, Y (t), X(t))) ≤ E(Eη (t0 , Y (t0 ), X(t0 ))) + E      ∥σY (s)∥2HS ds
+                                                                         t0
+                                                                     Z +∞                   
+                             ≤ E(Eη (t0 , Y (t0 ), X(t0 )) + E                ∥σY (s)∥2HS ds     < +∞,
+                                                                        t0
+which means, in particular, that
+                                          sup E ∥Y (t) − y ∗ ∥2 < +∞,
+                                                               
+                                          t≥t0
+
+
+sup E (b(t) (f (Y (t)) − inf H f )) < +∞ and sup E ∥η(Y (t) − y ∗ ) + X(t)∥2 < +∞.
+                                                                            
+t≥t0                                                         t≥t0
+
+Since, for every t ≥ t0 ,
+                 ∥X(t)∥2 ≤ 2∥η(Y (t) − y ∗ ) + X(t)∥2 + 2η 2 ∥Y (t) − y ∗ ∥2 ,
+we have that
+                                             sup E ∥X(t)∥2 < +∞.
+                                                          
+                                            t≥t0
+
+Therefore,
+                      sup E b(t) (f (Y (t)) − inf H f ) + ∥X(t)∥2 < +∞,
+                                                                 
+                      t≥t0
+
+in other words,
+                                                  
+            E b(t) (f (Y (t)) − inf H f ) + ∥X(t)∥2 = O (1) as t → +∞,
+thus proving (ii).
+   To prove statement (i), we will exploit the flexibility provided by the parameter η
+to the energy function, as well as the fact that the limits limt→+∞ Eη (t, Y (t), X(t))
+and limt→+∞ U (t) exist and are finite almost surely. Precisely, it follows from
+                                                 lim U (t) < +∞ a.s.
+                                              t→+∞
+                               STOCHASTIC HEAVY BALL DYNAMICS                                       447
+
+
+that
+                  Z +∞                                     Z +∞
+                         ∥X(t)∥2 dt < +∞ and                      (−u(t))dt < +∞ a.s.
+                   t0                                       t0
+From here, since
+        Z +∞                         !
+                               ḃ(t)
+               b(t) η − sup            (f (Y (t)) − inf H f )dt
+         t0               t≥t0 b(t)
+        Z +∞                                             Z +∞
+      ≤       (ηb(t) − ḃ(t))(f (Y (t)) − inf H f )dt ≤         (−u(t)) < +∞ a.s.,
+             t0                                                      t0
+it follows
+                          Z +∞
+                                 b(t)(f (Y (t)) − inf H f )dt < +∞ a.s.
+                           t0
+                                           
+   Now we choose η1 , η2 ∈ supt≥t0 ḃ(t)
+                                   b(t)  , λ  , η1 ̸= η2 . For every t ≥ t0 it holds
+                   Eη1 (t, Y (t), X(t)) − Eη2 (t, Y (t), X(t))
+                    1
+                  = λ(η1 − η2 )∥Y (t) − y ∗ ∥2 + (η1 − η2 )⟨Y (t) − y ∗ , X(t)⟩
+                    2                                                    
+                                  λ
+                  = (η1 − η2 )      ∥Y (t) − y ∗ ∥2 + ⟨Y (t) − y ∗ , X(t)⟩ .
+                                  2
+Denoting
+                                λ
+                         p(t) :=  ∥Y (t) − y ∗ ∥2 + ⟨Y (t) − y ∗ , X(t)⟩,
+                                2
+it follows from the existence of limt→+∞ Eη1 (t, Y (t), X(t)) − Eη2 (t, Y (t), X(t)) a.s.
+that also limt→+∞ p(t) < +∞ must exist a.s. Observe that for every t ≥ t0
+                                                            1
+        Eη (t, Y (t), X(t)) = b(t)(f (Y (t)) − inf H f ) + ∥η(Y (t) − y ∗ ) + X(t)∥2
+                                                            2
+                                 1                      ∗ 2
+                              + η(λ − η)∥Y (t) − y ∥
+                                 2
+                                                            1
+                            = b(t)(f (Y (t)) − inf H f ) + ∥X(t)∥2 + ηp(t).
+                                                            2
+Denoting
+                                                              1
+                        h(t) := b(t)(f (Y (t)) − inf H f ) + ∥X(t)∥2 ,
+                                                              2
+it yields that the limit
+                                   lim h(t) < +∞ exists a.s.
+                                   t→+∞
+
+Since
+    Z +∞                 Z +∞                                             Z +∞
+                                                                      1
+             h(t)dt =           b(t)(f (Y (t)) − inf H f )dt +                   ∥X(t)∥2 dt < +∞,
+        t0                t0                                          2   t0
+we can conclude that
+                                          lim h(t) = 0 a.s.
+                                       t→+∞
+
+Thus,
+                                                      
+                                                 1
+                  f (Y (t)) − inf H f = o       b(t)       and    lim ∥X(t)∥ = 0 a.s.,
+                                                                 t→+∞
+448                     RADU IOAN BOT
+                                    , AND CHIARA SCHINDLER
+
+
+
+which proves (i).
+   To prove statement (iii), we will make use of Opial’s Lemma ([19]). While
+the second hypothesis of this result is easier to verify, the fact that the limit
+limt→+∞ ∥Y (t) − y ∗ ∥ < +∞ exists almost surely, for every y ∗ ∈ argmin f , requires
+some involved arguments.
+   For the beginning, let y ∗ ∈ argmin f be fixed. We have
+                         d(∥Y (t) − y ∗ ∥2 ) = 2⟨Y (t) − y ∗ , X(t)⟩dt.
+Applying Lemma A.1, we deduce that the existence of limt→+∞ p(t) < +∞ implies
+that limt→+∞ ∥Y (t) − y ∗ ∥2 < +∞ also exists. Hence, there exist subsets Ω1 , Ωy∗ ⊆
+Ω of full measure such that
+                               
+                            1
+f (Y (ω, t)) − inf H f = o b(t)   ∀ω ∈ Ω1 and lim ∥Y (ω, t) − y ∗ ∥2 < +∞ ∀ω ∈ Ωy∗ .
+                                                  t→+∞
+
+Before concluding our argument, we must establish the existence of a set of full
+measure, independent of y ∗ argmin f , that can take the place of Ωy∗ in the second
+property. This can be attained using an argument from [15, 10], which relies on
+the separability assumption on H. Since argmin f is closed, the separability of H
+ensures the existence of a countable set S ⊆ H that is dense in argmin f . By the
+countability of S,
+                          !                   !
+                    \                  [              X
+                                            c
+                P      Ωs = 1 − P         Ωs ≥ 1 −       P(Ωcs ) = 1.
+                      s∈S                   s∈S              s∈S
+         T
+Then, P( s∈S ΩT  s ∩ Ω1 ) = 1.
+   Now let ω ∈ s∈S Ωs ∩ Ω1 be fixed and take y ∗ ∈ argmin f . Then, there exists
+a sequence (sk )k≥0 ⊆ S such that sk → y ∗ as k → +∞. For every k ≥ 0, since
+ω ∈ Ωsk , it holds
+                             lim ∥Y (ω, t) − sk ∥ < +∞ exists.
+                            t→+∞
+
+Using the triangle inequality, we obtain
+             ∥Y (ω, t) − sk ∥ − ∥Y (ω, t) − y ∗ ∥ ≤ ∥sk − y ∗ ∥    ∀k ≥ 0 ∀t ≥ 0.
+Hence, for every k ≥ 0, it holds
+               − ∥sk − y ∗ ∥ + lim ∥Y (ω, t) − sk ∥
+                                t→+∞
+             ≤ lim inf ∥Y (ω, t) − y ∗ ∥
+                t→+∞
+
+             ≤ lim sup ∥Y (ω, t) − y ∗ ∥ ≤ lim ∥Y (ω, t) − sk ∥ + ∥sk − y ∗ ∥.
+                 t→+∞                       t→+∞
+
+Letting k → +∞, it follows
+                lim ∥Y (ω, t) − y ∗ ∥ = lim       lim ∥Y (ω, t) − sk ∥ < +∞.
+              t→+∞                         k→+∞ t→+∞
+
+Recall that there exists a set Ωcont ⊆ Ω of full measure suchTthat Y (ω, ·) is contin-
+uous for every ω ∈ Ωcont . Define Ωconverge := Ω1 ∩ Ωcont ∩         s∈S Ωs , which is also
+a subset of full measure of Ω.
+   Now, we fix ω ∈ Ωconverge . From the above, for every y ∗ ∈ argmin f , the limit
+limt→+∞ ∥Y (ω, t) − y ∗ ∥ < +∞ exists. This verifies the first condition of Opial’s
+Lemma. Using the continuity of Y (ω, ·), we can also show that Y (ω, ·) is bounded. If
+ȳ(ω) is a weak limit point of this trajectory process, then using (i) and the weak lower
+semicontinuity of f , we get that f (ȳ(ω)) = inf H f . Therefore, ȳ(ω) ∈ argmin f . This
+                          STOCHASTIC HEAVY BALL DYNAMICS                                  449
+
+
+shows that the second condition of Opial’s Lemma is also satisfied. In conclusion,
+Y (ω, t) converges weakly to a minimizer of f as t → +∞.
+Remark 2.3. Note that in order to use Itô’s formula in the above proof, we do
+need to require that, for every t ≥ t0 , the mapping (y, x) 7→ Eη (y, x) is twice differ-
+entiable in y. This is because the correspoding components in ∇(y,x) Eη (t, y, x) and
+∇2(y,x) Eη (t, y, x) are multiplied by 0 in the integral representation of Eη (t, Y (t), X(t))
+– in the proof of Itô’s formula, the assumptions are only used for precisely the com-
+ponents that are not multiplied by 0, so it is sufficient to have the requirements
+verified only on them.
+   Depending on the choice for the parameter function b, these convergence rates
+may still leave room for improvement–an issue explored in the theorem below and
+in the remark immediately following the proof.
+Theorem 2.4. Assume !      σY is square integrable and
+Z +∞         Z s
+        1
+                   b(r)dr ∥σY (s)∥2HS ds < +∞. If (Y, X) ∈ SH×H     2
+                                                                      is a strong
+ t0    b(s)   s+t0
+                2
+solution of (SHBF), then
+                                                            
+                                                      1
+                     f (Y (t)) − inf H f = O  R t            a.s.
+                                                 t+t0 b(s)ds
+                                                         2
+
+and
+                               v               
+                                       b(t)
+                                u
+                    ∥X(t)∥ = O t R t
+                                u                a.s. as t → +∞.
+                                    t+t0 b(s)ds
+                                           2
+
+
+Proof. Define
+                                                                   1
+                       Φ(t, y, x) := (f (y) − inf H f ) +              ∥x∥2 ,
+                                                                 2b(t)
+and set
+                                Φ(t, y, x) := g(t)Φ(t, y, x),
+                                e
+where
+                                               Z t
+                                   g(t) :=             b(s)ds.
+                                                t+t0
+                                                  2
+
+Observe that
+                                                                  
+            de                 ḃ(t)                         t + t0
+               Φ(t, y, x) = −         ∥x∥2 g(t) + b(t) − b             Φ(t, x, y)
+            dt                2b(t)                            2
+             d e
+               Φ(t, y, x) = g(t)∇f (y)
+            dy
+             d e            g(t)
+               Φ(t, y, x) =       x
+            dx              b(t)
+             d2 e             g(t)
+                Φ(t, y, x) =         Id .
+            dx2               b(t)
+By Itô’s formula,
+      deΦ(t, Y (t), X(t))
+450                       RADU IOAN BOT
+                                      , AND CHIARA SCHINDLER
+
+
+
+                 ḃ(t)
+      = g(t) −          ∥X(t)∥2 + ⟨∇f (Y (t)), X(t)⟩
+                2b(t)2
+                                                
+          1
+       +      ⟨X(t), −λX(t) − b(t)∇f (Y (t))⟩ dt
+         b(t)
+                                                                           
+                       t + t0                            g(t)
+       + b(t) − b                Φ(t, X(t), Y (t))dt +        X(t), σY (t)dW (t)
+                         2                               b(t)
+          g(t)
+       +       tr (σY (t)σY (t)∗ ) dt
+         2b(t)
+                            !                        
+         g(t) ḃ(t)                            t + t0
+      =−                + λ ∥X(t)∥2 dt − b              Φ(t, X(t), Y (t))dt
+         b(t) 2b(t)                               2
+        + b(t)Φ(t, X(t), Y (t))dt
+             g(t)                          g(t)
+        +         ⟨σY (t)∗ X(t), dW (t)⟩ +       tr (σY (t)σY (t)∗ ) dt    ∀t ≥ t0 ,
+             b(t)                          2b(t)
+therefore,
+
+       Φ(t,
+       e Y (t), X(t))
+
+        =e
+         Φ(0, Y (0), X(0))
+           Z t                 !                   
+                g(s) ḃ(s)            2      s + t0
+         −                  + λ ∥X(s)∥ + b            Φ(s, X(s), Y (s))ds
+             t0 b(s)  2b(s)                    2
+           |                            {z                              }
+                                                  =:U (t)
+                 Z t
+                      g(s)
+             +              tr(σY (s)σY (s)∗ ) + b(s)Φ(s, X(s), Y (s))ds
+                   t0 2b(s)
+                 |                          {z                         }
+                                         =:A(t)
+                 Z t
+                     g(s)
+             +            ⟨σY (s)∗ X(s), dW (s)⟩      ∀t ≥ t0 .
+                  t  b(s)
+                 | 0            {z             }
+                             =:N (t)
+
+A(·) and U (·) are increasing processes fulfilling U (t0 ) = 0 = A(t0 ) a.s. Since
+          2
+(Y, X) ∈ SH×H    and for every t ≥ t0
+                                            !
+                Z t                      2
+                      g(s)       ∗
+           E               σY (s) X(s) ds
+                 t0 b(s)
+                 Z T        2                     !
+                        g(s)
+         ≤E                     ∥σY (s)∥2 ∥X(s)∥2 ds
+                  t0    b(s)
+                           2                   Z t
+                       g(s)                     2
+         ≤ sup                 E sup ∥X(s)∥             ∥σY (s)∥2HS ds < +∞,
+            t0 ≤s≤t    b(s)        t0 ≤s≤t           t0
+
+taking into account Proposition A.5, N (·) is a martingale. We have seen in the proof
+                     R +∞                                    R +∞
+of Theorem 2.2 that t0 b(t)(f (Y (t)) − inf H )dt < +∞ and t0 ∥X(t)∥2 dt < +∞,
+       R +∞
+hence t0 b(t)Φ(t, Y (t), X(t))dt < +∞. This, together with the second integrabil-
+ity assumption in the hypothesis, guarantees the existence of limt→+∞ A(t) < +∞.
+                         STOCHASTIC HEAVY BALL DYNAMICS                                 451
+
+
+Thus, from Theorem A.6 we obtain that the limit limt→+∞ e       Φ(t, X(t), Y (t)) exists
+and is finite a.s. This leads to the desired convergence rates.
+Remark 2.5. Depending on b and under stronger integrability conditions on the
+diffusion term, the convergence rate results in Theorem 2.4 may offer an improve-
+ment over those established in Theorem 2.2.
+   (a) For r > 1, let
+                                    b(t) := tr    ∀t ≥ t0 .
+For every s ≥ t0 it holds
+                                      Z s
+                                1                         s
+                                              b(u)du ≤       ,
+                               b(s)    s+t0
+                                        2
+                                                         r+1
+thus, assuming that
+                              Z +∞
+                                      s∥σY (s)∥2HS ds < +∞,
+                               t0
+
+both integrability conditions in Theorem 2.4 are satisfied. Under this assumption,
+the convergence rates improve to
+                                                      
+                                 1
+                                      and ∥X(t)∥ = O √1t as t → +∞ a.s.
+                                    
+       f (Y (t)) − inf H f = O tr+1
+
+   (b) As a second example, we consider for r > 1 and t0 > 0
+                               b(t) := tr log(t)     ∀t ≥ t0 .
+For every s ≥ t0 , it holds
+       Z s
+    1
+              b(u)du
+  b(s) s+t2
+            0
+                                                                                       !
+              Z s                                             s       Z s
+       1              r                  1       ur+1                          ur
+= r                  u log(u)du = r                   log(u)       −               du
+   s log(s) s+t  2
+                   0                s log(s) r + 1            s+t0      s+t0 r + 1
+                                                                         2
+                                                                2
+
+                                (s + t0 )r+1
+               r+1
+                                                                 sr+1        (s + t0 )r+1
+                                                                                        
+       1        s                                  s + t0
+= r                    log(s) − r+1          log            −            + r+1
+   s log(s) r + 1              2 (r + 1)             2         (r + 1)2     2 (r + 1)2
+≤ s for s large enough.
+This shows that if
+                              Z +∞
+                                      s∥σY (s)∥2HS ds < +∞,
+                               t0
+
+then both integrability conditions in Theorem 2.4 are satisfied. Under this assump-
+tion, the convergence rates improve to
+                                                       
+     f (Y (t)) − inf H f = O tr+1 1log(t) and ∥X(t)∥ = O √1t as t → +∞ a.s.
+
+   (c) In contrast, if b(t) = exp(t), no improvement in the convergence rates can be
+achieved via Theorem 2.4. Namely,
+                                      
+                                    1
+        f (Y (t)) − inf H f = O exp(t)    and ∥X(t)∥ = O (1) as t → +∞ a.s.
+This is not surprising, since for every s ≥ t0 we have
+                            Z s                             
+                         1                            t0 − s
+                                   b(u)du = 1 − exp            ,
+                       b(s) s+t2
+                                 0                       2
+452                   RADU IOAN BOT
+                                  , AND CHIARA SCHINDLER
+
+
+
+and therefore the second integrability assumption does not strengthen the required
+square integrability of the diffusion term.
+2.2. Application to the stochastic Su-Boyd-Candès system with vanishing
+damping. In the following, we show – via time-scaling arguments – that a particu-
+lar formulation of the stochastic Heavy Ball system (SHBF) is closely related to the
+stochastic Su–Boyd–Candès system with vanishing damping (SAVD). This con-
+nection allows us to derive a long-time statements for the latter, not through a
+technically involved energy-dissipativity argument, but rather by transferring the
+results of Theorem 2.2.
+Theorem 2.6. Let α > 1. For given t0 ≥ 0 and s0 > 0, consider the dynamical
+systems
+    
+    
+     dY (t) = X(t)dt
+                                                           
+                               2            
+      dX(t) = −X(t) − α−1     s0
+                                    exp 2(t−t
+                                         α−1
+                                             0)
+                                                  ∇f (Y (t))  dt + σY (t)dW (t)
+    
+    
+    
+      Y (t0 ) = Y0 , X(t0 ) = X0
+                                                                         (SHBFEXP)
+on [t0 , +∞), and
+           
+           dZ(s) = Q(s)ds
+           
+             dQ(s) = − αs Q(s) − ∇f (Z(s)) ds + σZ (s)dW (s)
+                                          
+                                                                                     (SAVD)
+           
+             Z(s0 ) = Z0 , Q(s0 ) = Q0
+           
+
+on [s0 , +∞). Then, the following statements are true:
+ (i) Let (Y, X) be a strong solution of (SHBFEXP). Then, for
+                                                
+                                                s
+                     τ (s) := t0 + (α − 1) log       ∀s ≥ s0 ,
+                                                s0
+      it holds that (Z, Q), defined by
+                                                     α−1
+                  Z(s) := Y (τ (s))      and   Q(s) :=   X(τ (s)),
+                                                      s
+      is a strong solution of (SAVD) with initial conditions Z(s0 ) = Z0 = Y0 and
+      Q(s0 ) = Q0 = α−1
+                      s0 X0 , and diffusion term
+                                                     3
+                                  3               α−1 2
+                 σZ (s) = (τ̇ (s)) σY (τ (s)) =
+                                  2
+                                                         σY (τ (s)) .
+                                                   s
+ (ii) Let (Z, Q) be a strong solution of (SAVD). Then, for
+                                                 
+                                           t − t0
+                          κ(t) := s0 exp            ∀t ≥ t0 ,
+                                           α−1
+      it holds that (Y, X), defined by
+                                                                      
+                                                 s0           t − t0
+            Y (t) = Z(κ(t))    and    X(t) =        exp                    Q(κ(t))
+                                                α−1           α−1
+      is a strong solution of (SHBFEXP) with initial conditions Y (t0 )Y0 = Z0 and
+                        s0
+      X(t0 ) = X0 = α−1    Q0 , and diffusion term
+                                                              32
+                            3                s0         t − t0
+            σY (t) = (κ̇(t)) σZ (κ(t)) =
+                            2
+                                                  exp                σZ (κ(t)).
+                                            α−1         α−1
+                         STOCHASTIC HEAVY BALL DYNAMICS                                453
+
+
+Proof. (i) Let (Y, X) be a strong solution of (SHBFEXP). We denote
+                                      2                  
+                                   s0            2(t − t0 )
+                        b(t) :=           exp                 .
+                                  α−1             α−1
+For Z(s) := Y (τ (s)) and Q(s) := α−1
+                                   s X(τ (s)) = τ̇ (s)X(τ (s)), it yields, for every
+s ≥ s0 , that
+                dZ(s) = dY (τ (s))τ̇ (s)ds = X(τ (s))τ̇ (s)ds = Q(s)ds,
+and
+       dQ(s) = τ̈ (s)X(τ (s))ds + τ̇ (s)d(X(τ (s)))
+              = τ̈ (s)X(τ (s))ds + τ̇ (s)2 − X(τ (s)) − b(τ (s))∇f (Y (τ (s))) ds
+                                                                              
+
+                + τ̇ (s)σY (τ (s))dW (τ (s))
+              = τ̈ (s)X(τ (s)) + τ̇ (s)2 − X(τ (s)) − b(τ (s))∇f (Y (τ (s))) ds
+                                                                            
+                          3
+                + (τ̇ (s)) 2 σY (τ (s))dW (s)
+                                                                     
+                  τ̈ (s)
+              =          Q(s) − τ̇ (s)Q(s) − b(τ (s))τ̇ (s)2 ∇f (Z(s)) ds
+                  τ̇ (s)
+                          3
+                + (τ̇ (s)) 2 σY (τ (s))dW (s),
+where we used [18, Theorem 8.5.7] to justify the time transformation of the term
+integrated with respect to the Brownian motion.
+   Since, for every s ≥ s0 ,
+                            τ̈ (s)              1 α−1           α
+                                   − τ̇ (s) = − −         =− ,
+                            τ̇ (s)              s      s        s
+and
+                               2          2                                         
+                  2      α−1            s0            −(α − 1) log(s0 ) + (α − 1) log(s)
+  b(τ (s))(τ̇ (s)) =                            exp
+                          s          α−1                           α−1
+                    = 1,
+we have                     α                   
+                  dQ(s) = − Q(s) − ∇f (Z(s)) ds + σZ (s)dW (s).
+                               s
+Noting that conditions (i) and (ii) in the definition of a strong solution (see Def-
+inition A.2) are trivially satisfied, we conclude that (Z, Q) is a strong solution of
+(SAVD).
+    (ii) Conversely, let (Z, Q) be a strong solution of (SAVD). It is clear that τ :
+[s0 , +∞) → [t0 , +∞) and κ : [t0 , +∞) → [s0 , +∞) are bijections and mutually
+inverse.                                            
+                                       s0
+    For Y (t) := Z(κ(t)) and X(t) := α−1  exp t−t
+                                                α−1 Q(κ(t)) = κ̇(t)Q(κ(t)), it yields,
+                                                   0
+
+
+for every t ≥ t0 , that
+                 dY (t) = dZ(κ(t))κ̇(t)dt = Q(κ(t))κ̇(t)dt = X(t)dt,
+and
+   dX(t) = κ̈(t)Q(κ(t)) + κ̇(t)d(Q(κ(t)))
+                                                               
+                                      α
+         = κ̈(t)Q(κ(t)) + κ̇(t)2 −        Q(κ(t)) − ∇f (Z(κ(t)))    dt
+                                     κ(t)
+                     3
+            + (κ̇(t)) 2 σZ (κ(t))dW (t)
+454                             RADU IOAN BOT
+                                            , AND CHIARA SCHINDLER
+
+
+
+                                 ακ̇(t)2
+                                                                          
+                                                 1
+              =        κ̈(t) −                       X(t) − κ̇(t)2 ∇f (Y (t)) dt
+                                  κ(t)         κ̇(t)
+                            3
+                + (κ̇(t)) 2 σZ (κ(t))dW (t)
+                                                            
+                       1         α
+              =             −          X(t) − κ̇(t)2 ∇f (Y (t)) dt
+                    α−1 α−1
+                            3
+               + (κ̇(t)) 2 σZ (κ(t))dW (t)
+                                    2                            !
+                                s0            2(t − t0 )
+              = −X(t) −                 exp                ∇f (Y (t)) dt + σY (t)dW (t),
+                               α−1             α−1
+                             3
+since σY (t) = (κ̇(t)) 2 σZ (κ(t)). The conditions (i) and (ii) in the definition of a
+strong solution (see Definition A.2) are also in this case satisfied, therefore (Y, X)
+is a strong solution of (SHBFEXP).
+
+   We can now use the strong connection established in the above theorem to derive
+long-time statements for (SAVD), by transferring those proved for (SHBFEXP) in
+Theorem 2.2.
+Theorem 2.7. Let α > 3, let s 7→ sσZ (s) be square integrable, and let (Z, Q) ∈
+  2
+SH×H    be a strong solution of (SAVD). Then, the following statements are true:
+  (i) f (Z(s)) − inf H f = o s12 and ∥Q(s)∥ = o 1s as s → +∞
+                                                  
+                                                              a.s.;
+ (ii) E (f (Q(s)) − inf H f ) = O s12 and E ∥Q(s)∥2 = O s12 as s → +∞;
+(iii) Z(s) converges weakly to a minimizer of f as s → +∞ a.s.
+                     2
+Proof. Let (Z, Q) ∈ SH×H  be a strong solution of (SAVD) and t0 ≥ 0. Consistently
+with Theorem 2.6, we define, for every t ≥ t0 ,
+                                                 κ(t)
+                           Y (t) := Z(κ(t)) and X(t) :=Q(κ(t)),
+                                                α−1
+                                                     
+where κ : [t0 , +∞) → [s0 , +∞), κ(t) := s0 exp t−t
+                                                 α−1 . It holds limt→+∞ κ(t) =
+                                                    0
+
+
+                     2
++∞. Then, (Y, X) ∈ SH×H   is a strong solution of (SHBF) for
+                    2                 
+                  s0          2(t − t0 )                          3
+ λ = 1, b(t) =          exp                , and σY (t) = (κ̇(t)) 2 σZ (κ(t)) ∀t ≥ t0 .
+                 α−1            α−1
+      Since
+                                        2s20
+                                                                         
+                                                             2(t − t0 )
+                            ḃ(t) =            exp                            ∀t ≥ t0 .
+                                      (α − 1)3                α−1
+assumption (10), which reads
+                                                        ḃ(t)
+                                                  sup           < λ,
+                                                  t≥t0 b(t)
+
+is equivalent to
+                                 2
+                                     < 1 ⇔ α > 3.
+                               α−1
+This explains the more restrictive assumption α > 3, which is in fact consistent
+with the one used in the deterministic setting for the Su–Boyd–Candès dynamical
+system.
+                                STOCHASTIC HEAVY BALL DYNAMICS                                      455
+
+
+  Furthermore, we observe that
+    Z +∞
+          ∥σY (t)∥2HS dt
+       t0
+       Z +∞                                          Z +∞
+                                           t=τ (s)
+   =            κ̇(t)3 ∥σZ (κ(t))∥2HS dt     =              κ̇(τ (s))3 τ̇ (s)∥σZ (s)∥2HS ds
+        t0                                           s0
+       Z +∞                                                 Z +∞
+                                                    s2
+   =            κ̇(τ (s))2 (κ ˙◦ τ )(s)∥σZ (s)∥2HS ds =  ∥σZ (s)∥2HS ds < +∞,
+       s0                                     s0  α −  1
+                                                                    
+where τ = κ−1 : [s0 , +∞) → [t0 , +∞), τ (s) := t0 + (α − 1) log ss0 . It holds
+lims→+∞ τ (s) = +∞. In conclusion, all hypotheses of Theorem 2.2 are satisfied.
+   We notice that, for every s ≥ s0 ,
+                                                                          
+                                                                            s
+             
+                s0
+                   2      
+                             2(τ (s) − t0 )
+                                             
+                                                 s0
+                                                    2       2(α − 1) log  s0
+  b(τ (s)) =           exp                   =         exp                   
+               α−1              α−1             α−1                α−1
+                   1
+            =            s2 .
+                (α − 1)2
+and
+                                    α−1                  α−1
+                      ∥Q(s)∥ =              ∥X(τ (s))∥ =     ∥X(τ (s))∥.
+                                   κ(τ (s))               s
+                                                                                               
+                                                                                            1
+  From Theorem 2.2 (i), we have that f (Y (τ (s))) − inf H f = o                         b(τ (s))   and
+                                                                                                1
+                                                                                                  
+∥X(τ (s))∥ = o(1) as s → +∞ a.s. Therefore, f (Z(s)) − inf H f                         = o s2 and
+∥Q(s)∥ = o 1s as s → +∞ a.s. This proves (i). The two statements in (ii) follow
+analogously, by using Theorem 2.2 (ii). Finally, by using Theorem 2.2 (iii), we
+obtain that Z(s) = Y (τ (s)) converges weakly to a minimizer of f as s → +∞ a.s.,
+therefore statement (iii).
+
+Remark 2.8. The technique used in the proof of the above theorem enabled us
+to recover the statements of [16, Theorem 4.4] without resorting to a technically
+involved energy-dissipativity argument and without requiring the objective function
+f to be twice continuously differentiable.
+
+
+3. The case of a monotone equation. In this section we will carry out a concep-
+tually similar analysis for the stochastic Heavy Ball system (SHBFOP) on [t0 , +∞)
+        
+        
+         dY (t) = X(t)dt
+        
+        dV (Y (t)) = H(t)dt
+                                                         
+        
+        
+         dX(t) = − λX(t) − µ(t)H(t) − γ(t)V (Y (t)) dt + σY (t)dW (t),
+          Y (t0 ) = Y0 , X(t0 ) = X0 ,
+        
+
+attached to the monotone equation (4), where X(·), Y (·) and V (Y (·)) are adapted
+stochastic processes with the property that there exists a continuous adapted process
+H(·) such that dV (Y (t)) = H(t)dt for every t ≥ t0 . In addition, we assume that
+λ > 0, µ : [t0 , +∞) → (0, +∞) is a continuously differentiable and nondecreasing
+function, and γ : [t0 , +∞) → (0, +∞) a continuous function.
+456                   RADU IOAN BOT
+                                  , AND CHIARA SCHINDLER
+
+
+
+   In the spirit of Definition A.2, we consider as solutions of (SHBFOP) pairs of
+trajectory processes (Y, X) ∈ C([t0 , +∞), H × H) such that, for every t ≥ t0 , almost
+surely,
+                Rt
+ Y (t) = Y0 + t0 X(s)ds
+ 
+                         Rt
+    V (Y (t)) = V (Y0 ) + t0 H(s)ds
+                  Rt                                           Rt
+    X(t) = X0 + t0 − λX(s) − µ(s)H(s) − γ(s)V (Y (s)) ds + t0 σY (s)dW (s)
+ 
+
+The rather strong requirement that a continuous adapted process H(·) exists such
+that dV (Y (t)) = H(t)dt for every t ≥ t0 can be met if V is continuously differen-
+tiable, for example. Then,
+                          H(t) = ∇V (Y (t))X(t)       ∀t ≥ t0 ,
+and its continuity is guaranteed in the case of a bounded diffusion term by Theorem
+3.1.
+   Since we do not assume that V derives from a potential function, the convergence
+rate results will be formulated in terms of the residual ∥V (Y (t)∥, the gap function
+⟨Y (t) − y ∗ , V (Y (t))⟩, where y ∗ ∈ zerV , and the velocity norm ∥X(t)∥.
+3.1. Long-time analysis of (SHBFOP). Firstly, we consider the existence and
+uniqueness of the trajectories defined by (SHBFOP). For a trajectory solution
+(Y, X) of (SHBFOP), defining, for every t ≥ t0 ,
+                             Z(t) := X(t) + µ(t)V (Y (t)).
+it yields
+                                                     
+        dZ(t) =    − λX(t) − µ(t)H(t) − γ(t)V (Y (t)) dt + σY (t)dW (t)
+                   + µ(t)H(t)dt + µ̇(t)V (Y (t))dt
+                                                            
+              =    − λZ(t) + (λµ(t) − γ(t) + µ̇(t))V (Y (t)) dt + σY (t)dW (t).
+From the definition of Z we have
+                      dY (t) = (Z(t) − µ(t)V (Y (t)))dt     ∀t ≥ t0 ,
+which means that (Y, Z) is a trajectory solution of the dynamical system on [t0 , +∞)
+      
+      dY (t) = (Z(t) − µ(t)V (Y (t)))dt
+      
+        dZ(t) = (−λZ(t) + (λµ(t) − γ(t) + µ̇(t))V (Y (t)))dt + σY (t)dW (t)
+      
+        Y (t0 ) = Y0 , Z(t0 ) = X0 + µ(t0 )V (Y0 ).
+      
+                                                                     (SHBFOPALT)
+Conversely, if (Y, Z) is a trajectory solution of (SHBFOPALT) and there exists a
+continuous adaptive process H(·) such that
+                            dV (Y (t)) = H(t)dt      ∀t ≥ t0 ,
+then, by setting
+                        X(t) := Z(t) − µ(t)V (Y (t))      ∀t ≥ t0 ,
+we obtain that (Y, X) is a trajectory solution of (SHBFOP).
+   Using the Lipschitz continuity of V and the continuity of µ, we also have that,
+                           ν                              ν
+for every ν ≥ 2, (Y, X) ∈ SH×H   if and only if (Y, Z) ∈ SH×H .
+   In the following result we establish the existence and uniqueness of trajectory
+solutions of (SHBFOPALT). The solution notion we will use in the subsequent
+statements are in accordance with Definition A.2.
+                         STOCHASTIC HEAVY BALL DYNAMICS                                       457
+
+
+Theorem 3.1. If ∥σY (t)∥HS ≤ σ∗ for every t ≥ t0 , then (SHBFOPALT) has a
+                                                      ν
+unique strong solution (Y, Z). In addition, (Y, Z) ∈ SH×H for every ν ≥ 2.
+Proof. Let t0 ≥ T . We denote
+                                        p
+                    B := LV     sup         µ(t)2 + (λµ(t) − γ(t) + µ̇(t))2 .
+                              t0 ≤t≤T
+
+  For Y, Z ∈ C([t0 , T ], H), t0 ≤ t ≤ T , ω ∈ Ω and y ∗ ∈ zerV , it holds
+                                                   
+              Z(ω, t) − µ(t)V (Y (ω, t))
+                                                         + ∥σY (t)∥HS
+     −λZ(ω, t) + (λµ(t) − γ(t) + µ̇(t))V (Y (ω, t))
+= ∥Z(ω, t) − µ(t)V (Y (ω, t))∥2
+                                                        1
+    +∥ − λZ(ω, t) + (λµ(t) − γ(t) + µ̇(t))V (Y (ω, t))∥2 2
+  + ∥σY (t)∥HS
+                                                                               12
+≤ 2(1 + λ2 )∥Z(ω, t)∥2 + 2L2V µ(t)2 + (λµ(t) − γ(t) + µ̇(t))2 ∥Y (ω, t) − y ∗ ∥2
+  + ∥σY (t)∥HS
+                                                                               
+                                                                         Y (ω, s)
+      p                           
+≤ max       2(1 + λ2 ), 4B, 4B∥y ∗ ∥ + σ∗    1 + sup                                 .
+                                                           t0 ≤s≤T       Z(ω, s)
+
+which shows that condition (1) in Theorem A.4 (i) is satisfied.
+  Now, let Y1 , Y2 , Z1 , Z2 ∈ C([t0 , T ], H), t0 ≤ t ≤ T and ω ∈ Ω be fixed. It holds
+                                                                 
+                            Z1 (ω, t) − µ(t)V (Y1 (ω, t))
+                                                       
+              −λZ1 (ω, t) + λµ(t) − γ(t) + µ̇(t) V (Y1 (ω, t))
+                                                                   
+                              Z2 (ω, t) − µ(t)V (Y2 (ω, t))
+           −                                             
+                 −λZ2 (ω, t) + λµ(t) − γ(t) + µ̇(t) V (Y2 (ω, t))
+             + ∥σY (t) − σY (t)∥HS
+          ≤ 2(1 + λ2 )∥Z1 (ω, t) − Z2 (ω, t)∥2
+                                                                            1
+            +2L2V (µ(t)2 + (λµ(t) − γ(t) + µ̇(t))2 )∥Y1 (ω, t) − Y2 (ω, t)∥2 2
+                               √ 
+                                                                
+                p                       Y1 (ω, t)       Y2 (ω, t)
+          ≤ max     2(1 + λ2 ), 2B                  −                 .
+                                        Z1 (ω, t)        Z2 (ω, t)
+Hence, condition (2) in Theorem A.4 (i) is also satisfied, thus (SHBFOPALT) has
+a unique strong solution on [t0 , T ]. Standard extension arguments guarantee the
+existence of a unique solution of (SHBFOPALT) on [t0 , +∞).
+   Arguing as above, according to Theorem A.4 (ii), we obtain that for every ν ≥ 2
+                                               ν
+the solution (Y, Z) of (SHBFOPALT) lies in SH×H    [t0 , T ] for every T ≥ t0 , and thus
+    ν
+in SH×H .
+
+   For the long-time analysis of the trajectory solution of (SHBFOP), we shall
+assume that
+             γ(t)                     µ̇(t)                                   µ̇(t)
+     ∃ lim          =: ℓ > 0,    sup        <1       and    2λ − 3ℓ + inf             > 0.   (12)
+      t→+∞ µ(t)                  t≥t0 γ(t)                                t≥t0 µ(t)
+
+Remark 3.2. Assumption (12) implies in particular that λ > ℓ. Indeed, let δ > 0
+be such that 2λ − δ ≥ 3ℓ − inf t≥t0 µ̇(t)                γ(t)
+                                    µ(t) . Since limt→+∞ µ(t) = ℓ, there exists
+458                    RADU IOAN BOT
+                                   , AND CHIARA SCHINDLER
+
+
+                                                     γ(t)
+t1 ≥ t0 such that for every t ≥ t1 it holds ℓ − 2δ ≤ µ(t) ≤ ℓ + 2δ , and in particular
+µ̇(t)       δ µ̇(t)        δ
+µ(t) ≤ (ℓ + 2 ) γ(t) ≤ ℓ + 2 . Consequently, for every t ≥ t1 it holds
+
+                                 µ̇(t)            µ̇(t)
+             2λ − δ ≥ 3ℓ − inf           ≥ 3ℓ −         ≥ 3ℓ − ℓ − 2δ = 2ℓ − 2δ ,
+                             t≥t0 µ(t)            µ(t)
+which implies 2λ > 2ℓ + 2δ > 2ℓ, and thus λ > ℓ.
+                                                                       2
+Theorem 3.3. Let σY be square integrable, let (Y, X) ∈ SH×H                be a trajectory
+                                     ∗
+solution of (SHBFOP), and let y be a zero of V . Then, the following statements
+are true:                                                      
+                        1
+  (i) ∥V (Y (t))∥ = o µ(t)   , ⟨Y (t) − y ∗ , V (Y (t))⟩ = o µ(t)
+                                                                1
+                                                                    , and ∥X(t)∥ = o(1) as
+      t → +∞ a.s.;                                                           
+ (ii) E(∥V (Y (t))∥2 ) = O µ(t)  1
+                                   2   , E(⟨Y (t) − y ∗ , V (Y (t))⟩) = O µ(t)1
+                                                                                  , and E
+      (∥X(t)∥2 ) = O(1) as t → +∞ a.s.;
+(iii) Y (t) converges weakly to a zero of V as t → +∞ a.s.
+Proof. Choose y ∗ ∈ zerV and 0 < η < λ. Consider the energy function
+                            1                           2
+           Eη (t, x, y, v) = ∥2η(y − y ∗ ) + 2x + µ(t)v∥           (Eη1 (t, x, y, v))
+                            2
+                            + 2η(λ − η)∥y − y ∗ ∥2                 (Eη2 (t, x, y, v))
+                              + 2ηµ(t)⟨y − y ∗ , v⟩                      (Eη3 (t, x, y, v))
+                                 1
+                              + µ(t)2 ∥v∥2 .                             (Eη4 (t, x, y, v))
+                                 2
+The energy function will be exploited in the same way as it was with the function
+in the proof of Theorem 2.2. Even though the proofs are conceptually similar and
+both rely on the decomposition of the evolution of the energy function along the
+stochastic dynamics, the proof for a monotone equation will require more delicate
+arguments.
+   We compute the derivatives
+                 d 1
+                   E (t, x, y, v) = µ̇(t)⟨v, 2η(y − y ∗ ) + 2x + µ(t)v⟩,
+                 dt η
+                  d 1
+                    E (t, x, y, v) = 2(2η(y − y ∗ ) + 2x + µ(t)v),
+                 dx η
+                  d 1
+                    E (t, x, y, v) = 2η(2η(y − y ∗ ) + 2x + µ(t)v),
+                 dy η
+                  d 1
+                    E (t, x, y, v) = µ(t)(2η(y − y ∗ ) + 2x + µ(t)v),
+                 dv η
+                  d2 1
+                     E (t, x, y, v) = 4 Id,
+                 dx2 η
+                  d 2
+                    E (t, x, y, v) = 4η(λ − η)(y − y ∗ ),
+                 dy η
+                 d 3
+                   E (t, x, y, v) = 2η µ̇(t)⟨y − y ∗ , v⟩,
+                 dt η
+                  d 3
+                    E (t, x, y, v) = 2ηµ(t)v,
+                 dy η
+                  d 3
+                    E (t, x, y, v) = 2ηµ(t)(y − y ∗ )
+                 dv η
+                           STOCHASTIC HEAVY BALL DYNAMICS                                459
+
+                   d 4
+                     E (t, x, y, v) = µ(t)µ̇(t)∥v∥2 ,
+                  dt η
+                   d 4
+                      E (t, x, y, v) = µ(t)2 v.
+                  dv η
+The continuity of (Y, X), the Lipschitz continuity of V and the square integrability
+of the diffusion term allow us to apply Itô’s formula as stated in Proposition A.5.
+For every t ≥ t0 , it holds
+   dEη1 (t, X(t), Y (t), V (Y (t)))
+  = ⟨2η(Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t)), µ̇(t)V (Y (t)) + 2ηX(t)⟩dt
+    + ⟨2η(Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t)),
+      2(−λX(t) − µ(t)H(t) − γ(t)V (Y (t))) + µ(t)H(t)⟩dt
+    + ⟨σY (t)∗ (2(2η(Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t)))), dW (t)⟩
+   + 2 tr(σY (t)σY (t)∗ )dt
+   
+  = 4η(η − λ)⟨Y (t) − y ∗ , X(t)⟩ + 2η(µ̇(t) − 2γ(t))⟨Y (t) − y ∗ , V (Y (t))⟩
+    − 2ηµ(t)⟨Y (t) − y ∗ , H(t)⟩ + 4(η − λ)∥X(t)∥2
+    + (2(µ̇(t) − 2γ(t)) + 2(η − λ)µ(t))⟨X(t), V (Y (t))⟩ − 2µ(t)⟨X(t), H(t)⟩
+                                                               
+    + µ(t)(µ̇(t) − 2γ(t))∥V (Y (t))∥2 − µ(t)2 ⟨V (Y (t)), H(t)⟩ dt
+    + ⟨σY (t)∗ (2(2η(Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t)))), dW (t)⟩ + 2∥σY (t)∥2HS dt,
+   dEη2 (t, X(t), Y (t), V (X(t))) = 4η(λ − η)⟨Y (t) − y ∗ , X(t)⟩dt,
+   dEη3 (t, X(t), Y (t), V (Y (t)))
+  = (2η µ̇(t)⟨Y (t) − y ∗ , V (Y (t))⟩ + 2ηµ(t)⟨X(t), V (Y (t))⟩
+    + 2ηµ(t)⟨Y (t) − y ∗ , H(t)⟩)dt,
+   dEη4 (t, X(t), Y (t), V (Y (t))) = (µ(t)µ̇(t)∥V (Y (t))∥2 + µ(t)2 ⟨V (Y (t)), H(t)⟩)dt.
+Summing these formulas gives, for every t ≥ t0 ,
+   dEη (t, X(t), Y (t), V (X(t)))
+  = dEη1 (t, X(t), Y (t), V (Y (t))) + dEη2 (t, X(t), Y (t), V (Y (t)))
+   + dEη3 (t, X(t), Y (t), V (Y (t))) + dEη4 (t, X(t), Y (t), V (Y (t)))
+   
+  = 4η(µ̇(t) − γ(t))⟨Y (t) − y ∗ , V (Y (t))⟩ + 4(η − λ)∥X(t)∥2 − 2µ(t)⟨X(t), H(t)⟩
+    + 2(2(η − λ)µ(t) + λµ(t) − 2γ(t) + µ̇(t))⟨X(t), V (Y (t))⟩
+                                     
+    + 2µ(t)(µ̇(t) − γ(t))∥V (Y (t))∥2 dt
+    + ⟨σY (t)∗ (2(2η(Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t)))), dW (t)⟩ + 2∥σY (t)∥2HS dt.
+We set
+                                       ε := λ − η > 0.
+In the following analysis, it will be important to know the sign of
+     t 7→ − 3ε∥X(t)∥2 + 2(−2εµ(t) + λµ(t) − 2γ(t) + µ̇(t))⟨X(t), V (Y (t))⟩
+              4                                                                        (13)
+            + µ(t)(µ̇(t) − γ(t))∥V (Y (t))∥2 .
+              3
+460                     RADU IOAN BOT
+                                    , AND CHIARA SCHINDLER
+
+
+
+To accomplish this, we set
+                  A(t) := − 3ε, B(t) := −2εµ(t) + λµ(t) − 2γ(t) + µ̇(t),
+                          4
+              and C(t) := µ(t)(µ̇(t) − γ(t))∥V (Y (t))∥2 .
+                          3
+It holds
+      B(t)2 − A(t)C(t) = (−2εµ(t) + λµ(t) − 2γ(t) + µ̇(t))2 + 4εµ(t)(µ̇(t) − γ(t))
+                       = 4ε2 µ(t)2 − 4εµ(t)(λµ(t) − 2γ(t) + µ̇(t)) + (λµ(t) − 2γ(t)
+                         + µ̇(t))2 + 4εµ(t)(µ̇(t) − γ(t))
+                                                                        2 !
+                                                 γ(t)        2γ(t)   µ̇(t)
+                       = µ(t)2 4ε2 − 4ε λ −             + λ−       +            .
+                                                 µ(t)        µ(t)    µ(t)
+Our next aim is to identify an interval I ⊆ (0, λ) such that the parabola B 2 − AC
+is negative for every ε ∈ I and large enough t. To this end we use a technique
+introduced in [2].
+   From (12), there exist δ1 , δ2 such that
+                                               
+                                   λ      µ̇(t)
+                      max 2 − , sup               < δ1 < δ2 < 1,               (14)
+                                   ℓ t≥t0 γ(t)
+which implies
+         2γ(t) µ̇(t)                γ(t)                γ(t)     γ(t)
+  λ−          +      < λ + (δ1 − 2)      < λ + (δ2 − 2)      <λ−                   ∀t ≥ t0 .
+         µ(t)   µ(t)                µ(t)                µ(t)     µ(t)
+                   γ(t)
+Using that limt→+∞ µ(t) = ℓ > 0, there exist δe1 , δe2 > 0 and t1 ≥ t0 and such that
+        2γ(t) µ̇(t)                                                   γ(t)
+ λ−          +      < λ + (δ1 − 2)ℓ < δe1 < δe2 < λ + (δ2 − 2)ℓ < λ −                ∀t ≥ t1 .
+        µ(t)   µ(t)                                                   µ(t)
+                                                                                              (15)
+On the other hand, we also know from (12) that
+                                                          µ̇(t)
+                               ℓ − λ < λ − 2ℓ − inf               .
+                                                    t≥t0 µ(t)
+
+We choose δe3 , δe4 > 0 such that
+                                                                      µ̇(t)
+                        ℓ − λ < −δe4 < −δe3 < λ − 2ℓ + inf                    ,
+                                                              t≥t0 µ(t)
+
+                                γ(t)
+and, using again that limt→+∞ µ(t)   = ℓ > 0, we obtain that there exists t2 > t1
+such that
+   γ(t)                         2γ(t)        µ̇(s)      2γ(t) µ̇(t)
+        − λ < −δe4 < −δe3 < λ −       + inf        ≤λ−       +         ∀t ≥ t2 .
+   µ(t)                          µ(t)   s≥t0 µ(s)       µ(t)    µ(t)
+                                                                             (16)
+Combining (15) with (16), we obtain
+       γ(t)                         2γ(t) µ̇(t) e                γ(t)
+            − λ < −δe4 < −δe3 < λ −      +      < δ1 < δe2 < λ −                  ∀t ≥ t2 .
+       µ(t)                         µ(t)   µ(t)                  µ(t)
+Without loss of generality, we assume
+                                    max(δe1 , δe3 ) = δe1 .
+                              STOCHASTIC HEAVY BALL DYNAMICS                                            461
+
+
+Then, the discriminant of the quadratic expression in B(t)2 − A(t)C(t) is
+                         2                     2 !
+                     γ(t)           2γ(t) µ̇(t)
+    ∆t := 16      λ−         − λ−          +           ≥ 16(δe22 − δe12 ) > 0.                     (17)
+                     µ(t)            µ(t)    µ(t)
+Now, we choose δ3 > 0 such that
+                                                    q                 
+                                                         δe22 − δe12
+                               δ3 < min ℓ, λ − ℓ,                     .
+                                                            2
+                   γ(t)
+Using that limt→+∞ µ(t) = ℓ once more yields the existence of t3 ≥ t2 such that
+                                          γ(t)
+                      λ − ℓ − δ3 ≤ λ −         ≤ λ − ℓ + δ3               ∀t ≥ t3 .                (18)
+                                          µ(t)
+Going back to B(t)2 − A(t)C(t), the roots of the quadratic form in this expression
+are given by
+                             √                             √
+                 1      γ(t)      ∆t             1      γ(t)       ∆t
+           εt :=     λ−       −       and εt :=      λ−        +       .
+                 2      µ(t)      8              2      µ(t)       8
+Using (17) and (18), we see that
+                               √
+                                                        q
+                                                            δe22 − δe12
+                      
+        1       γ(t)            ∆t   λ − ℓ + δ3                                λ − ℓ − δ3
+   εt =     λ−             −       <            −                          <                ∀t ≥ t3 .
+        2       µ(t)            8        2                      2                  2
+Similarly, we obtain
+                                   λ − ℓ + δ3
+                                              < εt   ∀t ≥ t3 .
+                                       2
+In other words,
+                                           
+                      λ − ℓ − δ3 λ − ℓ + δ3
+                   I :=         ,             ⊆ (εt , εt )                  ∀t ≥ t3 .
+                          2          2
+The way that δ3 was chosen also ensures that
+                                          I ⊆ (0, λ).
+Therefore, for every ε ∈ I and every t ≥ t3 ,
+                                    B(t)2 − A(t)C(t) < 0.                                          (19)
+  In the following, we choose ε ∈ I and set η := λ − ε ∈ (0, λ). For every t ≥ t3 ,
+we have
+               dEη (t, Y (t), X(t), V (Y (t)))
+            = u(t)dt + ⟨σY (t)∗ (2(2η(Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t)))),
+               dW (t)⟩ + 2∥σY (t)∥2HS dt,
+where
+u(t) := 4η(µ̇(t) − γ(t))⟨Y (t) − y ∗ , V (Y (t))⟩ + 4(η − λ)∥X(t)∥2 − 2µ(t)⟨X(t), H(t)⟩
+          + 2(2(η − λ)µ(t) + λµ(t) − 2γ(t) + µ̇(t))⟨X(t), V (Y (t))⟩
+          + 2µ(t)(µ̇(t) − γ(t))∥V (Y (t))∥2
+     ≤ 4η (µ̇(t) − γ(t)) ⟨Y (t) − y ∗ , V (Y (t))⟩ + (η − λ)∥X(t)∥2
+            2
+         + µ(t) (µ̇(t) − γ(t)) ∥V (Y (t))∥2
+            3
+462                               RADU IOAN BOT
+                                              , AND CHIARA SCHINDLER
+
+
+
+       ≤ 0,
+which follows from (19), together with the facts that ⟨X(t), H(t)⟩ ≥ 0 and ⟨Y (t) −
+y ∗ , V (Y (t))⟩ ≥ 0, both of which are consequences of the monotonicity of V .
+     Denoting
+                  Z t                     Z t
+         U (t) :=     (−u(s))ds, A(t) :=      2∥σY (s)∥2HS ds,
+                         t3                               t3
+                     Z t
+        N (t) :=              ⟨σY (s)∗ (2(2η(Y (s) − y ∗ ) + 2X(s) + µ(s)V (Y (s)))), dW (s)⟩,
+                         t3
+
+we thus obtain, for every t ≥ t3 ,
+ Eη (t, Y (t), X(t), V (Y (t))) = Eη (t3 , Y (t3 ), X(t3 ), V (Y (t3 ))) − U (t) + N (t) + A(t).
+                                                                                             (20)
+The processes A(·) and U (·) are increasing and fulfill A(t3 ) = U (t3 ) = 0. According
+                                                             2
+to Proposition A.5, N (·) is a martingale, since (Y, X) ∈ SH×H     and for every t ≥ t3
+       Z t                                                          
+                    ∗             ∗                              2
+     E       ∥σY (s) (2η(Y (s) − y ) + 2X(s) + µ(s)V (Y (s)))∥ ds
+               t3
+           Z t                                                                                           
+                     4∥σY (s)∥2HS             2
+                                                  + 2L2V µ(s)2 )(∥Y (s)∥2 + ∥y ∗ ∥2 ) + 4∥X(s)∥2
+                                                                                                    
+      ≤E                                (4η                                                             ds
+                t3
+                                                   
+      ≤ 4 max            sup (4η 2 + 2L2V µ(s)2 ), 4
+                        t3 ≤s≤t
+                                                                      Z t
+                                   2                       2     ∗ 2
+       E       sup ∥X(s)∥ + sup ∥Y (s)∥ + ∥y ∥                                    ∥σY (s)∥2HS ds < +∞.
+            t3 ≤s≤t                     t3 ≤s≤t                              t3
+
+From the square-integrability of σY , we have limt→+∞ A(t) < +∞, therefore, by
+Theorem A.6, the limits limt→+∞ Eη (t, Y (t), X(t), V (Y (t))) < +∞ and limt→+∞
+U (t) exist and are finite a.s.
+   Taking the expectation in (20), we obtain, for every t ≥ t0 , that
+           E (Eη (t, Y (t), X(t), V (Y (t))))
+                                                                  Z t                     
+        ≤ E(Eη (t0 , Y (t3 ), X(t3 ), V (Y (t3 ))) + 2E                     ∥σY (s)∥2HS ds
+                                                                       t3
+                                                                  Z +∞                         
+        ≤ E(Eη (t0 , Y (t3 ), X(t3 ), V (Y (t3 ))) + 2E                           ∥σY (s)∥2HS ds < +∞.
+                                                                       t0
+
+This means, in particular, that
+                     sup E ∥2η(Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t))∥2 < +∞,
+                                                                      
+                     t≥t0
+
+                     sup E ∥Y (t) − y ∗ ∥2 < +∞,
+                                          
+                     t≥t0
+                     sup E (µ(t)⟨Y (t) − y∗ , V (Y (t))⟩) < +∞,
+                     t≥t0
+
+                     sup E µ(t)2 ∥V (Y (t))∥2 < +∞.
+                                             
+                     t≥t0
+
+Thus,
+                                              sup E(∥X(t)∥2 ) < +∞,
+                                              t≥t0
+                              STOCHASTIC HEAVY BALL DYNAMICS                                 463
+
+
+which proves (ii).
+  Recall that from (14) and (18) we have, for every t ≥ t3 , that µ̇(t)
+                                                                  γ(t) ≤ δ1 < 1 and
+         γ(t)
+ℓ − δ3 ≤ µ(t) ≤ ℓ + δ3 , thus
+                       (1 − δ1 )(ℓ − δ3 )µ(t) ≤ (1 − δ1 )γ(t) ≤ γ(t) − µ̇(t).
+Therefore, for every t ≥ t3 ,
+                          Z t                                         Z t
+                                            ∗
+     4η(ℓ − δ3 )(1 − δ1 )     µ(s)⟨Y (s) − y , V (Y (s))⟩ds + (λ − η)     ∥X(s)∥2 ds
+                               t3                                               t3
+                            Z t
+         2
+      + (ℓ − δ3 )(1 − δ1 )      µ(s)2 ∥V (Y (s))∥2 ds
+         3                   t3
+         2 t
+           Z
+      +       µ(s) (γ(s) − µ̇(s)) ∥V (Y (s))∥2 ds
+         3 t3
+         Z t                                                    Z t
+                                       ∗
+    ≤ 4η     (γ(s) − µ̇(s)) ⟨Y (s) − y , V (Y (s))⟩ds + (λ − η)     ∥X(s)∥2 ds
+              t0                                                        t3
+         2 t
+           Z
+      +       µ(s) (γ(s) − µ̇(s)) ∥V (Y (s))∥2 ds
+         3 t3
+      Z t
+    ≤     (−u(s))ds = U (t).
+        t3
+
+Given that limt→+∞ U (t) < +∞ a.s., it follows that
+       Z +∞                                        Z +∞
+             µ(t)⟨Y (t) − y ∗ , V (Y (t))⟩dt < +∞,      ∥X(t)∥2 dt < +∞ and
+         t3                                                t3
+       Z +∞
+                   µ(t)2 ∥V (Y (t))∥2 dt < +∞ a.s.
+         t3
+
+   Now, we choose ε1 , ε2 ∈ I, ε1 ̸= ε2 , and set ηi := λ − εi , i = 1, 2. For every t ≥ t3
+it holds
+          Eη2 (t, Y (t), X(t), V (Y (t))) − Eη1 (t, Y (t), X(t), V (Y (t)))
+           1                                                  2
+        =      ∥2η2 (Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t))∥
+           2                                                   
+                                                                2
+               − ∥2η2 (Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t))∥
+              + 2(η2 (λ − η2 ) − η1 (λ − η1 ))∥Y (t) − y ∗ ∥2
+              + 2(η2 − η1 )µ(t)⟨Y (t) − y ∗ , V (Y (t))⟩
+        = 2(η22 − η12 )∥Y (t) − y ∗ ∥2
+              + 2(η2 − η1 )⟨Y (t) − y ∗ , 2X(t) + µ(t)V (Y (t))⟩
+              + 2λ(η2 − η1 ) − 2(η22 − η12 ) ∥Y (t) − y ∗ ∥2
+                                             
+
+          + 2(η2 − η1 )µ(t)⟨Y (t) − y ∗ , V (Y (t))⟩
+                                                                          
+                        λ           ∗ 2              ∗
+        = 4(η2 − η1 )     ∥Y (t) − y ∥ + ⟨Y (t) − y , X(t) + µ(t)V (Y (t))⟩ .
+                        2
+We denote
+                     λ
+        p(t) :=        ∥Y (t) − y ∗ ∥2 + ⟨Y (t) − y ∗ , X(t) + µ(t)V (Y (t))⟩    ∀t ≥ t3 .
+                     2
+464                   RADU IOAN BOT
+                                  , AND CHIARA SCHINDLER
+
+
+
+Thus, since limt→+∞ E(t, Y (t), X(t), V (Y (t))) < +∞ exists a.s., it follows that
+limt→+∞ p(t) < +∞ must exist a.s. With this in mind, we rewrite
+Eη (t, Y (t), X(t), V (Y (t))), for every t ≥ t3 , as
+       Eη (t, Y (t), X(t), V (Y (t)))
+        1                                           2
+      = ∥2η(Y (t) − y ∗ ) + 2X(t) + µ(t)V (Y (t))∥ + 2η(λ − η)∥Y (t) − y ∗ ∥2
+        2
+                                           1
+        + 2ηµ(t)⟨Y (t) − y ∗ , V (Y (t))⟩ + µ(t)2 ∥V (Y (t))∥2
+                                           2
+                    1                           1
+      = 4ηp(t) + ∥2X(t) + µ(t)V (Y (t))∥2 + µ(t)2 ∥V (Y (t))∥2
+                    2                           2
+      = 4ηp(t) + ∥X(t) + µ(t)V (Y (t))∥2 + ∥X(t)∥2 .
+Define
+                h(t) := ∥X(t) + µ(t)V (Y (t))∥2 + ∥X(t)∥2        ∀t ≥ t3 .
+Since both limt→+∞ Eη1 (t, Y (t), X(t), V (Y (t))) < +∞ and limt→+∞ p(t) < +∞
+exist a.s., so does limt→+∞ h(t) < +∞ exist. Since
+       Z +∞               Z +∞                Z +∞
+               h(t)dt ≤ 3      ∥X(t)∥2 dt + 2       µ(t)2 ∥V (Y (t))∥2 dt < +∞,
+         t3               t3                    t3
+
+it yields that limt→+∞ h(t) = 0 a.s. Thus,
+                                   lim ∥X(t)∥ = 0 a.s.,
+                                 t→+∞
+
+which can be combined with limt→+∞ ∥X(t) + µ(t)V (Y (t))∥2 = 0 a.s. to deduce
+                               lim µ(t)∥V (Y (t))∥ = 0 a.s.
+                               t→+∞
+
+Using the boundedness of t 7→ ∥Y (t) − y ∗ ∥, it yields
+                        lim µ(t)⟨Y (t) − y ∗ , V (Y (t))⟩ = 0 a.s.,
+                      t→+∞
+
+thus, (i) is proved.
+   It remains to show weak convergence of the trajectory Y (t). Combining the fact
+that limt→+∞ p(t) < +∞ and limt→+∞ µ(t)⟨Y (t) − y ∗ , V (Y (t))⟩ = 0, we obtain
+                                                         
+                       λ           ∗ 2            ∗
+                lim      ∥Y (t) − y ∥ + ⟨Y (t) − y , X(t)⟩ < +∞ a.s.
+               t→+∞    2
+Further, Lemma A.1 guarantees that
+                           ∃ lim ∥Y (t) − y ∗ ∥ < +∞ a.s.
+                               t→+∞
+
+Hence, there exist subsets Ω1 , Ωy∗ ⊆ Ω of full measure such that
+                         
+                      1
+∥V (Y (ω, t))∥ = o          ∀ω ∈ Ω1 and       lim ∥Y (ω, t) − y ∗ ∥ < +∞ ∀ω ∈ Ωy∗ .
+                     b(t)                    t→+∞
+
+Since zerV is a closed set, by using the separability of H, we can show by repeating
+the arguments from the proof of Theorem 2.2Tthat there exists a countable set
+S ⊆TH, which is dense in zerV , such that P( s∈S Ωs ∩ Ω1 ) = 1 and, for every
+ω ∈ s∈S Ωs ∩ Ω1 and for every y ∗ ∈ zerV , it holds
+                                lim ∥Y (ω, t) − y ∗ ∥ < +∞.
+                               t→+∞
+                        STOCHASTIC HEAVY BALL DYNAMICS                             465
+
+
+Let Ωcont ∈ F be such that P(ΩcontT    ) = 1 and Y (ω, ·) is continuous for every ω ∈
+Ωcont , and Ωconverge := Ω1 ∩ Ωcont ∩ s∈S Ωs , which is also a subset of full measure
+of Ω.
+   We fix ω ∈ Ωconverge . Since limt→+∞ ∥Y (ω, t) − y ∗ ∥ < +∞ exists, for every
+ ∗
+y ∈ zerV , the first requirement for Opial’s Lemma ([19]) is satisfied. As Y (ω, ·) is
+bounded, we can choose weak limit point ȳ(ω) of it. Using (i) and the fact that the
+graph of V is sequentially closed in the weak×strong topology of H × H (see [8]), it
+yields V (ȳ(ω)) = 0. Therefore, ȳ(ω) ∈ zerV . This shows that the second condition
+of Opial’s Lemma is also satisfied and therefore proves that Y (ω, t) converges weakly
+to a zero of V as t → +∞.
+3.2. Application to the stochastic fast optimistic gradient descent ascent
+(OGDA) system. Analogously to the minimization setting, we show – using again
+time-scaling arguments – that a particular formulation of (SHBFOP) is closely
+connected to the stochastic variant of the Fast Optimistic Gradient Descent Ascent
+(OGDA) system recently introduced by Boţ, Csetnek, and Nguyen in [9]. This
+connection will also enable us to establish long-time results for the latter.
+Theorem 3.4. Let α > 1 and β > 0. For given t0 ≥ 0 and s0 > 0, consider the
+dynamical systems
+   
+   
+    dY (t) = X(t)dt
+   
+     dV (Y (t))= H(t)dt
+   
+   
+   
+                                                       
+   
+     dX(t) = − 2(α−1) α   X(t)   − 2βs0
+                                      α  exp   2(t−t0 )
+                                                           H(t)      (SHBFOPEXP)
+                                                α
+                   2βs0       2(t−t0 )
+                − α exp
+   
+   
+   
+                                α       V (Y (t)) dt + σY (t)dW (t)
+   
+   
+     Y (t0 ) = Y0 , X(t0 ) = X0
+   
+
+on [t0 , +∞) and
+     
+     
+       dZ(s) = Q(s)ds
+     
+     dV (Z(s)) = K(s)ds
+     
+                                                                        (SFOGDA)
+    
+     dQ(s) = − αs Q(s) − βK(s) − αβ
+                                  2s V (Z(s))  + σZ (s)dW (s)
+    
+    
+      Z(s0 ) = Z0 , Q(s0 ) = Q0
+    
+
+on [s0 , +∞). Then, the following statements are true:
+ (i) Let (Y, X) be a trajectory solution of (SHBFOPEXP). Then, for
+                                            
+                                     α       s
+                        τ (s) := t0 + log          ∀s ≥ s0 ,
+                                      2      s0
+     it holds that (Z, Q) defined by
+                                                              α
+                    Z(s) := Y (τ (s))   and   Q(s) :=           X(τ (s))
+                                                            2s
+      is a trajectory solution of (SFOGDA) with initial conditions Z(s0 ) = Z0 = Y0
+      and Q(s0 ) = Q0 = 2sα0 X0 and diffusion term
+                                       3
+                                                        α  32
+                     σZ (s) = (τ̇ (s)) 2 σY (τ (s)) =           σY (τ (s)).
+                                                         2s
+ (ii) Let (Z, Q) be a trajectory solution of (SFOGDA). Then, for
+                                                       
+                                             2(t − t0 )
+                         κ(t) := s0 exp                     ∀t ≥ t0 ,
+                                                 α
+466                     RADU IOAN BOT
+                                    , AND CHIARA SCHINDLER
+
+
+
+      it holds that (Y, X) defined by
+                                                                             
+                                                   2s0           2(t − t0 )
+             Y (t) := Z(κ(t))    and       X(t) :=     exp                        Q(κ(t))
+                                                    α                α
+      is a trajectory solution of (SHBFOPEXP) with initial conditions Y (t0 ) =
+      Y0 = Z0 and X(t0 ) = X0 = 2sα0 Q0 and diffusion term
+                                                                32
+                            3               2s0       2(t − t0 )
+           σY (t) = (κ̇(t)) 2 σZ (κ(t)) =       exp                    σZ (κ(t)).
+                                             α            α
+Proof. (i) Let (Y, X) be a trajectory solution of (SHBFOPEXP). We denote
+                                                                  
+                      2(α − 1)               2βs0       2(t − t0 )
+                 λ :=           and µ(t) :=       exp                .
+                          α                   α             α
+                                  α
+For Z(s) := Y (τ (s)), Q(s) := 2s   X(τ (s)) = τ̇ (s)X(τ (s)), and K(s) := τ̇ (s)H(τ (s)),
+it yields, for every s ≥ s0 , that
+                 dZ(s) = dY (τ (s))τ̇ (s)ds = X(τ (s))τ̇ (s)ds = Q(s)ds,
+and
+dQ(s) = τ̈ (s)X(τ (s))ds + τ̇ (s)d(X(τ (s)))
+       = τ̈ (s)X(τ (s))ds
+          + (τ̇ (s))2 (−λX(τ (s)) − µ(τ (s))H(τ (s)) − µ(τ (s))V (Y (τ (s)))) ds
+          + τ̇ (s)σY (τ (s))dW (τ (s))
+       = τ̈ (s)X(τ (s))ds
+          + (τ̇ (s))2 (−λX(τ (s)) − µ(τ (s))H(τ (s)) − µ(τ (s))V (Y (τ (s))))ds
+                   3
+         + (τ̇ (s)) 2 σY (τ (s))dW (s)
+                                                                                    
+           τ̈ (s)                                                   2
+       =          Q(s) − λτ̇ (s)Q(s) − τ̇ (s)µ(τ (s))K(s) − (τ̇ (s)) µ(τ (s))V (Z(s)) ds
+           τ̇ (s)
+                   3
+          + (τ̇ (s)) 2 σY (τ (s))dW (s),
+where we used [18, Theorem 8.5.7] to justify the time transformation of the term
+integrated with respect to the Brownian motion. Since, for every s ≥ s0 ,
+                            τ̈ (s)            1 α−1   α
+                                   − λτ̇ (s) = +    =− ,
+                            τ̇ (s)            s  s    s
+and
+                                                                
+                                             α       s
+                              α 2βs0       2 2 log  s0  + t 0 − t 0
+             τ̇ (s)µ(τ (s)) =        exp                            =β
+                              2s α                    α
+
+as well as
+                                                                βα
+                              (τ̇ (s))2 µ(τ (s)) = β τ̇ (s) =      ,
+                                                                2s
+we obtain that, for every s ≥ s0 ,
+                    α                 α           
+          dQ(s) = − Q(s) − βK(s) − βV (Z(s)) ds + σZ (s)dW (s).
+                       s               2s
+The continuity property is obviously inherited, therefore, (Z, Q) is a trajectory
+solution of (SFOGDA).
+                          STOCHASTIC HEAVY BALL DYNAMICS                            467
+
+
+   (ii) Conversely, let (Z, Q) be a trajectory solution of (SFOGDA). It is clear that
+τ : [s0 , +∞) → [t0 , +∞) and κ : [t0 , +∞) → [s0 , +∞) are bijections and mutually
+inverse.                                            
+   For Y (t) := Z(κ(t)), X(t) := 2sα0 exp 2(t−t α
+                                                  0)
+                                                       Q(κ(t)) = κ̇(t)Q(κ(t)) and H(t)
+:= κ̇(t)K(κ(t)), it yields, for every t ≥ t0 , that
+                  dY (t) = dZ(κ(t))κ̇(t)dt = Q(κ(t))κ̇(t)dt = X(t)dt,
+and
+dX(t) = κ̈(t)Q(κ(t)) + κ̇(t)d(Q(κ(t)))
+                                                                             
+                              2    α                         α
+      = κ̈(t)Q(κ(t)) + (κ̇(t)) −       Q(κ(t)) − βK(κ(t)) −       βV (Z(κ(t))) dt
+                                  κ(t)                      2κ(t)
+                  3
+         + (κ̇(t)) 2 σZ (κ(t))dW (t)
+                                                         ακ̇(t)2
+                                                                          
+           κ̈(t)          ακ̇(t)
+       =         X(t) −          X(t) − β κ̇(t)H(t) −            βV (Y (t)) dt
+           κ̇(t)           κ(t)                           2κ(t)
+         + σY (t)dW (t)
+                                                       
+              2(α − 1)           2βs0         2(t − t0 )
+       = −              X(t) −         exp                 H(t)
+                 α                  α             α
+                                             
+           2βs0          2(t − t0 )
+         −        exp                 V (Y (t)) dt + σY (t)dW (t).
+             α               α
+In this case as well, the continuity property is inherited, thus (Y, X) is a trajectory
+solution of (SHBFOPEXP).
+   In the next theorem, we transfer the long-time statements for (SHBFOPEXP),
+as provided by Theorem 3.3, to (SFOGDA).
+Theorem 3.5. Let α > 2, β > 0, let s 7→ sσZ (s) be square integrable, and let
+           2
+(Z, Q) ∈ SH×H   be a trajectory solution of (SFOGDA), and let z ∗ be a zero of V .
+Then, the following statements are true:
+  (i) ∥V (Z(s))∥ = o 1s , ⟨Z(s) − z ∗ , V (Z(s))⟩ = o 1s , and ∥Q(s)∥ = o 1s as
+                                                                            
+
+      s → +∞ a.s.;
+                    ) = O s12 , E(⟨Z(s)−z ∗ , V (Z(s))⟩) = O 1s , and E(∥Q(s)∥2 ) =
+                  2
+                                                              
+ (ii) E(∥V (Z(s))∥
+      O s12 as s → +∞;
+           
+
+(iii) Z(s) converges weakly to a zero of V as s → +∞ a.s.
+                       2
+Proof. Let (Z, Q) ∈ SH×H    be a trajectory solution of (SFOGDA) and t0 ≥ 0.
+Consistently with Theorem 3.4, we define
+                                                 2
+                  Y (t) := Z(κ(t)) and X(t) := κ(t)Q(κ(t)),
+                                                α
+                                                                  
+where κ : [t0 , +∞) → [s0 , +∞) is given by κ(t) := s0 exp 2(t−t
+                                                              α
+                                                                0)
+                                                                     . It holds
+                                       2
+limt→+∞ κ(t) = +∞. Then, (Y, X) ∈ SH×H        is a trajectory solution of (SHBFOP)
+for
+                                                                   
+                 2(α − 1)                    2βs0        2(t − t0 )
+           λ :=           , µ(t) = γ(t) :=         exp                and
+                     α                        α              α
+                                           32
+                       2s0       2(t − t0 )
+           σY (t) :=       exp                    σZ (κ(t)) ∀t ≥ t0 .
+                        α            α
+468                            RADU IOAN BOT
+                                           , AND CHIARA SCHINDLER
+
+
+
+      Notice that
+                                               2                    
+                                          λs0     λ         λ(t−t0 )
+                µ̇(t)   µ̇(t)             α−1    α−1 exp     α−1                 λ
+                      =       =                 2                          =            ∀t ≥ t0 .
+                γ(t)    µ(t)                                                    α−1
+                                                                
+                                            λs0          λ(t−t0 )
+                                            α−1    exp    α−1
+
+Hence, assumption (12) is satisfied if and only if
+                         λ                                             λ
+                           <1                        and   2λ − 3 +       > 0,
+                       α−1                                            α−1
+which is nothing else than
+                                                       α > 2.
+This explains the more restrictive assumption α > 2, which is consistent with the
+one used in the deterministic setting for the Fast OGDA system.
+  It remains to show square integrability of σY . We have
+           Z +∞
+                 ∥σY (t)∥2HS dt
+                 t0
+                Z +∞
+            =               κ̇(τ (s))3 τ̇ (s)∥σZ (s)∥2HS ds
+                 s0
+                Z +∞                                                  Z +∞
+                                                                                4s20 s2
+            =               κ̇(τ (s))2 (κ ˙◦ τ )(s)∥σZ (s)∥2 ds =                       ∥σZ (s)∥2 ds
+                  s0                                                   s0       α2 s20
+                       Z +∞
+              4
+            = 2                s2 ∥σZ (s)∥2 ds < +∞,
+             α         s0
+                                                           
+where τ = κ−1 : [s0 , +∞) → [t0 , +∞), τ (s) = t0 + α2 log ss0 . It holds lims→+∞ τ (s)
+= +∞. In conclusion, all hypotheses of Theorem 3.3 are satisfied.
+  Recall that, for every s ≥ s0 ,
+                                                       
+                                      α        s               2βs
+                    µ(τ (s)) = µ t0 + log            + t0 =        ,
+                                       2       s0               α
+so, according to Theorem 3.3(i), it holds
+                                                       
+                                             1           1
+       ∥V (Z(s))∥ = ∥V (Y (τ (s)))∥ = o              =o     as s → +∞ a.s.
+                                          µ(τ (s))       s
+and
+                                                                                                      
+                               ∗                                 ∗                             1
+           ⟨Y (τ (s)) − z , V (Y (τ (s)))⟩ = ⟨Z(s) − z , V (Z(s))⟩ = o
+                                                                                            µ(τ (s))
+                                               
+                                                1
+                                           =o       as s → +∞ a.s.
+                                                s
+Furthermore, it holds
+                             2s
+                                ∥Q(s)∥ = ∥X(τ (s))∥ → 0 as s → +∞ a.s.,
+                             α
+which implies
+                                               
+                                               1
+                                   ∥Q(s)∥ = o     as s → +∞ a.s..
+                                               s
+                         STOCHASTIC HEAVY BALL DYNAMICS                           469
+
+
+The statements in (ii) follow analogously from Theorem 3.3(ii). Since τ (s) → +∞
+as s → +∞, we obtain that Z(s) = Y (τ (s)) converges weakly to a zero of V as
+s → +∞ a.s., which proves statement (iii).
+
+Remark 3.6. The deterministic counterpart of (SFOGDA) is the dynamical system
+             (
+              Z̈(s) + αs Ż(s) + β ds
+                                   d
+                                      V (Z(s)) + αβ
+                                                 2s V (Z(s)) = 0
+              Z(t0 ) = Z0 and Ż(t0 ) = Q0
+which was introduced and studied in [9] (in a slightly more general form) as the
+Fast Optimistic Gradient Descent Ascent (OGDA) dynamical system, in connec-
+tion with solving monotone equations. The Fast OGDA dynamics achieve the best
+known convergence rates for monotone equations in the literature and reveal the
+surprising phenomenon that inertial dynamics with vanishing damping can have an
+accelerating effect beyond the setting of convex minimization. The same phenom-
+enon has also been observed in [9] for the explicit discretization of Fast OGDA,
+which yields an algorithm combining Nesterov momentum with a correction-term
+evaluation of the operator.
+
+Appendix A. The following lemma plays a crucial in our long-time analysis.
+Lemma A.1. Let λ > 0, t0 ≥ 0 and ϕ : [t0 , +∞) → R an Itô process with ϕ(t) =
+        Rt
+ϕ(t0 ) + t0 ψ(s)ds almost surely such that limt→+∞ (λϕ(t) + ψ(t)) = ℓ ∈ R almost
+surely. Then, limt→+∞ ϕ(t) = λℓ ∈ R almost surely.
+Proof. Let Ω1 be the subset of Ω of measure 1 such that for all ω R t∈ Ω1 it holds
+limt→+∞ λϕ(ω, t) + ψ(ω, t) = ℓ(ω) as well as ϕ(ω, t) = ϕ(ω, t0 ) + t0 ψ(ω, s)ds for
+all t ≥ t0 . We fix ω ∈ Ω1 and set ζ(ω, t) := ϕ(ω, t) − ℓ(ω)
+                                                           λ for all t ≥ t0 . Hence,
+limt→+∞ (λζ(ω, t) + ψ(ω, t)) = 0, and thus, for ε > 0, there exists Tε ≥ t0 such that
+for all t ≥ Tε it holds
+                                |λζ(ω, t) + ψ(ω, t)| < ε,
+therefore,
+                      | exp(λt)(λζ(ω, t) + ψ(ω, t))| < ε exp(λt).
+Denoting
+                                                           
+                                                       ℓ
+                            F (ℓ, ϕ, t) := exp(λt) ϕ −          ,
+                                                       λ
+we have
+                                               
+              d                               ℓ      d
+                F (ℓ, ϕ, t) = λ exp(λt) ϕ −       ,    F (ℓ, ϕ, t) = exp(λt),
+             dt                               λ     dϕ
+              d                  1
+                F (ℓ, ϕ, t) = − exp(λt).
+             dℓ                 λ
+By Itô’s formula, we have for all t ≥ t0
+                                                     
+                                                    ℓ
+               dF (ℓ, ϕ(t), t) = λ exp(λt) ϕ(t) −       dt + exp(λt)dϕ(t)
+                                                    λ
+                               = (λ exp(λt)ζ(t) + exp(λt)ψ(t))dt.
+470                   RADU IOAN BOT
+                                  , AND CHIARA SCHINDLER
+
+
+
+From here it follows that for all t ≥ Tε
+                                             Z t
+ | exp(λt)ζ(ω, t) − exp(λTε )ζ(ω, Tε )| =          (λ exp(λs)ζ(ω, s) + exp(λs)ψ(ω, s))ds
+                                              Tε
+                                             Z t
+                                                                 ε
+                                       ≤ε          exp(λs)ds =     (exp(λt) − exp(λTε )),
+                                              Tε                 λ
+hence
+     exp(λt)|ζ(ω, t)| ≤ |exp(λt)ζ(ω, t) − exp(λTε )ζ(Tε )| + exp(λTε )|ζ(ω, Tε )|
+                          ε
+                      < (exp(λt) − exp(λTε )) + exp(λTε )|ζ(ω, Tε )|,
+                          λ
+and thus
+                             ε                                ε
+                  |ζ(ω, t)| < + exp(λ(Tε − t)) |ζ(ω, Tε )| −      .
+                             λ                                 λ
+From here it yields
+                                                    ε
+                             0 ≤ lim sup |ζ(ω, t)| ≤ ,
+                                  t→+∞              λ
+which completes the proof, since ε > 0 and ω ∈ Ω1 were chosen arbitrarily.
+    Next, consider the general formulation of a stochastic differential equation on
+[t0 , +∞], where t0 ≥ 0,
+              (
+                dX(t) = F (t, X(t))dt + G(t, X(t))dW (t)
+                                                                         (SDEGEN)
+                X(t0 ) = X0 ∈ H,
+defined on a filtered probability space (Ω, F , {Ft }t≥t0 , P), where W denotes a H-
+valued Brownian motion, F : [t0 , +∞) × H → H and G : [t0 , +∞) × H → L(H, H).
+We equip L(H, H) with the Hilbert-Schmidt inner product ⟨·, ·⟩HS and correspond-
+ing norm ∥ · ∥PHS . For A, B ∈ L(H, H) and any orthonormal basis (ek )k∈N , it holds
+                ∞
+⟨A, B⟩HS := k=1 ⟨Aek , Bek ⟩.
+   In the following definition, we introduce the notion of a solution that we consider
+for (SDEGEN).
+Definition A.2. ([13, Definition 3.1]) A stochastic process X : Ω × [t0 , +∞) → H
+is a strong solution of (SDEGEN) if
+   (i) X ∈ C([t0 , +∞), H) almost surely;
+  (ii) for every t ≥ t0 it holds
+            Z t
+                ∥F (s, X(s))∥ + ∥G(s, X(s))∥2HS ds < +∞ almost surely;
+                                               
+            t0
+
+(iii) for every t ≥ t0 it holds
+                       Z t                 Z t
+      X(t) = X(t0 ) +      F (s, X(s))ds +     G(s, X(s))dW (s)        almost surely.
+                        t0                    t0
+
+   Furthermore, we introduce a class of stochastic processes characterized by a key
+property governing the expectation of their norm raised to a given power.
+Definition A.3. (i) A stochastic process X : Ω × [t0 , +∞) → H is called progres-
+sively measurable, if for every T ≥ t0 the mapping
+                        Ω × [t0 , T ] → H,     (ω, s) 7→ X(ω, s),
+                            STOCHASTIC HEAVY BALL DYNAMICS                                471
+
+
+is FT ⊗ B([t0 , T ])-measurable, where ⊗ denotes the product σ-algebra and B is the
+Borel σ-algebra. Further, X is called adapted if X(·, T ) is FT -measurable for every
+T ≥ t0 .
+For T ≥ t0 , we define the quotient space as
+ 0
+SH [t0 , T ] := {X : Ω × [t0 , T ] → H :
+                                                                             .
+               X is a progressively measurable continuous stochastic process} R,
+
+          0               0
+               T
+and set SH  := T ≥t0 SH     [t0 , T ].
+                                         ν
+  (ii) For ν > 0 and T ≥ t0 , we define SH [t0 , T ] as the following subset of stochastic
+              0
+processes in SH [t0 , T ]
+                          (                                        !        )
+           ν                         0
+          SH [t0 , T ] :=       X ∈ SH [t0 , T ] :    E     sup ∥X(t)∥ν          < +∞ .
+                                                          t∈[t0 ,T ]
+
+                 ν                     ν
+                            T
+Finally, we set SH :=           T ≥t0 SH [t0 , T ].
+
+  The theorem below ensures the existence and uniqueness of solutions to
+(SDEGEN) within a fixed compact interval.
+
+Theorem A.4. Consider the general stochastic differential equation (SDEGEN)
+and let T ≥ t0 . Assume that F and G are jointly measurable, i.e. F : [t0 , T ] ×
+H → H and G : [t0 , T ] × H → L(H, H) are B([t0 , T ]) ⊗ B(H)-measurable, and also
+measurable with respect to the product σ-field B([t0 , t]) ⊗ B(H) on [t0 , t] × H for
+every t0 ≤ t ≤ T .
+ (i) ([13, Theorem 3.3]) Assume that the following conditions hold:
+     (1) There exists a constant ℓ such that for every X ∈ C([t0 , T ], H) almost
+          surely it holds
+                                                                      
+         ∥F (t, X(ω, t))∥ + ∥G(t, X(ω, t))∥HS ≤ ℓ 1 + sup ∥X(ω, s)∥
+                                                                       t0 ≤s≤T
+
+         for every t0 ≤ t ≤ T and ω ∈ Ω.
+     (2) For every X, Y ∈ C([t0 , T ], H), t0 ≤ t ≤ T and ω ∈ Ω, there exists K > 0
+         such that
+
+         ∥F (t, X(ω, t)) − F (t, Y (ω, t))∥ + ∥G(t, X(ω, t)) − G(t, Y (ω, t))∥HS
+         ≤ K sup ∥X(ω, s) − Y (ω, s)∥.
+               t0 ≤s≤T
+
+      Then, (SDEGEN) has a unique strong solution on [t0 , T ].
+ (ii) ([15, Theorem A.7], [18, Theorem 5.2.1]) Additionally, assume that there exists
+      C > 0 such that
+
+               ∥F (t, x) − F (t, y)∥ + ∥G(t, x) − G(t, y)∥HS ≤ C∥x − y∥
+
+     for every x, y ∈ H and t0 ≤ t ≤ T . Then, the unique solution of the stochastic
+                                                          ν
+     differential equation (SDEGEN) on [t0 , T ] lies in SH [t0 , T ] for every ν ≥ 2.
+
+   Using standard extension arguments, we then obtain a unique solution of the
+                                                    ν
+system (SDEGEN) on [t0 , +∞) which also belongs to SH for every ν ≥ 2.
+   Next we recall the Itô formula.
+472                      RADU IOAN BOT
+                                     , AND CHIARA SCHINDLER
+
+
+
+Proposition A.5. [13, Theorem 2.9] Let T ≥ t0 be fixed. Let X be a stochastic
+process given by
+                          Z t           Z t
+              X(t) = X0 +     F (s)ds +     G(s)dW (s) ∀t ∈ [t0 , T ],
+                                   t0                 t0
+defined, as before, on a filtered probability space (Ω, F , {Ft }t0 ≤t≤T , P), where W
+denotes a H-valued Brownian motion, F : [t0 , T ] → H and G : [t0 , T ] → L(H, H).
+Moreover, we require that X0 is an Ft0 -measurable H-valued random variable, F (·)
+is adapted such that
+                              Z T
+                                  ∥F (t)∥dt < +∞ a.s.,
+                                        t0
+and G(·) is adapted such that
+                           Z T
+                                             ∥G(t)∥2HS dt < +∞ a.s.
+                                   t0
+
+Let ϕ : [t0 , +∞) × H → R be such that ϕ(·, x) ∈ C1 ([t0 , +∞)) for every x ∈ H and
+ϕ(t, ·) ∈ C2 (H) for every t ≥ t0 . Then,
+                                             X̃(t) := ϕ(t, X(t))
+is an Itô process such that
+              d
+   dX̃(t) = ϕ(t, X(t))dt + ⟨∇x ϕ(t, X(t)), F (t)⟩ dt + ⟨∇x ϕ(t, X(t)), G(t)dW (t)⟩
+             dt
+                1
+             + tr ∇2xx ϕ(t, X(t))G(t)G(t)∗ dt ∀t ≥ t0 .
+                                          
+                2
+Here, G(t)∗ denotes the adjoint operator of G(t) and tr(·) the trace of an operator
+A ∈ L(H, H), defined by
+                                       ∞
+                                       X
+                               tr(A) =    ⟨Aek , ek ⟩,
+                                                    k=1
+where {ek }k∈N denotes an orthonormal basis of the Hilbert space H. Further, if, for
+every t0 ≤ t ≤ T ,
+                      Z t                          
+                    E      ∥G(s)∗ ∇x ϕ(s, X(s))∥2 ds < +∞,
+                              t0
+             Rt      ∗
+then t 7→ t0 ⟨G(s) ∇x ϕ(s, X(s)), dW (s)⟩ is, for every t0 ≤ t ≤ T , a square inte-
+grable continuous martingale with expected value 0.
+      The following theorem is central to the asymptotic analysis.
+Theorem A.6. ([14, Theorem 3.9]) Let A : [t0 , +∞) → R and U : [t0 , +∞) → R be
+two continuous adapted increasing processes with A(t0 ) = U (t0 ) = 0 almost surely.
+Let N : [t0 , +∞] → R be a real-valued continuous local martingale with N (t0 ) = 0
+almost surely and ξ be a nonnegative F0 -measurable random variable. Define
+                         X(t) := ξ + A(t) − U (t) + N (t)          ∀t ≥ t0 .
+If X(·) is nonnegative and limt→+∞ A(t) < +∞ almost surely, then the limits
+limt→+∞ X(t) < +∞ and limt→+∞ U (t) < +∞ exist almost surely.
+   In the analysis of the dynamical system governed by an operator we shall make
+use of the following lemma.
+                            STOCHASTIC HEAVY BALL DYNAMICS                                       473
+
+
+Lemma A.7. Let A, B, C ∈ R be such that A ̸= 0 and B 2 − AC ≤ 0. The
+following statements are true:
+  (i) If A > 0, then it holds
+                      A∥P ∥2 + 2B⟨P, Q⟩ + C∥Q∥2 ≥ 0              ∀P, Q ∈ H;
+ (ii) If A < 0, then it holds
+                      A∥P ∥2 + 2B⟨P, Q⟩ + C∥Q∥2 ≤ 0              ∀P, Q ∈ H.
+
+Acknowledgments. The authors would like to thank Julio Backhoff-Veraguas for
+fruitful discussions on various aspects of this work.
+
+                                         REFERENCES
+
+ [1] F. Álvarez, On the minimizing property of a second-order dissipative system in Hilbert spaces,
+     SIAM Journal on Control and Optimization, 38 (2000), 1102-1119.
+ [2] H. Attouch, R. I. Bot, , D. A. Hulett and D.-K. Nguyen, Recovering Nesterov accelerated
+     dynamics from Heavy Ball dynamics via time rescaling, preprint, 2025, arXiv:2504.15852.
+ [3] H. Attouch, Z. Chbani, J. Peypouquet and P. Redont, Fast convergence of inertial dynamics
+     and algorithms with asymptotic vanishing viscosity, Mathematical Programming, 168 (2018),
+     123-175.
+ [4] H. Attouch, X. Goudou and P. Redont, The heavy ball with friction method. The contin-
+     uous dynamical system, global exploration of the local minima of a real-valued function by
+     asymptotical analysis of a dissipative dynamical system, Communications in Contemporary
+     Mathematics, 2 (2000), 1-34.
+ [5] H. Attouch, R. Ioan Bot, and D.-K. Nguyen, Fast convex optimization via time scale and
+     averaging of the steepest descent, Mathematics of Operations Research, 50 (2024), 2633-
+     2665.
+ [6] H. Attouch and B. F. Svaiter, A continuous dynamical Newton-like approach to solving mono-
+     tone inclusions, SIAM Journal on Control and Optimization, 49 (2011), 574-598.
+ [7] J.-B. Baillon and H. Brézis, Une remarque sur le comportement asymptotique des semi-
+     groupes non linéaires, Houston Journal of Mathematics, 2 (1976), 5-7.
+ [8] H. H. Bauschke and P. L. Combettes, Convex Analysis and Monotone Operator Theory in
+     Hilbert Spaces, 2nd edition, Springer International Publishing AG, 2017.
+ [9] R. I. Bot, , E. R. Csetnek and D.-K. Nguyen, Fast Optimistic Gradient Descent Ascent (OGDA)
+     method in continuous and discrete time, Foundations of Computational Mathematics, 25
+     (2025), 163-222.
+[10] R. I. Bot, and C. Schindler, On a stochastic differential equation with correction term governed
+     by a monotone and Lipschitz continuous operator, Evolution Equations and Control Theory,
+     14 (2025), 463-493.
+[11] A. Chambolle and C. Dossal, On the convergence of the iterates of the “Fast Iterative Shrink-
+     age/Thresholding Algorithm”, Journal of Optimization Theory and Applications, 166 (2015),
+     968-982.
+[12] R. Cominetti, J. Peypouquet and S. Sorin, Strong asymptotic convergence of evolution equa-
+     tions governed by maximal monotone operators with Tikhonov regularization, Journal of
+     Differential Equations, 245 (2008), 3753-3763.
+[13] L. Gawarecki and V. Mandrekar, Stochastic Differential Equations in Infinite Dimensions,
+     Springer-Verlag, Berlin, Heidelberg, 2011.
+[14] X. Mao, Stochastic Differential Equations and Applications, 2nd edition, Woodhead Publish-
+     ing, Cambridge, 2007.
+[15] R. Maulen-Soto, J. Fadili and H. Attouch, An SDE perspective on stochastic convex opti-
+     mization, Mathematics of Operations Research, 50 (2024), 3190-3221.
+[16] R. Maulen-Soto, J. Fadili, H. Attouch and P. Ochs, An SDE perspective on stochastic in-
+     ertial gradient dynamics with time-dependent viscosity and geometric damping, to appear,
+     Optimization.
+[17] Y. E. Nesterov, A method of solving a convex programming problem with convergence rate
+     O(1/k2 ), Soviet Mathematics Doklady, 27 (1983), 372-376.
+474                      RADU IOAN BOT
+                                     , AND CHIARA SCHINDLER
+
+
+
+[18] B. Øksendal, Stochastic Differential Equations, 6th edition, Springer-Verlag, Berlin, Heidel-
+     berg, 2003.
+[19] Z. Opial, Weak convergence of the sequence of successive approximations for nonexpansive
+     mappings, Bulletin of the American Mathematical Society, 73 (1967), 591-597.
+[20] B. T. Polyak, Introduction to Optimization, Optimization Software, Inc., Publications Divi-
+     son, New York, 1987.
+[21] B. T. Polyak, Some methods of speeding up the convergence of iteration methods, USSR
+     Computational Mathematics and Mathematical Physics, 4 (1964), 1-17.
+[22] W. Su, S. Boyd and E. J. Candès, A differential equation for modeling Nesterov’s accelerated
+     gradient method: theory and insights, J. Mach. Learn. Res., 17 (2016), 5312–5354.
+
+  Received October 7, 2025; revised January 13, 2026; early access February 5,
+2026.
+

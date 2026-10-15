@@ -1,0 +1,272 @@
+[
+  {
+    "id": "http://arxiv.org/abs/2406.02413v4",
+    "title": "Variance-Reduced Fast Krasnoselkii-Mann Methods for Finite-Sum Root-Finding Problems",
+    "published": "2024-06-04T15:23:29Z",
+    "updated": "2026-09-09T16:25:15Z",
+    "summary": "We propose a new class of fast Krasnoselkii--Mann methods with variance reduction to solve a finite-sum co-coercive equation $Gx = 0$. Our algorithm is single-loop and leverages a new family of unbiased variance-reduced estimators specifically designed for a wider class of root-finding algorithms. Our method achieves both $\\mathcal{O}(1/k^2)$ and $o(1/k^2)$ last-iterate convergence rates in terms of $\\mathbb{E}[\\| Gx^k\\|^2]$, where $k$ is the iteration counter and $\\mathbb{E}[\\cdot]$ is the total expectation. We also establish almost sure $o(1/k^2)$ convergence rates and the almost sure convergence of iterates $\\{x^k\\}$ to a solution of $Gx=0$. We instantiate our framework for two prominent estimators: SVRG and SAGA. By an appropriate choice of parameters, both variants attain an oracle complexity of $\\mathcal{O}(n + n^{2/3}ε^{-1})$ to reach an $ε$-solution, where $n$ represents the number of summands in the finite-sum operator $G$. Furthermore, under $σ$-strong quasi-monotonicity, our method achieves a linear convergence rate and an oracle complexity of $\\mathcal{O}(n+ \\max\\{n, n^{2/3}κ\\} \\log(\\frac{1}ε))$, where $κ:= L/σ$. We extend our approach to solve a class of finite-sum inclusions (possibly nonmonotone), demonstrating that our schemes retain the same theoretical guarantees as in the equation setting. Finally, numerical experiments validate our algorithms and demonstrate their promising performance compared to state-of-the-art methods.",
+    "authors": [
+      "Quoc Tran-Dinh"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2604.22581v3",
+    "title": "Stochastic Krasnoselskii-Mann Iterations: Convergence without Uniformly Bounded Variance",
+    "published": "2026-04-24T14:13:29Z",
+    "updated": "2026-09-11T11:55:54Z",
+    "summary": "We investigate the Stochastic Krasnoselskii-Mann iterations for expected nonexpansive fixed-point problems in a real separable Hilbert space. We establish convergence guarantees under significantly weaker assumptions on the variance than those typically used in the literature. In particular, instead of a uniform bound on the variance of the stochastic oracle, we only assume finite variance at a single fixed point. Under this assumption, we prove almost sure weak convergence of the iterates, derive convergence rates for the expected residual and the last-iterate residual, and obtain almost sure convergence rates for the running minimum residual. Notably, we recover the best-known stochastic oracle complexity without imposing uniformly bounded variance. We illustrate the applicability of our results to Stochastic Gradient Descent, where we recover known guarantees, to Stochastic Three-Operator Splitting and Stochastic Backward-Forward Splitting, for which we obtain the first results that avoid uniform variance bounds, and to a novel Stochastic Lifted Three-Operator Splitting.",
+    "authors": [
+      "Daniel Cortild",
+      "Coralia Cartis",
+      "Juan Peypouquet"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2203.10947v3",
+    "title": "Fast Optimistic Gradient Descent Ascent (OGDA) method in continuous and discrete time",
+    "published": "2022-03-21T13:12:25Z",
+    "updated": "2024-02-22T11:44:56Z",
+    "summary": "In the framework of real Hilbert spaces we study continuous in time dynamics as well as numerical algorithms for the problem of approaching the set of zeros of a single-valued monotone and continuous operator $V$. The starting poin is a second order dynamical system that combines a vanishing damping term with the time derivative of $V$ along the trajectory. Our method exhibits fast convergence rates of order $o \\left( \\frac{1}{tβ(t)} \\right)$ for $\\|V(z(t))\\|$, wher $β(\\cdot)$ is a positive nondecreasing function satisfying a growth condition, and also for the restricted gap function. We also prove the weak convergence of the trajectory to a zero of $V$. Temporal discretizations of the dynamical system generate implicit and explicit numerical algorithms, which can be both seen as accelerated versions of the Optimistic Gradient Descent Ascent (OGDA) method, for which we prove that the generated sequence of iterates shares the asymptotic features of the continuous dynamics. In particular we show for the implicit numerical algorithm convergence rates of order $o \\left( \\frac{1}{kβ_k} \\right)$ for $\\|V(z^k)\\|$ and the restricted gap function, where $(β_k)_{k \\geq 0}$ is a positive nondecreasing sequence satisfying a growth condition. For the explicit numerical algorithm we show by additionally assuming that the operator $V$ is Lipschitz continuous convergence rates of order $o \\left( \\frac{1}{k} \\right)$ for $\\|V(z^k)\\|$ and the restricted gap function. All convergence rate statements are last iterate convergence results; in addition we prove for both algorithms the convergence of the iterates to a zero of $V$. To our knowledge, our study exhibits the best known convergence rate results for monotone equations. Numerical experiments indicate the overwhelming superiority of our explicit numerical algorithm over other methods for monotone equations.",
+    "authors": [
+      "Radu Ioan Bot",
+      "Ernö Robert Csetnek",
+      "Dang-Khoa Nguyen"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2206.09462v2",
+    "title": "Fast Krasnosel'skii-Mann algorithm with a convergence rate of the fixed point iteration of $o\\left(\\frac{1}{k}\\right)$",
+    "published": "2022-06-19T18:18:21Z",
+    "updated": "2023-08-24T20:15:22Z",
+    "summary": "The Krasnosel'skii-Mann (KM) algorithm is the most fundamental iterative scheme designed to find a fixed point of an averaged operator in the framework of a real Hilbert space, since it lies at the heart of various numerical algorithms for solving monotone inclusions and convex optimization problems. We enhance the Krasnosel'skii-Mann algorithm with Nesterov's momentum updates and show that the resulting numerical method exhibits a convergence rate for the fixed point residual of $o(1/k)$ while preserving the weak convergence of the iterates to a fixed point of the operator. Numerical experiments illustrate the superiority of the resulting so-called Fast KM algorithm over various fixed point iterative schemes, and also its oscillatory behavior, which is a specific of Nesterov's momentum optimization algorithms.",
+    "authors": [
+      "Radu Ioan Bot",
+      "Dang-Khoa Nguyen"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2609.15257v2",
+    "title": "Improving the Last-Iterate Guarantees of Anytime Algorithms for Stochastic Monotone Variational Inequalities",
+    "published": "2026-09-14T09:17:23Z",
+    "updated": "2026-09-24T16:48:33Z",
+    "summary": "We analyze a stochastic algorithm with Halpern-type anchoring for constrained convex-concave problems and monotone variational inequalities. This single-loop and single-call algorithm uses one unbiased sample of the gradient operator at every iteration, to be applicable to monotone games with noisy feedback. With $t$ denoting the iteration counter, we prove an anytime last-iterate convergence rate of $O(t^{-1/4})$ for both the gradient-mapping norm and restricted gap, bypassing the $O(t^{-1/5})$ constrained-anytime bottleneck in the literature. Specializing then to multi-point oracles, we use variance reduction to achieve the $O(t^{-1/2})$ rate with an anytime single-loop algorithm using $2$ samples per iteration. Our results allow constrained problems with a potentially unbounded feasible set; as well as a structured class of stochastic oracles whose variance need not be uniformly bounded.",
+    "authors": [
+      "Jun-Hyun Kim",
+      "Ahmet Alacaoglu"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2203.09436v4",
+    "title": "Stochastic Halpern Iteration with Variance Reduction for Stochastic Monotone Inclusions",
+    "published": "2022-03-17T16:48:57Z",
+    "updated": "2023-01-08T21:32:52Z",
+    "summary": "We study stochastic monotone inclusion problems, which widely appear in machine learning applications, including robust regression and adversarial learning. We propose novel variants of stochastic Halpern iteration with recursive variance reduction. In the cocoercive -- and more generally Lipschitz-monotone -- setup, our algorithm attains $ε$ norm of the operator with $\\mathcal{O}(\\frac{1}{ε^3})$ stochastic operator evaluations, which significantly improves over state of the art $\\mathcal{O}(\\frac{1}{ε^4})$ stochastic operator evaluations required for existing monotone inclusion solvers applied to the same problem classes. We further show how to couple one of the proposed variants of stochastic Halpern iteration with a scheduled restart scheme to solve stochastic monotone inclusion problems with ${\\mathcal{O}}(\\frac{\\log(1/ε)}{ε^2})$ stochastic operator evaluations under additional sharpness or strong monotonicity assumptions.",
+    "authors": [
+      "Xufeng Cai",
+      "Chaobing Song",
+      "Cristóbal Guzmán",
+      "Jelena Diakonikolas"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2208.04193v3",
+    "title": "Stochastic fixed-point iterations for nonexpansive maps: Convergence and error bounds",
+    "published": "2022-08-08T14:49:36Z",
+    "updated": "2023-03-31T20:44:09Z",
+    "summary": "We study a stochastically perturbed version of the well-known Krasnoselski--Mann iteration for computing fixed points of nonexpansive maps in finite dimensional normed spaces. We discuss sufficient conditions on the stochastic noise and stepsizes that guarantee almost sure convergence of the iterates towards a fixed point, and derive non-asymptotic error bounds and convergence rates for the fixed-point residuals. Our main results concern the case of a martingale difference noise with variances that can possibly grow unbounded. This supports an application to reinforcement learning for average reward Markov decision processes, for which we establish convergence and asymptotic rates. We also analyze in depth the case where the noise has uniformly bounded variance, obtaining error bounds with explicit computable constants.",
+    "authors": [
+      "Mario Bravo",
+      "Roberto Cominetti"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2403.04860v2",
+    "title": "The stochastic Ravine accelerated gradient method with general extrapolation coefficients",
+    "published": "2024-03-07T19:18:33Z",
+    "updated": "2024-03-21T20:58:25Z",
+    "summary": "In a real Hilbert space domain setting, we study the convergence properties of the stochastic Ravine accelerated gradient method for convex differentiable optimization. We consider the general form of this algorithm where the extrapolation coefficients can vary with each iteration, and where the evaluation of the gradient is subject to random errors. This general treatment models a breadth of practical algorithms and numerical implementations. We show that, under a proper tuning of the extrapolation parameters, and when the error variance associated with the gradient evaluations or the step-size sequences vanish sufficiently fast, the Ravine method provides fast convergence of the values both in expectation and almost surely. We also improve the convergence rates from O(.) to o(.). Moreover, we show almost sure summability property of the gradients, which implies the fast convergence of the gradients towards zero. This property reflects the fact that the high-resolution ODE of the Ravine method includes a Hessian-driven damping term. When the space is also separable, our analysis allows also to establish almost sure weak convergence of the sequence of iterates provided by the algorithm. We finally specialize the analysis to consider different parameter choices, including vanishing and constant (heavy ball method with friction) damping parameter, and present a comprehensive landscape of the tradeoffs in speed and accuracy associated with these parameter choices and statistical properties on the sequence of errors in the gradient computations. We provide a thorough discussion of the similarities and differences with the Nesterov accelerated gradient which satisfies similar asymptotic convergence rates.",
+    "authors": [
+      "Hedy Attouch",
+      "Jalal Fadili",
+      "Vyacheslav Kungurtsev"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2403.12338v4",
+    "title": "Stochastic Halpern iteration in normed spaces and applications to reinforcement learning",
+    "published": "2024-03-19T01:07:35Z",
+    "updated": "2025-05-09T21:02:52Z",
+    "summary": "We analyze the oracle complexity of the stochastic Halpern iteration with minibatch, where we aim to approximate fixed-points of nonexpansive and contractive operators in a normed finite-dimensional space. We show that if the underlying stochastic oracle has uniformly bounded variance, our method exhibits an overall oracle complexity of $\\tilde{O}(\\varepsilon^{-5})$, to obtain $\\varepsilon$ expected fixed-point residual for nonexpansive operators, improving recent rates established for the stochastic Krasnoselskii-Mann iteration. Also, we establish a lower bound of $Ω(\\varepsilon^{-3})$ which applies to a wide range of algorithms, including all averaged iterations even with minibatching. Using a suitable modification of our approach, we derive a $O(\\varepsilon^{-2}(1-γ)^{-3})$ complexity bound in the case in which the operator is a $γ$-contraction to obtain an approximation of the fixed-point. As an application, we propose new model-free algorithms for average and discounted reward MDPs. For the average reward case, our method applies to weakly communicating MDPs without requiring prior parameter knowledge.",
+    "authors": [
+      "Mario Bravo",
+      "Juan Pablo Contreras"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2609.36033v1",
+    "title": "Dual-Anchor Acceleration Is Near-Optimal for Stochastic Monotone Root-Finding",
+    "published": "2026-09-28T18:04:25Z",
+    "updated": "2026-09-28T18:04:25Z",
+    "summary": "Among distinct optimal acceleration mechanisms for deterministic monotone root-finding problems and fixed-point problems, dual-anchoring has recently been shown to admit a more robust direct stochastic extension than standard anchor acceleration. However, without additional strong monotonicity, the existing stochastic dual-anchoring guarantee has two limitations: first, it requires cocoercivity in expectation, and second, it attains only $O(ε^{-3})$ oracle complexity, leaving a gap to the near-optimal $\\tilde{O}(ε^{-2})$ complexity achieved by other methods. In this work, we address both of these limitations by combining dual-anchoring with stochastic resolvent approximation and optimized variance control. For unbiased stochastic oracles with variance bounded by $σ^2$, where sample operators are monotone and uniformly $L$-Lipschitz, our algorithm finds a point with $ε$-residual with a near-optimal oracle complexity of $O ( (LD / ε) \\ell + (σ^2 / ε^2) \\ell^2)$, where $\\ell = \\log (1 + LD / ε)$ and $D$ is the initial distance to a solution. This result improves the best known oracle complexity in the noise-dominated regime under these samplewise assumptions, reducing the poly-logarithmic factor from cubic to quadratic.",
+    "authors": [
+      "TaeHo Yoon",
+      "Nicolas Loizou"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2609.28543v1",
+    "title": "Stochastic Inertial Krasnosel'skii-Mann Iteration Achieves Near-Optimal Sample Complexity",
+    "published": "2026-09-22T23:57:59Z",
+    "updated": "2026-09-22T23:57:59Z",
+    "summary": "We analyze a simple stochastic inertial Krasnosel'skii--Mann (iKM) method for finding a fixed point of a nonexpansive operator in a real Hilbert space. Our method is obtained simply by adding two inertial extrapolations to stochastic KM [Bravo and Cominetti, 2024], and it retains one call to a possibly biased stochastic oracle per update and achieves sharp rates in both the stochastic and deterministic regimes. Specifically, with our proposed parameter schedule, we prove the following last-iterate fixed-point residual bound: \\[ {O}\\!\\left(\\frac{1}{K} +\\frac{σ\\log K}{\\sqrt K} +\\frac{B_K\\log K}{K}\\right), \\] where $K$ is the horizon, $σ$ is the noise level and $B_K$ is the accumulated root-mean-square bias. When $B_K=O(\\sqrt K)$, this yields $\\widetilde O(ε^{-2})$ sample complexity that matches, up to a logarithmic factor, the stochastic-oracle lower bound given under the unbiased subclass of our model [Foster et al., 2019, Theorem 2]. It also improves the best-known $O(ε^{-4})$ random-iterate guarantee for stochastic KM [Bravo and Cominetti, 2024, Corollary 5.4]. To our knowledge, this is the first single-loop method for general nonexpansive fixed-point problems to attain this near-optimal sample complexity without variance reduction or batching. When the oracle is exact, the same method attains the worst-case-optimal $O(K^{-1})$ last-iterate residual rate [Park and Ryu, 2022, Theorem 4.6], improving the $O(K^{-1/2})$ rate of classical KM [Cominetti et al., 2014; Bravo and Cominetti, 2018].",
+    "authors": [
+      "Tong Yang",
+      "Tao Jiang",
+      "Yuejie Chi",
+      "Ashok Cutkosky",
+      "Lin Xiao"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/1404.7536v4",
+    "title": "Stochastic Quasi-Fejér Block-Coordinate Fixed Point Iterations with Random Sweeping",
+    "published": "2014-04-29T21:03:29Z",
+    "updated": "2015-04-17T14:38:46Z",
+    "summary": "This work proposes block-coordinate fixed point algorithms with applications to nonlinear analysis and optimization in Hilbert spaces. The asymptotic analysis relies on a notion of stochastic quasi-Fejér monotonicity, which is thoroughly investigated. The iterative methods under consideration feature random sweeping rules to select arbitrarily the blocks of variables that are activated over the course of the iterations and they allow for stochastic errors in the evaluation of the operators. Algorithms using quasinonexpansive operators or compositions of averaged nonexpansive operators are constructed, and weak and strong convergence results are established for the sequences they generate. As a by-product, novel block-coordinate operator splitting methods are obtained for solving structured monotone inclusion and convex minimization problems. In particular, the proposed framework leads to random block-coordinate versions of the Douglas-Rachford and forward-backward algorithms and of some of their variants. In the standard case of $m=1$ block, our results remain new as they incorporate stochastic perturbations.",
+    "authors": [
+      "Patrick L. Combettes",
+      "Jean-Christophe Pesquet"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2006.07867v2",
+    "title": "Almost sure convergence rates for Stochastic Gradient Descent and Stochastic Heavy Ball",
+    "published": "2020-06-14T11:12:05Z",
+    "updated": "2021-02-05T13:40:31Z",
+    "summary": "We study stochastic gradient descent (SGD) and the stochastic heavy ball method (SHB, otherwise known as the momentum method) for the general stochastic approximation problem. For SGD, in the convex and smooth setting, we provide the first \\emph{almost sure} asymptotic convergence \\emph{rates} for a weighted average of the iterates . More precisely, we show that the convergence rate of the function values is arbitrarily close to $o(1/\\sqrt{k})$, and is exactly $o(1/k)$ in the so-called overparametrized case. We show that these results still hold when using stochastic line search and stochastic Polyak stepsizes, thereby giving the first proof of convergence of these methods in the non-overparametrized regime. Using a substantially different analysis, we show that these rates hold for SHB as well, but at the last iterate. This distinction is important because it is the last iterate of SGD and SHB which is used in practice. We also show that the last iterate of SHB converges to a minimizer \\emph{almost surely}. Additionally, we prove that the function values of the deterministic HB converge at a $o(1/k)$ rate, which is faster than the previously known $O(1/k)$. Finally, in the nonconvex setting, we prove similar rates on the lowest gradient norm along the trajectory of SGD.",
+    "authors": [
+      "Othmane Sebbouh",
+      "Robert M. Gower",
+      "Aaron Defazio"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2201.11413v2",
+    "title": "Exact Optimal Accelerated Complexity for Fixed-Point Iterations",
+    "published": "2022-01-27T10:08:41Z",
+    "updated": "2022-06-27T05:40:44Z",
+    "summary": "Despite the broad use of fixed-point iterations throughout applied mathematics, the optimal convergence rate of general fixed-point problems with nonexpansive nonlinear operators has not been established. This work presents an acceleration mechanism for fixed-point iterations with nonexpansive operators, contractive operators, and nonexpansive operators satisfying a Hölder-type growth condition. We then provide matching complexity lower bounds to establish the exact optimality of the acceleration mechanisms in the nonexpansive and contractive setups. Finally, we provide experiments with CT imaging, optimal transport, and decentralized optimization to demonstrate the practical effectiveness of the acceleration mechanism.",
+    "authors": [
+      "Jisun Park",
+      "Ernest K. Ryu"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/1705.09340v2",
+    "title": "Rates of convergence for inexact Krasnosel'skii-Mann iterations in Banach spaces",
+    "published": "2017-05-25T19:56:17Z",
+    "updated": "2017-06-01T20:18:09Z",
+    "summary": "We study the convergence of an inexact version of the classical Krasnosel'skii-Mann iteration for computing fixed points of nonexpansive maps. Our main result establishes a new metric bound for the fixed-point residuals, from which we derive their rate of convergence as well as the convergence of the iterates towards a fixed point. The results are applied to three variants of the basic iteration: infeasible iterations with approximate projections, the Ishikawa iteration, and diagonal Krasnosels'kii-Mann schemes. The results are also extended to continuous time in order to study the asymptotics of nonautonomous evolution equations governed by nonexpansive operators.",
+    "authors": [
+      "Mario Bravo",
+      "Roberto Cominetti",
+      "Matías Pavez-Signé"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2511.12665v3",
+    "title": "The iterates of FISTA converge even under inexact computations and stochastic gradients",
+    "published": "2025-11-16T16:03:50Z",
+    "updated": "2026-07-30T15:11:12Z",
+    "summary": "Very recently, the papers \"Point Convergence of Nesterov's Accelerated Gradient Method: An AI-Assisted Proof\" by Jang and Ryu, and \"The Iterates of Nesterov's Accelerated Algorithm Converge in the Critical Regimes\" by Bot, Fadili, and Nguyen have simultaneously resolved a long-standing open problem concerning Nesterov's accelerated gradient method. These works show that the iterates of the algorithm (known in its composite form as FISTA) indeed converge to an optimal solution. In this work, we extend these results and prove that, in infinite dimensional Hilbert spaces, the iterates of such an algorithm still converge (in the weak sense) even when the proximity operator and the gradient are computed inexactly, with the latter possibly stochastic.",
+    "authors": [
+      "Saverio Salzo"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2508.16791v2",
+    "title": "New Accelerated Past-Extragradient Methods with Variance Reduction for Generalized Equations",
+    "published": "2025-08-22T20:46:29Z",
+    "updated": "2026-09-09T16:44:40Z",
+    "summary": "We develop a novel past-extragradient-type algorithmic framework, combining both Nesterov's \\textit{acceleration} and \\textit{variance-reduction} techniques, to solve a class of generalized equations involving possibly \\textit{nonmonotone operators} in data-driven applications. Our framework covers a wide class of stochastic variance-reduced schemes, including mini-batching and both unbiased and biased control-variate estimators. We establish that our method achieves $\\mathcal{O}(1/k^2)$ convergence rates in expectation for the squared norm of the residual under Lipschitz continuity and a ``co-hypomonotonicity-type'' assumption, significantly improving upon non-accelerated counterparts by a factor of $1/k$. We also prove faster $o(1/k^2)$ convergence rates, both in expectation and almost surely. In addition, we show that the sequence of iterates generated by our method almost surely converges to a solution of the underlying problem. We demonstrate the applicability of our method using general error approximation criteria, covering mini-batch stochastic estimators as well as three well-known control variate estimators: Loopless SVRG, SAGA, and Loopless SARAH. The resulting three variants attain significantly better oracle complexities than existing methods. We validate our framework and theoretical results through three numerical examples. The numerical results illustrate promising performance of our accelerated method over its non-accelerated counterparts.",
+    "authors": [
+      "Quoc Tran-Dinh",
+      "Nghia Nguyen-Trung"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2610.00295v1",
+    "title": "Adaptivity, Anchoring, and the Exact Oracle Complexity of Stochastic Fixed-Point Iterations",
+    "published": "2026-09-26T04:03:38Z",
+    "updated": "2026-09-26T04:03:38Z",
+    "summary": "We study stochastic fixed-point iterations $x_{n+1}=θ_nx_0+(1-θ_n)\\widehat T(x_n)$ for nonexpansive and contractive operators on Hilbert spaces, with a single-point unbiased oracle of bounded variance. Deterministically, every anchor schedule $θ_n=c_n/(n+2)$ whose density $c_n\\in(0,1]$ does not oscillate between scales is either polynomially suboptimal on contractions or super-polynomially slow on rotations; for constant densities $θ_n=c/(n+2)$ the tradeoff is exact, with $\\norm{x_n}\\asympΓ(c+1)(n\\varphi)^{-c}$ on rotations by angle $\\varphi$ ($\\varphi\\to0$, $n\\varphi\\to\\infty$) and, for the classical schedule, $\\norm{x_n}=\\frac{2|\\sin(n\\varphi/2)|}{n\\varphi}+O(\\frac1n)$. The dichotomy fails exactly under lacunary anchor concentration: an explicit $γ$-oblivious schedule, one per target accuracy, is simultaneously contraction-optimal and rotation-polynomial with exponent $1/α_0$, $α_0=\\log_2(3/2)$, and, for each fixed target accuracy, the matching lower bound holds for Lebesgue-a.e.\\ angle. For stochastic contractions, the minimax rate is $Θ(σ^2\\eps^{-2}(1-γ)^{-2})$ on affine maps, and within the anchored class $Θ(σ^2\\eps^{-2}(1-γ)^{-2}+(1-γ)^{-1}\\ln(D/\\eps))$ for known modulus via geometric batching; without a certified modulus bound no sound distance certificate exists, and a certified ceiling is the exact boundary. For nonexpansive maps we prove $O(Kσ^2D^2\\eps^{-4})$ in every $2$-uniformly smooth Banach space and the Hilbert rate $\\tildeΘ(σ^2\\eps^{-2}+D\\eps^{-1})$ by reduction to monotone inclusions. Numerical experiments are consistent with every scaling prediction.",
+    "authors": [
+      "Yekini Shehu"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2512.13547v1",
+    "title": "A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles and Its Applications",
+    "published": "2025-12-15T17:06:22Z",
+    "updated": "2025-12-15T17:06:22Z",
+    "summary": "In this paper, we develop a novel accelerated fixed-point-based framework using delayed inexact oracles to approximate a fixed point of a nonexpansive operator (or equivalently, a root of a co-coercive operator), a central problem in scientific computing. Our approach leverages both Nesterov's acceleration technique and the Krasnosel'skii-Mann (KM) iteration, while accounting for delayed inexact oracles, a key mechanism in asynchronous algorithms. We also introduce a unified approximate error condition for delayed inexact oracles, which can cover various practical scenarios. Under mild conditions and appropriate parameter updates, we establish both $\\mathcal{O}(1/k^2)$ non-asymptotic and $o(1/k^2)$ asymptotic convergence rates in expectation for the squared norm of residual. Our rate significantly improves the $\\mathcal{O}(1/k)$ rates in classical KM-type methods, including their asynchronous variants. We also establish $o(1/k^2)$ almost sure convergence rates and the almost sure convergence of iterates to a solution of the problem. Within our framework, we instantiate three settings for the underlying operator: (i) a deterministic universal delayed oracle; (ii) a stochastic delayed oracle; and (iii) a finite-sum structure with asynchronous updates. For each case, we instantiate our framework to obtain a concrete algorithmic variant for which our convergence results still apply, and whose iteration complexity depends linearly on the maximum delay. Finally, we verify our algorithms and theoretical results through two numerical examples on both matrix game and shallow neural network training problems.",
+    "authors": [
+      "Nghia Nguyen-Trung",
+      "Quoc Tran-Dinh"
+    ],
+    "doi": null,
+    "journal_ref": null
+  },
+  {
+    "id": "http://arxiv.org/abs/2410.07870v3",
+    "title": "Gradient correlation is a key ingredient to accelerate SGD with momentum",
+    "published": "2024-10-10T12:41:51Z",
+    "updated": "2026-06-11T12:35:39Z",
+    "summary": "Empirically, it has been observed that adding momentum to Stochastic Gradient Descent (SGD) accelerates the convergence of the algorithm. However, the literature has been rather pessimistic, even in the case of convex functions, about the possibility of theoretically proving this observation. We investigate the possibility of obtaining accelerated convergence of the Stochastic Nesterov Accelerated Gradient (SNAG), a momentum-based version of SGD, when minimizing a sum of functions in a convex setting. We demonstrate that the average correlation between gradients allows to verify the strong growth condition, which is the key ingredient to obtain acceleration with SNAG. Numerical experiments, both in linear regression and deep neural network optimization, confirm in practice our theoretical results.",
+    "authors": [
+      "Julien Hermant",
+      "Marien Renaud",
+      "Jean-François Aujol",
+      "Charles Dossal",
+      "Aude Rondepierre"
+    ],
+    "doi": null,
+    "journal_ref": null
+  }
+]

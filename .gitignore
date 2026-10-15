@@ -1,0 +1,33 @@
+# Local application settings and operating-system files
+.codex/
+.claude/
+.agents/
+.DS_Store
+._*
+
+# Local caches and temporary build dependencies
+**/tmp/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+
+# LaTeX intermediate files; retain source, bibliography and PDFs
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.out
+*.blg
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.xdv
+
+# Nested repository metadata stays local
+**/.git/

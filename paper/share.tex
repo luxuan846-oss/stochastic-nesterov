@@ -1,0 +1,260 @@
+% Imported from 3_DDLALM/overleaf/tools/shared.tex on 2026-10-15.
+% Local adaptations: preprint margins and existing operator notation.
+% 共享文档信息 (可以从主文档和补充文档中调用)
+
+% Encoding and typography (load early)
+\usepackage[utf8]{inputenc} % UTF-8 input encoding
+\usepackage[T1]{fontenc}    % 8-bit T1 fonts
+\usepackage{microtype}      % Microtypography improvements
+
+% General utilities
+\usepackage{lipsum}         % Placeholder text
+\usepackage{graphicx}       % Image insertion
+% \usepackage{epstopdf}     % Uncomment only if EPS conversion is explicitly needed
+\usepackage{xcolor}         % Colors
+\usepackage{colortbl}       % Table-row shading
+\usepackage{url}            % URL typesetting
+\usepackage{nicefrac}       % Compact fraction symbols
+\usepackage{xspace}         % Smart spacing for macros
+\usepackage{geometry}       % Page layout
+
+% Mathematical packages
+\usepackage{amsmath}        % Core math support
+% \theoremstyle{remark}
+\usepackage{amssymb}        % Math symbols (includes amsfonts)
+\usepackage{bbm}            % Blackboard bold 1 for \mathbbm
+\usepackage{mathrsfs}       % Script fonts
+\usepackage{bm}             % Bold math symbols
+\usepackage{booktabs}       % Professional tables
+\usepackage{threeparttable} % Table notes
+\usepackage{makecell}       % Multi-line table cells
+\usepackage{subcaption}     % Subfigures
+\usepackage{multirow}       % Multirow tables
+\usepackage{array}          % Enhanced table formatting
+\usepackage{tabularx}
+\usepackage{setspace}       % Line spacing control
+
+% Algorithms
+\makeatletter
+\@ifpackageloaded{algorithm}{}{\usepackage{algorithm}}
+\makeatother
+\usepackage{algorithmic}    % Consider algorithmicx or algorithm2e for modern alternatives
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,shapes.misc}
+\makeatletter
+\@ifpackageloaded{hyperref}{}{\usepackage{hyperref}}
+\makeatother
+\usepackage{nameref}        % Reference names
+\makeatletter
+\@ifpackageloaded{cleveref}{}{\usepackage{cleveref}}
+\makeatother
+
+\geometry{margin=1in}
+
+% Ensure hyperref settings are robust
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+%-----------------------------数学符号新命令------------------------------
+\newcommand{\eucalB}{\EuScript{B}}
+\newcommand{\eucalP}{\EuScript{P}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Ex}{\mathsf{E}}
+\newcommand{\Prob}{\mathsf{P}}
+\newcommand{\one}{\mathbbm{1}}
+\newcommand{\One}{\bm{1}}
+\newcommand{\zero}{\bm{0}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\Rp}{\RR_+}
+\newcommand{\TT}{\mathbb{T}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\VV}{\mathbb{V}}
+\newcommand{\diff}{\mathrm{d}}
+\DeclareMathOperator{\prox}{prox}
+\newcommand{\rprox}{\mathrm{rprox}}
+\newcommand{\ran}{\mathrm{ran}}
+\DeclareMathOperator{\Id}{Id}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\rKKT}{r_{\mathrm{KKT}}}
+\newcommand{\bB}{\bm{B}}
+\newcommand{\bH}{\bm{H}}
+\newcommand{\bF}{\bm{F}}
+\newcommand{\bS}{\bm{S}}
+\newcommand{\bX}{\bm{X}}
+\newcommand{\bx}{\bm{x}}
+\newcommand{\bb}{\bm{b}}
+\newcommand{\br}{\bm{r}}
+\newcommand{\bbeta}{\bm{\beta}}
+\newcommand{\bt}{\bm{t}}
+% \newcommand{\eproof}{\hfill $\square$}
+\newcommand{\bh}{\bm{h}}
+\newcommand{\bu}{\bm{u}}
+\newcommand{\bz}{\bm{z}}
+\newcommand{\ba}{\bm{a}}
+\newcommand{\by}{\bm{y}}
+\newcommand{\be}{\bm{e}}
+\newcommand{\bc}{\bm{c}}
+\newcommand{\bU}{\bm{U}}
+\newcommand{\bZ}{\bm{Z}}
+\newcommand{\bY}{\bm{Y}}
+\newcommand{\blmbd}{\bm{\lambda}}
+\newcommand{\bLmbd}{\bm{\Lambda}}
+\newcommand{\bd}{\bm{d}}
+\newcommand{\bq}{\bm{q}}
+\newcommand{\bmu}{\bm{\mu}}
+\DeclareMathOperator*{\argmin}{\mathrm{argmin}}
+\DeclareMathOperator*{\Argmin}{\mathrm{Argmin}}
+\DeclareMathOperator*{\minimize}{\mathrm{minimize}\,}
+\DeclareMathOperator*{\maximize}{\mathrm{maximize}}
+\DeclareMathOperator*{\argmax}{\mathrm{argmax}}
+\DeclareMathOperator*{\Diag}{\mathrm{Diag}}
+\newcommand{\calX}{\mathcal{X}}
+\newcommand{\calY}{\mathcal{Y}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\calL}{\mathcal{L}}
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calC}{\mathcal{C}}
+\newcommand{\calJ}{\mathcal{J}}
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calQ}{\mathcal{Q}}
+\newcommand{\calO}{\mathcal{O}}
+\newcommand{\ent}{\mathrm{ent}}
+% \newcommand{\diag}{\mathrm{diag}}
+\newcommand{\dom}{\mathrm{dom}}
+\newcommand{\cl}{\mathrm{cl}}
+\DeclareMathOperator{\conv}{conv}
+\newcommand{\interior}{\mathrm{int}}
+\DeclareMathOperator{\zer}{zer}
+\newcommand{\epi}{\mathrm{epi}}
+\newcommand{\amax}{a_{\max}}
+\newcommand{\amin}{a_{\min}}
+\newcommand{\bmax}{b_{\max}}
+\newcommand{\bmin}{b_{\min}}
+\newcommand{\bp}{\bm{p}}
+\newcommand{\bD}{\bm{D}}
+\newcommand{\mW}{\mathrm{W}}
+\newcommand{\bv}{\bm{v}}
+\newcommand{\bw}{\bm{w}}
+\newcommand{\ta}{\tilde{a}}
+\newcommand{\tb}{\tilde{b}}
+\newcommand{\tp}{\widetilde{\bp}}
+\newcommand{\sumn}{\sum_{i=1}^n}
+\newcommand{\sumQ}{\sum_{q=1}^Q}
+\newcommand{\sumq}{\sum_{k=1}^q}
+\newcommand{\summ}{\sum_{i=1}^m}
+\newcommand{\sumd}{\sum_{i=1}^d}
+\newcommand{\sumT}{\sum\limits_{ k =1}^{T}}
+\newcommand{\sumTa}{\frac{1}{T} \sum\limits_{ k =1}^{T}}
+\newcommand{\bC}{\bm{C}}
+\newcommand{\bI}{\bm{I}}
+\newcommand{\bM}{\bm{M}}
+\newcommand{\bR}{\bm{R}}
+\newcommand{\bV}{\bm{V}}
+\newcommand{\bW}{\bm{W}}
+\newcommand{\bxi}{\bm{\xi}}
+\newcommand{\tmu}{\widetilde{\bmu}}
+\newcommand{\tU}{\widetilde{\bU}}
+\newcommand{\tV}{\widetilde{\bV}}
+\newcommand{\tM}{\widetilde{\bM}}
+\newcommand{\bDelta}{\bm{\Delta}}
+\newcommand{\bs}{\bm{s}}
+\newcommand{\ox}{\overline{x}}
+\newcommand{\ob}{\overline{b}}
+\newcommand{\op}{\overline{p}}
+\newcommand{\obp}{\overline{\bp}}
+\newcommand{\obmu}{\overline{\bmu}}
+\newcommand{\obC}{\overline{\bC}}
+\newcommand{\obD}{\overline{\bD}}
+\newcommand{\bsigma}{\bm{\sigma}}
+\newcommand{\bomega}{\bm{\omega}}
+\newcommand{\tomega}{\widetilde{\omega}}
+\newcommand{\tr}{\mathrm{tr}}
+\newcommand{\an}{\mathrm{an}}
+\newcommand{\bj}{\bm{j}}
+\newcommand{\bG}{\bm{G}}
+\newcommand{\bcalG}{\bm{\calG}}
+\newcommand{\bcalK}{\bm{\calK}}
+\newcommand{\bcalX}{\bm{\calX}}
+\newcommand{\fX}{\mathfrak{X}}
+\newcommand{\bfX}{\bm{\fX}}
+\newcommand{\bell}{\bm{\ell}}
+\newcommand{\bL}{\bm{L}}
+\newcommand{\bzeta}{\bm{\zeta}}
+\renewcommand{\vec}{\mathrm{vec}}
+\newcommand{\hy}{\widehat{y}}
+\newcommand{\ul}[1]{\underline{#1}}
+\makeatletter
+% Each environment has its own counter, reset at the start of each section.
+\@ifundefined{theorem}{\newtheorem{theorem}{Theorem}[section]}{}
+\@ifundefined{newsiamremark}{
+  \@ifundefined{lemma}{\newtheorem{lemma}{Lemma}[section]}{}
+  \@ifundefined{corollary}{\newtheorem{corollary}{Corollary}[section]}{}
+  \@ifundefined{proposition}{\newtheorem{proposition}{Proposition}[section]}{}
+  \@ifundefined{definition}{\newtheorem{definition}{Definition}[section]}{}
+  \@ifundefined{assumption}{\newtheorem{assumption}{Assumption}[section]}{}
+  \@ifundefined{remark}{\newtheorem{remark}{Remark}[section]}{}
+  \@ifundefined{example}{\newtheorem{example}{Example}[section]}{}
+}{
+  % Override the shared counters supplied by the SIAM class.
+  \theoremstyle{plain}
+  \theoremheaderfont{\normalfont\scshape}
+  \theorembodyfont{\normalfont\itshape}
+  \theoremseparator{.}
+  \theoremsymbol{}
+  \renewtheorem{lemma}{Lemma}[section]
+  \renewtheorem{corollary}{Corollary}[section]
+  \renewtheorem{proposition}{Proposition}[section]
+  \renewtheorem{definition}{Definition}[section]
+  \theoremheaderfont{\normalfont\itshape}
+  \theorembodyfont{\normalfont}
+  \@ifundefined{assumption}{
+    \newtheorem{assumption}{Assumption}[section]
+  }{}
+  \@ifundefined{remark}{\newtheorem{remark}{Remark}[section]}{}
+  \@ifundefined{example}{\newtheorem{example}{Example}[section]}{}
+}
+\@ifundefined{proof}{\newenvironment{proof}[1][Proof]{\par\noindent\textbf{#1.}\space}{\hfill$\square$\par}}{}
+\@ifundefined{noproof}{\newenvironment{noproof}{\par\noindent\textbf{Proof.}\space}{\hfill\par}}{}
+\makeatother
+
+\newcommand{\bcL}{\overline{\calL}}
+\newcommand{\KL}{K\L\xspace}
+\newcommand{\res}{\mathrm{res}}
+\newcommand{\eproof}{\hfill $\square$}
+\newcommand{\calF}{\mathcal{F}}
+
+\newcommand{\commyy}[1]{{\color{red}(yy: #1)}} % Yuan Yao's comments
+
+\numberwithin{equation}{section}
+\newcommand{\blue}[1]{{\color{blue}#1}}
+\newcommand{\red}[1]{{\color{red}#1}}
+\newcommand{\todo}[1]{{\color{red}\textbf{TODO:} #1}}
+
+%% Packages and macros go here
+\usepackage{lipsum}
+\usepackage{amsfonts}
+\ifpdf
+  \DeclareGraphicsExtensions{.eps,.pdf,.png,.jpg}
+\else
+  \DeclareGraphicsExtensions{.eps}
+\fi
+
+% Prevent itemized lists from running into the left margin inside theorems and proofs
+\usepackage{enumitem}
+\setlist[enumerate]{leftmargin=.5in}
+\setlist[itemize]{leftmargin=.5in}
+
+% Add a serial/Oxford comma by default.
+\newcommand{\creflastconjunction}{, and~}

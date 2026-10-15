@@ -1,0 +1,25 @@
+VFOSA: Variance-Reduced Fast Operator Splitting Algorithms for Generalized Equations
+Home Page
+Papers
+Submissions
+News
+Editorial Board
+Special Issues
+Open Source Software
+Proceedings (PMLR)
+Data (DMLR)
+Transactions (TMLR)
+Search
+Statistics
+Login
+Frequently Asked Questions
+Contact Us
+VFOSA: Variance-Reduced Fast Operator Splitting Algorithms for Generalized Equations
+Quoc Tran-Dinh; 26(254):1−68, 2025.
+Abstract
+We develop two Variance-reduced Fast Operator Splitting Algorithms (VFOSA) to approximate solutions for a class of generalized equations, covering fundamental problems such as minimization, minimax problems, and variational inequalities as special cases. Our approach integrates recent advances in accelerated operator splitting and fixed-point methods, co-hypomonotonicity structure, and variance reduction techniques. First, we introduce a class of variance-reduced estimators and establish their variance-reduction bounds. This class includes both unbiased and biased instances and comprises common estimators as special cases, including SVRG, SAGA, SARAH, and Hybrid-SGD. Second, we design a novel accelerated variance-reduced forward-backward splitting (FBS) method using these estimators to solve generalized equations in both finite-sum and expectation settings. Our algorithm achieves both O(1/k^2) and o(1/k^2) convergence rates on the expected squared norm E[ ||G_{\lambda}x^k||^2] of the FBS residual G_{\lambda}, where k is the iteration counter. Additionally, we establish almost sure convergence rates and the almost sure convergence of iterates to a
+solution of the underlying generalized equation. Unlike existing stochastic operator splitting algorithms, our methods accommodate co-hypomonotone operators, which can include nonmonotone problems arising in recent applications. Third, we specify our method for each concrete estimator mentioned above and derive the corresponding oracle complexity, demonstrating that these variants achieve the best-known oracle complexity bounds without requiring additional enhancement techniques. Fourth, we develop a variance-reduced fast backward-forward splitting (BFS) method, which attains similar convergence results and oracle complexity bounds as our FBS-based algorithm. Finally, we validate our results through numerical experiments and compare their performance with existing methods.
+[abs][pdf][bib]
+© JMLR 2025.
+(edit, beta)
+Mastodon

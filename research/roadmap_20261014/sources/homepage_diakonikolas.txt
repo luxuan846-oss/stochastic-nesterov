@@ -1,0 +1,599 @@
+Jelena Diakonikolas
+HOME
+ABOUT
+NEWS
+CONTACT
+Jelena Diakonikolas
+I am an Associate Professor at the Department of Computer Sciences and (by courtesy) the Department of Statistics, at the University of Wisconsin-Madison. I am also an affiliate of the Data Science Institute at UW-Madison.
+My main research interests are in the area of optimization algorithms &s; theory, particularly at the intersection with other areas, such as machine learning theory.
+Prior to joining UW-Madison, I was a Postdoctoral Fellow at UC Berkeley's Foundations of Data Analysis (FODA) TRIPODS Institute, where I primarily worked with Mike Jordan. In Fall 2018, I was a Microsoft Research Fellow at the Simons Institute for the Theory of Computing, associated with the program on Foundations of Data Science. Prior to starting the postdoctoral position at UC Berkeley, I was a Postdoctoral Associate at the Department of Computer Science, Boston University, where I worked with Lorenzo Orecchia. I completed my Ph.D. at the Department of Electrical Engineering, Columbia University,
+where I was co-advised by Gil Zussman and Cliff Stein.
+Some of my publications are under my maiden name -- Marašević.
+Prospective students: I am receiving a large volume of email and cannot respond to individual requests. All of the graduate students in the CS program at UW-Madison are admitted by the department, not by individual faculty. Thus, I can only respond to requests from students who are already admitted to UW-Madison.
+I am an Associate Professor in the Department of Computer Sciences and (by courtesy) the Department of Statistics at UW-Madison. I am also an affiliate of the Data Science Institute at UW-Madison. My full CV can be found here. My maiden name is Marašević.
+On this page:
+Research Interests
+Honors & Awards
+Professional Activities
+Teaching
+Research Group
+Talks
+Publications
+Misc
+Research Interests
+First-order convex and non-convex optimization algorithms; momentum-based methods
+Variational inequalities and fixed-point iterations
+Optimization in learning applications;
+Width-independent algorithms (optimization on a relative scale)
+Lower bounds in optimization
+Selected Honors & Awards
+UW-Madison L&S Distinguished Honors Faculty Award (2026)
+Google ML & Systems Junior Faculty Award (2025)
+NSF CAREER Award (2025)
+AFOSR Young Investigator Program award (2024)
+UW-Madison Provost's Award for Mentoring Undergraduates In Research, Scholarly, and Creative Activities (2023)
+Simons-Berkeley Research Fellowship and Microsoft Research Fellowship (2018)
+Morton B. Friedman Memorial Prize for Excellence at Columbia Engineering (2017)
+Columbia EE Dept. Collaborative Research Award (2017)
+Qualcomm Innovation Fellowship (2015)
+MIT EECS Rising Star (2015)
+Jacob Millman Award (Outstanding TA) (2013)
+Columbia University M.S. Award of Excellence (2013)
+Professional Activities
+I am serving on the Editorial Boards of Mathematics of Operations Research and INFORMS Journal on Optimization, as an Associate Editor.
+I am serving as a Stream Organizer at ISMP 2027, for the stream on Random Methods for Continuous Optimization.
+I am co-organizing (together with Sean Welleck, Zaid Harchaoui, Sewoong Oh, and Soumik Pal) a Workshop on Flows for Generative AI, to be held at CMU, in March 2026.
+I am co-organizing (together with Eyjó Ásgeirsson, Eric Balkanski, Rodrigo Carrasco, Fei Li, David Phillips, Nouri Sakr, and Jingwei Li) a Workshop on Algorithms & Optimization: From Foundations to Future Directions, to be held at Columbia University, in March 2026.
+I am co-organizing (together with Kevin Tian) a mini-symposium on Learning and Optimization at SIAM OP26, to be held in Edinburgh, UK, in June 2026.
+I am on the scientific committee of ELLIIT Symposium on Optimization for Learning, to be held as part of ELLIIT Focus Periods, in Lund, Sweden, in May 2026.
+I am on the program committee of the INFORMS Optimization Society conference 2026, as an Optimization in Data Science track co-chair. [conference website]
+I was a cluster chair for ICCOPT 2025, for the cluster on "Fixed Points and Variational Inequalities". [conference website]
+I was on the organizing committee of the OPT 2024 workshop @ NeurIPS 2024 [workshop website].
+I was on the program committee of the INFORMS Optimization Society conference 2024, as an Optimization in Data Science track co-chair. [conference website]
+Co-organized a mini symposium on Advances in First-Order Primal-Dual Methods at SIAM OP 23. [mini symposium program Part 1 out of 4]
+Co-organized the NeurIPS Workshop Order Up! The Benefits of Higher-Order Optimization in Machine Learning. [workshop website]
+Co-organizing the WISCERS exploreCSR program: a research mentorship program for undergraduate students, intended to increase research participation of historically underrepresented groups in computing. [program website]
+Co-organized the Workshop on Sampling Algorithms and Geometries on Probability Distributions at the Simons Institute, as part of the Geometric Methods in Optimization and Sampling Fall 2021 program. [workshop website]
+Co-organized the Conference on Optimization, as part of the Focus Program on Data Science and
+Optimization at the Fields Institute, in November 2019. [workshop website]
+Organized the INFORMS session on the Continuous-time Perspective in Optimization in 2019.
+Conference program committees: COLT'26 (senior PC member), STOC'26 (PC Member), NeurIPS'25 (Area Chair and Workshop PC), COLT'25 (senior PC member), ICLR'25 (Area Chair), NeurIPS'24 (Workshop PC), FOCS'24 (PC Member), SODA'24 (PC Member), COLT'24 (senior PC member), ICML'24 (Area Chair), ICLR'24 (Area Chair), ITCS'24 (PC Member), NeurIPS'23 (Workshop PC), COLT'23 (senior PC member), ICML'23 (Area Chair), COLT'22 (senior PC member), ICLR'22 (Area Chair), NeurIPS'21 (Area Chair), ICML'21 (Workshop PC), ICLR'21 (Area Chair), ICML'20 (Area Chair), ICALP'20 (PC member), ICNP'18 (PC member), NETGCOOP'18 (PC member).
+Teaching
+(Spring 2026) CS541: Theory & Algorithms for Data Science [course website]
+(Fall 2025) CS839: Learning and Optimization
+(Spring 2025) CS541: Theory & Algorithms for Data Science [course website]
+(Fall 2024) CS839: Advanced Topics in Nonlinear Optimization
+(Spring 2024) CS639: Theoretical Foundations of Data Science
+(Fall 2023) CS726: Nonlinear Optimization I [course website]
+(Spring 2023) CS639: Foundations of Data Science [course website]
+(Fall 2022) CS726: Nonlinear Optimization I [course website]
+(Spring 2022) CS639: Foundations of Data Science [course website]
+(Fall 2020) CS726: Nonlinear Optimization I [course website]
+(Spring 2020) CS726: Nonlinear Optimization I [course website]
+Research Group
+PhD Students
+Puqian Wang [CS], Fall 2021 -- Present
+Guyang Cao [CS], Fall 2024 -- Present
+Alexander Zainoun [CS], Fall 2026 -- Present
+Anna Mordvina [CS], Fall 2026 -- Present
+Undergraduate Students
+Adriana Fang [CS], Summer 2026 -- Present
+Runbo Yu [Math], Spring 2026 -- Present
+Qiushi Lu [CS, DS, & Math], Spring 2025 -- Present (honors thesis). Hilldale Fellowship, David DeWitt Scholarship, L&S Honors Summer Senior Thesis Research Grant, and Augusta Schurrer Undergraduate Student Scholarship Recipient.
+Rishit Malpani [CS], Summer 2025 -- Present (honors thesis). UW-Madison Honors Summer Research Apprenticeship Award and Trewartha Honors Thesis Research Grant Recipient.
+Past Group Members and Visitors
+Shuyao Li [CS, co-advised with S. Wright], Summer 2021 -- Summer 2025 (PhD; now a research scientist at Meta)
+Cheuk Yin (Eric) Lin [CS], Spring 2020 -- Spring 2025 (PhD; now a research scientist at Meta)
+Xufeng Cai [CS], Fall 2020 -- Spring 2025 (PhD; now a research scientist at Meta)
+Yi Wei [Math & CS], Spring 2024 -- Spring 2025 (undergrad; now a PhD student at U. Washington). Hilldale Scholarship and David DeWitt Scholarship Recipient.
+Chris Cai [CS & Math], Summer 2024 -- Spring 2025 (undergrad; now an MS student at Princeton)
+Rahul Choudhary [CS], Spring 2023 -- Spring 2024 (MS/PhD student)
+Nott Laoaron [CS], Spring 2023 -- Fall 2023 (undergrad; now a PhD student at U. Maryland). David DeWitt Scholarship Recipient.
+Xintong Li [CS], Spring 2022 -- Spring 2023 (undergrad; now a PhD student at UCSD)
+Binhao Chen [CS], Summer 2022 -- Spring 2023 (undergrad; now a PhD student at Brown). David DeWitt Scholarship Recipient.
+Chaobing Song, November 2020 -- April 2022 (postdoc; now at Huawei)
+Chenghui Li [Stats, co-advised with N. G. Trillos], Fall 2020 -- Summer 2022 (PhD student)
+Lakshmi Muraleedharan Nair [ISyE], Summer 2022 (MS student, independent study)
+Swati Padmanabhan (U. Washington PhD student; postdoc at MIT -> faculty at U. Minnesota ISyE), Summer 2021 (intern)
+Puqian Wang, Summer & Fall 2020 (undergraduate student; now a PhD student at UW-Madison)
+Talks
+“Parameter-free approximation of fixed-point problems at the tractability frontier,” Second Workshop on Proof Mining (WPM26), University of Bath, Bath, UK, September 2026, invited talk
+“Pushing the Complexity Boundaries of Fixed-Point Equations: Adaptive Algorithm at the Tractability Frontier,” Continuous Optimization Workshop, Foundations of Computational Mathematics (FoCM) Conference, Vienna, Austria, July 2026, invited talk
+“Hidden Regularity in Learning Problems: When Nonconvexity Is Not an Obstacle,” International Conference on Optimization and Machine Learning, Theory and Applications (ICOMaLTA-2026), Universidad de Tarapacá, Arica, Chile, May 2026, plenary talk
+“Gradient Alignment, Learning, and Optimization,” ELLIIT Symposium on Optimization for Learning, Lund, Sweden, May 2026, invited talk
+“Optimization Under a Magnifying Glass,” ISyE Seminar, Georgia Tech, Atlanta, GA, April 2026, invited talk
+“Robust Learning of Single-Index Models,” Econometrics Seminar, UW-Madison, Madison, WI, February 2026, invited talk
+“Efficient Solvers for Fixed-Point Equations,” Frontiers of Convex Optimization Workshop, University of Washington, Seattle, WA, January 2026, invited talk
+“Efficient Learning of Single-Index Models,” DeepMath Conference, Ann Arbor, MI, November 2025, invited talk
+“On Efficient Solvers for Fixed-Point Equations: Classical Results and New Twists,” Workshop on Regret, Optimization, and Games, Institut Henri Poincaré, Paris, France, November 2025, invited talk
+“Better Convergence Bounds for Cyclic Methods,” Algorithms and Randomness Center Colloquium Series, GA Tech, Atlanta, GA, October 2025, invited talk
+“On Efficient Solvers for Fixed-Point Equations: Classical Results and New Twists,” Session on Advances in min-max optimization algorithms for machine learning, ICCOPT, July 2025, invited talk
+“On Efficient Solvers for Fixed-Point Equations: Classical Results and New Twists,” 2025 PKU Workshop on Optimization Theory and Methods, Beijing, China, June 2025, invited talk
+“Gradient alignment, learning, and optimization,” Strategies for Handling Applications with Nonconvexity Workshop, Banff International Research Station (BIRS), Canada, May 2025, invited talk
+“Faster Solutions to Variational Inequalities with Highly Nonuniform Component or Block Lipschitz Constants,” Continuous Optimization – Algorithms, Applications, and Analysis, Canada Mathematical Society (CMS) Winter Meeting, Vancouver, BC, Dec 2024, invited talk
+“Optimization on a Finer Scale: Bounded Local Subgradient Variation Perspective,” invited session on Large-Scale Methods for Linear and Nonlinear Optimization, INFORMS Annual Meeting, Seattle, WA, Oct 2024, invited talk
+“Robust Learning of Single-Index Models: An Optimization Perspective,” Workshop on Algorithms for Learning and Economics (WALE 2024), Kefalonia, Greece, Jun 2024, keynote talk
+“Optimization on a Finer Scale: Bounded Local Subgradient Variation Perspective,” Distinguished Seminar in Optimization & Data @ UWashington, Seattle, WA, Apr 2024, invited talk [video]
+“Cyclic Block Coordinate Methods on a Finer Scale: Tighter Bounds and New Methods,” IEOR Colloquium Series, UC Berkeley, Berkeley, CA, Mar 2024, invited talk
+“Robust Learning of a Single Neuron: Bridging Computational Gaps Using Insights from Optimization,” IPAM EnCore Workshop on Computational vs Statistical Gaps in Learning and Optimization, IPAM UCLA, Los Angeles, CA, Feb 2024, invited talk [video]
+“Cyclic Block Coordinate Methods on a Finer Scale: Tighter Bounds and New Methods,” Optimization Seminar, UPenn, Philadelphia, PA, Feb 2024, invited talk
+“Robust Learning of a Single Neuron via Sharpness,” Workshop on Optimization and Algorithm Design, Simons Institute, November 2023, invited talk [video]
+“Robust ReLU Regression via Stochastic Optimization and Local Error Bounds,” International Conference on Stochastic Programming, Davis, CA, July 2023, invited talk
+“Advances in Cyclic Block Coordinate Methods: Gradient Extrapolation, Acceleration, and Variance Reduction,” SIAM Conference on Optimization, Minisymposium on Recent Advancements in Optimization Methods for Machine Learning, Seattle, WA, June 2023, invited talk
+“Advances in Cyclic Block Coordinate Methods: Gradient Extrapolation, Acceleration, and Variance Reduction,” Statistics and Optimization in Data Science Workshop, Purdue University, West Lafayette, IN, May 2023, invited talk
+“Recent Advances in Cyclic Block Coordinate Methods,” Optimization and Statistical Learning Workshop, Les Houches, France, January 2023, invited talk
+“Halpern Iteration and Min-Max Optimization,” IFDS Monthly All-hands Meeting, June 2022, invited talk
+“Faster Empirical Risk Minimization,” East Coast Optimization Meeting, online, April 2022, invited talk [video]
+“How to Make the Gradients Small in Convex and Min-Max Optimization,” IFDS Ideas Forum, UW-Madison, March 2022
+“Halpern Iteration and Equilibria Problems,” Workshop on Adversarial Approaches in Machine Learning, Simons Institute, February 2022, invited talk [video]
+“Faster Empirical Risk Minimization,” NeurIPS OPT-ML Workshop, online, December 2021, invited plenary talk
+“How to Make the Gradients Small in Convex and Min-Max Optimization,” MIT Operations Research Center Colloquium Series, November 2021, invited talk
+“Local Acceleration of Frank-Wolfe Methods,” Workshop on Continuous Approaches to Discrete Optimization, Hausdorff Institute for Mathematics, October 2021, invited talk
+“Faster Empirical Risk Minimization,” LIDS OPTML++ Seminar Series, online, September 2021, invited talk
+“Structure in Min-Max Optimization (and How to Use It!),” SIAM Conference on Optimization, session on New Results on Minimax (Saddle-Point) Problems, online, July 2021, invited talk
+“Faster Empirical Risk Minimization,” ICML Workshop: Beyond First-order Methods in Machine Learning Systems, online, July 2021, invited plenary talk
+“Structure in Min-Max Optimization (and How to Use It!),” MTL MLOpt Seminar Series, online, June 2021, invited talk
+“Structure in Min-Max Optimization (and How to Use It!),” Digital Futures, Fly-high Fika Seminars, online, June 2021, invited talk
+“Fair Packing and Applications to Congestion Control,” Google Algorithms Workshop Series on Markets, Mobility, and the Mind, online, May 2021, invited talk
+“Structure in Min-Max Optimization (and How to Use It!),” Cornell University, ORIE colloquium, online, April 2021, invited talk
+“Structure in Min-Max Optimization (and How to Use It!),” TTIC Women in Theoretical Machine Learning, online, April 2021, invited talk
+“On Min-Max Optimization and Halpern Iteration,” IMSI Workshop on Multifaceted Complexity of Machine Learning, online, April 2021, invited talk
+“On Min-Max Optimization and Halpern Iteration,” MINDS & CIS Seminar, Johns Hopkins University, online, September 2020, invited talk
+“Langevin Monte Carlo Without Smoothness,” Probability Seminar, University of Wisconsin-Madison, Madison, WI, February 2020, invited talk
+“Langevin Monte Carlo Without Smoothness,” Foundations of Data Science Reunion Workshop, Simons Institute for the Theory of Computing, Berkeley, CA, December 2019
+“Langevin Monte Carlo Without Smoothness,” TTIC colloquium, Chicago, IL, November 2019, invited talk
+“Langevin Monte Carlo Without Smoothness,” UC Berkeley, Berkeley, CA, November 2019, BAIR seminar
+“Distributed Algorithms For Fair Packing and Covering Problems,” INFORMS session on Bridging Discrete and Continuous Optimization, Seattle, WA, October 2019, invited talk<>
+“On Acceleration With Noise-corrupted Gradients,” INFORMS session on
+Optimization in Machine Learning: Accelerated Methods and Stochastic Optimization, Seattle, WA, October 2019, invited talk<>
+“A Hamiltonian Perspective On Momentum-based Methods,” INFORMS session on Continuous-time Perspective in Optimization, Seattle, WA, October 2019
+“Continuous-time Perspective on Optimization Algorithms in Machine Learning,” Machine Learning and Optimization Research Consortium Industry Affiliates Day, University of Wisconsin-Madison, Madison, WI, September 2019, invited talk
+“Langevin Monte Carlo Without Smoothness,” IFDS seminar, University of Wisconsin-Madison, Madison, WI, September 2019, invited talk
+“A Tutorial on Convex Optimization: First-order Methods,” ADSI Summer School on Foundations of Data Science, University of Washington, Seattle, WA, August 2019, invited lecture
+“The Approximate Duality Gap Technique and Applications,” Machine Learning in Science and Engineering (MLSE) conference, Atlanta, GA, June 2019, invited talk
+“Lower Bounds for Parallel and Randomized Convex Optimization,” Midwest Machine Learning Symposium (MMLS), Madison, WI, June 2019, invited talk
+“Invariance in First-Order Optimization,” Instituto de Ingeniería Matemática y Computacional, Universidad Cátolica de Chile, Santiago, Chile, April 2019, invited talk
+“Invariance in First-Order Optimization,” Optimization and Statistical Learning Workshop, Les Houches, France, March 2019, invited talk
+“Invariance in First-Order Convex Optimization,” Mathematics of Data and Decisions Seminar, UC Davis, Davis, CA, February 2019, invited talk
+“Lower Bounds for Randomized and Parallel Convex Optimization,” Information Theory and Applications (ITA) Workshop, San Diego, CA, February 2019, invited talk
+“Width-Independence Beyond Linear Objectives: Distributed Algorithms for Fair Packing and Covering Problems,” Bridging Continuous and Discrete Optimization Reunion, Simons Institute for the Theory of Computing, Berkeley, CA, December 2018
+“Lower Bounds for Randomized and Parallel Convex Optimization,” Data Science Mini-Workshop, Simons Institute for the Theory of Computing, Berkeley, CA, December 2018
+“Block Coordinate Descent and Exact Minimization,” Workshop on Local
+Algorithms, MIT, Cambridge, MA, June 2018, invited talk
+“Conservation Laws and First-Order Optimization: Novel Insights and Algorithms,” University of Southern California, May 2018, ISE colloquium talk
+“Conservation Laws and First-Order Optimization: Novel Insights and Algorithms,” University of Wisconsin-Madison, April 2018, CS colloquium talk
+“Conservation Laws and First-Order Optimization: Novel Insights and Algorithms,” Thayer School of Engineering at Dartmouth, March 2018, data analytics seminar/special seminar
+“Fairness, Congestion Control, and Related Open Problems,” Schloss Dagstuhl Seminar on Scheduling, Warden, Germany, March 2018, invited talk
+“A Unifying Theory of First-Order Methods and Applications,” Microsoft Research, Redmond, WA, February 2018, invited talk [video]
+“A Unifying Theory of First-Order Methods and Applications,” Boston University, Boston, MA, January 2018, seminar talk
+“From Networked Systems to Theory and Back: Full-Duplex Wireless and Beyond,” University of Southern California, Los Angeles, CA, April 2017, CS colloquium talk
+“A Fast Distributed Algorithm for α-Fair Packing Problems,” Caltech, Pasadena, CA, April 2016, RSRG seminar
+“Full-Duplex Wireless: Resource Allocation and Rate Gains for Realistic Hardware Models,” Bell-Labs, Murray Hill, NJ, Nov. 2015, invited talk
+“A Fast Distributed Algorithm for α-Fair Packing Problems,” Google Research, New York, NY, June 2015, invited talk
+“Full-Duplex Wireless: Resource Allocation and Rate Gains for Realistic Hardware Models,” University of Southern California, Los Angeles, CA, May 2015, CS colloquium talk
+“A Fast Distributed Algorithm for α-Fair Packing Problems,” Microsoft Research Redmond Theory Group, Redmond, WA, May 2015, invited talk [video]
+“Full-Duplex Wireless: Resource Allocation and Rate Gains for Realistic Hardware Models,” University of California Santa Barbara, Santa Barbara, CA, May 2015, CS colloquium talk
+“GENI in the Classroom: Teaching Cellular Networking with WiMAX Hands-on Labs,” 19th GENI Engineering Conference (GEC19), Atlanta, GA, Mar. 2014, invited talk
+Publications
+by venue
+or
+by year
+J. Diakonikolas, C. Guzmán, D. Martínez-Rubio
+“Oracle Complexity of Stochastic Fixed-Point Equations with Nonexpansive Maps,” arXiv preprint,
+arXiv:2609.09524, 2026. (α-β order)
+[arXiv]
+P. Wang, N. Zarifis, J. Diakonikolas,
+“Efficient Optimization on the Euclidean Sphere: Riemannian Gradient Alignment as a Unifying Principle,” arXiv preprint,
+arXiv:2609.07723, 2026.
+[arXiv]
+R. Yu, J. Diakonikolas,
+“Tight Convergence Bounds for the Classical Kaczmarz Method,” arXiv preprint,
+arXiv:2609.32034, 2026.
+[arXiv]
+J. Diakonikolas,
+“Solving Stochastic Fixed-Point Equations with High Probability,” arXiv preprint,
+arXiv:2607.09097, 2026.
+[arXiv]
+Y. Wei, X. Cai, J. Diakonikolas,
+“Adaptive Delayed-Update Cyclic Algorithm for Variational Inequalities,” accepted to NeurIPS'26, 2026.
+[arXiv]
+J. Diakonikolas,
+“Open Problems in Optimization,” SIAG/OPT Views & News, 2025.
+[paper]
+G. Cao, S. Li, S. Karmalkar, J. Diakonikolas,
+“Robust Learning of a Group DRO Neuron,” in Proc. AISTATS'26, 2026.
+[arXiv]
+S. Li, S. Wright, J. Diakonikolas, “Outlier-robust Nonsmooth Stochastic Optimization.” Journal of Nonlinear and Variational Analysis, 10(2), 2026. A special issue in honor of Prof. Yurii Nesterov's 70th birthday.
+[paper]
+I. Diakonikolas, J. Diakonikolas, D.M. Kane, J.C.H. Lee, T. Pittas,
+“Linear Regression under Missing or Corrupted Coordinates,” in Proc. COLT, 2026.
+[arXiv]
+M. Ma, G. Cao, J. Diakonikolas, I. Diakonikolas,
+“Efficiently Learning Drifting Halfspaces with Massart Noise,” in Proc. ICML, 2026.
+[arXiv]
+S. Li, I. Diakonikolas, J. Diakonikolas,
+“Distributionally Robust Optimization with Adversarial Data Contamination,” arXiv preprint,
+arXiv:2507.10718, 2025.
+[arXiv]
+R. Mehta, J. Diakonikolas, Z. Harchaoui,
+“Min-Max Optimization with Dual-Linear Coupling,” arXiv preprint,
+arXiv:2507.06328, 2025.
+[arXiv]
+P. Wang, N. Zarifis, I. Diakonikolas, J. Diakonikolas,
+“Robustly Learning Monotone Single-Index Models,” in Proc. NeurIPS'25, 2025.
+[arXiv]
+J. Diakonikolas, C. Guzmán,
+“Optimization on a Finer Scale: Bounded Local Subgradient Variation Perspective,”
+SIAM Journal on Optimization, 36(1), pp. 152-184, 2026.
+[arXiv]
+J. Diakonikolas,
+“Pushing the Complexity Boundaries of Fixed-Point Equations: Adaptation to Contraction and Controlled Expansion,”
+SIAM Journal on Optimization, to appear.
+[arXiv]
+X. Cai, J. Altschuler, J. Diakonikolas,
+“Near-Linear Runtime for a Classical Matrix Preconditioning Algorithm,”
+Journal of the ACM, 73(1), pp. 1-25, 2026.
+[arXiv]
+N. Zarifis, P. Wang, I. Diakonikolas, J. Diakonikolas,
+“Robustly Learning Monotone Generalized Linear Models via Data Augmentation,”
+in Proc. COLT'25, 2025.
+[arXiv]
+J. Diakonikolas,
+“A Block Coordinate and Variance-Reduced Method for Generalized Variational Inequalities of Minty Type.”
+ACM/IMS Journal of Data Science, vol. 2, no. 2, pp. 1--30, June 2025.
+[arXiv]
+X. Cai, J. Diakonikolas,
+“Last Iterate Convergence of Incremental Methods as a Model of Forgetting,”
+in Proc. ICLR'25, 2025.
+[arXiv]
+P. Wang, N. Zarifis, I. Diakonikolas, J. Diakonikolas,
+“Sample and Computationally Efficient Robust Learning of Gaussian Single-Index Models,”
+in Proc. NeurIPS'24, 2024.
+[arXiv]
+S. Li, S. Karmalkar, I. Diakonikolas, J. Diakonikolas,
+“Learning a Single Neuron Robustly to Distributional Shifts and Adversarial Label Noise,”
+in Proc. NeurIPS'24, 2024.
+[arXiv]
+X. Cai, C-Y. Lin, J. Diakonikolas,
+“Tighter Convergence Bounds for Shuffled SGD via Primal-Dual Perspective,”
+in Proc. NeurIPS'24, 2024.
+[arXiv]
+R. Mehta, J. Diakonikolas, Z. Harchaoui
+“DRAGO: Primal-Dual Coupled Variance Reduction for Faster Distributionally Robust Optimization,”
+in Proc. NeurIPS'24, 2024.
+[arXiv]
+N. Zarifis, P. Wang, I. Diakonikolas, J. Diakonikolas,
+“Robustly Learning Single-Index Models via Alignment Sharpness,”
+in Proc. ICML'24, 2024.
+[arXiv]
+X. Cai, A. Alacaoglu, J. Diakonikolas,
+“Variance Reduced Halpern Iteration for Finite-Sum Monotone Inclusions,”
+in Proc. ICLR'24, 2024.
+[arXiv]
+J. Diakonikolas and C. Guzmán,
+“Complementary Composite Optimization, Small Gradients in General Norms, and Applications,”
+Mathematical Programming, Series A, vol. 208, no. 1-2, pp. 319--363, Jan 2024. (α-β order)
+[arXiv]
+J. Kim, C. Park, A. Ozdaglar, J. Diakonikolas, E.K. Ryu,
+“Mirror Duality in Convex Optimization,”
+arXiv preprint, arXiv:2311.17296, 2023.
+[arXiv]
+D. Chakrabarti, J. Diakonikolas, C. Kroer,
+“Block-Coordinate Methods and Restarting for Solving Extensive-Form Games,”
+in Proc. NeurIPS'23, 2023. (α-β order)
+[arXiv]
+I. Diakonikolas, J. Diakonikolas, D.M. Kane, P. Wang, N. Zarifis,
+“Near-Optimal Bounds for Learning Gaussian Halfspaces with Random Classification Noise,”
+in Proc. NeurIPS'23, 2023. (α-β order)
+[arXiv]
+S.Li, Y. Cheng, I. Diakonikolas, J. Diakonikolas, R. Ge, S. Wright,
+“Robust Second-Order Nonconvex Optimization and Its Application to Low Rank Matrix Sensing,”
+in Proc. NeurIPS'23, 2023. (α-β order after first) [arXiv]
+I. Diakonikolas, J. Diakonikolas, D. Kane, P. Wang, N. Zarifis,
+“Information-Computation Tradeoffs for Learning Margin Halfspaces with Random Classification Noise,”
+in Proc. COLT'23, 2023. (α-β order)
+[arXiv]
+P. Wang, N. Zarifis, I. Diakonikolas, J. Diakonikolas
+“Robustly Learning a Single Neuron via Sharpness,” in Proc. ICML'23, 2023, oral presentation.
+[arXiv]
+C-Y. Lin, C. Song, J. Diakonikolas
+“Accelerated Cyclic Coordinate Dual Averaging with Extrapolation for Composite Convex Optimization,”
+in Proc. ICML'23, 2023. [arXiv]
+X. Cai, C. Song, S. Wright, J. Diakonikolas,
+“Cyclic Block Coordinate Descent With Variance Reduction for Composite Nonconvex Optimization,”
+in Proc. ICML'23, 2023.
+[arXiv]
+C. Song, J. Diakonikolas,
+“Cyclic Coordinate Dual Averaging with Extrapolation,”
+SIAM Journal on Optimization, vol. 33, no. 4, pp. 2935--296, 2023.
+[arXiv]
+J. Diakonikolas and P. Wang, “Potential Function-based Framework for Minimizing Gradients in Convex and Min-Max Optimization,”
+SIAM Journal on Optimization, vol. 32, no. 3, p. 1668--1697, 2022. (α-β order)
+[arXiv]
+X. Cai, C. Song, C. Guzmán, J. Diakonikolas,
+“A Stochastic Halpern Iteration with Variance Reduction for Stochastic Monotone Inclusion Problems,”
+in Proc. NeurIPS'22, 2022.
+[arXiv]
+J. Diakonikolas, C. Li, S. Padmanabhan, C. Song,
+“A Fast Scale-Invariant Algorithm for Non-negative Least Squares with Non-negative Data,”
+in Proc. NeurIPS'22, 2022. (α-β order)
+[arXiv]
+C. Song, CY. Lin, S. Wright, J. Diakonikolas,
+“Coordinate Linear Variance Reduction for Generalized Linear Programming,”
+in Proc. NeurIPS'22, 2022.
+[arXiv]
+J. Diakonikolas and M. I. Jordan,
+“Generalized Momentum-Based Methods: A Hamiltonian Perspective,”
+SIAM Journal on Optimization, vol. 31, no. 1, pp. 915-944, 2021.
+[arXiv]
+C. Song, S. Wright, J. Diakonikolas,
+“Variance Reduction via Primal-Dual Accelerated Dual Averaging for Nonsmooth Convex Finite-Sums,”
+in Proc. ICML'21, 2021, long talk.
+[arXiv]
+A. Carderera, J. Diakonikolas, C-Y Lin, S. Pokutta,
+“Parameter-free Locally Accelerated Conditional Gradients,”
+in Proc. ICML'21, 2021. (α-β order)
+[arXiv]
+J. Diakonikolas, C. Daskalakis, and M. I. Jordan,
+“Efficient Methods for Structured Nonconvex-Nonconcave Min-Max Optimization,”
+in Proc. AISTATS'21, 2021.
+[arXiv]
+J. Diakonikolas, M. Fazel, and L. Orecchia,
+“Fair Packing and Covering on a Relative Scale,”
+SIAM Journal on Optimization, vol. 30, no. 4, pp. 3284–3314, 2020.
+[arXiv]
+J. Diakonikolas and C. Guzmán,
+“Lower Bounds for Parallel and Randomized Convex Optimization,”
+Journal of Machine Learning Research, vol. 21, no. 26, pp. 1-31, 2020. (α-β order)
+[arXiv][paper]
+J. Diakonikolas,
+“Halpern Iteration for Near-Optimal and Parameter-Free Monotone Inclusion and Strong Solutions to Variational Inequalities,”
+in Proc. COLT'20, 2020.
+[arXiv]
+N. Chatterji*, J. Diakonikolas*, M. I. Jordan, and P. L. Bartlett,
+“Langevin Monte Carlo Without Smoothness,” in Proc. AISTATS'20, 2020.
+[arXiv]
+J. Diakonikolas, A. Carderera, S. Pokutta,
+“Locally Accelerated Conditional Gradients,” in Proc. AISTATS'20, 2020.
+[arXiv]
+T. Chen, J. Diakonikolas, J. Ghaderi, G. Zussman,
+“Hybrid Scheduling in Heterogeneous Half- and Full-Duplex Wireless Networks,”
+IEEE/ACM Transactions on Networking, vol. 28, no. 2, pp. 764-777, 2020.
+[arXiv]
+J. Diakonikolas and L. Orecchia,
+“The Approximate Duality Gap Technique: A Unified Theory of First-Order Methods,”
+SIAM Journal on Optimization, vol. 29, no. 1, pp. 660-689, 2019.
+[arXiv]
+J. Diakonikolas and C. Guzmán,
+“Lower Bounds for Parallel and Randomized Convex Optimization,”
+in Proc. COLT'19, 2019. (α-β order)
+[pdf]
+J. Diakonikolas, A. Carderera, S. Pokutta,
+“Breaking the Curse of Dimensionality (Locally) to Accelerate Conditional Gradients,”
+NeurIPS Workshop on Optimization for Machine Learning, 2019.
+[pdf]
+M. Xu, J. Diakonikolas, E. Modiano, S. Subramaniam, “A Hierarchical WDM-based Scalable Data Center Network Architecture,” in Proc. IEEE ICC'19, 2019.
+[arXiv]
+N. Reiskarimian, T. Dinc, J. Zhou, M. B. Dastjerdi, T. Chen, J. Diakonikolas, G. Zussman, H. Krishnaswamy,
+“A one-way ramp to a two-way highway: Integrated magnetic-free non-reciprocal antenna interfaces for full duplex wireless,”
+IEEE Microwave Magazine, vol. 20, no. 2, pp. 56-75, 2019. Invited paper.
+J. Diakonikolas, L. Orecchia,
+“Conjugate Gradients and Accelerated Methods Unified: The Approximate Duality Gap View,”
+July 2019. Unpublished note.
+[arXiv]
+M. B. Cohen, J. Diakonikolas, L. Orecchia,
+“On Acceleration with Noise-Corrupted Gradients,”
+in Proc. ICML’18, 2018.
+[arXiv]
+J. Diakonikolas, L. Orecchia,
+“Alternating Randomized Block Coordinate Descent,”
+in Proc. ICML’18, 2018, long talk.
+[arXiv]
+J. Diakonikolas and L. Orecchia,
+“Accelerated Extra-Gradient Descent: A Novel Accelerated First-Order Method,”
+in Proc. ITCS'18, 2018.
+[pdf][arXiv]
+T. Chen, J. Diakonikolas, J. Ghaderi, G. Zussman,
+“Hybrid Scheduling in Heterogeneous Half- and Full-Duplex Wireless Networks,”
+in Proc. IEEE INFOCOM'18, 2018.
+[arXiv]
+J. Diakonikolas and G. Zussman,
+“On the Rate Regions of Single-Channel and Multi-Channel Full-Duplex Links,”
+IEEE/ACM Transactions on Networking, vol. 26, no. 1, pp. 47-60, Feb. 2018.
+[pdf]
+T. Chen, J. Diakonikolas, J. Ghaderi, G. Zussman,
+“Hybrid Scheduling in Heterogeneous Half- and Full-Duplex Wireless Networks,”
+in Proc. Asilomar'18, 2018. Invited paper.
+J. Marašević, C. Stein, and G. Zussman,
+“Max-min Fair Rate Allocation and Routing in Energy Harvesting Networks: Algorithmic Analysis,”
+Algorithmica, vol. 78, no. 2, pp. 521-557, 2017.
+[pdf]
+J. Zhou, N. Reiskarimian, J. Marašević, T. Dinc, T. Chen, G. Zussman, H. Krishnaswamy,
+“Integrated Full-Duplex Radios,”
+IEEE Communications Magazine, vol. 55, no. 4, pp. 142-151, 2017. Invited paper.
+[pdf]
+J. Marašević, J. Zhou, H. Krishnaswamy, Y. Zhong, and G. Zussman,
+“Resource Allocation and Rate Gains in Practical Full-Duplex Systems,”
+IEEE/ACM Transactions on Networking, vol. 25, no. 1, pp. 292-305, Feb. 2017.
+[pdf]
+J. Diakonikolas and L. Orecchia,
+“Solving Packing and Covering Linear Programs in Õ(ε-2) Distributed Iterations with a Single Algorithm and Simpler Analysis,”
+October 2017. Unpublished note.
+[arXiv]
+J. Marašević, C. Stein, and G. Zussman,
+“A Fast Distributed Stateless Algorithm for α-Fair Packing Problems,”
+in Proc. ICALP'16, 2016.
+[pdf][arXiv]
+H. Krishnaswamy, G. Zussman, J. Zhou, J. Marašević, T. Dinc, N. Reiskarimian, and T. Chen,
+“Full-Duplex in a Hand-held Device - From Fundamental Physics to Complex Integrated Circuits, Systems, and Networks: An Overview of the Columbia FlexICoN Project,”
+in Proc. Asilomar'16, 2016. Invited paper.
+[pdf]
+J. Marašević and G. Zussman,
+“On the Capacity Regions of Single-Channel and Multi-Channel Full-Duplex Links,”
+in Proc. ACM MobiHoc'16, 2016.
+[pdf][arXiv]
+J. Marašević,
+“Resource Allocation in Wireless Networks: Theory and Applications,”
+Columbia University Academic Commons, Doctoral Thesis, 2016.
+[link]
+J. Marašević, T. Chen, J. Zhou, N. Reiskarimian, H. Krishnaswamy, G. Zussman,
+“Full-Duplex Wireless: Algorithms and Rate Improvement Bounds for Integrated Circuit Implementations,”
+in Proc. ACM HotWireless'16, 2016. Invited paper.
+[pdf]
+J. Marašević, J. Zhou, H. Krishnaswamy, Y. Zhong, and G. Zussman,
+“Resource Allocation and Rate Gains in Practical Full-Duplex Systems,” in Proc. ACM SIGMETRICS'15, 2015.
+[pdf][arXiv]
+J. Zhou, J. Marašević, G. Zussman, and H. Krishnaswamy,
+“Co-design of Full-duplex RFIC and Resource Allocation Algorithms,” IEEE PA Symposium, 2015.
+[pdf]
+J. Marašević, C. Stein, and G. Zussman,
+“Max-min Fair Rate Allocation and Routing in Energy Harvesting Networks: Algorithmic Analysis,”
+in Proc. ACM MobiHoc’14, 2014.
+[pdf][arXiv]
+J. Marašević, J. Janak, H. Schulzrinne, and G. Zussman,
+“WiMAX in the Classroom: Designing a Cellular Networking Hands-on Lab,” The Second GENI Research and Educational Experiment Workshop (GREE2013) Workshop co-located with the 16th GENI Engineering Conference (GEC16), 2013. Best educational paper award.
+[pdf]
+Miscellanous
+My group at its local (perhaps global?) maximum, in May 2025.
+Left to right: Guyang Cao, Yi Wei, Puqian Wang, Eric Lin, Jelena Diakonikolas, Shuyao Li, Chris Cai, Xufeng Cai, Qiushi Lu.
+UW-Madison CS department article about the Google ML and Systems Junior Faculty Award.
+UW-Madison CS department article and Columbia EE article about my CAREER award.
+UW-Madison CS department article about the AFOSR YIP award.
+2023 photo with my research group on the Memorial Terrace, post NeurIPS deadline. (Well, technically, Nikos is Ilias' student, but I would gladly "steal" him.)
+Left to right: Puqian Wang, Eric Lin, Jelena Diakonikolas, Nikos Zarifis, Xufeng Cai, Shuyao Li.
+UW-Madison CS department announcement about the exploreCSR WISCERS program.
+A Columbia Engineering article about the Friedman Prize.
+An article about my research on full-duplex featured in IEEE Spectrum.
+10 Women in Networking/Communications that you should Watch and an article about me on Columbia EE webpage.
+FlexICoN project website.
+My profile on the MIT EECS Rising Stars webpage.
+Columbia Electrical Engineering article about my participation as a young researcher in the 3rd Heidelberg Laureate Forum.
+Columbia Electrical Engineering article about Tugce, Dessi, and myself being selected for the MIT EECS Rising Stars Workshop.
+Columbia Engineering article about our winning of the Qualcomm Innovation Fellowship 2015 award.
+8/17/2026
+I have been promoted to Associate Professor (with tenure).
+7/17/2025
+Congratulations to Dr. Li on defending his PhD thesis!
+7/1/2025
+I have been awarded an inaugural Google ML & Systems Junior Faculty Award.
+5/7/2025
+Congratulations to Dr. Lin on defending his PhD thesis!
+5/5/2025
+Congratulations to Dr. Cai on defending his PhD thesis!
+1/13/2025
+I have been awarded the NSF CAREER award.
+12/23/2023
+I am one of the winners of the AFOSR Young Investigator Program awards.
+04/15/2023
+I have received (jointly with Shivaram Venkataraman) an Award for Mentoring Undergraduates In Research, Scholarly and Creative Activities for the creation and impact of the WISCERS program.
+12/03/2022
+I was awarded a Mathematical Programming Meritorious Service Award for "exceptional contributions to the journal" as a referee.
+12/02/2022
+I have co-organized (with Albert Berahas, Jarad Forristal, Brandon Reese, Martin Takac, and Yan Xu) the workshop "Order up! The Benefits of Higher-Order Optimization in Machine Learning" at NeurIPS 2022.
+10/01/2022
+WISCERS program run by Shivaram Venkataraman and myself has received an exploreCSR award from Google for the third (and final) year in a row.
+10/29/2020
+Shivaram Venkataraman and I have received an exploreCSR award from Google to organize a research-focused mentorship program for undergrad students, with the goal of increasing research participation among students from historically underrepresented groups in computing. Check out the website of our WISCERS program, Google Research announcement and the press release from our CS department.
+10/01/2020
+I am co-organizing (with Philippe Rigollet and Santosh Vempala) the Workshop on Sampling Algorithms and Geometries on Probability Distributions at the Simons Institute, as part of the Geometric Methods in Optimization and Sampling Fall 2021 program.
+7/9/2020
+I am serving on the program committee of ICLR 2021.
+11/4/2019
+I am serving on the program committees of ICML 2020 and ICALP 2020.
+9/15/2019
+I am co-organizing the Workshop on Optimization at the Fields Institute in Toronto, as part of the Focus Program on Data Science and Optimization.
+3/15/2019
+I am organizing a session on the Continuous-Time Perspective in Optimization at this year's INFORMS annual meeting.
+9/18/2018
+Check out the Columbia EE article about the six alumni (including myself) joining top universities in the US and China.
+6/20/2018
+I was named a Microsoft Research Fellow for the upcoming program on Foundations of Data Science at the Simons Institute for the Theory of Computing.
+6/1/2018
+I will join the Department of Computer Sciences at University of Wisconsin-Madison as an assistant professor in January 2020.
+5/11/2018
+Two papers accepted to ICML'18!
+4/13/2018
+I will serve on the technical program committee of International Conference on NETwork Games, COntrol and OPtimisation (NETGCOOP'18).
+2/17/2018
+I will be joining the Simons Institute for the Theory of Computing as a Research Fellow, for the program on Foundations of Data Science. I will also join UC Berkeley's Foundations of Data Analysis (FODA) institute as a postdoc.
+2/16/2018
+I will serve on the program committee of ICNP'18.
+2/15/2018
+I will serve on Thomas Stahlbuhk's PhD thesis committee at MIT as a reader.
+6/7/2017
+An article about the Friedman Memorial Prize for Excellence is featured on the Columbia Engineering website.
+6/7/2017
+I will be visiting Simons Institute in the Fall for the semester on Bridging Continuous and Discrete Optimization.
+5/16/2017
+I was awarded a Collaborative Research Award by the EE department at Columbia University!
+4/24/2017
+I was invited and will be attending Schloss Dagstuhl seminar on scheduling next March!
+4/10/2017:
+Very excited and deeply honored to be awarded Morton B. Friedman Memorial Prize for Excellence at Columbia Engineering. This award gives me such a great motivation to keep pushing for the academic values I believe in and that are part of Dean Friedman's legacy. See below for the description of the award, copied from the letter I received from Dean Boyce.
+3/3/2017:
+I was selected to attend the Launching Academics on the Tenure-Track: an Intentional Community in Engineering (LATTICE) Symposium.
+10/6/2016:
+Our demo presented at the 2016 NYC Media Lab's Annual Summit received the Honorable Mention Award (selected among 13 awarded demos from about 140 presented demos).
+10/4/2016:
+I presented our work on full-fuplex at ACM HotWireless workshop. I also attended (by invitation) SIGMOBILE visioning workshop, where I had the chance to discuss with top researchers in the wireless networking field the grand challenges for the SIGMOBILE research community -- i.e., we were indentifying the problems that the community should work on in the next ~10 years.
+9/6/2016:
+I started my postdoc at BU.
+8/18/2016:
+I was listed as one of the 10 Women in Networking/Communications That You Should Watch!
+8/3/2016:
+We will have an invited paper at ACM HotWireless'16!
+7/18/2016:
+I successfully defended my Ph.D. thesis!
+4/15/2016:
+Our paper titled “A Fast Distributed Stateless Algorithm for α-Fair Packing Problems” just got accepted to ICALP.
+4/13/2016:
+I presented our work on distributed and stateless α-fair packing at an RSRG seminar at Caltech.
+4/1/2016:
+Our paper titled “On the Capacity Regions of Single-Channel and Multi-Channel Full-Duplex Links” just got accepted to MobiHoc'16 (18.7% acceptance rate).
+11/6/2015:
+I presented our work on full-duplex at Bell-Labs.
+10/7/2015:
+My profile is now live on the MIT EECS Rising Stars webpage.
+9/24/2015:
+Jin Zhou and I presented our work on full-duplex at the PA Symposium.
+4/20/2015:
+I have been selected as a participant to attend the 3rd Heidelberg Laureate Forum. So excited to meet other young researchers and Abel, Fields, and Turing laureates!
+4/17/2015:
+The story about our winning of the Qualcomm Innovation Fellowship Award is live on the Columbia Engineering webpage.
+4/14/2015:
+Jin Zhou and I won the Qualcomm Innovation Fellowship 2015 award!
+2/8/2015:
+Our paper titled “Resource Allocation and Rate Gains in Practical Full-Duplex Systems” has been accepted to ACM SIGMETRICS'15 (acceptance rate 13.4%).
+12/15/2014:
+My joint project proposal with Jin Zhou from CoSMIC lab, Columbia University, has been selected as one of the finalists for the Qualcomm Innovation Fellowship 2015 award.
+7/14/2014:
+I have been selected for an N^2 Women Fellowship award to organize an N^2 Women event at ACM MobiHoc 2014.
+6/5/2014:
+Our paper titled "Max-min Fair Rate Allocation and Routing in Energy Harvesting Networks: Algorithmic Analysis" was accepted to ACM MobiHoc 2014 (18.9% acceptance rate)!
+2/5/2014:
+I was invited to present our work on teaching cellular networking with WiMAX hands-on labs at the 19th GENI Engineering Conference (GEC19) held in Atlanta, Georgia, March 17-19.
+10/17/2013:
+I have been invited to attend a dinner and networking reception for the Engineering Consortium Career Fair as a student leader and representative of GradSWE!
+5/11/2013:
+I was awarded the Millman Award for Outstanding TA and the MS Award of Excellence from the EE department of Columbia University!
+4/24/2013:
+I was accepted into a summer school on green communications and networking, GreenComNet, being held in Boston May 28-31. I was also awarded full financial support to attend it!
+3/22/2013:
+Our paper on teaching with WiMAX won the Best Educational Paper Award at GREE2013.
+2/23/2013:
+My paper titled "WiMAX in the Classroom: Designing a Cellular Networking Hands-on Lab" has been accepted to The Second GENI Research and Educational Experiment Workshop (GREE2013), co-located with GEC16.
+2/19/2013:
+I was awarded a travel grant to attend The 16th GENI Engineering Conference (GEC16) in Salt Lake City, Utah.
+2/12/2013:
+I was awarded "Dr Milos Babic" Scholarship by the City of Kraljevo!
+12/12/2012:
+I was appointed the Corporate Chair position in the GradSWE executive board for 2013!
+11/2/2012:
+As of October 17, 2012, I hold an MS degree in Electrical Engineering from Columbia University.
+10/5/2012:
+I will be attending CIAN Retreat
+October 21-23 in Manhattan Beach, CA.
+10/2/2012:
+I won Yahoo! Yodel Your Thoughts Scholarship Award!
+Email: jelena at cs dot wisc dot edu
+Office: Morgridge Hall 6510

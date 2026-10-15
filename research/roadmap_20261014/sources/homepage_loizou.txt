@@ -1,0 +1,127 @@
+Nicolas Loizou
+About
+News
+Publications
+Team
+Talks
+Bio
+Professional Services
+Teaching
+Open Positions
+🎓 Open PhD and Postdoc positions for 2027.
+For more details see:
+Open Positions
+About
+I am an Assistant Professor in the
+Department of Applied Mathematics and Statistics (AMS) and the
+Mathematical Institute for Data Science (MINDS) at
+Johns Hopkins University, with secondary appointments in the
+Department of Computer Science and the
+Department of Electrical and Computer Engineering.
+I am also affiliated with the
+Johns Hopkins Data Science and AI Institute,
+the
+JHU Machine Learning Group, and the
+Ralph O’Connor Sustainable Energy Institute (ROSEI).
+My research develops the mathematical and algorithmic foundations of
+large-scale and stochastic optimization, min-max optimization, variational inequalities and learning in games, randomized numerical linear algebra,
+distributed and federated optimization.
+A central theme of my work is to understand how structural properties of
+optimization and equilibrium problems can be exploited to design simple,
+scalable, and theoretically principled algorithms for machine learning,
+multi-agent systems, and large-scale computational problems.
+Prior to joining Johns Hopkins, I was an
+IVADO Postdoctoral Fellow at
+Mila - Quebec Artificial Intelligence Institute and
+DIRO, Université de Montréal.
+I received my PhD in Optimization and Operational Research from the
+University of Edinburgh in 2019,
+an MSc in Computing from
+Imperial College London,
+and a BSc in Mathematics from the
+National and Kapodistrian University of Athens.
+I also spent Fall 2018 as a research intern at
+Facebook AI Research (FAIR) in Montreal, Canada.
+For more details, please see my
+Curriculum Vitae (updated August 2026).
+Selected Recent News
+(For the full list of news please check the News tab.)
+14 August 2026:
+I am honored to have received the
+AFOSR Young Investigator Program (YIP) Award
+in Computational Mathematics.
+This week, I attended the
+2026 AFOSR Computational Mathematics Program Review
+,
+held August 10--14, where I presented the goals of my YIP project,
+“Randomized and Scalable Iterative Algorithms for Extreme-Scale
+Computational Science: Design, Analysis, and Applications.”
+I really enjoyed the Program Review, especially learning about the breadth of research
+across computational mathematics and exchanging ideas with the community.
+21 July 2026:
+I am thrilled and deeply honored to receive the
+NSF CAREER Award.
+My project, titled
+“Structural and Algorithmic Foundations of Variational Inequalities
+in Machine Learning: From Principles to Scalability”
+,
+will support an integrated program of research and education at the
+intersection of optimization and machine learning.
+I am very grateful to the NSF for this support and to my students,
+collaborators, colleagues, and mentors who have contributed to this journey.
+08 June 2026:
+I spent the week in the UK, beginning with a visit to the University of Oxford on June 1, where I gave a talk at the
+Machine Learning and Data Science Seminar
+on our recent work on efficient extragradient methods for modern machine learning.
+I then attended and gave a talk at the
+SIAM Conference on Optimization
+in Edinburgh. At the conference, I co-organized together with
+Taeho Yoon, a 15-speaker minisymposium on
+Recent Advancements in Optimization Methods for Machine Learning.
+It was a real pleasure to visit Edinburgh and the University of Edinburgh again for the first time since completing my PhD there in 2019.
+05 May 2026:
+I am attending
+the ELLIIT Focus Period Symposium in Optimization for Learning
+, taking place at Lund University. Tomorrow, I will give a talk on
+“Extragradient Methods for Modern Machine Learning: New Theory, Step-Size Rules, and Stochastic Variants”.
+Beyond the symposium, I will also stay at Lund University for two additional weeks as a visiting scholar.
+During my visit, on May 13, I will give a mini-course titled
+“Polyak-type Optimization: From Principles to Scalability”.
+The course will be divided into two parts:
+Part I: Principles and Foundations of Polyak-type Optimization
+Part II: Scalable and Modern Polyak-type Methods
+30 April 2026:
+Two papers, joint work with Dimitris Oikonomou, were accepted to ICML 2026:
+Adaptive Sharpness-Aware Minimization with a Polyak-type Step size: A Theory-Grounded Scheduler
+Safeguarded Stochastic Polyak Step Sizes for Non-smooth Optimization: Robust Performance Without Small (Sub)Gradients
+20 April 2026:
+Congratulations to Ezra Greenberg who received the Best MSE Thesis Research Award for his thesis on convergence guarantees of extragradient methods for variational inequalities. Earlier this month, he also received the Best Talk Award at MATRX 2026
+01 Feb 2026: This semester, I will be giving a few presentations on our recent and ongoing work in variational inequality methods and their impact on machine learning. Slides and videos will be available after the presentations. I look forward to meeting with colleagues at JHU Physics, INFORMS Optimization, Arizona State, and Flatiron.
+18 Feb 2026:
+Physics of Learning Seminar, Physics & Astronomy Department, Johns Hopkins University
+22 March 2026:
+2026 INFORMS Optimization Society Conference, Atlanta, Georgia.
+27 March 2026:
+Learning, Information, Optimization, Networks and Statistics (LIONS) Seminar, Arizona State University.
+17 April 2026:
+Center for Computational Mathematics, Machine Learning Seminar, Flatiron Institute, NYC.
+08 Dec 2025:
+After NeurIPS 2025, I’m staying in California for a few more days. Today, I’m giving a talk at the
+Applied Math Colloquium
+in the UCLA Department of Mathematics. I’ll present some of our
+recent work at the intersection of game theory and federated learning.
+Talk title: Communication in Multiplayer Games Matters: A Federated Learning Approach to Equilibrium Computation.
+23 Nov 2025:
+I have recently joined the editorial boards of:
+Optimization Methods and Software, and Transactions on Machine Learning Research.
+Please consider submitting your best work at the intersection of optimization and machine learning!
+September 2025:
+I’m delighted to share that my first doctoral student, Sayantan Choudhury, successfully defended his PhD dissertation.
+We began working together in Summer 2022, and over the past three years it has been a joy to watch him grow into a very strong researcher. During his PhD he co-authored seven papers (including 4 NeurIPS and 2 ICLR).
+His thesis entitled "Next-Generation Iterative Algorithms for Large-Scale Min-Max Optimization: Design and Analysis" will be available online soon.
+August 2025:
+Together with Ernest Ryu (UCLA), we received an NSF CISE Medium award for the project
+“Post-Modern Min-Max Optimization Theory: Departure from Classical Minimization Theory.”
+The project focuses on developing specialized theoretical frameworks and efficient algorithms
+tailored to unconstrained min-max optimization.
+Credits for website's template : Peter Richtarik

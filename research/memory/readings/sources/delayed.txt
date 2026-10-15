@@ -1,0 +1,2846 @@
+                                           Noname manuscript No.
+                                           (will be inserted by the editor)
+
+
+
+
+                                           A Class of Accelerated Fixed-Point-Based Methods with Delayed
+                                           Inexact Oracles and Its Applications
+
+                                           Nghia Nguyen-Trung · Quoc Tran-Dinh
+
+
+
+
+arXiv:2512.13547v1 [math.OC] 15 Dec 2025
+                                           Abstract In this paper, we develop a novel accelerated fixed-point-based framework using
+                                           delayed inexact oracles to approximate a fixed point of a nonexpansive operator (or equiva-
+                                           lently, a root of a co-coercive operator), a central problem in scientific computing. Our ap-
+                                           proach leverages both Nesterov’s acceleration technique and the Krasnosel’skiǐ-Mann (KM)
+                                           iteration, while accounting for delayed inexact oracles, a key mechanism in asynchronous
+                                           algorithms. We also introduce a unified approximate error condition for delayed inexact
+                                           oracles, which can cover various practical scenarios.
+                                                                                                Under mild conditions and     appropri-
+                                           ate parameter updates, we establish both O 1/k 2 non-asymptotic and o 1/k 2 asymptotic
+                                           convergence ratesin expectation for the squared norm of residual. Our rate significantly im-
+                                           proves the O 1/k rates in classical KM-type methods, including its asynchronous variants.
+                                           We also establish o 1/k 2 almost sure convergence rates and the almost sure convergence of
+                                           iterates to a solution of the problem. Within our framework, we instantiate three settings
+                                           for the underlying operator: (i) a deterministic universal delayed oracle; (ii) a stochastic de-
+                                           layed oracle; and (iii) a finite-sum structure with asynchronous updates. For each case, we
+                                           instantiate our framework to obtain a concrete algorithmic variant for which our convergence
+                                           results still apply, and whose iteration complexity depends linearly on the maximum delay.
+                                           Finally, we verify our algorithms and theoretical results through two numerical examples on
+                                           both matrix game and shallow neural network training problems.
+                                           Keywords Accelerated fixed-point-based method · Nesterov’s acceleration · delayed
+                                           inexact oracle · asynchronous algorithm · nonexpansive operator · fixed-point problem.
+                                           Mathematics Subject Classification (2000) 90C25 · 90-08
+
+                                           1 Introduction
+                                           (a) Problem statement. Let F : Rp → Rp be a nonexpansive operator (i.e., ∥F x − F y∥ ≤
+                                           ∥x − y∥ for all x, y ∈ Rp ). We consider the following fixed-point problem:
+
+                                                                          Find x⋆ ∈ Rp such that: x⋆ = F x⋆ .                             (FP)
+
+                                           Nghia Nguyen-Trung · Q. Tran-Dinh
+                                           Department of Statistics and Operations Research
+                                           The University of North Carolina at Chapel Hill, 318 Hanes Hall, Chapel Hill, NC 27599-3260.
+                                           Email: nghiant@unc.edu,quoctd@email.unc.edu.
+2                                                                    N. Nguyen-Trung, Q. Tran-Dinh
+
+
+This problem is fundamental in scientific computing and related fields such as optimization,
+machine learning, engineering, probability and statistics, and economics, see, e.g., [2, 18, 27].
+   It is well-known (e.g., [13]) that if we define G := I − F , where I is the identity mapping,
+then (FP) can be reformulated equivalently into the following root-finding problem of G:
+
+                               Find x⋆ ∈ Rp such that: Gx⋆ = 0,                               (CE)
+
+where G is 12 -co-coercive, i.e., ⟨Gx − Gy, x − y⟩ ≥ 12 ∥Gx − Gy∥2 for all x, y ∈ Rp . Therefore,
+approximating a fixed-point x⋆ of (FP) is equivalent to finding an approximate root of
+(CE). For the sake of our presentation, we will treat the latter problem, i.e., (CE). While
+we consider (CE) in a finite-dimensional space Rp , we believe that our results in this paper
+can be extended to a Hilbert space with a little effort.
+   Throughout this paper, we require the following assumption on (CE).
+Assumption 1 The equation (CE) satisfies the following assumptions:
+(i) It has a solution, i.e., zer(Φ) := {x ∈ Rp | Gx⋆ = 0} ̸= ∅.
+(ii) There exist β, β̄ ∈ [0, +∞) and a nonnegative function D : Rp × Rp → R+ satisfying
+    D(x, x) = 0 for all x ∈ Rp such that
+
+                   ⟨Gx − Gy, x − y⟩ ≥ β∥Gx − Gy∥2 + β̄D(x, y),          ∀x, y ∈ Rp .            (1)
+
+While Assumption 1(i) makes sure that (CE) is solvable and well-defined, Assumption 1(ii)
+generalizes the β-co-coercivity of G by adding the last term β̄D(x, y), which will be spec-
+ified
+   Pnlater in our applications. Specifically, Pin    the finite-sum setting of (CE) with Gx =
+ 1                                          1     n                   2
+n        G
+      i=1 i x, we will  choose D(x, y)  :=  n     i=1 ∥Gi x − Gi y∥ . Note that, we allow either
+β = 0 or β̄ = 0 in (1). Under this flexibility, it is clear that if G is β-co-coercive on Rp , then
+it automatically satisfies (1) with either β̄ = 0 or D(·, ·) = 0. Since the co-coercivity of G in
+(CE) is equivalent to the nonexpansiveness of F in (FP), Assumption 1(ii) is reasonable.
+(b) Motivation. In parallel and distributed optimization methods, enforcing perfectly up-
+to-date oracle evaluations such as [approximate] gradient or operator evaluations is often
+prohibitively expensive, and in many cases, infeasible [4, 17, 74]. Both exact and approx-
+imate synchronous oracle evaluations require global coordination across workers, memory
+systems, and data partitions, which causes significant idle time and communication overhead
+in heterogeneous computing environments. These limitations motivate the development of
+algorithms that tolerate delayed or asynchronous inexact oracle information rather than
+requiring workers to remain perfectly aligned to up-to-date oracle evaluations.
+    Hitherto, most advanced asynchronous methods have been designed for minimization
+problems; see, for example, [11, 17, 26, 37, 41, 47, 48, 53, 56, 68, 84, 85]. Such algorithms do not
+directly accommodate modern applications in robust and distributionally robust optimiza-
+tion, adversarial training, or reinforcement learning, which give rise to minimax or fixed-
+point formulations. Only a limited number of works address more general models such as
+(CE) and their special cases, including minimax problems; see [16, 25, 28, 30, 40, 66]. These
+approaches largely extend classical asynchronous optimization schemes to fixed-point prob-
+lems or monotone inclusions. However, these methods are often designed for a specific type
+of asynchronous mechanism, such as asynchronous coordinate updates [16, 28, 40, 66] or in-
+cremental aggregation [30]. In addition, these methods are non-accelerated, often require
+restrictive assumptions (e.g., quasi-strong
+                                             monotonicity), achieve sub-optimal convergence
+rates (at most O 1/k or o 1/k rates), or have inefficient complexity bounds (e.g., quadratic
+dependence on the maximum delay), see, e.g., [30, 40, 66]. For instance, [16, 28] studied asyn-
+chronous fixed-point-type iterations for (FP) or (CE), but they are non-accelerated and
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                        3
+
+
+only asymptotic convergence was established without explicit iteration or oracle complex-
+ity bounds. Recently, [66] proposed an asynchronous block-coordinate fixed-point iteration
+for (CE) that attains asymptotic convergence properties under Assumption 1, or a linear
+convergence but requires a quasi-strong monotonicity of G, and its complexity could de-
+pend quadratically on the maximum delay. This dependence was later improved to linear
+in subsequent works, e.g., [37]. Recently, [30] developed asynchronous aggregated schemes
+for solving (CE) extended to the finite-sum setting and obtained similar convergence and
+complexity results using analogous block-coordinate updates and assumptions as in [66].
+    The aim of this paper is to develop a unified accelerated fixed-point framework for (CE)
+capable of handling delayed and inexact oracle evaluations and adaptable to a broad range
+of asynchronous update mechanisms without quasi-strong monotonicity. Our approach inte-
+grates Nesterov-type acceleration (different from previous works for (CE)), Krasnosel’skiǐ-
+Mann iterations, and delayed inexact oracle information in a single scheme, while not using
+the “quasi-strong monotonicity” of G as in [30, 66]. As a result, our framework yields sev-
+eral improvements and new convergence properties compared to existing methods, even in
+special cases such as smooth convex optimization and convex-concave minimax problems.
+(c) Our contributions. To this end, our contributions can be summarized as follows.
+(i) We apply Nesterov’s acceleration techniques to the Krasnosel’skiǐ-Mann fixed-point it-
+     eration to derive a new Accelerated Fixed-Point-type framework (AFP) with delayed
+     inexact oracles (deterministic or stochastic) to approximate solutions of (CE).
+(ii) We introduce a generic error approximation criterion         to handle delayed inexact oracles
+     of G. Under this criterion, we can prove a O 1/k 2 convergence rate of our AFP frame-
+                                                             
+
+     work on the residual E[∥Gy k ∥2 ], where   k is the iteration counter and y k is the last iterate.
+     We also establish a faster o 1/k convergence rate of ∥Gy k ∥2 both in expectation and
+                                          2
+                                            
+
+     almost surely, and the almost sure convergence of iterates {y k } to a solution of (CE).
+(iii) We apply our framework toderive an AFP variant with delay updates and achieve an
+                                   τ
+     iteration-complexity of O βϵ       to obtain an ϵ-solution of (CE), where τ is the maximum
+     delay and β is the co-coercivity constant in Assumption 1.
+(iv) We also apply our method to design an asynchronous stochastic AFP variant for ap-
+     proximating a solution of (CE) when G is equipped with an unbiased stochastic oracle
+     G such thatGx = E[G(x, ξ)]. We prove that our method can achieve an ϵ-solution after
+          σ     τ
+     O ϵ√   τ
+              + βϵ  oracle calls, where τ is the maximum delay and σ 2 is the variance of G.
+(v) As byproducts of our results, we also obtain two new variants of our AFP framework.
+     The first one is an incremental aggregated AFP scheme, while the second variant is a
+     shuffling aggregated AFP algorithm. Both variants have rigorous theoretical convergence
+     rate guarantees as consequences of our unified convergence analysis.
+Algorithmic and analysis highlights. First, in the absence of inexactness, our AFP
+scheme reduces to an exact deterministic version for solving (CE). Due to a different pa-
+rameter update, this method is not identical to, but closely related to, Nesterov’s accelerated
+scheme in [77] and the fast KM method in [19]. However, the convergence analyses in [19,
+77] are not well suited for developing inexact variants of (CE). The difficulty arises from
+bounding inner-product terms such as ⟨ek , y k+1 − y k ⟩ and ⟨ek , y k − x⋆ ⟩, where y k is the
+iterate, x⋆ ∈ zer(G), and ek = G    e k − Gy k is the error between the inexact oracle G   e k and the
+                k
+true value Gy . Processing these terms is non-trivial in convergence analysis. This limitation
+motivates us to develop a new scheme whose analysis avoids such terms entirely.
+     Second, although our method may initially appear similar to Nesterov’s accelerated
+scheme in [46, 62] for smooth convex minimization, the underlying analysis differs substan-
+4                                                                      N. Nguyen-Trung, Q. Tran-Dinh
+
+
+tially. In convex optimization, convergence analysis typically uses the objective residual
+f (xk ) − f (x⋆ ) as part of the underlying Lyapunov function [12]. For general operator prob-
+lems such as (CE), no such objective exists, and the analysis instead relies on constructing
+an appropriate Lyapunov function – a nontrivial task in this context.
+    Third, our method incorporates acceleration together with delayed inexact oracles, set-
+ting it apart from existing inexact KM-type schemes such as [21, 29, 51]. It is also different
+from recent non-accelerated paradigms in [28, 30, 66], where the analysis often uses a stan-
+dard metric such as ∥xk −x⋆ ∥2 to construct a Lyapunov function. They often require stronger
+assumptions for non-asymptotic rates, such as quasi-strong monotonicity [30, 66].
+    Fourth, in the stochastic setting, our approach also differs from recent variance-reduced
+fast KM methods [78, 79] due to the new algorithmic structure, convergence metrics, and
+the generic delayed error approximation condition introduced in Definition 1.
+    Finally, our framework is sufficiently general to accommodate additional variants beyond
+the three settings studied in Section 4. It can also be applied to solve more general classes
+of problems than (CE), such as monotone or co-hypomonotone inclusions, by applying ap-
+propriate reformulation techniques as in [79] (see Remark 4).
+(d) Related work and comparison. Since (FP) or its equivalent form (CE) is classical and
+fundamental, its theory, numerical methods, and applications have been widely developed
+for many decades, including the following monographs [13, 70, 39]. Here, we only discuss and
+compare the most relevant work to our setting and methods studied in this paper.
+(i) Fixed-point methods and its accelerated variants. Both the Banach-Picard (BP) iteration
+and the Krasnosel’skiǐ-Mann (KM) scheme are classical approaches for approximating a
+solution of (FP) or, equivalently, (CE). The BP iteration requires the operator F to be
+contractive, whereas the KM scheme only assumes that F is nonexpansive, and therefore
+applies to a broader class of algorithms — particularly those arising in monotone operator
+theory such as proximal-point and splitting schemes; see, for example, [13, 36, 57, 71]. While
+the BP method achieves a linear convergence              rate due to the contractivity of F , the KM
+scheme guarantees at most O 1/k or o 1/k rates in terms of the squared residual norm
+under mere nonexpansiveness, which is far from the O 1/k 2 -optimal rate [64].
+    Boosting the convergence rates of classical fixed-point methods has become an attrac-
+tive research topic in recent years. Both Nesterov’s acceleration and Halpern’s fixed-point
+iteration have been extensively studied for solving (FP) and (CE); see, for example, [7, 10,
+15, 20, 24, 34, 44, 52, 54, 64, 67, 72, 77, 80, 82, 86]. Depending on the assumptions
+                                                                                     and parameter
+update rules, these methods achieve convergence rates as fast as O 1/k 2 or even o 1/k 2 .
+                                                                                                     
+
+These rates are substantially improved over the non-accelerated counterparts by a factor of
+1/k and often match the optimal rate up to a constant factor in many settings [52, 65].
+    Hitherto, however, most accelerated algorithms of this type are deterministic and rely on
+exact oracles. Only a limited number of works address inexact oracles, with most focusing on
+stochastic oracles or randomized coordinate updates; see, e.g., [22, 23, 81, 78, 79]. As observed
+in convex optimization [33], accelerated methods tend to be more sensitive to oracle errors
+than their non-accelerated counterparts. In addition, most convergence analysis of inexact
+methods relies on inexact oracles defined through the objective function. Unlike convex
+optimization, here the absence of an objective function in (FP) makes the development of
+Nesterov-type inexact accelerated fixed-point algorithms particularly challenging.
+(ii) Optimization algorithms with delayed or asynchronous updates. Asynchronous algo-
+rithms have been extensively developed in the literature, primarily within the domain of
+convex optimization and numerical linear algebra. The seminal monograph [17] arguably
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles              5
+
+
+laid the theoretical foundation for parallel and distributed computation, covering both syn-
+chronous and asynchronous algorithmic mechanisms. The recent surge of interest in solving
+large-scale problems on parallel and distributed computing platforms has revived and greatly
+expanded research on asynchronous methods. A major milestone in this renewed interest
+is [68], introducing HOGWILD!, which established near-optimal convergence guarantees for
+lock-free stochastic gradient descent. Subsequent theoretical analyses have typically demon-
+strated convergence degradation proportional either to the maximum delay [1, 6, 38, 50, 56,
+75] or to the average delay [11, 26]. The work of [37] refined this characterization by re-
+placing the maximum delay with a threshold parameter and established a non-accelerated
+O 1/k best-iterate convergence rate in expected optimality gap. The ASAGA algorithm
+[48] achieved linear convergence for finite-sum, smooth, and strongly convex problems, with
+explicit step-size and constant dependencies on the bounded overlap (delay) parameter,
+matching the serial SAGA performance up to delay-dependent factors and allowing near-
+linear speedups. Similarly, A2BCD [41], a Nesterov’s accelerated block-coordinate method,
+attained linear convergence with optimal complexity under moderate delay conditions. Nev-
+ertheless, extending this approach to accelerated fixed-point methods remains largely open.
+(iii) Fixed-point methods with delayed or asynchronous updates. Unlike optimization, asyn-
+chronous algorithms for fixed-point problems such as (FP) and generalized equations such
+as (CE) remain comparatively underdeveloped. While most early methods were presented
+in [17], convergence rates and complexity analysis similar to those in optimization remain
+largely elusive. Remarkably, the work [66] systematically studied a class of asynchronous
+coordinate schemes for (CE) based on the KM iteration, called ARock, allowing inconsis-
+tent reads and finite maximal delays, and establishing almost sure convergence (and linear
+rates under an additional quasi-strong monotonicity assumption) with delay-dependent step
+sizes. Subsequent variants of ARock can be found, e.g., in [40, 42]. The work [30] extended
+ARock’s idea and developed asynchronously incremental aggregated schemes for a finite-sum
+setting of (CE) and obtained similar convergence results as [66] under analogous assump-
+tions. For monotone inclusions, [28] proposed an asynchronous block-iterative primal-dual
+splitting method with weak and strong asymptotic convergence guarantees. These methods,
+however, are non-accelerated, highlighting the need for a general, non-asymptotic, and ac-
+celerated framework capable of accommodating asynchrony in both nonexpansive mappings
+and monotone equations or inclusions.
+(e) Paper outline. The rest of this paper is organized as follows. Section 2 reviews the
+necessary background and mathematical tools used in the sequel. Section 3 develops our
+accelerated fixed-point framework with delayed inexact oracles and analyzes its convergence
+under a general error approximation condition. Section 4 specifies our framework for three
+concrete computing models, and establishes their convergence rates accordingly. Section 5
+presents two numerical examples to verify our methods and theoretical results. For clarity
+of presentation, we defer some technical proofs to the appendix.
+2 Background and Mathematical Tools
+In this section, we recall the necessary concepts and mathematical tools used in the sequel.
+We also briefly review Nesterov’s accelerated gradient method for minimizing a smooth and
+convex function as a starting point of our development in this paper.
+2.1 Basic concepts
+(a) Basic notations. We work with a finite-dimensional space Rp equipped with an in-
+ner product ⟨·, ·⟩, inducing the norm ∥ · ∥. For a mapping G (single-valued or multival-
+ued mapping), we denote by dom(G) := {x ∈ Rp : Gx ̸= ∅} the domain of G and by
+6                                                                   N. Nguyen-Trung, Q. Tran-Dinh
+
+
+gra(G) := {(x, u) ∈ Rp × Rp : u ∈ Gx} the graph of G. For given functions g(t) and h(t), we
+say that g(t) = O h(t) if there exists M > 0 and t0 ≥ 0 such that g(t) ≤ M h(t) for t ≥ t0 ,
+                                          g(t)
+and we say that g(t) = o(h(t)) if limt→∞ h(t)  = 0.
+(b) Filtration and expectations. We define by Fk the σ-algebra generated by all the
+randomness induced by x0 , x1 , . . . , xk , up to the k-th iteration. This σ-algebra generates a
+filtration {Fk }. We denote by Ek [·] = E · | Fk the conditional expectation w.r.t. Fk , by
+Eξ [·] = Eξ∼P [·] the expectation w.r.t. ξ, and by E · the total expectation.
+(c) Co-coercivity, Lipschitz continuity, and nonexpansiveness. For a single-valued
+operator G : Rp → Rp , we say that G is β-co-coercive if there exists β ≥ 0 such that
+⟨Gx − Gy, x − y⟩ ≥ β∥Gx − Gy∥2 for all x, y ∈ Rp ; we say that G is L-Lipschitz continuous
+if there exists L ≥ 0 such that ∥Gx − Gy∥ ≤ L∥x − y∥ for all x, y ∈ dom(G). If L = 1,
+then G is nonexpansive. If Gx = ∇f (x), the gradient of a convex function f , then the L-
+Lipschitz continuity of ∇f is equivalent to the L1 -co-coercivity of ∇f due to the well-known
+Baillon–Haddad theorem [13].
+(d) Monotonicity and co-hypomonotonicity. For a possibly multivalued operator G :
+Rp ⇒ Rp , we say that G is ρ-co-hypomonotone if ⟨wx − wy , x − y⟩ ≥ −ρ∥wx − wy ∥2 for
+all (x, wx ), (y, wy ) ∈ gra(G) and ρ ≥ 0. If ρ = 0, then we say that G is monotone. A
+co-hypomonotone operator is not necessarily monotone, see, e.g., [79] for concrete examples.
+
+2.2 Nesterov’s accelerated gradient method and its variants
+We recall here one common variant of Nesterov’s accelerated gradient method [61] for min-
+imizing a convex and L-smooth function f from [46]. This method starts from an arbitrary
+x0 ∈ Rp , chooses y 0 := x0 , and at iteration k ≥ 0, updates:
+
+                                       := tkt−s xk + tsk z k ,
+                                 k
+                                 y          k
+                                
+                                  xk+1 := y k − η∇f (y k ),                                (NAG)
+                                
+                                 k+1
+                                  z    := z k + tk (xk+1 − y k ),
+
+where s > 0 and η ∈ (0, L1 ] are given, and tk = O k can be adaptively updated.
+                                                       
+
+    In the unconstrained setting, (NAG) can be expressed equivalently to several well-known
+variants of Nesterov’s accelerated gradient scheme, including those presented in [60, 61].With
+an appropriate    choice of the parameters s and tk , the method attains both O 1/k 2 and
+o 1/k convergence rates for the objective residual f (xk ) − f (x⋆ ). Moreover, its iterates
+       2
+         
+
+{xk } also converge to a minimizer x⋆ of f ; see, for instance, [9]. Over the past two decades,
+research on this topic has evolved extensively, with significant contributions summarized in
+[14, 45, 61]. Furthermore, these ideas have been successfully extended to broader settings,
+including monotone inclusions and variational inequalities; see, e.g., [7, 20, 44, 54, 55, 77].
+
+3 Accelerated Fixed-Point Framework with Delayed Inexact Oracle
+In this section, we develop a novel accelerated fixed-point iteration framework with
+delayed inexact oracle to approximate a solution of (FP), or equivalently, a root of (CE).
+Our method is inspired by Nesterov’s accelerated gradient algorithm described in (NAG).
+
+3.1 The accelerated fixed-point method with delayed inexact oracle
+Our method for solving (CE) is described as follows.
+• Initialization: Choose a constant s > 1. Given an initial point y 0 ∈ Rp , we set z 0 := y 0 .
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                        7
+
+
+• Main loop: At each iteration k ≥ 0, we compute an appropriate delayed inexact esti-
+        e k of Gy k (either deterministic or stochastic), and then update
+  mator G
+                              
+                                  k+1
+                              x
+                              
+                                     := y k − ηk G
+                                                  ek ,
+                                                γ
+                                z k+1 := z k + sk (xk+1 − y k ),              (AFP)
+                              
+                               y k+1 := tk −s xk+1 + s z k+1 ,
+                              
+                                                 tk          tk
+
+    where ηk > 0, γk ∈ [0, 1], and tk > 1 are given parameters, determined later.
+In the subsequent sections, we will specify how to construct the delayed inexact estimator
+Ge k of Gy k as well as the choice of s and the update rules of tk , ηk , and γk . First, we define
+
+                                          ek := G
+                                                e k − Gy k                                         (2)
+
+to be the error between the delayed inexact estimator G             e k and the true operator value
+   k      k
+Gy at y . Let us briefly discuss the relations between our scheme (AFP) and other methods.
+⋄ In the exact case, i.e., when G    e k = Gy k , our method is much closer in spirit to Nesterov’s
+  variant in [3, 46] than to those in [60, 61]. A key distinction, however, lies in the choice of γk.
+  In convex optimization, as shown in (NAG), the parameter is taken             as γk = stk = O k
+  [3, 46], whereas in our method γk is constant, namely γk = γ = O 1 . This difference leads
+  to a more aggressive update of z k in convex optimization compared with our approach.
+⋄ Alternatively, if G e k = Gy k (i.e., the exact value Gy k is used), then our scheme reduces to a
+  deterministic accelerated fixed-point method for solving (CE), which can be transformed
+  into forms similar to those studied in [7, 19, 44, 54, 55, 77]. However, as mentioned earlier,
+  extending the convergence analyses from these works to the inexact oracle variants is
+  difficult compared with (AFP), because their proofs require bounding product terms such
+  as ⟨ek , y k − y k−1 ⟩ and ⟨ek , y k − x⋆ ⟩. Controlling such terms becomes challenging unless
+  they vanish; for example, when using unbiased estimators G          e k satisfying Ek [G
+                                                                                         e k ] = Gy k .
+⋄ For the inexact setting, we allow both deterministic and stochastic inexact oracles in our
+  scheme (AFP). The stochastic oracle is not required to be unbiased, which makes our
+  method more flexible and broad enough to encompass a wide range of existing and new
+  inexact oracles, particularly those involving delays.
+⋄ In convex optimization, the underlying inexact oracles for accelerated methods are often
+  defined directly (see, e.g., [33, 35]) or indirectly through the objective function (see, e.g.,
+  [73]). Such formulations make it possible to avoid directly bounding inner-product terms
+  such as ⟨ek , y k − x⋆ ⟩. However, because no objective function underlies (CE), establishing
+  convergence for inexact methods becomes substantially more difficult.
+Note that our framework (AFP) is single-loop. In terms of per-iteration complexity, (AFP)
+requires only one evaluation of G     e k per iteration. All additional operations consist solely of
+vector additions or scalar-vector multiplications, making their computational cost compara-
+ble to that of classical fixed-point schemes such as BP iteration or KM fixed-point schemes.
+3.2 Key properties of (AFP)
+To analyze Nesterov’s accelerated methods in convex optimization, we often use aLyapunov
+function of the form Lk = ak (f (xk ) − f (x⋆ )) + 12 ∥z k − x⋆ ∥2 for some ak = O k 2 , see, e.g.,
+[12]. For our scheme (AFP), we first introduce the following function:
+                                                                  2
+               Lk := a2k ∥Gy k ∥2 + stk−1 ⟨Gy k , y k − z k ⟩ + 2ηsk−1
+                                                                    (s−1)     k   ⋆ 2
+                                                                       γk−1 ∥z − x ∥ ,
+                                                                                                   (3)
+
+where ak > 0 is given, determined later, and other parameters are given in (AFP).
+8                                                                           N. Nguyen-Trung, Q. Tran-Dinh
+
+
+    The function Lk is not yet a Lyapunov function for our method. One needs to augment
+it with additional terms due to the delayed inexact oracle. Next, we state the following two
+technical lemmas to characterize the properties of Lk in (3). For the sake of presentation,
+the proof of these lemmas is deferred to Appendix B.
+
+Lemma 1 Suppose that Condition (1) of Assumption 1 holds for (CE) and γ ∈ [0, 1],
+s > 1 + γ, and η > 0 are given. Let {(xk , y k , z k )} be generated by (AFP) using
+
+              tk = tk−1 + 1,           tk > 2s,   γk := γ ∈ (0, 1],   and    ηk := 2(tηt k
+                                                                                       k −s)
+                                                                                             .       (4)
+
+Then, for any c1 > 0 and c2 > 0, and ek defined by (2), Lk defined by (3) satisfies
+
+         Lk − Lk+1 ≥ [2β−(1+c12)η]tk (tk −s) ∥Gy k+1 − Gy k ∥2 + β̄tk (tk − s)D(y k+1 , y k )
+                         + η(s−γ−1)t k
+                                       ∥Gy k ∥2 + s(s − 1)⟨Gy k , y k − x⋆ ⟩                         (5)
+                              4        
+                         − η2 c11 + s−γ
+                                     c2   tk (tk − s)∥ek ∥2 .
+
+Lemma 2 Let Lk be defined in (3). Then, under Assumption 1, if s ≥ 1 + 3γ, then we have
+                                       ηt2k−1  k 2  s2 (tk−1 −3s)
+                          Lk ≥            8 ∥Gy ∥ +     ηtk−1     ∥z k − x⋆ ∥2 .                     (6)
+
+3.3 Convergence of (AFP) under general error approximation condition
+(a) General error approximation condition. Without loss of generality, suppose that
+Ge k is a stochastic approximation of Gy k in (AFP) such that the error ek := G
+                                                                              e k − Gy k
+defined by (2) satisfies the following definition.
+Definition 1 (Error approximation condition) Suppose that {y k } is generated by
+(AFP), and ek is the error between the [possibly stochastic] approximation G         e k and Gy k
+defined by (2) adapted to the filtration {Fk }. There exists a sequence of nonnegative random
+variables {∆k }, three constants κ ∈ (0, 1], Θ ≥ 0, and Θ̂ ≥ 0, an integer delay τk ∈ [0, τ ],
+and a nonnegative sequence {δk } such that, almost surely, the following conditions hold:
+
+   E [∥ek ∥2 ] ≤ Ek [∆k ],
+ 
+  k
+ 
+                                      k
+                                    X                                                              (7)
+                                            Θ∥Gy l − Gy l−1 ∥2 + Θ̂D(y l , y l−1 ) + tk (tδkk−s) ,
+                                                                                 
+  Ek [∆k ] ≤ (1 − κ)∆k−1 +
+ 
+                                       l=[k−τk +1]+
+        0     −1               τ0 −1
+where y = y        = ··· = y           , tk , and s is given in (AFP), and D is in (1) of Assumption 1.
+Note that, in (7), if β = 0 in Assumption 1, then Θ = 0, and if β̄ = 0, then Θ̂ = 0.
+To be consistent, we use the convention 0c = +∞ for any c ≥ 0 when necessary. Our
+approximation condition (7) in Definition 1 is sufficiently general to cover various scenarios,
+including deterministic and stochastic (both unbiased and biased) errors, delayed updates,
+and asynchronous updates. Let us further discuss a few aspects of Definition 1.
+• First, to the best of our knowledge, the condition (7) is the first to address delayed inexact
+  oracles for fixed-point-type methods in a unified manner (deterministic and stochastic).
+• Second, in the special case where (CE) corresponds to an optimization problem, most
+  asynchronous algorithms rely on specific mechanisms (e.g., deterministic, stochastic, or
+  incremental aggregated approaches). In contrast, the framework captured by Definition 1
+  allows us to encompass a broad class of algorithms, as will be demonstrated in Section 4.
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                        9
+
+
+• Third, in the absence of delay, our framework includes [79] as a special case. However, the
+  scheme (AFP) differs substantially from [79] because it uses Gy k rather than Gxk , which
+  leads to a significantly different analysis. In this delay-free setting, our framework also
+  differs from [78] since we do not impose the unbiasedness requirement in Definition 1.
+(b) Lyapunov function and its key bound. The following lemma introduces a new
+Lyapunov function and establishes a key recursive inequality to analyze convergence of our
+scheme (AFP), whose proof is deferred to Appendix B.3.
+Lemma 3 Suppose that Assumption 1 holds for (CE), and γ ∈ [0, 1], s > 1 + γ, τ ≥ 1,
+Λ := 1 + s − γ, and η > 0 are given. Let {(xk , y k , z k )} be generated by (AFP) using an
+          e k satisfying Definition 1, where tk , γk , and ηk are respectively updated by
+estimator G
+                       tk := k + 3s + τ,    γk := γ,     and    ηk := 2(tηt k
+                                                                          k −s)
+                                                                                .                  (8)
+                                               2s+1
+Suppose further that κ in (7) satisfies α := (s+1)  2 < κ ≤ 1 and 0 ≤ τk ≤ τ for all k ≥ 0.
+
+For Lk given in (3) and θ := 1 − (1 − κ)α > 0, consider the following Lyapunov function:
+                          h                                                              i
+ Vk := Lk + tk−1 (tk−1 −s) 2β−(1+τ
+                                2
+                                    )η
+                                       ∥Gy k
+                                             − Gy k−1 2
+                                                     ∥  + β̄D(y k k−1
+                                                                 , y  ) + Λα(1−κ)η
+                                                                            2τ θ   ∆ k−1   . (9)
+
+Then, we can show that almost surely
+                                                       k
+                                                       X
+                     Ek [Vk+1 ] ≤ Vk − Uk + µk                  Sl − νk Sk + ωk ,                 (10)
+                                                 l=[k−τk +1]+
+
+where
+                      h                                                      i
+         tk−1 (tk−1 −s) Λ(1−κ)(s+1)η              k      k−1 2         k k−1
+
+
+ U k :=        2          2τ θs 2   ∆ k−1 + β∥Gy   − Gy    ∥  + β̄D(y  , y  )
+
+
+         + η(s−γ−1)tk4+4βs(s−1) ∥Gy k ∥2 ,
+
+
+
+                                                                                     (11)
+
+
+ Sk := Θ∥Gy k − Gy k−1 ∥2 + Θ̂D(y k , y k−1 ),
+
+                                                                    n               o
+ ωk := Λη δk , µk := Λη tk (tk − s), and νk := 1 tk−1 (tk−1 − s) min β−(1+τ )η , β̄ .
+
+
+        2τ θ          2τ θ                      2                        Θ        Θ̂
+
+(c) Main result 1: Convergence rates and iteration-complexity. For given s > 1,
+                                                              2s+1
+τ ≥ 1, and γ ∈ [0, 1], we define Λ := 1 + s − γ > 0 and α := (s+1)2 ∈ (0, 1) as before. Given
+
+κ, Θ, and Θ̂ in Definition 1 such that α < κ ≤ 1, and β and β̄ in Assumption 1, let us
+denote θ := 1 − (1 − κ)α > 0 and define the following quantity:
+                     
+                      3θβ̄                         7ΛΘ̂β
+                                     if 0 < β̄ ≤ 7ΛΘ+3θ(1+τ
+                       7ΛΘ̂                                 ),
+               η̄ :=                                                              (12)
+                            3θβ                       7ΛΘ̂β             Θ̂
+                                     if β̄ = 0 or 7ΛΘ+3θ(1+τ   ) ≤ β̄ ≤ Θ β.
+                     
+                       7ΛΘ+3θ(1+τ )
+
+Then, we are ready to state and prove our first main result in this section.
+Theorem 1 Suppose that Assumption 1 holds for (CE). Let {(xk , y k , z k )} be generated by
+(AFP) such that G   e k satisfies Definition 1 with Θβ̄ ≤ Θ̂β, α := 2s+12 < κ ≤ 1 for a given
+                                                                     (s+1)
+s > 1, and a bounded delay 0 ≤ τk ≤ τ for a given τ ≥ 1. Suppose further that η̄ is defined
+by (12), γ ∈ [0, 1], s ≥ 1 + 3γ, and tk , γk , and ηk are respectively updated as follows:
+                                                            ηtk
+          tk := k + 3s + τ,    γk := γ,    and   ηk :=             ,    where       0 < η ≤ η̄.   (13)
+                                                         2(tk − s)
+Then, the following statements hold.
+10                                                                           N. Nguyen-Trung, Q. Tran-Dinh
+
+
+(i) The O 1/k 2 convergence rate in expectation. We have
+               
+                                                              
+                                        4             2   ΛηSK
+                  E ∥Gy K ∥2 ≤
+                           
+                                                     R0 +        ,                                     (14)
+                                η(K + 3s + τ − 1)2         θτ
+                                           −1)2              3                         PK
+    where θ := 1 − (1 − κ)α, R20 := η(3s+τ
+                                         2      ∥Gy 0 ∥2 + 2s
+                                                           ηγ  ∥y 0 − x⋆ ∥2 , and SK := k=0 δk .
+                                                          P∞
+(ii) Summability bounds in expectation. If S∞ := k=0 δk < +∞, then we have
+            ∞
+            X                                                 ∞
+                                                              X
+                  (k + τ )E ∥xk+1 − xk ∥2 < +∞                       (k + τ )E ∥Gy k ∥2 < +∞.
+                                                                                    
+                                                      and                                              (15)
+            k=0                                               k=0
+                                                        P∞
+(iii) The o 1/k 2 convergence in expectation. If S∞ := k=0 δk < +∞, then we get
+                 
+
+          lim (k + τ )2 E ∥xk+1 − xk ∥2 = 0 and lim (k + τ )2 E ∥Gy k ∥2 = 0.
+                                                                     
+            k→∞                                               k→∞
+                                                                              (16)
+                                                                                                       2
+                                                                                              σ
+(iv) Iteration-complexity. For a given tolerance ϵ > 0, if we choose δk := (k+r)                1+ω
+
+    for some  r  >  0, ω > 0,   and   σ ≥   0,  then   the total number  of iterations k to achieve
+    E ∥Gy k ∥2 ≤ ϵ2 is at most
+             
+                                          
+                            σ      τ     Θ̂                       7ΛΘ̂β
+                      O ϵ√
+                     
+                              τ
+                                 +  ϵ + β̄ϵ
+                                                  if 0 < β̄ ≤ 7ΛΘ+3θ(1+τ ),
+                k :=                          
+                            σ                                      7ΛΘ̂β
+                     O √
+                     
+                           ϵ τ
+                                 + τϵ + Θ+τ
+                                          βϵ      if β̄ = 0 or 7ΛΘ+3θ(1+τ           Θ̂
+                                                                          ) ≤ β̄ ≤ Θ β.
+
+Proof First, for νk and µk in (11), and θ := 1 − (1 − κ)α > 0, we need to guarantee
+Pτ −1
+  l=0 µk+l ≤ νk for (10) to apply Lemma 8 for our subsequent proofs. Indeed, we have
+        Pτ −1          Λη Pτ −1
+           l=0 µk+l = 2τ θ     l=0 (tk−1 + l + 1)(tk−1 − s + l + 1)
+                           h                                                              i
+                       Λη                          τ (τ +1)               τ (τ +1)(2τ +1)
+                    = 2τ θ   τ t k−1 (t k−1 − s) +     2    (2tk−1 − s) +        6
+                         ○
+                         1
+                           Λη                                           1
+                                                                                           
+                         ≤ 2τ θ τ tk−1 (tk−1 − s) + τ tk−1 (tk−1 − s) + 3 τ tk−1 (tk−1 − s)
+                         = 7Λη
+                            6θ tk−1 (tk−1 − s),
+
+where 1 ○ holds due to the choice tk−1 ≥ 2s + τ , s > 1 and τ ≥ 1.
+
+   Now, given this bound, we consider the following cases:
+                                                                               Pτ −1
+• If β̄ = 0, then νk reduces to νk := β−(1+τ
+                                           2Θ
+                                               )η
+                                                  tk−1 (tk−1 − s). To guarantee l=0 µk+l ≤ νk ,
+                      β−(1+τ )η
+  we require 7Λη6θ ≤     2Θ
+                                                                 3θβ
+                                , leading to 0 ≤ η ≤ η̄ := 7ΛΘ+3θ(1+τ   ).
+              Θ̂
+• If 0 < β̄ ≤ Θ  β, then we consider twonsub-cases:              o
+                   Θ   β   β̄                   β−(1+τ )η   β̄         β̄                  Pτ −1
+     ⋄ If 0 ≤ η ≤ 1+τ (Θ − Θ̂ ), then min          Θ      , Θ̂       = Θ̂ . To guarantee     l=0 µk+l ≤ νk ,
+
+       we require 7Λη     β̄                                      3θ β̄
+                    3θ ≤ Θ̂ , which is equivalent to η ≤ η̄ := 7ΛΘ̂ .
+                         7ΛΘ̂β                                   3θ β̄
+       ▷ If 0 < β̄ ≤ 7ΛΘ+3θ(1+τ   ) , then we get 0 < η ≤ η̄ := 7Λ      .
+                                                                   Θ̂         
+               7ΛΘ̂β              Θ̂                           Θ      β     β̄
+       ▷ If 7ΛΘ+3θ(1+τ ) ≤   β̄ ≤ Θ  β, then we get 0 < η ≤   1+τ     Θ   − Θ̂
+                                                                                 .
+                                             n                 o                          Pτ −1
+                                                β−(1+τ )η
+               Θ
+     ⋄ If η ≥ 1+τ    β    β̄
+                     Θ − Θ̂ ≥ 0, then min           Θ
+                                                            β̄
+                                                          , Θ̂ = β−(1+τ
+                                                                      Θ
+                                                                          )η
+                                                                             . To guarantee l=0 µk+l ≤
+                                β−(1+τ )η
+       νk , we require 7Λη
+                        3θ ≤       Θ
+                                                                                   3θβ
+                                          , which is equivalent to η ≤ η̄ := 7ΛΘ+3θ(1+τ   . This con-
+                                                                                      ) 
+                             7ΛΘ̂               Θ̂                                Θ    β   β̄
+       dition holds if 7ΛΘ+3θ(1+τ ) β ≤ β̄ ≤ Θ β, and thus, we finally get 1+τ Θ − Θ̂          ≤η≤
+                  3θβ
+       η̄ := 7ΛΘ+3θ(1+τ ) .
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                                          11
+
+
+Combining the above arguments, it confirms the choice of η in (13), with η̄ given by (12).
+                             Pτ −1
+    Next, underthe condition l=0 µk+l ≤ νk , we are ready to prove the remaining results.
+(i) The O 1/k convergence rate. Applying Lemma 8(i) to (10) in Lemma 3, we have
+                                                              Λη PK
+              E VK+1                                       ≤ E V0 + 2τ θ k=0 δk ,
+              PK η(s−γ−1)tk +4βs(s−1)           k 2
+                                                               Λη PK
+                k=0          4          E ∥Gy ∥            ≤ E V0 + 2τ θ k=0 δk ,
+              PK Λη(1−κ)(s+1)tk−1 (tk−1 −s)                   Λη PK
+                k=0          4τ s2 θ           E ∆k−1 ≤ E V0 + 2τ      θ k=0 δk ,
+              PK βtk−1 (tk−1 −s)       k         k−1 2
+                                                               Λη PK
+                k=0      2        E ∥Gy − Gy           ∥ ≤ E V0 + 2τ θ k=0 δk ,
+              PK β̄tk−1 (tk−1 −s)                              Λη PK
+                                  E D(y k , y k−1 )
+                                                    
+                k=0      2                                 ≤ E V0 + 2τ θ k=0 δk .
+
+                              PK                        0
+Let us denote by SK :=           k=0 δk . Since z           = y −1 := y 0 , ∆−1 := 0, t−1 = 3s + τ − 1, and
+                                                                                     2
+η−1 = 2(tηt−1
+          −1 −s)
+                 = η(3s+τ −1)
+                   2(2s+τ −1) , a0 = η−1 t−1 (t−1 − s) =
+                                                         η(3s+τ −1)
+                                                              2     , we have
+
+                                                   s2 (s−1)
+                   E V0 = V0 = L0 = a20 ∥Gy 0 ∥2 + 2η       ∥y 0 − x⋆ ∥2
+                     
+                                                     −1 γ−1
+                                            2                     2
+                             = η(3s+τ
+                                    4
+                                      −1)
+                                          ∥Gy 0 ∥2 + s (s−1)(2s+τ −1)
+                                                        ηγ(3s+τ −1)   ∥y 0 − x⋆ ∥2
+                             ○
+                             1              2                     3                      R20
+                             ≤ η(3s+τ
+                                    4
+                                      −1)            s
+                                          ∥Gy 0 ∥2 + ηγ ∥y 0 − x⋆ ∥2 :=                  2 ,
+
+                         2                          3
+                     s (s−1)(2s+τ −1)   s
+where ○
+      1 holds due to
+                        ηγ(3s+τ −1)   ≤ ηγ . Moreover, since tk−1 = k + 3s + τ − 1 ≥ 3s, (6)
+implies that ∥Gy k ∥2 ≤ ηt8L
+                           2
+                             k
+                               ≤ ηt8V
+                                    2
+                                      k
+                                        . Using the last two expressions and tk = k + 3s + τ ,
+                           k−1      k−1
+we can easily prove the following bounds:
+
+                                                                                               4θτ R2 +4ΛηS
+       E ∥Gy K ∥2
+                 
+                                                                                         ≤ ηθτ (K+3s+τ
+                                                                                                 0     K−1
+                                                                                                       −1)2 ,
+       PK                     k 2
+                                                                                              2θτ R20 +2ΛηSK
+         k=0 (k + 3s + τ )E ∥Gy ∥                                                        ≤      θτ η(s−γ−1) ,
+       PK                                                                                    2s2 (τ θR20 +ΛηSK )
+         k=0 (k + 3s + τ − 1)(k + 2s + τ − 1)E ∆k−1                                      ≤       Λη(1−κ)(s+1) ,
+       PK                                                         τ θR20 +ΛηSK
+                                                                      k
+                                                   − Gy k−1 ∥2 ≤
+                                                              
+                                                              
+         k=0 (k + 3s + τ − 1)(k + 2s + τ − 1)E ∥Gy                     βτ θ    ,
+                                                                       2
+       PK                                       k k−1
+                                                                 τ θR   +ΛηS
+        k=0 (k + 3s + τ − 1)(k + 2s + τ − 1)E D(y , y           ≤            K
+                                                       )               0
+                                                                       β̄τ θ
+                                                                               .
+
+The first line of these results leads to (14).   P∞
+   In addition, if we assume that Sk ≤ S∞ = k=0 δk < +∞, then by passing through
+limits as K → ∞ in the last four inequalities, we obtain
+    P∞                           k 2
+                                                                                 2τ θR20 +2ΛηS∞
+       k=0 (k + 3s + τ )E ∥Gy      ∥                                          ≤    τ θη(s−γ−1) < +∞,
+    P∞                                                                          2s2 (θτ R20 +ΛηS∞ )
+       k=0 (k + 3s + τ )(k + 2s + τ )E ∆k                                     ≤     Λη(1−κ)(s+1)      < +∞,
+                                                                                                                     (17)
+    P∞                                   k+1              τ θR20 +ΛηS∞
+                                             − Gy k ∥2 ≤
+                                                     
+     k=0 (k + 3s + τ )(k + 2s + τ )E ∥Gy                        βτ θ   < +∞,
+                                                               2
+    P∞                                  k+1 k
+                                                         τ θR0 +ΛηS∞
+     k=0 (k + 3s + τ )(k + 2s + τ )E D(y    ,y )        ≤       β̄τ θ
+                                                                       < +∞.
+
+(ii) Summability bounds. We divide the proof of this part into three steps.
+12                                                                         N. Nguyen-Trung, Q. Tran-Dinh
+
+
+Step 1. Prove the summability result for E ∥ek ∥2 and E ∥G
+                                                             k 2
+                                                                e ∥ . First, taking the total
+expectation of the first line of (7), and using the third line of (17), we obtain
+                           ∞
+                           X
+                                 (k + 3s + τ )(k + 2s + τ )E ∥ek ∥2 < +∞.
+                                                                  
+                                                                                                   (18)
+                           k=0
+
+Moreover, since ek := Ge k − Gy k , by Young’s inequality, we have ∥G
+                                                                    e k ∥2 ≤ 2∥Gy k ∥2 + 2∥ek ∥2 .
+Next, using the last two relations and the second line of (17), we obtain
+                                   ∞
+                                   X                    k 2
+                                         (k + 3s + τ )E ∥G
+                                                         e ∥ < +∞.                                 (19)
+                                   k=0
+
+
+Step 2. Prove the summability result for E ∥xk+1 − xk ∥2 . From (AFP), we can derive that
+                                                       
+
+
+             tk−1 (xk+1 − xk + ηk G
+                                  ek )                = s(z k − xk ),
+             (tk−2 − s)(xk − xk−1 + ηk−1 G
+                                         e k−1 ) = s(z k−1 − xk − ηk−1 G
+                                                                       e k−1 )
+
+                                                 = s z − xk − (1 − γs )ηk−1 Ge k−1 .
+                                                     k                           
+
+Combining these two expressions, we obtain
+
+     tk−1 (xk+1 − xk + ηk G
+                          e k ) = (tk−2 − s)(xk − xk−1 + ηk−1 G
+                                                              e k−1 ) + (s − γ)ηk−1 G
+                                                                                    e k−1 . (20)
+
+Denoting v k := xk+1 − xk + ηk G
+                               e k . Then, the last expression can be rewritten as
+
+                                         s
+                       tk−1 v k = (1 − tk−2 )tk−2 v k−1 + s(s−γ)η k−1 tk−2 e k−1
+                                                              stk−2       G      .
+                                 s
+By the convexity of ∥ · ∥2 and tk−2 ∈ (0, 1], since ηk = 2(tηt k
+                                                             k −s)
+                                                                   ≤ η, we have
+
+                                      s                       (s−γ)2 ηk−1
+                                                                       2
+                                                                          tk−2 e k−1 2
+               t2k−1 ∥v k ∥2 ≤ (1 − tk−2 )t2k−2 ∥v k−1 ∥2 +           s       ∥G    ∥
+                                                                         2 2
+                                                                                                   (21)
+                           ≤ t2k−2 ∥v k−1 ∥2 − stk−2 ∥v k−1 ∥2 + (s−γ)
+                                                                    s
+                                                                       η       e k−1 ∥2 .
+                                                                         tk−2 ∥G
+      P∞            k 2
+Since    k=0 tk−1 E ∥G ∥     < +∞ due to (19), taking the total expectation of the last
+                     e
+inequality and then applying Lemma 4, we can show that
+                                                P∞
+             limk→∞ t2k−1 E ∥v k ∥2 exists and
+                                                           k 2
+                                                  k=0 tk−1 E ∥v ∥  < +∞.           (22)
+
+Using Lemma 5, the last two relations imply that
+
+                               limk→∞ t2k−1 E ∥v k ∥2 = 0.
+                                                    
+                                                                                                   (23)
+
+Furthermore, from Young’s inequality and ηk ≤ η, we have
+
+           ∥xk+1 − xk ∥2 ≤ 2∥xk+1 − xk + ηk G
+                                            e k ∥2 + 2η 2 ∥G
+                                                       k
+                                                           e k ∥2 ≤ 2∥v k ∥2 + 2η 2 ∥G
+                                                                                     e k ∥2 .
+
+Using this relation, (19), and (22), we can prove that
+                             P∞            k+1
+                                                − xk ∥2 < +∞.
+                                                       
+                                k=0 tk−1 E ∥x
+
+This proves the first line of (15) due to tk−1 = k + 3s + τ − 1 ≥ k + τ .
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                                13
+
+
+Step 3. Prove the summability result for E ∥Gy k ∥2 . From (20), we can show that
+                                                  
+
+
+tk−1 [xk+1 − xk + ηk (G
+                      e k − Gy k )] = (tk−2 − s)[xk − xk−1 + ηk−1 (G
+                                                                   e k−1 − Gy k−1 )]
+                                                       e k−1 − tk−1 ηk Gy k + (tk−2 − s)ηk−1 Gy k−1 .
+                                         + (s − γ)ηk−1 G
+
+Let us define wk := xk+1 − xk + ηk ek . Then, the last expression can be rewritten as
+    tk−1 wk = (tk−2 − s)wk−1 + (s − γ)ηk−1 G
+                                           e k−1 − tk−1 ηk Gy k + (tk−2 − s)ηk−1 Gy k−1 ,
+
+leading to
+                                    s
+tk−1 [wk + ηk (Gy k − Gy k−1 )] = tk−2 · tk−2        (tk−2 − γ)ηk−1 − tk−1 ηk Gy k−1 + (s − γ)ηk−1 ek−1
+                                                                                                      
+                                           s
+                                              s
+                                     + (1 − tk−2 )tk−2 wk−1 .
+
+Using the convexity of ∥ · ∥2 , xk+1 − xk = y k − y k−1 − (ηk G
+                                                              e k − ηk−1 G
+                                                                         e k−1 ) from the first line
+of (AFP), Young’s inequality, Assumption 1(ii), and ηk ≤ η, we can show that
+   t2k−1 ∥wk ∥2 ≤ tk−2 (tk−2 − s)∥wk−1 ∥2 − 2t2k−1 ηk ⟨Gy k − Gy k−1 , xk+1 − xk ⟩
+                   − 2t2k−1 ηk ⟨Gy k − Gy k−1 , ek ⟩ − t2k−1 ηk2 ∥Gy k − Gy k−1 ∥2
+                   + tk−2
+                                                           k−1
+                       s ∥ (tk−2 − γ)ηk−1 − tk−1 ηk Gy             + (s − γ)ηk−1 ek−1 ∥2
+                ≤ tk−2 (tk−2 − s)∥wk−1 ∥2 − t2k−1 ηk (ηk + 2β)∥Gy k − Gy k−1 ∥2                            (24)
+                   − 2β̄t2k−1 ηk D(y k , y k−1 ) + 2ηt2k−1 ∥Gy k − Gy k−1 ∥2 + ηt2k−1 ∥ek ∥2
+                                                                                       2
+                   + t2k−1 ηk ∥ηk G          e k−1 ∥2 + tk−2 [(tk−2 −γ)ηk−1 −tk−1 ηk ] ∥Gy k−1 ∥2
+                                  e k − ηk−1 G
+                                                                       s
+                            2 2
+                   + (s−γ) sη tk−2 ∥ek−1 ∥2 .
+         e k − ηk−1 G
+Since ηk G          e k−1 = ηk (Gy k − Gy k−1 ) + (ηk − ηk−1 )Gy k−1 + ηk ek − ηk−1 ek−1 , where
+                      sη                                                                  ks2 η 2 t2   η
+ηk − ηk−1 = − 2(tk −s)(t k −s−1)
+                                 , using Young’s inequality, ηk ≤ η, and 4(tk −s)2 (tk−1
+                                                                                      k −s−1)
+                                                                                              2 ≤
+
+   s2 η 3
+(tk−1 −s)2 , we can show that
+                                                                              2 2 2
+                                                                      4s η tk−1 ηk
+   t2k−1 ηk ∥ηk G
+                e k − ηk−1 G
+                           e k−1 ∥2 ≤ 4t2 η 3 ∥Gy k − Gy k−1 ∥2 +
+                                        k−1 k                     4(tk −s)2 (tk −s−1)2 ∥Gy
+                                                                                           k−1 2
+                                                                                              ∥
+                                       + 4t2k−1 ηk3 ∥ek ∥2 + 4t2k−1 ηk ηk−1
+                                                                        2
+                                                                            ∥ek−1 ∥2
+                                                                             2 3
+                                                                       4s η
+                                   ≤ 4η 3 t2k−1 ∥Gy k − Gy k−1 ∥2 + (tk−1 −s)2 ∥Gy
+                                                                                   k−1 2
+                                                                                      ∥
+                                       + 4η 3 t2k−1 ∥ek ∥2 + 4η 3 t2k−1 ∥ek−1 ∥2 .
+Moreover, we can also evaluate
+          |(tk−2 − γ)ηk−1 − tk−1 ηk | = η2 · tkt−s−1
+                                                k −1
+                                                     · (γ+1)ttkk −s
+                                                                 −s(γ+2)
+                                                                         ≤ η2 · 32 · 2 = 3η
+                                                                                          2 .
+
+Substituting the last two relations into (24), we obtain
+    t2k−1 ∥wk ∥2 ≤ t2k−2 ∥wk−1 ∥2 − stk−2 ∥wk−1 ∥2 − t2k−1 ηk (ηk + 2β)∥Gy k − Gy k−1 ∥2
+                    − 2β̄t2k−1 ηk D(y k , y k−1 ) + 2η(1 + 2η 2 )t2k−1 ∥Gy k − Gy k−1 ∥2
+                                                                                                           (25)
+                      h 2                       i
+                                      4s2 η 3
+                    + 9η 4s tk−2
+                                 + (tk−1   −s)2 ∥Gy
+                                                      k−1 2
+                                                         ∥ + η(1 + 4η 2 )t2k−1 ∥ek ∥2
+                      h       2 2
+                                                    i
+                    + (s−γ) sη tk−2 + 4η 3 t2k−1 ∥ek−1 ∥2 .
+14                                                                         N. Nguyen-Trung, Q. Tran-Dinh
+
+
+Since the last four terms of (25) are summable due to (14) and (18), applying Lemma 4 to
+(25) after taking the total expectation, we can show that
+                                                   P∞
+             limk→∞ t2k−1 E ∥wk ∥2 exists and
+                                                              k 2
+                                                     k=0 tk−1 E ∥w ∥   < +∞.        (26)
+Using Lemma 5, the last two relations imply that
+                              limk→∞ t2k−1 E ∥wk ∥2 = 0.
+                                                  
+                                                                                                   (27)
+Moreover, since ηk ≥ η2 , by Young’s inequality, we have
+     η2   k 2   2     k 2     k+1
+     4 ∥Gy ∥ ≤ ηk ∥Gy ∥ ≤ 2∥x     − xk + ηk G
+                                            e k ∥2 + 2∥xk+1 − xk + ηk (G
+                                                                       e k − Gy k )∥2
+                                                                                                   (28)
+                   k 2     k 2
+               = 2∥v ∥ + 2∥w ∥ .
+Using this fact, (22), and (26), we can prove the second line of (15).
+                
+(iii) The o 1/k convergence rates. By Young’s inequality and ηk ≤ η, we have
+           ∥xk+1 − xk ∥2 ≤ 2∥xk+1 − xk + ηk ek ∥2 + 2ηk2 ∥ek ∥2 ≤ 2∥wk ∥2 + 2η 2 ∥ek ∥2 .          (29)
+Combining this fact, (27), and (18), we get the first line of (16). Finally, using (28), (23)
+and (27), we obtain the second line of (16).
+                                               2
+                                        σ
+(iv) Iteration-complexity. If δk := (k+r) 1+ν for some r, ν > 0 and a given σ > 0, we have
+
+                       σ2
+             P∞                  2
+                                                          P∞      1
+Sk ≤ S∞ = k=0 (k+r)1+ν = Γ σ < +∞, where Γ := k=0 (k+r)             1+ν < +∞. Then, from
+
+(14), we have
+                                                       
+                                4               ΛηΓ σ 2
+             E ∥Gy k ∥2 ≤ η(k+3s+τ         2
+                      
+                                   −1)2   R0 +    θτ
+                                         2    0 2            3   0   ⋆ 2              2
+                         = 2(3s+τ −1) ∥Gy ∥
+                              (k+3s+τ −1)2  + γη8s   ∥y −x ∥           4ΛΓ σ
+                                                 2 (k+3s+τ −1)2 + θτ (k+3s+τ −1)2 .
+
+
+
+Thus, for a given tolerance ϵ > 0, to guarantee E ∥Gy k ∥2 ≤ ϵ2 , we impose
+                                                          
+
+          4ΛΓ σ 2      ϵ2      2(3s+τ −1)2 ∥Gy 0 ∥2    2          8s ∥y −x ∥  3   0   ⋆ 2     2
+
+     θτ (k+3s+τ −1)2 ≤ 3 ,        (k+3s+τ −1)2      ≤ ϵ3 ,
+                                                      and                           ϵ
+                                                               γη 2 (k+3s+τ −1)2 ≤ 3 .
+                                                                                           (30)
+                                    j √      k         j√                   k
+                                                          6(3s+τ −1)∥Gy 0 ∥
+The first two conditions hold if k ≥ 2σϵ√3ΛΓ
+                                         θτ
+                                               and k ≥           ϵ           , respectively.
+                  7ΛΘ̂β                               3θ β̄
+⋄ If 0 < β̄ ≤ 7ΛΘ+3θ(1+τ    ) ,k then we choose η := 7Θ̂Λ , and the third condition in (30) holds
+       j √ 3/2
+                Θ̂Λ∥y 0 −x⋆ ∥
+if k ≥ 14 6s3θβ̄γ 1/2 ϵ         . Combining all the above results, we need at most
+              nj √        k j√               0
+                                                 k j √ 3/2                ko                    
+                                                            Θ̂Λ∥y 0 −x⋆ ∥
+   k := max 2σϵ√3ΛΓ  θτ
+                           , 6(3s+τ −1)∥Gy
+                                       ϵ
+                                               ∥
+                                                  , 14 6s3θβ̄γ 1/2 ϵ
+                                                                                  σ
+                                                                             = O ϵ√ τ
+                                                                                      + τϵ + β̄ϵ
+                                                                                             Θ̂
+
+
+iterations to achieve E ∥Gy k ∥2 ≤ ϵ2 .
+                                    
+                    7ΛΘ̂β                 Θ̂                                 3θβ
+⋄ If β̄ = 0 or 7ΛΘ+3θ(1+τ     ) ≤ β̄ k≤ Θ    β, then we choose η := 7ΛΘ+3θ(1+τ      ) . In this case, if
+     j √ 3/2                    0  ⋆
+       2 6s   [7ΛΘ+3θ(1+τ )]∥y −x ∥
+k≥               3θβγ 1/2 ϵ
+                                       , then the third condition in (30) holds. Combining all the
+above results, we need at most
+                     nj √         k j√                    k j √ 3/2                          ko
+                                        6(3s+τ −1)∥Gy 0 ∥    2 6s   [7ΛΘ+3θ(1+τ )]∥y 0 −x⋆ ∥
+          k := max 2σϵ√3ΛΓ    θτ
+                                   ,            ϵ          ,           3θβγ 1/2 ϵ
+                                     
+                     σ
+             = O ϵ√    τ
+                          + τϵ + Θ+τ
+                                   βϵ
+
+iterations to achieve E ∥Gy k ∥2 ≤ ϵ2 in expectation.
+                                   
+                                                                                                      □
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                         15
+
+
+Remark 1 (Convergence of E ∥Gxk ∥2 ) Theorem 1 establishes convergence on E ∥Gy k ∥2 .
+                                                                                           
+
+This criterion is different from standard Nesterov’s accelerated methods in convex optimiza-
+tion, where convergence is certified on the sequence {xk } for the gradient norm. It is similar
+to the Ravine method studied in [8]. Nevertheless, by Young’s inequality and Assumption 1,
+we have ∥Gxk ∥2 ≤ 2∥Gxk ∥2 + 2∥Gy k − Gxk ∥2 ≤ 2∥Gxk ∥2 + β22 ∥y k − xk ∥2 . Moreover, one
+                P∞
+can show that k=0 E ∥yk − xk ∥2 < +∞. As a result,
+                                    
+                                                           it ispossible to derive convergence
+rate results for E ∥Gxk ∥2 analogous to those for E ∥Gy k ∥2 in Theorem 1. For brevity, we
+                                                      
+
+omit the details of this proof.
+
+Remark 2 (Choices of parameters) We note that the parameter ranges in Theorem 1,
+such as s ≥ 1 + 3γ originated from Lemma 2, are chosen to make the proof tractable and are
+not necessarily optimized. When implementing the algorithm, one may choose values outside
+these strict ranges (e.g., we can choose s > 1) to achieve a better empirical performance,
+but we omit these heuristics here to avoid complicating the theoretical analysis.
+
+Remark 3 (Linear dependence of the iteration-complexity on τ ). Our iteration-
+complexity depends linearly on the maximum delay τ , and either Θ̂, or Θ + τ . In Section 4,
+where we specialize our framework for concrete settings, we establish that either Θ = O τ
+           
+or Θ̂ = O τ . Consequently, our iteration-complexity can be simplified to either
+                                                                         
+                                      σ   τ                       σ    τ
+                             O        √ +          or    O        √ +           .
+                                     ϵ τ  βϵ                     ϵ τ  β̄ϵ
+This demonstrates a linear dependence on the maximum delay τ , which is known to be
+the optimal dependence in asynchronous and delayed methods foroptimization [5]. Since
+β and β̄ are co-coercivity constants, they are of the order O 1/L , where L denotes the
+Lipschitz constant of the operator G (or, in particular, the smoothness constant of the
+objective function in optimization). Therefore, our complexity match the linear dependence
+on τ commonly found in optimization literature aswell (e.g., [5, 75] for SGD with delayed
+                                                      σ2  Lτ
+updates), which typically yields a complexity of O 2 +
+                                                  e            for L-smooth functions.
+                                                                 ϵ   ϵ
+
+
+(d) Main result 2: Almost sure convergence. Our second main result is the almost sure
+convergence of our framework (AFP) under the general error approximation condition (7).
+
+Theorem 2 Under the same conditions and settings as in Theorem 1, if additionally S∞ :=
+P∞
+ k=0 δk < +∞, then the following summability bounds hold almost surely:
+
+      P∞                   k 2
+                                                        P∞                 k+1
+         k=0 (k + τ )∥Gy    ∥ < +∞         and            k=0 (k + τ )∥x            − xk ∥2 < +∞.   (31)
+
+Moreover, we also have the following almost sure limits (i.e., o 1/k 2 -almost sure rates):
+                                                                      
+
+
+      limk→∞ (k + τ )2 ∥Gy k ∥2 = 0        and          limk→∞ (k + τ )2 ∥xk+1 − xk ∥2 = 0.         (32)
+
+Finally, the iterate sequences {xk }, {y k }, and {z k } converge almost surely to a zer(G)-valued
+random variable x⋆ , a solution to (CE).
+
+Proof We divide the proof of this theorem into three main steps as follows.
+16                                                                      N. Nguyen-Trung, Q. Tran-Dinh
+
+
+Step 1: Prove limk→∞ t2k ∥Gy k ∥2 = 0 and limk→∞ t2k ∥xk+1 − xk ∥2 = 0 almost surely.
+Apply Lemma 8(ii) to (10), we can show that almost surely,
+
+                             limk→∞ Vk exists,
+                             P∞            k 2
+                                k=0 tk ∥Gy ∥                   < +∞,
+                             P∞
+                                k=0 tk (tk − s)∆k              < +∞,                              (33)
+                             P∞                    k+1     k 2
+                                k=0 tk (tk − s)∥Gy     − Gy ∥ < +∞,
+                             P∞                    k+1 k
+                                k=0 tk (tk − s)D(y    ,y )     < +∞.
+
+Since tk = k + 3s + τ > k + τ due to (13), the second line of (33) proves the first almost
+sure summability bound of (31).
+   Given the last two summability bounds, we can use Lemma 10 to show that
+                  P∞                 Pk                l      l−1 2
+                    k=0 tk (tk − s)   l=[k−τk +1]+ ∥Gy − Gy      ∥ < +∞,
+                  P∞                 Pk                                               (34)
+                                                       l l−1
+                    k=0 tk (t k − s)  l=[k−τk +1]+ D(y  , y  )      < +∞.
+
+Now, from (7), we have
+                                              k
+                                              X
+Ek [∥ek ∥2 ] ≤ Ek [∆k ] ≤ (1 − κ)∆k−1 +          Θ∥Gy l − Gy l−1 ∥2 + Θ̂D(y l , y l−1 ) + tk (tδkk−s) .
+                                                                                      
+
+                                          l=[k−τk +1]+
+
+Multiplying both sides of this inequality by tk (tk − s), we can derive that
+
+     tk (tk − s)Ek [∥ek ∥2 ] ≤ tk−1 (tk−1 − s)∥ek−1 ∥2 − tk−1 (tk−1 − s)∥ek−1 ∥2
+                                            Pk
+                               + tk (tk − s) l=[k−τk +1]+ Θ∥Gy l − Gy l−1 ∥2 + Θ̂D(y l , y l−1 )
+                                                                                                
+
+                              + (1 − κ)tk (tk − s)∆k−1 + δk .
+                     P∞
+Using (33), (34), and k=0 δk < +∞ from the assumption, the last two lines of this in-
+equality are summable almost surely. Thus, applying Lemma 6, we conclude that
+                      P∞                  k 2
+                         k=0 tk (tk − s)∥e ∥ < +∞ almost surely,
+                                                                                 (35)
+                       limk→∞ tk (tk − s)∥ek ∥2 = 0 almost surely.
+
+                e k ∥2 ≤ 2∥Gy k ∥2 + 2∥ek ∥2 by Young’s inequality, using the first line of (33)
+   Next, since ∥G
+and (35), we can show that
+                           P∞         ek 2
+                            k=0 tk ∥G ∥ < +∞ almost surely.
+                                                                                            (36)
+
+For v k := xk+1 − xk + ηk G
+                          e k as in Theorem 1, taking the conditional expectation Ek · of
+                                                                                     
+
+(21), we obtain
+                                                                         2 2
+            t2k−1 Ek ∥v k ∥2 ≤ t2k−2 ∥v k−1 ∥2 − stk−2 ∥v k−1 ∥2 + (s−γ)  η        e k−1 ∥2 .
+                           
+                                                                      s      tk−2 ∥G
+       P∞         e k ∥2 < +∞ almost surely by (36), applying Lemma 6 to the last inequal-
+Since k=0 tk−1 ∥G
+ity, and then using Lemma 5, we can show that
+             P∞          k 2
+               k=0 tk ∥v ∥ < +∞ and      limk→∞ t2k ∥v k ∥2 = 0 almost surely.        (37)
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                          17
+
+
+Similarly, for wk := xk+1 − xk + ηk ek as in Theorem 1, using similar arguments but applying
+to (25), we can prove that
+             P∞          k 2
+                k=0 tk ∥w ∥ < +∞ and         limk→∞ t2k ∥wk ∥2 = 0 almost surely.       (38)
+                                                     P∞
+Combining (29), (38), and (35), we can show that k=0 tk ∥xk+1 − xk ∥2 = 0 almost surely.
+Since tk = k + 3s + τ due to (13), the last expression proves the second almost-sure summa-
+bility bound in (31).
+    Combining (28), the two limits in (37) and (38), we can show that
+                              limk→∞ t2k ∥Gy k ∥2 = 0       almost surely.
+This is exactly the first result of (32). Similarly, combining (29), (38), and (35), we can show
+that limk→∞ t2k ∥xk+1 − xk ∥2 = 0 almost surely, which is the second result of (32).
+Step 2: Prove the existence of limk→∞ ∥z k − x⋆ ∥2 . From (AFP), we have s(z k − xk ) =
+tk−1 (xk+1 − xk + ηk G e k ) = tk−1 v k . Since lim t2 ∥v k ∥2 = 0 almost surely, we obtain that
+                                                     k
+            k    k 2
+limk→∞ ∥z − x ∥ = 0 almost surely. Moreover, from the third line of (AFP), we can show
+                        s
+that y k − z k = (1 − tk−1  )(xk − z k ), thus
+                          s
+   ∥y k − z k ∥2 = (1 − tk−1 )2 ∥xk − z k ∥2 ≤ ∥xk − z k ∥2 → 0        as k → ∞,      almost surely.
+
+Using Cauchy-Schwarz inequality, the last limit and the first line of (32), we can show that
+almost surely
+             |stk−1 ⟨Gy k , y k − z k ⟩|2 ≤ s2 t2k−1 ∥Gy k ∥2 ∥y k − z k ∥2 → 0   as k → ∞.
+
+Hence, we get limk→∞ stk−1 ⟨Gy k , y k − z k ⟩ = 0 almost surely.
+   Now, from (3) and (9), we can write
+                                                             2
+         Vk = a2k ∥Gy k ∥2 + stk−1 ⟨Gy k , y k − z k ⟩ + s2γη
+                                                            (s−1)
+                                                              k−1
+                                                                  ∥z k − x⋆ ∥2
+                + (2β−η)tk−1
+                          2
+                             (tk−1 −s)
+                                       ∥Gy k − Gy k−1 ∥2 + β̄tk−1 (tk−1 − s)D(y k , y k−1 )        (39)
+                   Ληα(1−κ)
+                + 2[1−(1−κ)α] tk−1 (tk−1 − s)∆k−1 .
+
+Collecting all necessary almost sure limits we have proven so far, we have, almost surely,
+             limk→∞ Vk       exists,
+             limk→∞ a2k ∥Gy k ∥2 = limk→∞ t2k ∥Gy k ∥2 = 0          (due to ak = O t2k ),
+                                                                                      
+
+             limk→∞ stk−1 ⟨Gy k , y k − z k ⟩ = 0,
+             limk→∞ tk−1 (tk−1 − s)∥Gy k − Gy k−1 ∥2 = 0,
+             limk→∞ tk−1 (tk−1 − s)D(y k , y k−1 ) = 0,
+             limk→∞ tk−1 (tk−1 − s)∆k−1 = 0.
+
+Combining these limits and (39), and noting that ηk−1 = O 1 , we conclude that limk→∞ ∥z k −
+                                                              
+
+x⋆ ∥2 exists almost surely. Moreover, since limk→∞ ∥z k − xk ∥2 = limk→∞ ∥y k − z k ∥2 = 0 al-
+most surely, by triangle inequality, we also obtain that limk→∞ ∥xk −x⋆ ∥2 and limk→∞ ∥y k −
+x⋆ ∥2 exist almost surely.
+Step 3: Almost sure convergence of the iterates. Since limk→∞ ∥y k −x⋆ ∥2 exists almost
+surely for any solution x⋆ ∈ zer(G), limk→∞ ∥Gy k ∥ = 0 almost surely by the first result of
+18                                                                N. Nguyen-Trung, Q. Tran-Dinh
+
+
+(32), and G is continuous, applying Lemma 7, we conclude that {y k } converges almost surely
+to a random variable x⋆ ∈ zer(G). Finally, since limk→∞ ∥y k − z k ∥ = limk→∞ ∥z k − xk ∥ = 0
+almost surely, using triangle inequality, we can also prove that {xk } and {z k } almost surely
+converge to x⋆ ∈ zer(G).                                                                     □
+
+Discussion. Our almost sure convergence results in Theorem 2 appear to be the first for
+asynchronous accelerated
+                       methods, even for convex optimization. Here, we establish summa-
+bility bounds, o 1/k 2 convergence rates, and the convergence of iterates. Moreover, our
+framework covers a wide range of algorithms in different settings as discussed in Section 4.
+
+Remark 4 [Extension to generalized equations] We can apply our scheme (AFP) to
+solve the following generalized equation (known as inclusion):
+
+                          Find x⋆ ∈ Rp such that: 0 ∈ Gx⋆ + T x⋆ ,                       (GE)
+
+where G is defined as in (CE), while T : Rp ⇒ Rp is a possibly multivalued mapping that is
+ρ-co-hypomonotone. We sketch the main steps of this application as follows.
+• First, we equivalently reformulate (GE) into (CE) using either a forward-backward split-
+   ting (FBS) operator or a backward-forward splitting (BFS) operator as done in [79].
+• Next, we develop a similar result as Corollary 1 in [79] to verify Assumption 1.
+• Then, we apply (AFP) and its convergence theory to the resulting FBS or BFS equation.
+• Finally, we convert the convergence results of this equation to the original problem (GE).
+More generally, our framework (AFP) can be applied to solve any problem that can be
+reformulated into the fixed-point problem (FP) of a nonexpansive operator F .
+
+
+4 Applications to AFP Methods with Delay and Asynchronicity
+Section 3 develops our delayed inexact AFP framework under the error approximation con-
+dition (7) in Definition 1. Now, we apply our framework (AFP) to derive three different
+algorithms with delayed and asynchronous updates for solving (CE), or equivalently, (FP).
+4.1 Accelerated Fixed-Point Method with Delayed Oracles
+In this setting of (CE), we do not assume any structure on G and treat it as a universal
+operator satisfying Assumption 1(ii) with β̄ = 0 and β > 0, i.e., G is β-co-coercive. This
+setting is equivalent to finding a fixed-point of a nonexpansive operator F in (FP).
+4.1.1 The computing mechanism
+We consider a standard server-worker system outlined in Figure 1 with one central server
+and multiple workers. The server maintains (i) the decision variables in a V-memory block
+and (ii) the most recent operator value in a G-memory block. All workers have read access
+to the shared data and can therefore evaluate the operator (though their speeds may differ).
+(a) Protocol. The server initializes V-memory with y 0 and broadcasts the current iterate y k
+whenever updated. Upon receiving y k , a worker computes Gy k using the shared data and,
+when finished, attempts to commit the result to G-memory. A successful commit triggers the
+server to form the next iterates xk+1 , y k+1 , z k+1 and atomically write them to V-memory.
+(b) Atomic assumption. All reads/writes to G- and V-memory are atomic: a memory
+region being written is locked (mutual exclusion), so every reader observes either the old
+value or the fully written new value – never a mixture (no torn reads). In practice, such
+atomicity can be enforced using some technical or systems techniques, such as a memory
+lock or double-/dual-memory (double buffering) with an atomic swaps approach [66].
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                                                19
+
+
+                                     Memory                     Computing                Data
+
+
+
+
+                                      W1                                                 G1         G1              D1
+              x                                                             x
+
+
+                                                  Shared data
+                                      W2                                                 G2         G2              D2
+              y            G                                                y
+                                       ..                                                 ..        ..              ..
+                                        .                                                  .         .               .
+              z                                                             z
+                                      Wn                                                 Gn         Gn              Dn
+
+                                            Workers                                                       Workers
+
+
+
+
+                  Server                                                        Server
+
+Fig. 1 The server-worker architecture with: shared data for solving the universal setting of (CE) (left) and
+distributed data for solving the finite-sum setting of (CE) (right)
+
+(c) Staleness and estimator. Because workers are heterogeneous, the value present in
+the G-memory at the k-th server update (i.e., k-th iteration) may be a delayed evaluation
+Gy k−τk with a delay τk ≥ 0. Hence, the estimator used by the server is
+                                                          e k = Gy k−τk ,
+                                                          G                                                              (40)
+
+which is one of the previously computed operator values in {Gy 0 , · · · , Gy k }. This is called
+a consistent asynchrony model: the operator value is one of the historical computed values.
+(d) Bounded-delay option. To prevent excessively stale information, the server can enforce
+a threshold τ > 0 by discarding any worker result with τk > τ . This ensures a uniform bound
+on delays throughout the procedure, i.e., 0 ≤ τk ≤ τ for all k ≥ 0.
+4.1.2 Convergence of AFP with universal delayed oracle
+Now, we specify Theorems 1 and 2 to the setting in Subsection 4.1.1 to obtain the following
+corollary to guarantee convergence of (AFP) with delayed oracle (40).
+Corollary 1 Suppose that Assumption 1 holds for (CE). Let {(xk , y k , z k )} be generated
+by (AFP) using a delayed oracle Ge k = Gy k−τk as in (40) with uniformly bounded delays
+0 ≤ τk ≤ τ for some τ ≥ 1, where we choose s and η, and update tk , γk , and ηk as follows:
+                                 3β
+  s ≥ 1 + 3γ,        0 < η ≤ 3+(7Λ+3)τ ,              tk := k + 3s + τ,         γk := γ ∈ [0, 1],        ηk := 2(tηt k
+                                                                                                                   k −s)
+                                                                                                                         .
+Then, the following statements hold.
+                                                  −1)2              3
+(i) Convergence in expectation. For R20 := η(3s+τ
+                                                2      ∥Gy 0 ∥2 + 2s   0   ⋆ 2
+                                                                  ηγ ∥y − x ∥ , we get
+
+                                         4R20
+              E ∥Gy k ∥2 ≤                                                  lim (k + τ )2 E ∥Gy k ∥2 = 0.
+                                                                                                 
+                                                                   and
+                                  η(k + 3s + τ − 1)2                        k→∞
+
+(ii) Almost sure convergence. The following results hold almost surely:
+                   ∞
+                   X
+                           (k + τ )∥Gy k ∥2 < +∞                 and        lim (k + τ )2 ∥Gy k ∥2 = 0.
+                                                                            k→∞
+                   k=0
+
+    Moreover, the sequences {xk }, {y k }, and {z k } converge almost surely to a zer(G)-valued
+    random variable x⋆ , a solution to (CE).
+20                                                                  N. Nguyen-Trung, Q. Tran-Dinh
+                                                                                                    
+                                                                                            τ   τ
+(iii) Iteration-complexity. For any given tolerance ϵ > 0, we require at most O             ϵ + βϵ
+     iterations to achieve E ∥Gy k ∥2 ≤ ϵ2 .
+                                    
+
+
+Proof Since our update is consistent as in (40), by (2), we have ek := G
+                                                                       e k − Gy k = Gy k−τk −
+   k                             2
+Gy . Using the convexity of ∥ · ∥ and 0 ≤ τk ≤ τ , we have
+                                                  Pk
+                ∥ek ∥2 = ∥Gy k−τk − Gy k ∥2 = ∥ l=[k−τk +1]+ (Gy l − Gy l−1 )∥2
+                              Pk
+                       = τk2 ∥ l=[k−τk +1]+ τ1k (Gy l − Gy l−1 )∥2
+                             Pk
+                       ≤ τk l=[k−τk +1]+ ∥Gy l − Gy l−1 ∥2
+                           Pk
+                       ≤ τ l=[k−τ +1]+ ∥Gy l − Gy l−1 ∥2 .
+
+                                                  e k = Gy k−τk satisfies Definition 1 with κ =
+Using this inequality, one can easily verify that G
+1, Θ = τ , Θ̂ = 0, and δk = 0. Under this choice of G e k , the stepsize η in Theorem 1 reduces
+                  3β            3β
+to 0 < η ≤ 7Λτ +3(1+τ ) = 3+(7Λ+3)τ as stated in Corollary 1. Moreover, the statements in
+parts (i) and (ii) are direct consequences of Theorems 1 and 2, respectively.       Finally, for a
+                                                                         k 2      2
+                                                                             
+given tolerance
+                ϵ > 0,the number  of iterations k  to achieve   E ∥Gy   ∥    ≤ ϵ  in Theorem 1
+                τ   τ
+reduces to O    ϵ + βϵ   as stated in Corollary 1.                                               □
+
+
+4.2 Asynchronous Stochastic Accelerated Fixed-Point Method
+In this subsection, we consider the setting when G in (CE) is inaccessible but can be queried
+only through an unbiased stochastic oracle G(·, ξ) with bounded variance defined on a given
+probability space. More specifically, we impose the following additional assumption on G:
+Assumption 2 G in (CE) is equipped with an unbiased stochastic oracle G(·, ξ) such that
+
+                              Gx = Eξ [G(x, ξ)],     ∀x ∈ dom(G).                              (41)
+
+Moreover, there exists σ ≥ 0 such that Eξ [∥G(x, ξ) − Gx∥2 ] ≤ σ 2 for all x ∈ dom(G).
+This assumption is standard in stochastic approximation methods, see, e.g., [59], and it has
+been extended to different forms. Here, we simply use a simple version as in [59].
+4.2.1 The computing mechanism
+The scheme studied in this subsection is the same as (AFP), and the mechanism is very
+similar to the mechanism studied in the previous subsection. However, unlike Subsection 4.1,
+due to the inaccessibility to the full operator G, workers only return a stochastic estimator
+of Gy k for any k ≥ 0 rather than the true value. This leads to the choice G  e k used in this
+variant of (AFP) as an “delayed stochastic estimator”, i.e., a stochastic estimator of an
+obsolete operator value Gy k−τk for some τk ∈ {0, 1, · · · , τ }.
+(a) Delayed stochastic estimator. We use the same update scheme as in (AFP), and
+the execution flow mirrors the previous subsection, Subsection 4.1. The key difference is
+that workers cannot evaluate the full operator G exactly; instead, upon receiving an iterate
+y k−τk , they return a stochastic estimation of Gy k−τk . Consequently, at the k-th iteration,
+(AFP) employs a delayed stochastic estimator G   e k of Gy k−τk . Compared to Subsection 4.1,
+we now have two sources of approximation errors that need to be addressed:
+• Stochastic approximation error: The error between the stochastic estimator G e k and Gy k−τk .
+• Asynchronous error: The error comes from the obsolescence between Gy k−τk and Gy k .
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                               21
+
+
+(b) Approximation condition for G       e k . Given an unbiased stochastic oracle G(·, ξ) of G,
+we assume that G   e is constructed by querying the oracles G(y k−τk , ξ) of Gy k−τk adapted
+                    k
+
+to the filtration {Fk } and there exists a nonnegative sequence {δ̂k } such that
+
+                                       e k − Gy k−τk ∥2 ] ≤     δ̂k
+                                  Eξ [∥G                    tk (tk −s) ,
+                                                                                                      (42)
+                                                                                2
+                                                                       σ
+where tk and s are from (AFP). One way to choose δ̂k is δ̂k := (k+r)     1+ω for some r > 0,
+
+ω ≥ 0, and σ given in Assumption 2.
+Example: Mini-batch estimator. We can construct G        e k using adaptive mini-batches with
+increasing batch size. For example, given an i.i.d. mini-batch Bk of size bk , we construct
+
+                              Ge k := 1 P            k−τk
+                                                          , ξk ).                         (43)
+                                      bk  ξk ∈Bk G(y
+
+                                                    e k − Gy k−τk ∥2 ] ≤ σ2 . If we choose
+By Jensen’s inequality, it is well-known that EBk [∥G                    bk
+           2                                                          2             2
+          σ                                                        σ           σ
+δ̂k := (k+r) 1+ω , then to guarantee (42), we need to impose b
+                                                                    k
+                                                                      ≤ (k+r)1+ω tk (tk −s) , leading to
+                                                    1+ω
+an increasing batch-size update bk ≥ (k + r)            tk (tk − s). This mechanism is almost the
+same as the universalPdelayed oracle mechanism, except that the workers return a mini-batch
+estimator G e k := 1                k−τk
+                                         , ξk ) to the server, rather than the true value Gy k−τk ,
+                     bk  ξk ∈Bk G(y
+which is not accessible in this setting.
+     The condition (42) can hold for a wide range of stochastic variance-reduced estimators,
+including unbiased and biased instances such as common estimators: SVRG [43], SAGA
+[32], SARAH [63], and Hybrid-SGD [83]. However, we omit their construction for brevity.
+We only consider the mini-batch estimator (43) as a simple instance of our class.
+4.2.2 Convergence of asynchronous stochastic AFP method
+We specify Theorems 1 and 2 to this asynchronous stochastic AFP variant and obtain the
+following convergence results.
+
+Corollary 2 Suppose that Assumption 1 holds with β̄ = 0 and Assumption 2 also holds
+for (CE). Let {(xk , y k , z k )} be generated by (AFP) using a delayed stochastic estimator G
+                                                                                             ek
+satisfying (42) with uniformly bounded delays, i.e., there exists τ ≥ 1 such that 0 ≤ τk ≤ τ
+for all k ≥ 0. Suppose that we choose s and η, and update tk , γk , and ηk as follows:
+                               3β
+  s ≥ 1 + 3γ,      0 < η ≤ 3+(7Λ+3)τ ,     γk := γ ∈ [0, 1],     tk := k + 3s + τ,      ηk := 2(tηt k
+                                                                                                  k −s)
+                                                                                                        .
+                                P∞
+Suppose further that S∞ :=k=0 δk < +∞. Then, the following statements hold.
+                                                  −1)2              3
+(i) Convergence in expectation. For R20 := η(3s+τ
+                                                2      ∥Gy 0 ∥2 + 2s   0   ⋆ 2
+                                                                  ηγ ∥y − x ∥ , we have
+
+                            4(R20 + Λητ −1 S∞ )
+               E ∥Gy k ∥2 ≤                                     lim (k + τ )2 E ∥Gy k ∥2 = 0.
+                                                                                     
+                                                       and
+                            η(k + 5s + τ − 1)2                 k→∞
+
+(ii) Almost sure convergence. The following results hold almost surely:
+                  ∞
+                  X
+                        (k + τ )∥Gy k ∥2 < +∞       and        lim (k + τ )2 ∥Gy k ∥2 = 0.
+                                                               k→∞
+                  k=0
+
+   Moreover, the iterate sequences {xk }, {y k }, and {z k } converge almost surely to a zer(G)-
+   valued random variable x⋆ , a solution to (CE).
+22                                                                              N. Nguyen-Trung, Q. Tran-Dinh
+                                                                                                                    
+(iii) Iteration-complexity. For a given ϵ > 0, we requires at most k := O                            σ
+                                                                                                     √
+                                                                                                    ϵ τ
+                                                                                                        + τϵ + βϵ
+                                                                                                               τ
+
+     iterations to achieve E ∥Gy k ∥2 ≤ ϵ2 .
+                                    
+
+
+Proof We decompose the error term ek := G     e k − Gy k from (2) into ek = ẽk + êk , where
+ẽk := G
+       e k − Gy k−τk is the stochastic approximation error and êk := Gy k−τk − Gy k is the
+asynchronous error. Then, using the convexity of ∥ · ∥2 and 0 ≤ τk ≤ τ , we can derive that
+                                                          Pk
+                  ∥êk ∥2 = ∥Gy k−τk − Gy k ∥2 ≤ τ            l=[k−τ +1]+ ∥Gy
+                                                                                l
+                                                                                    − Gy l−1 ∥2 .
+
+Since ek = ẽk + êk , applying Young’s inequality, (42), and the last relation, we have
+                                                                           Pk
+     Ek [∥ek ∥2 ] ≤ 2Ek [∥ẽk ∥2 ] + 2Ek [∥êk ∥2 ] ≤ tk (t2δ̂kk−s) + 2τ    l=[k−τ +1]+ ∥Gy
+                                                                                               l
+                                                                                                   − Gy l−1 ∥2 .
+
+                           e k constructed by the delayed stochastic estimator (42) satisfies
+This inequality shows that G
+Definition 1 with κ = 1, Θ = τ , Θ̂ = 0, and δk = 2δ̂k .
+                                                                                  3β
+   Using this estimator, the stepsize η in Theorem 1 reduces to 0 < η ≤ 7Λτ +3(1+τ      ) =
+    3β
+3+(7Λ+3)τ  as stated in Corollary 2. Moreover, the statements in parts (i) and (ii) are direct
+consequences of Theorems 1 and 2, respectively. Finally, for a given tolerance ϵ > 0, if
+                      σ2                          2σ 2
+we choose δ̂k := (k+r)  1+ω , leading to δk := (k+r)1+ω , the number of iterations to achieve
+                                                                
+                                                    σ     τ   τ
+E ∥Gy k ∥2 ≤ ϵ2 in Theorem 1 becomes k = O ϵ√
+         
+                                                      τ
+                                                        + ϵ + βϵ   as stated in Corollary 2. □
+
+
+4.3 Finite-sum setting of (CE): Inconsistent Asynchronous AFP method
+                                                      Pn
+Finally, we consider the finite-sum structure Gx := n1 i=1 Gi x of G in (CE) with D(x, y) :=
+1
+  P n                 2
+n   i=1 ∥Gi x − Gi y∥ . More specifically, we assume that the following assumption holds.
+
+Assumption 3 The operator G in (CE) satisfies  Pn the following conditions.
+(i) G has a finite-sum structure, i.e., Gx = n1 i=1 Gi x for n ≥ 1.
+(ii) There exist β, β̄ ∈ [0, +∞) such that
+                                               Pn
+      ⟨Gx − Gy, x − y⟩ ≥ β∥Gx − Gy∥2 + nβ̄ i=1 ∥Gi x − Gi y∥2 , ∀x, y ∈ dom(G).                                    (44)
+
+For (i), the finite-sum structure is ubiquitous in statistical learning and machine learning ap-
+plications. It is often obtained by sample average approximation. For (ii), we can see that G
+satisfying (44) is β-co-coercive. However, the reverse statement is not true in general. Thus,
+this assumption is stronger than the β-co-coercivity of G. If β = 0 and β̄ > 0, then G is said
+to be β̄-average co-coercive. This assumption has been previously used in variance-reduced
+fixed-point-based algorithms, including [22, 78, 79], and is common in convex optimization.
+4.3.1 The inconsistently asynchronous oracle
+Before proceeding, let us recall the computing mechanism from Subsection 4.1. When G has
+                        e k used in Subsection 4.1 was consistently asynchronous as
+a finite-sum structure, G
+
+                             Ge k := Gy k−τk = 1 Pn Gi y k−τk ,
+                                               n   i=1
+
+which requires all components Gi y k−τk at the same delayed iterate y k−τk and therefore
+coincides with an actual historical operator value Gy l for some k − τ + 1 ≤ l ≤ k.
+    In contrast to the above consistency, this subsection allows inconsistently asynchronous
+updates, i.e., each component Gi may be evaluated at a (possibly) different stale iterate
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                       23
+
+
+within a bounded delay window. Specifically, each component Gi y k−τi,k was evaluated at
+each delayed iterate y k−τi,k such that τi,k ∈ {0, 1, · · · , τ }. Then, we set
+                                   e k := 1 Pn Gi y k−τi,k .
+                                   G                                                (45)
+                                           n   i=1
+
+In this case, Ge k is possibly not equal to Gy l for any single l ∈ {k − τ + 1, · · · , k}, and
+hence, “inconsistent”. Nevertheless, it is atomically consistent, i.e., every term Gi y k−τi,k
+is a historical value drawn from {Gi y k−τ +1 , · · · , Gi y k } for i ∈ [n]. Hitherto, we have not
+specified any computing mechanism yielding the oracle (45) yet, but we will give a detailed
+description of two representative mechanisms later: incremental and shuffling strategies.
+4.3.2 Convergence of the inconsistently asynchronous AFP method
+For given β and β̄ in Assumption 3, τ ≥ 1, and Λ := 1 + s − γ > 0, let us define
+                                     
+                                      3β̄  if 0 < β̄ ≤ 3(1+τ   7Λτ β
+                                       7Λτ                            ),
+                               η̄ :=                                                           (46)
+                                      β    if β̄ ≥ 3(1+τ7Λτ β
+                                       1+τ                      ).
+
+Then, we have the following convergence results for this variant of (AFP).
+
+Corollary 3 Suppose that Assumptions 1(a) and 3 holds for (CE). Let {(xk , y k , z k )} be
+generated by (AFP) using the inconsistent estimator G  e k in (45) such that the delays 0 ≤
+τi,k ≤ τ for τ ≥ 1 and i ∈ [n], where we choose s and η, and update tk , γk , and ηk as
+
+       s ≥ 1 + 3γ,      0 ≤ η ≤ η̄,   γk := γ ∈ (0, 1],    tk := k + 3s + τ,    ηk := 2(tηt k
+                                                                                          k −s)
+                                                                                                .
+
+Then, the following statements hold.
+                                                  −1)2              3
+(i) Convergence in expectation. For R20 := η(3s+τ
+                                                2      ∥Gy 0 ∥2 + 2s   0   ⋆ 2
+                                                                  ηγ ∥y − x ∥ , we have
+
+                                     4R20
+             E ∥Gy k ∥2 ≤                                     lim (k + τ )2 E ∥Gy k ∥2 = 0.
+                                                                                   
+                                                     and
+                              η(k + 3s + τ − 1)2             k→∞
+
+(ii) Almost sure convergence. The following results hold almost surely:
+                 ∞
+                 X
+                       (k + τ )∥Gy k ∥2 < +∞       and       lim (k + τ )2 ∥Gy k ∥2 = 0.
+                                                             k→∞
+                 k=0
+
+     Moreover, the sequences {xk }, {y k }, and {z k } converge almost surely to a zer(G)-valued
+     random variable x⋆ , a solution to (CE).
+(iii) Iteration-complexity.     For a given tolerance ϵ > 0, the total number of iterations k
+     to achieve E ∥Gy k ∥2 ≤ ϵ2 is at most
+                         
+
+                                               
+                                              τ                     7Λτ β
+                                   O τϵ + β̄ϵ
+                                                     if 0 < β̄ ≤ 3(1+τ   ),
+                             k :=               
+                                  O τ + τ                     7Λτ β
+                                  
+                                         ϵ    βϵ      if β̄ ≥ 3(1+τ  ).
+
+Proof The source of randomness in inconsistent updates comes from which node has made
+an update at each iteration. Let ik be the node that sends an update to the server at
+the k-th iteration. Then, we can view ik as a random variable on {1, · · · , n}. Let Fk :=
+σ(i1 , i2 , · · · , ik−1 ) be the σ-field generated by all the randomness before the k-th iteration.
+In addition, let Ek [·] = E · | Fk be the conditional expectation conditioned on Fk .
+24                                                                      N. Nguyen-Trung, Q. Tran-Dinh
+
+
+     From (45), by Jensen’s inequality, the convexity of ∥ · ∥2 , and 0 ≤ τi,k ≤ τ , we get
+                                 e k − Gy k ∥2 ] = Ek [∥ 1 Pn (Gi y k−τi,k − Gi y k )∥2 ]
+             Ek [∥ek ∥2 ] = Ek [∥G                       n  i=1
+                              Pn
+                          ≤ n1 i=1 Ek [∥Gi y k−τi,k − Gi y k ∥2 ]
+                              Pn         Pk
+                          = n1 i=1 Ek [∥ l=k−τi,k +1 (Gi y l − Gi y l−1 )∥2 ]
+                              Pn              Pk
+                          = n1 i=1 Ek [τi,k
+                                        2
+                                            ∥ l=k−τi,k +1 τi,k1
+                                                                  (Gi y l − Gi y l−1 )∥2 ]
+                              Pn             Pk
+                          ≤ n1 i=1 Ek [τi,k l=k−τi,k +1 ∥Gi y l − Gi y l−1 ∥2 ]
+                              Pk         Pn
+                          ≤ nτ l=k−τ +1 i=1 Ek [∥Gi y l − Gi y l−1 ∥2 ].
+
+This expression shows that G  e k computed by the inconsistent finite-sum update (45) satisfies
+Definition 1 with κ = 1, Θ = 0, Θ̂ = τ , and δk := 0.
+                         e k , the stepsize η in Theorem 1 reduces to 0 < η ≤ 3β̄ if 0 < β̄ ≤
+    Using this estimator G                                                      7Λτ
+ 7Λτ β                 β            7Λτ β
+3(1+τ ) , and 0 ≤ η ≤ 1+τ if β̄ ≥ 3(1+τ ) as stated in Corollary 3. Moreover, the statements
+in Parts (i) and (ii) are direct consequences of Theorems 1 and 2, respectively.       Finally,
+                                                                                  k 2
+                                                                                        ≤ ϵ2 in
+                                                                             
+for a given tolerance ϵ > 0, the total
+                                         number  of iterations to achieve
+                                                                          E
+                                                                             ∥Gy  ∥
+                              τ    τ                 7Λτ β                τ   τ                7Λτ β
+Theorem 1 reduces to O        ϵ + β̄ϵ   if 0 < β̄ ≤ 3(1+τ  ) , and O      ϵ + βϵ      if β̄ ≥ 3(1+τ  ) as
+stated in Corollary 3.                                                                                 □
+4.3.3 A representative mechanism in decentralized computing systems
+While the inconsistently asynchronous updates (45) may cover a wide range of computing
+mechanisms, we specify here a representative one that is usually studied in literature.
+(a) General mechanism. We again consider a server-worker system with one central
+server and n single workers similar to Subsection 4.1, but now each worker has their own
+data and cannot be shared with other workers, and the server has n separate memory slots to
+maintain the most recent values of each component Gi in the G-memory. The i-th worker is
+now responsible for only computing Gi , i = 1, · · · , n (if it is not the case, then we can divide
+Gi into groups such that each group is handled by one worker). The server stores the most
+recent values of the components Gi y k−τi,k and is responsible to updating the iterates xk , y k ,
+and z k in the V-memory. See Figure 1 (right) for an illustration of the system architecture.
+⋄ Initialization (k = 0) — Synchronous step. At the initial iteration k = 0, the server
+initializes an iterate y 0 in the V-memory and broadcasts this y 0 to all nodes.
+• Worker i (i ∈ [n]): It first evaluates Gi y 0 , then sends Gi y 0 to the central server.
+• Server
+     Pn : Waits    until gathering all values Gi y 0 from the n nodes, then computes Gy 0 :=
+   1            0            e0       0                           e0                          1  1
+   n    i=1 Gi y and sets G := Gy . Next, the server uses G to update the iterates x , z ,
+    1                            1
+   y , and then broadcasts y to all nodes as the initial iterate for the asynchronous phase.
+⋄ Main loop (k ≥ 1) — Asynchronous phase. Let τi,k be the delay of the iterate at
+which Gi is evaluated at the k-th iteration. Let Ik ⊆ [n] be the set of workers that make an
+update at the k-th iteration.
+• Worker i ∈ Ik : Whenever a worker i ∈ Ik finishes computing Gi y k−τi,k , it returns this
+   operator value to the central server.
+• Central server : Upon receiving Gi y k−τi,k from all workers i ∈ Ik , the central server up-
+   dates the estimator G  e k as:
+                              e k−1 + 1
+                                        X                                       
+                     e k := G
+                     G                        Gi y k−τi,k − Gi y (k−1)−τi,k−1 .
+                                      n       | {z }           |       {z      }
+                                        i∈Ik
+                                               add the newly    discard values from
+                                               updated values     the last update
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                  25
+
+
+   Simultaneously, we also replace the current value in the Gi memory slot by Gi y k−τi,k for
+                      e k is used in (AFP) to update the iterates xk+1 , z k+1 , and y k+1 . After
+   all i ∈ Ik . Then, G
+   that, the server broadcasts this y k+1 to all idle workers in the system.
+Note that we still assume the atomicity for all read-write processes in this mechanism, as
+well as the boundedness of the maximum delay, i.e., 0 ≤ τi,k ≤ τ for all k ≥ 0 and i ∈ [n].
+(b) Two concrete examples: Incremental and Shuffling Aggregated. Now, we specify
+two concrete mechanisms of the general decentralized computing system often studied in
+the literature: Incremental Aggregated and Shuffling Aggregated. Both mechanisms maintain
+a component buffer Ĝk = [Ĝk1 , · · · , Ĝkn ] and, at each iteration, update only one component
+before forming the averaged estimator G          e k := 1 Pn Ĝk of G (i.e., |Ik | = 1). These two
+                                                        n   i=1 i
+mechanisms only differ in the order in which indices in {1, · · · , n} are visited.
+• Incremental (or cyclic) strategy. Use a fixed order π0 = [1, 2, · · · , n]; at iteration k
+   pick i = π0 ((k mod n) + 1), set Ĝki ← Gi y k , and leave the remaining Ĝkj unchanged.
+• Shuffling strategy. Partition iterations into epochs of length n; at the start of each
+   epoch (k mod n = 0), draw a new permutation π of {1, · · · , n} (deterministic or random),
+   and during that epoch update components in the order prescribed by π.
+Both schemes compute only a single Gi per iteration while leveraging historical entries in
+Ĝk , thus saving a huge amount of computation, especially when n is large. When applying
+these two mechanisms to (AFP), we consequently obtain Algorithm 1.
+
+
+Algorithm 1 (Incremental/Shuffling Aggregated Accelerated Fixed-Point Method)
+ 1: Input: An initial point y 0 ∈ Rp , and choose method ∈ {incremental, shuffling}.
+ 2: Initialization: Compute Ĝ0 := [G1 y 0 , G2 y 0 , · · · , Gn y 0 ].
+    If method = incremental, set τ := n. If method = shuffling, set τ := 2n.
+    Set z 0 := y 0 and set π0 := [1, 2, · · · , n].
+ 3: For k := 0, · · · , kmax do
+ 4:    If method = incremental then
+ 5:      Set π := π0 ;
+ 6:    Else If method = shuffling then
+ 7:      If k mod n = 0 then
+ 8:         Sample a permutation π of {1, 2, · · · , n} (either deterministic or random)
+ 9:      End If
+10:    End If
+11:    Choose an active index i := π((k mod n) + 1)
+12:    Update the memory Ĝki ← Gi y k and compute G         e k = 1 Pn Ĝk
+                                                                     n  j=1 j
+13:    Update tk := k + 3s + τ , γk := γ, and ηk := 2(tηt−s)
+                                                          k
+                                                        k
+14:    Update                          
+                                       
+                                         xk+1 := y k − ηk G ek
+                                       
+                                            k+1     k     γk
+                                          z     := z + s (xk+1 − y k )
+                                       
+                                        y k+1 := s z k+1 + tk −s xk+1 .
+                                       
+                                                   tk          tk
+15: End For
+
+
+
+      Note that, the update of xk+1 in both cases of Algorithm 1 can be cast into the form
+                                          xk+1 := y k − ηk G
+                                                           ek ,
+
+                    e k is constructed as follows.
+where the estimator G
+⋄ Incremental aggregated strategy: We form
+                                   Ge k := 1 Pn Gi y k−i ,                                   (47)
+                                           n   i=1
+26                                                                  N. Nguyen-Trung, Q. Tran-Dinh
+
+
+⋄ Shuffling aggregated strategy: We construct
+                             e k := 1 Pn Gπ(i) y k−π(i) .
+                             G                                                               (48)
+                                    n  i=1
+
+Clearly, both (47) and (48) show that the estimators G e k constructed by these two mecha-
+nisms are indeed special cases of the inconsistent updates (45). Moreover, we also observe
+that in (47), the maximum delay τ is always n, while in (48), the maximum delay is at most
+2n. Hence, we can apply Corollary 3 to these concrete mechanisms with either τ := n or
+τ := 2n to obtain convergence results. We omit stating this result here to avoid repetition.
+5 Numerical Experiments
+In this section, we present two numerical examples to illustrate the proposed algorithms and
+compare them with baseline methods. All the algorithms are implemented in Python and
+run on UNC’s Longleaf HPC cluster with NVIDIA A100 (40 GB) and L40 (48 GB) GPUs.
+5.1 Bilinear matrix game: Policeman vs. Burglar problem
+The goal of this example is to test different variants of our framework (AFP) specified in
+Section 4, including both deterministic and stochastic variants.
+(a) Mathematical model. Consider an m × m urban grid comprising m2 houses, where
+the j-th house possesses wealth wj , j = 1, · · · , m2 . Each night, the Burglar selects a house j
+to target, while the Policeman chooses a location proximate to house k to station. Upon ini-
+tiation of the burglary, the Policeman is instantaneously informed of the incident’s location,
+and the probability of apprehension is pc := exp{−θdist(j, k)}, where dist(j, k) denotes
+the distance between house j and k. However, neither the Burglar nor the Policeman is
+aware of the true wealth wj ; instead, they only have an estimate from a set of n obser-
+           (i)
+vations ŵj for i = 1, · · · , n. The Burglar’s objective is to maximize the expected reward
+             n   (i)
+Rj := n1 i=1 ŵj 1 − exp{−θdist(j, k)} , whereas the Policeman seeks to minimize Rj .
+         P                                  
+
+    The Policeman vs. Burglar problem outlined above admits a zero-sum game formulation.
+This model was investigated in [58], and we introduce a minor modification to obtain a
+stochastic variant. In line with [58], we specify the payoff matrix L as follows:
+                  Pn              (i)   (i)
+          L := n1 i=1 L(i) , Lj,k = ŵj (1 − exp{−θ dist(j, k)}) , 1 ≤ j, k ≤ m2 .
+Then, we can formulate the above problem into the following classical bilinear matrix game:
+                                       n                   o
+                            min max L(v, w) := ⟨Lv, w⟩ ,                                (49)
+                              v∈∆p1 w∈∆p2
+
+where v and w represent mixed strategies of the Policeman and Burglar, and ∆p1 and ∆p2
+are the standard simplexes in Rp1 and Rp2 , respectively with p1 = p2 = m2 .
+    Let us define xP:=   [v; w] ∈ Rp with p := p1 + p2 , Gi x := Gi x = [L(i)⊤ w; −L(i) v] for
+                 1    n
+i ∈ [n], Gx := n i=1 Gi x, and T x := [∂δ∆p1 (v); ∂δ∆p2 (w)], where δX (·) is the indicator
+of X . Then, we can write the optimality condition of (49) as a generalized equation 0 ∈
+Gx + T x. It is well-known that this problem is equivalent to solving Gλ u = 0, where Gλ u :=
+G(JλT u) + λ1 (I − JλT )u is the backward-forward splitting operator. Then, 0 ∈ Gx⋆ + T x⋆
+if and only if Gλ u⋆ = 0 with x⋆ := JλT u⋆ . The equation Gλ u⋆ = 0 is a special case of (CE).
+(b) Input data. Following [58], we set dist(j, k) := |j − k| and fix θ := 0.8. We then draw
+the nominal wealth wj from a standard normal distribution and replace it by |wj | to enforce
+                                                      (i)          (i)          (i)
+nonnegativity. Noisy observations are generated as wj := |wj + ϵj |, where ϵj is a normal
+random variable with zero mean and variance σ 2 = 0.05. Finally, we produce two sets of
+experiments, each comprising 5 problem instances:
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                                                                                                                 27
+
+
+• Experiment 1. m = 10 and n = 1000, corresponding to p1 = 100 and p = 2p1 = 200.
+• Experiment 2. m = 15 and n = 2000, corresponding to p1 = 225 and p = 2p1 = 450.
+(c) Algorithms and parameters. We implement five variants of our proposed method
+(AFP) specified in Section 4 as follows.
+⋄ AFP-D: This is our (AFP) using the delayed estimate (40);
+⋄ AFP-SD: It is (AFP) using the stochastic mini-batch delayed estimate (43);
+⋄ AFP-IA: It is (AFP) using the incremental aggregated estimate (47);
+⋄ AFP-SA: It is (AFP) using the shuffling aggregated estimate (48).
+⋄ AFP-RA-m: It is (AFP) using a random aggregated estimator with m components Gλ,i
+   computed per iteration.
+                                  1              0.75
+For each variant, we set η = 1+τ      and η = 1+τ      in Experiment 1 and Experiment 2,
+respectively, and choose s = 1.1 and γ = 1 (other values still work). The increasing mini-
+batch size for AFP-SD is chosen as bk = max{5, min{r(k + 1)3 , n}}, where r > 0 is a small
+scale factor used to enforce that bk is increasing but not too fast as using bk = O k 3 . The
+initial point is chosen as x0 := p11 · ones(p1 ); p12 · ones(p2 ) for all variants.
+(d) Numerical results. First, we test the effect of the maximum delay τ on the performance
+of (AFP). To this end, we let τ vary from τ := 0 (meaning no delays) to τ := 500, and run the
+AFP-D variants with several values of τ in that range. The results are presented in Figure 2,
+where Number of full passes is the number of times computing full n components Gλ,i
+of the finite sum (which is also equal to the number of iterations since we treat the operator
+universally without assuming any specific structure).
+
+                                    Experiment 1: Policeman vs. Burglar (p = 200, n = 1000)                                         Experiment 2: Policeman vs. Burglar (p = 450, n = 2000)
+                          100                                                =0         = 50                              100                                                =0         = 50
+                                                                             =1         = 100                                                                                =1         = 100
+                                                                             = 10       = 500                                                                                = 10       = 500
+xk / x0                                                                                         xk / x0
+                         10 1                                                                                            10 1
+
+                         10 2                                                                                            10 2
+
+
+
+
+Relative operator norm                                                                          Relative operator norm
+                         10 3                                                                                            10 3
+
+                         10 4                                                                                            10 4
+
+                         10 5                                                                                            10 5
+
+                         10 6                                                                                            10 6
+
+                                0          10000      20000        30000       40000    50000                                   0          10000      20000        30000       40000    50000
+                                                     Number of full passes                                                                           Number of full passes
+
+Fig. 2 The performance (averaging over 5 problem instances) of AFP-D with different maximum delay values
+τ to solve (49) on 2 experiments. The numbers followed by the legends are the values of τ used in AFP-D.
+
+    We can see that the zero-latency variant (τ = 0) provides a superior performance com-
+pared to all other variants, reaching the tolerance 10−6 after approximately 30,000 iterations.
+Moreover, as τ grows, performance degrades monotonically: larger τ yields slower decay of
+the relative operator norm. This observation is consistent in both experiments and can be
+attributed to the dependence of the stepsize η̄ as well as the upper bound of E ∥Gy k ∥2 on
+τ as proved in Theorem 1. Finally, the number of iterations that (AFP) needs to achieve a
+given accuracy level ϵ is revealed in Figure 3, which validates the theoretical finding about
+the linear dependence of the iteration-complexity on the maximum delay τ .
+                                                                                          e k on
+    Next, we test the effect of different strategies for constructing a delayed estimator G
+the performance of (AFP). In this test, we fix the maximum delay τ := 10 for both AFP-D
+and AFP-SD. Then, the numerical results are presented in Figure 4.
+28                                                                                                                                                  N. Nguyen-Trung, Q. Tran-Dinh
+
+                                                              = 10 3                                                                                           = 10 4
+                     50000
+                                       Experiment 1                                                                                      Experiment 1
+                                       Experiment 2                                                                                      Experiment 2
+                     40000                                                                                            40000
+
+
+                     30000                                                                                            30000
+
+Iterations                                                                                        Iterations
+                     20000                                                                                            20000
+
+                     10000                                                                                            10000
+
+                            0                                                                                                 0
+                                0           50        100      150       200     250        300                                   0           5         10       15        20      25          30
+
+
+Fig. 3 The number of iterations of (AFP) (required to achieve ∥Gλ xk ∥/∥Gλ x0 ∥ ≤ ϵ) vs. the maximum
+delay τ . This plot verifies that the iteration-complexity depends linearly on τ as stated in Corollary 1(iii).
+
+                                    Experiment 1: Policeman vs. Burglar (p = 200, n = 1000)                                           Experiment 2: Policeman vs. Burglar (p = 450, n = 2000)
+                          100                                                        AFP-D                                  100                                                         AFP-D
+                                                                                     AFP-SD                                                                                             AFP-SD
+                                                                                     AFP-IA                                                                                             AFP-IA
+xk / x0                                                                                           xk / x0
+                         10 1                                                        AFP-SA                                                                                             AFP-SA
+                                                                                                                           10 1                                                         AFP-RA-10
+                                                                                     AFP-RA-10                                                                                          AFP-RA-100
+                                                                                     AFP-RA-100                                                                                         AFP-RA-500
+                         10 2                                                        AFP-RA-500
+
+
+
+
+Relative operator norm                                                                            Relative operator norm
+                                                                                                                           10 2
+
+                         10 3
+                                                                                                                           10 3
+
+                         10 4
+                                                                                                                           10 4
+
+                                0           200         400          600       800         1000                                   0           200         400          600      800           1000
+                                                      Number of full passes                                                                             Number of full passes
+
+Fig. 4 The performance (averaging over 5 problem instances) of 4 algorithms for solving (49) on 2 experi-
+ments. For AFP-RA-m, we run 3 cases with m = 10, m = 100, and m = 500, respectively.
+
+    From Figure 4, we can see that AFP-IA outperforms the other variants when achieving the
+tolerance of magnitude 10−5 after nearly 400 passes. Among the remaining variants, AFP-SA
+and AFP-RA-m have a similar performance, as they all randomly evaluate some Gi ’s to
+perform the iterate updates, while smaller values of m yield slightly better performance due
+to their higher update frequency. Finally, AFP-SD shows a slightly better performance than
+AFP-D, especially in the early phase when the mini-batch size is still below n. In the later
+phase, when AFP-SD switches to use the full-batch operator, the two variants perform more
+similarly and ultimately reach the tolerance around 4 × 10−4 after 1000 passes.
+
+5.2 Training neural networks via delayed inexact oracles
+In this example, we evaluate different variants of our framework (AFP) on a simple training
+task involving a shallow neural network. It is motivated by the following observations. First,
+training large-scale machine learning models is typically carried out on parallel or distributed
+systems equipped with multiple CPU or GPU processors. In such environments, the use
+of delayed inexact oracles is unavoidable. Second, although the underlying optimization
+problem of this task is nonconvex, the network architecture contains only a few hidden
+layers, making its landscape relatively simple compared to deep learning models. Third,
+several existing studies have shown that training neural networks using variants of Nesterov’s
+momentum can improve performance, see, e.g., [76].
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                                                         29
+
+
+(a) Model and data. We train a shallow neural network to perform a well-known image
+classification on handwritten digits. The model is a fully connected network with two hidden
+layers containing 300 and 100 nodes, respectively, followed by a softmax cross-entropy loss
+layer. The network is implemented in PyTorch and trained on the well-known MNIST dataset
+with N = 60,000 samples [49]. To simulate a privacy-sensitive environment and non-i.i.d.
+characteristics often encountered in practice, the data is partitioned so that each of the 10
+digit classes is stored exclusively on a single worker node (yielding 10 workers in total). In
+this setting, the data on each worker remains confidential from both the central server and
+the other workers.
+   The first order optimality condition
+                                      Pof  this training problem can be written as Gx⋆ = 0, a
+                                    1   10
+special case of (CE), where Gx := 10 i=1 Gi x, Gi x is the gradient of the loss function over
+the data of the i-th worker, and x gathers all trainable parameters of the neural network.
+(b) Algorithms and parameters. We apply (AFP) with inconsistent asynchronous oracle
+Ge k defined in (45), denoted by AFP-RA-m, where m ∈ {1, 2, 5} is the number of active
+workers randomly sampled (without replacement) at each iteration. We also implement the
+standard Gradient Descent method (GD) and the Incremental Aggregated Gradient method
+(IAG) for benchmarking. The parameters of each algorithm are chosen as follows after tuning:
+• For GD and IAG, the learning rates are set to 1.5 × 10−2 and 1.25 × 10−2 , respectively.
+                                                       3                 N
+• For AFP-RA: we choose γ = 1.0, s = 1.05, and η = 1+τ   , where τ := 2⌈ m ⌉.
+(c) Numerical results. Figure 5 compares the performance of different algorithmic variants
+on the training loss value and the test accuracy, each averaged over 10 runs.
+
+                                                                                        100
+                                                         GD
+              2 × 100                                    IAG                            90
+                                                         AFP-RA-1
+                                                         AFP-RA-2                       80
+                                                         AFP-RA-5
+                 100                                                                    70
+
+
+                                                                    Test Accuracy (%)
+             8 × 10 1
+Train Loss
+                                                                                        60
+             6 × 10 1
+                                                                                        50
+             4 × 10 1
+                                                                                        40                                     GD
+                                                                                                                               IAG
+                                                                                        30                                     AFP-RA-1
+             2 × 10 1                                                                                                          AFP-RA-2
+                                                                                        20                                     AFP-RA-5
+                        0   20   40            60   80        100                             0   20   40            60   80        100
+                                      Epochs                                                                Epochs
+Fig. 5 The behavior of the train loss and the test accuracy produced by 5 algorithms (three variants AFP-RA
+of (AFP) and two competitors) for solving a neural network training problem using the MNIST dataset.
+
+
+    We observe that the three variants of (AFP) outperform the two competitors, while the
+ones with fewer active workers per iteration perform slightly better due to more updates
+per epoch. This demonstrates the effectiveness of the accelerated methods over the non-
+accelerated counterparts, even when the updates are executed using delayed information.
+Moreover, while GD typically performs well when the data is partitioned into i.i.d. subsets, it
+is not the case in such an extreme non-i.i.d. setting, which causes single-class-based updates,
+introducing significant bias to the network. In contrast, the aggregated methods retain
+historical information from all classes – despite the staleness – thereby mitigating bias and
+yielding superior overall performance.
+30                                                                                   N. Nguyen-Trung, Q. Tran-Dinh
+
+
+A Appendix: Preliminary and Mathematical Tools
+We first recall some technical results that will be used in our convergence analysis. Then, we extend
+Lemma 3.5 from [37] to cover stochastic settings and also provide its proof.
+
+Lemma 4 ([13]) Let {ak }, {bk }, and {dk } be sequences of real  numbers. Assume that {ak } is bounded
+                                                                P∞
+from below, {bk } and {dk } are nonnegative sequences such that  k=0 dk < ∞, and
+
+                                        ak+1 ≤ ak − bk + dk ,           ∀k ≥ 0.
+
+Then, the following statements P
+                               hold:
+                                 ∞
+(i) {bk } is summable, namely    k=0 bk < ∞.
+(ii) {ak } is convergent.
+
+Lemma 5 ([79]) Let {ak }k≥0 P  be a sequence of nonnegative numbers and α > 0 be a constant. Assume
+                                 ∞
+that limk→∞ kα+1 ak exists and         α
+                                 k=0 k ak < ∞. Then, limk→∞ k
+                                                                α+1 a = 0.
+                                                                     k
+
+
+Lemma 6 (Supermartingale theorem, [69]) Let {Xk }, {αk }, {Vk }, and {Rk } be sequences of non-
+negative                variables on some arbitrary probability space and adapted to the filtration {Fk }
+     P∞integrable randomP ∞
+with   k=0 αk < +∞ and    k=0 Rk < +∞ almost surely, and
+
+                      E [Xk+1 | Fk ] ≤ (1 + αk )Xk − Vk + Rk ,            ∀k ≥ 0 almost surely.
+                                              P∞
+Then, {Xk } almost surely converges and          k=0 Vk < +∞ almost surely.
+
+Lemma 7 (Proposition 4.1 of [31]) Suppose that G in (CE) is continuous. Let {xk } be a sequence
+of random vectors such that for all x⋆ ∈ zer(G), the sequence {∥xk − x⋆ ∥2 } almost surely converges to
+a [0, ∞)-valued random variable. In addition, assume that {∥Gxk ∥} also almost surely converges to zero.
+Then, {xk } almost surely converges to a zer(G)-valued random variable.
+
+     The following lemma is an extension of [37, Lemma 3.5] from a deterministic to a stochastic setting.
+
+Lemma 8 Let {Vk }, {Uk }, and {Sk } be three sequences of nonnegative integrable random variables on
+some arbitrary probability space and adapted to the filtration {Fk } such that, almost surely
+
+                                                            k
+                                                            X
+                             
+                   E Vk+1 | Fk ≤ Vk − Uk + µk                           Sl − νk Sk + ωk ,   ∀k ≥ 0.           (50)
+                                                        l=[k−τk +1]+
+
+                                                                                   Pτ −1
+where µk , νk , ωk ≥ 0 and 0 ≤ τk ≤ τ for all k ≥ 0. Suppose further that            l=0 µk+l ≤ νk .
+(i) Then, we have
+
+                        K
+                        X               K                                           K
+                                  X                                       X
+                          E Uk ≤ E V0 +   ωk                and     E VK+1 ≤ E V0 +   ωk .                    (51)
+                        k=0                      k=0                                        k=0
+
+(ii) Let D0 := 0 and, for k ≥ 1, let
+                                                               
+                              k−1           min{l+τ −1,k−1}
+                              X                  X
+                      Dk :=         νl −                     µt  Sl       and     Vek := Vk + Dk .          (52)
+                              l=0                 t=l
+
+
+     If ∞
+       P                                                                                    P∞
+         k=0 ωk < +∞, then {Vk } converges almost surely to a finite random variable V∞ and  k=0 Uk <
+                               e                                                     e
+     +∞ almost surely. Consequently, both Dk and Vk converge almost surely to finite random variables
+     D∞ and V∞ , respectively.
+
+Proof (i) Let Sk = 0 for k ≤ −1. Taking the full expectation on both sides of (50), we get
+
+                                                            k
+                                                            X
+                                                                               
+                    E Vk+1 + E Uk ≤ E Vk +                              µk E Sl − νk E Sk + ωk .
+                                                        l=[k−τk +1]+
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                                  31
+
+                                                                      
+Summing up this inequality from k = 0 to K, and noting that b0 = 1, E Sk = 0 for k ≤ −1, and τk ≤ τ ,
+we get
+                                                           PK             PK
+       E VK+1 + K
+             P            PK Pk
+                k=0 E Uk ≤ E V0 + k=0   l=(k−τk +1)+ µk E Sl −    k=0 νk E Sk +    k=0 ωk
+                              PK Pk                   PK             PK
+                         = E V0 + k=0 l=k−τk +1 µk E Sl − k=0 νk E Sk + k=0 ωk
+                         ≤ E V0 + K
+                              P      Pk              PK             PK
+                                   k=0  l=k−τ +1 µk E Sl −    k=0 νk E Sk +    k=0 ωk
+                              Pτ −1 PK−l            PK             PK              (53)
+                         = E V0 + l=0   k=−l µk+l E Sk −     k=0 νk E Sk +    k=0 ωk
+                              P −1 PK
+                         ≤ E V0 + τl=0
+                                                    PK              PK
+                                        k=0 µk+l E Sk −     k=0 νk E Sk +    k=0 ωk
+                              PK         Pτ −1              PK
+                         = E V0 − k=0 νk − l=0 µk+l E Sk + k=0 ωk ,
+
+where the last inequality follows from the fact that Sk ≥ 0 for all k ≥ 0 and Sk = 0 for k < 0. We eventually
+get from (53) that
+                                    PK        Pτ −1       P
+            E VK+1 + K                                            K
+                  P       
+                      k=0 E Uk ≤ E V0 − k=0 νk −  l=0 µk+l E Sk + k=0 ωk .
+
+       P −1
+Since τl=0   µk+l ≤ νk , this estimate leads to E VK+1 + K
+                                                      P                  PK
+                                                          k=0 E Uk ≤ E V0 +     k=0 ωk . This inequality
+implies both estimates in (51).
+    (ii) Suppose we start with D0 = 0 and aim to construct a sequence of nonnegative integrable random
+variables {Dk } such that
+                                  Dk+1 = Dk + νk Sk − µk kl=[k−τ +1]+ Sl .
+                                                        P
+                                                                                                   (54)
+By induction, this leads to
+                                      Pk−1 h                            i
+                                             νr Sr − µr rl=[r−τ +1]+ Sl
+                                                        P
+                              Dk :=      r=0
+                                      Pk−1          Pk−1     Pr
+                                    =  r=0 νr Sr −    r=0 µr   l=[r−τ +1]+ Sl
+                                      Pk−1         Pk−1 Pmin{l+τ −1,k−1}
+                                    =  l=0 νl Sl −   l=0   r=l              µr Sl
+                                      Pk−1 h      Pmin{l+τ −1,k−1} i
+                                    =  l=0 νl −     r=l             µr Sl
+
+                                         Pτ −1
+as stated in (52). Using the condition      l=0 µk+l ≤ νk , we can show that
+
+                            Pmin{l+τ −1,k−1}            Pl+τ −1          Pτ −1
+                              r=l                µr ≤     r=l     µr =    t=0 µl+t ≤ νl .
+
+Combining this fact and Sl ≥ 0, we can show that
+                                                 {D
+                                                    k } is nonnegative and monotonically increasing.
+   Now, taking the conditional expectation E · | Fk of (54) and then adding the result to (50) yields
+                                       Pk                                                Pk
+     E[Vek+1 | Fk ] ≤ Vek − Uk + µk      l=[k−τk +1]+ Sl − νk Sk + ωk + νk Sk − µk          l=[k−τk +1]+ Sl
+                                       Pk                             Pk
+                   ≤ Vek − Uk + µk       l=[k−τ +1]+ Sl + ωk − µk         l=[k−τk +1]+ Sl                     (55)
+
+                   = Vek − Uk + ωk .
+
+From (55) and ∞
+                P
+                  k=0 ωk < ∞, the classical Robbins-Siegmund theorem (i.e., Lemma 6) applies to Vek , giving
+Vek → Ve∞ as k → ∞ and ∞
+                         P
+                            k=0 Uk < ∞ almost surely.
+    Finally, since limk→∞ Vek exists almost surely, there exists M > 0 such that Vek ≤ M almost surely.
+Moreover, since Vk ≥ 0, we have
+
+                                    Dk = Vek − Vk ≤ Vek ≤ M        almost surely.
+
+Combining this fact and the monotonicity of {Dk }, we conclude that D∞ := limk→∞ Dk exists almost
+surely. Therefore, we conclude that
+
+                   limk→∞ Vk = limk→∞ (Vek − Dk ) = Ve∞ − D∞ := V∞                  almost surely.
+
+This completes the proof.                                                                                       □
+32                                                                                        N. Nguyen-Trung, Q. Tran-Dinh
+
+
+B Appendix: The Proofs of Technical Lemmas in Section 3
+This appendix provides the missing proofs in Section 3 of the main text.
+
+B.1 The proof of Lemma 1: Lower bounding Lk − Ek [Lk+1 ]
+To prove Lemma 1, we need the following technical lemma.
+
+Lemma 9 Suppose that Condition (1) holds for (CE). Let {(xk , y k , z k )} be generated by (AFP) such that
+tk > s and tk = tk−1 + 1. Then, for Lk defined by (3), we have
+
+                                  [2β−(1+c1 )ηk ]tk (tk −s)
+               Lk − Lk+1 ≥                    2
+                                                            ∥Gy k+1 − Gy k ∥2 + β̄tk (tk − s)D(y k+1 , y k )
+                                                                                                                                  (56)
+                                     ak −âk
+                                  +     2
+                                             ∥Gy ∥ + s(s − 1)⟨Gy k , y k − x⋆ ⟩ − ηk2bk ∥ek ∥2 ,
+                                                 k   2
+
+
+where ak , âk , and bk are respectively given by
+
+                     ak := ηk−1 tk−1 (tk−1 − s),
+                   
+                   
+                   
+                   
+                     âk := ηk [(tk − s)(tk − 2s + 2γk ) + c2 (s − γk ) + (s − 1)(1 + ĉk )γk ],                                  (57)
+                                                                                              
+                    b := 1 + s−γk t (t − s) + (s − 1)γ
+                                                                     1+ĉk      η    γk−1
+                                                                            + η γ k−1
+                   
+                       k      c      c      k k                   k    ĉ          −η      γ
+                                                                                                   ,
+                                  1      2                                      k        k k   k−1 k−1
+
+
+for any positive constants c1 , c2 , and ĉk .
+
+Proof First, recall ek := G
+                          e k − Gy k from (2). Then, from the last and the first lines of (AFP), we have
+
+                tk y k+1 = sz k+1 + (tk − s)xk+1 = sz k+1 + (tk − s)y k − ηk (tk − s)(Gy k + ek ).
+
+Using sz k+1 = sz k − γk ηk (Gy k + ek ) from the second line of (AFP), the last equation can be expressed
+into two different forms as
+
+              (tk − s)tk (y k+1 − y k ) = s(tk − s)(z k+1 − y k ) − ηk (tk − s)2 (Gy k + ek )
+                                          = s(tk − s)(z k − y k ) − ηk (tk − s)(tk − s + γk )(Gy k + ek ),                        (58)
+              (tk − s)tk (y k+1 − y k ) = stk (z k+1 − y k+1 ) − ηk tk (tk − s)(Gy k + ek ).
+
+Since G satisfies Condition (1) of Assumption 1, we can show that
+
+        tk (tk − s)⟨Gy k+1 , y k+1 − y k ⟩ − tk (tk − s)⟨Gy k , y k+1 − y k ⟩ ≥ βtk (tk − s)∥Gy k+1 − Gy k ∥2
+                                                                                    + β̄tk (tk − s)D(y k+1 , y k ).
+
+Substituting the two expressions from (58) into the last inequality, we can derive that
+
+         T[1] := stk ⟨Gy k+1 , z k+1 − y k+1 ⟩ − s(tk − s)⟨Gy k , z k − y k ⟩
+              ≥ βtk (tk − s)∥Gy k+1 − Gy k ∥2 + ηk tk (tk − s)⟨Gy k+1 , Gy k ⟩ + β̄tk (tk − s)D(y k+1 , y k )
+                   − ηk (tk − s)(tk − s + γk )∥Gy k ∥2 + ηk (tk − s)⟨tk Gy k+1 − (tk − s + γk )Gy k , ek ⟩
+                   (2β−ηk )tk (tk −s)                      η t (t −s)
+              =            2
+                                      ∥Gy k+1 − Gy k ∥2 + k k 2 k     ∥Gy k+1 ∥2 + β̄tk (tk − s)D(y k+1 , y k )
+                      η (t −s)(tk −2s+2γk )
+                   − k k         2
+                                            ∥Gy k ∥2 + ηk (tk − s)⟨tk Gy k+1 − (tk − s + γk )Gy k , ek ⟩.
+
+                                                          2
+Here, we have used 2 Gy k+1 , Gy k = Gy k+1 + ∥Gy k ∥2 − ∥Gy k+1 − Gy k ∥2 in the last equality. By
+Young’s inequality, for any c1 > 0 and c2 > 0, we can show that
+
+      T[2] := ηk (tk − s)⟨tk Gy k+1 − (tk − s + γk )Gy k , ek ⟩
+            = ηk tk (tk − s)⟨Gy k+1 − Gy k , ek ⟩ + (s − γk )ηk (tk − s)⟨Gy k , ek ⟩
+                   c η t (t −s)                          ηk tk (tk −s)
+            ≥ − 1 k k2 k          ∥Gy k+1 − Gy k ∥2 −         2c1
+                                                                       ∥ek ∥2
+                   c2 (s−γk )ηk (tk −s)            (s−γk )ηk tk (tk −s)
+               −          2tk
+                                        ∥Gy k ∥2 −        2c2
+                                                                        ∥ek ∥2
+                                                                                                    
+                   c η t (t −s)                          c2 (s−γk )ηk                                    ηk tk (tk −s)
+            ≥ − 1 k k2 k          ∥Gy k+1 − Gy k ∥2 −          2
+                                                                      ∥Gy k ∥2 −         1
+                                                                                        c1
+                                                                                           + s−γ
+                                                                                              c2
+                                                                                                 k
+                                                                                                                2
+                                                                                                                       ∥ek ∥2 ,
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                                              33
+
+
+where we have used tkt−s ≤ 1 in the last inequality. Substituting T[2] into T[1] , and rearranging the result
+                       k
+with the fact that tk = tk−1 + 1, we get
+
+T[3] := stk−1 ⟨Gy k , y k − z k ⟩ − stk ⟨Gy k+1 , y k+1 − z k+1 ⟩
+          [2β−(1+c1 )ηk ]tk (tk −s)                       η t (t −s)
+     ≥               2
+                                    ∥Gy k+1 − Gy k ∥2 + k k 2 k       ∥Gy k+1 ∥2 + β̄tk (tk − s)D(y k+1 , y k )
+                                                                                                                    
+                                          η [(t −s)(t   −2s+2γ   )+c  (s−γ k )]           η t (t −s)
+          + s(s − 1)⟨Gy k , y k − z k ⟩ − k k         k
+                                                           2
+                                                               k    2
+                                                                                ∥Gy k ∥2 − k k 2 k      1
+                                                                                                       c1
+                                                                                                          + s−γ c2
+                                                                                                                   k
+                                                                                                                       ∥ek ∥2 .
+
+Next, using again Young’s inequality and z k+1 − z k = − γksηk (Gy k + ek ) from the second line of (AFP), for
+any ck > 0 and ĉk > 0, we have
+
+                                   s2 (s−1)                s2 (s−1)
+                       T[4] :=      2ηk γk
+                                            ∥z k − x⋆ ∥2 − 2η γ ∥z k+1 − x⋆ ∥2
+                                                               k k
+                                      s2 (s−1) k+1                      s2 (s−1)
+                              = −      ηk γk
+                                              ⟨z   − z k , z k − x⋆ ⟩ − 2η γ ∥z k+1 − z k ∥2
+                                                                            k k
+                                                                        (s−1)ηk γk
+                              = s(s − 1)⟨Gy k + ek , z k − x⋆ ⟩ −           2
+                                                                                   ∥Gy k + ek ∥2
+                                                                   2
+                                                                  s (s−1)ck
+                              ≥ s(s − 1)⟨Gy k , z k − x⋆ ⟩ −          2
+                                                                            ∥z k − x⋆ ∥2 − s−1
+                                                                                           2ck
+                                                                                               ∥ek ∥2
+                                      (s−1)(1+ĉk )ηk γk            (s−1)(1+ĉk )ηk γk
+                                  −          2
+                                                         ∥Gy k ∥2 −       2ĉk
+                                                                                       ∥ek ∥2 .
+
+                                                            ηk γk −ηk−1 γk−1
+Rearranging this inequality and choosing ck :=               γk−1 γk ηk−1 ηk
+                                                                             , we get
+
+              s2 (s−1)                s2 (s−1)
+  T̂[4] := 2η          ∥z k − x⋆ ∥2 − 2η γ ∥z k+1 − x⋆ ∥2
+              k−1 γk−1                    k k
+                                              (s−1)(1+ĉk )ηk γk            (s−1)ηk γk  1+ĉk      η    γk−1     k 2
+         ≥ s(s − 1)⟨Gy k , z k − x⋆ ⟩ −                          ∥Gy k ∥2 −                    + η γ k−1          ∥e ∥ .
+                                                     2                          2         ĉk     k k −ηk−1 γk−1
+
+
+Combining T[3] and T̂[4] , we obtain
+
+                                          s2 (s−1)
+ T[5] := stk−1 ⟨Gy k , y k − z k ⟩ + 2η            ∥z k − x⋆ ∥2
+                                          k−1 γk−1
+
+                                                    s2 (s−1)
+           − stk ⟨Gy k+1 , y k+1 − z k+1 ⟩ −         2ηk γk
+                                                             ∥z k+1 − x⋆ ∥2
+           [2β−(1+c1 )ηk ]tk (tk −s)                       η t (t −s)
+       ≥               2
+                                     ∥Gy k+1 − Gy k ∥2 + k k 2 k       ∥Gy k+1 ∥2 + β̄tk (tk − s)D(y k+1 , y k )
+                                            ηk
+           + s(s − 1)⟨Gy , y − x ⟩ − 2 [(tk − s)(tk − 2s + 2γk ) + c2 (s − γk ) + (s − 1)(1 + ĉk )γk ]∥Gy k ∥2
+                           k    k      ⋆
+                 h                                                                  i
+                                                                          η    γk−1
+           − η2k     1
+                        + s−γ   k
+                                    tk (tk − s) + (s − 1)γk 1+ĉ   k
+                                                                     + η γ k−1             ∥ek ∥2 .
+                    c1       c2                                ĉk      k k −ηk−1 γk−1
+
+
+Rearranging this inequality and using ak , âk , and bk as in (57), and the definition of Lk from (3), we finally
+get (56) from the last expression T[5] .                                                                       □
+
+    Now, applying Lemma 9 above, we are ready to prove Lemma 1.
+
+Proof (The proof of Lemma 1) We first choose ĉk := 1, γk := γ ∈ (0, 1], and ηk = 2(tηt−s)
+                                                                                       k
+                                                                                           for some
+                                                                                                           k
+η > 0. Then, we have η2 ≤ ηk ≤ 2(tηt−s)
+                                    0
+                                        ≤ η due to t0 > 2s. Next, we can show that
+                                           0
+
+                                                                         η[c2 (s−γ)+2(s−1)γ]tk
+                               ak − âk = η(s − γ − 1)tk + η2 −                  2(tk −s)
+                                                                         η[c2 (s−γ)+2(s−1)γ]t0
+                                              ≥ η(s − γ − 1)tk + η2 −            2(t0 −s)
+                                              ≥ η2 (s − γ − 1)tk > 0,
+
+provided that s > 1 + γ. Moreover, from (57), we can also prove that
+                                                                                         
+                                                                                η    γk−1
+                      bk :=        1
+                                  c1
+                                     + s−γ
+                                         tk (tk − s) + (s − 1)γk 1+ĉ
+                                        c2
+                                           k
+                                                                     ĉk
+                                                                         k
+                                                                           + η γ k−1
+                                                                                  −η    γ
+                                                                              k k   k−1 k−1
+                                                                     tk−1 (tk −s)
+                                                             h                  i
+                          = c1 + s−γ
+                                  c2
+                                       tk (t k − s) + (s − 1)γ   2 −       s
+                             1
+                                    
+                          ≤ c1 + s−γ
+                                  c
+                                       t  (t
+                                        k k    − s),
+                                  1       2
+34                                                                                            N. Nguyen-Trung, Q. Tran-Dinh
+
+
+where the last inequality holds due to tk−1 > 2s.
+    Finally, substituting the last two estimates of ak − âk and bk into (56) of Lemma 9, and noticing that
+0 < ηk ≤ η, we obtain
+                        [2β−(1+c1 )η]tk (tk −s)
+       Lk − Lk+1 ≥               2
+                                                ∥Gy k+1 − Gy k ∥2 + β̄tk (tk − s)D(y k+1 , y k )
+                                                                                              
+                           η(s−γ−1)tk
+                        +      4
+                                       ∥Gy k ∥2 + s(s − 1)⟨Gy k , y k − x⋆ ⟩ − η2 c1 + s−γc2
+                                                                                                 tk (tk − s)∥ek ∥2 ,
+                                                                                   1
+
+which is exactly (5).                                                                                                                  □
+
+
+B.2 The proof of Lemma 2: Lower bounding Lk
+Since Gx⋆ = 0 for any x⋆ ∈ zer(G), we obtain from Condition (1) of Assumption 1(b) that ⟨Gy k , y k − x⋆ ⟩ ≥
+β∥Gy k ∥2 . Using this relation, we can show from (3) that
+                                                                s2 (s−1)
+            Lk = a2k ∥Gy k ∥2 + stk−1 ⟨Gy k , y k − z k ⟩ + 2η          ∥z k − x⋆ ∥2
+                                                               k−1 γk−1
+
+                         ηt2
+                                                                       h 2                               2
+                                                                                                               i
+                                                                             s (s−1)
+               = a2k − k−1  8
+                                 ∥Gy k ∥2 + stk−1 ⟨Gy k , y k − x⋆ ⟩ + 2η        γ
+                                                                                                  − 2sη            ∥z k − x⋆ ∥2
+                                                                                       k−1 k−1
+                                                                                                                                     (59)
+                     1
+                  + 8η ∥4s(z k − x⋆ ) − ηtk−1 Gy k ∥2
+                  4ak −ηt2
+                                                  h 2
+                         k−1 +8sβtk−1                                         2
+                                                                                  i
+                                                      s (s−1)
+                ≥          8
+                                       ∥Gy k ∥2 + 2η      γ
+                                                                          − 2sη       ∥z k − x⋆ ∥2 .
+                                                           k−1 k−1
+
+Using ak in (56), ηk in (4), and s > 1 + 3γ, we can also show that
+          Ak := 4ak − ηt2k−1 + 8βstk−1 = ηt2k−1 + 8βstk−1 ≥ ηt2k−1 ,
+
+                    s2 (s−1)      2   2           (s−1)(tk−1 −s)              2       3(tk−1 −s)                   s2 (tk−1 −3s)
+                                              h                       i           h                    i
+          Bk := 2η           − 2sη = sη                          −2       ≥ sη                   −2        =                     .
+                    k−1 γk−1                          γtk−1                              tk−1                           tk−1
+
+Substituting these expressions into (59), we obtain (6).                                                                               □
+
+B.3 Proof of Lemma 3: Lower bounding Vk − Ek [Vk+1 ]
+Since x⋆ ∈ zer(G), by Condition (1) of Assumption 1(b), we have ⟨Gy k , y k − x⋆ ⟩ ≥ β∥Gy k ∥2 . Substituting
+this inequality into (5), then choosing c1 = c2 := τ > 0 and taking the conditional expectation Ek [·] on both
+sides of the result, we obtain
+                                [2β−(1+τ )η]tk (tk −s)
+          Lk − Ek [Lk+1 ] ≥              2
+                                                       Ek [∥Gy k+1 − Gy k ∥2 ] + β̄tk (tk − s)Ek [D(y k+1 , y k )]
+                                                                                                                                     (60)
+                                   η(s−γ−1)tk +4βs(s−1)
+                                +            4
+                                                            ∥Gy k ∥2 − Λη t (t − s)∥ek ∥2 ,
+                                                                       2τ k k
+
+where Λ := 1 + s − γ.
+   Since we choose tk = k + 3s + τ , it is obvious to show that tk (tk − s) ≤ α − s+1
+                                                                                      
+                                                                                  2s2
+                                                                                        tk−1 (tk−1 − s), where
+       (s+1)2
+α :=     s2
+              . Using this inequality, we can show from the second line of (7) that
+                                    α(1−κ)                                           
+             tk (tk − s)Ek [∆k ] ≤ 1−(1−κ)α tk−1 (tk−1 − s)∆k−1 − tk (tk − s)Ek [∆k ]
+                                           t (t −s)
+                                          k k             δk                      (1−κ)(s+1)tk−1 (tk−1 −s)
+                                       + 1−(1−κ)α Wk + 1−(1−κ)α −                          2s2 θ
+                                                                                                           ∆k−1 ,
+               Pk                                                                        2s+1
+                                  Θ∥Gy l −Gy l−1 ∥2 + Θ̂D(y l , y l−1 ) , provided that (s+1)
+                                                                      
+where Wk :=      l=[k−τk +1]+                                                                2 < κ ≤ 1. Substituting
+
+Ek [∥ek ∥2 ] ≤ Ek [∆k ] from the first line of 1 into (60) and then using the last inequality, we can show that
+                            η(s−γ−1)tk +4βs(s−1)                Λη(1−κ)(s+1)tk−1 (tk−1 −s)
+       Lk − Ek [Lk+1 ] ≥              4
+                                                    ∥Gy k ∥2 +            4τ s2 θ
+                                                                                             ∆k−1
+                               [2β−(1+τ )η]tk (tk −s)
+                            +           2
+                                                      Ek [∥Gy k+1 − Gy k ∥2 ] + β̄tk (tk − s)Ek [D(y k+1 , y k )]
+                                            h                                        i
+                                Ληα(1−κ)
+                            − 2τ [1−(1−κ)α] tk−1 (tk−1 − s)∆k−1 − tk (tk − s)Ek [∆k ] − Ληδ  2τ θ
+                                                                                                 k
+
+
+                              Ληtk (tk −s) Pk                l       l−1 ∥2 + Θ̂D(y l , y l−1 )
+                                                                                                
+                            −      2τ θ      l=[k−τk +1]+ Θ∥Gy − Gy                                                                  (61)
+                              [2β−(1+τ )η]tk−1 (tk−1 −s)
+                            −              2
+                                                         ∥Gy k − Gy k−1 ∥2 − β̄tk−1 (tk−1 − s)D(y k , y k−1 )
+                              βt   (t     −s)                      β̄t   (t    −s)
+                            + k−1 2k−1        ∥Gy k − Gy k−1 ∥2 + k−1 2k−1         D(y k , y k−1 )
+                              [β−(1+τ )η]tk−1 (tk−1 −s)                     β̄t    (t    −s)
+                            +             2
+                                                        ∥Gy k − Gy k−1 ∥2 + k−1 2k−1          D(y k , y k−1 ).
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                                   35
+
+
+Now, if we define
+                         [2β−(1+τ )η]tk−1 (tk−1 −s)
+           
+           
+           
+            Vk := Lk +              2
+                                                    ∥Gy k − Gy k−1 ∥2 + β̄tk−1 (tk−1 − s)D(y k , y k−1 )
+           
+                      Ληα(1−κ)
+           
+           
+           
+                  + 2τ [1−(1−κ)α] tk−1 (tk−1 − s)∆k−1 ,
+           
+           
+            Uk := η(s−γ−1)tk +4βs(s−1) ∥Gy k ∥2 + Λη(1−κ)(s+1)t2k−1 (tk−1 −s) ∆k−1
+           
+           
+           
+                             4                                  4τ s θ
+                                                                                                              (62)
+                     βt   (t   −s)                         β̄t   (t −s)
+           
+           
+           
+                  + k−1 2k−1      ∥Gy k − Gy k−1 ∥2 + k−1 2k−1         D(y k , y k−1 ),
+           
+           
+             Sk := Θ∥Gy k − Gy k−1 ∥2 + Θ̂D(y k , y k−1 ),
+           
+           
+           
+           
+           
+                                                                            n               o
+            ω := Ληδk , µ := Ληtk (tk −s) , ν := 1 t
+           
+                                                                               β−(1+τ )η β̄
+               k      2τ θ        k          2τ θ          k   (t   − s) min
+                                                                  2 k−1   k−1            ,     ,Θ   Θ̂
+
+then we can derive from (61) that
+                                                           Pk
+                             Ek [Vk+1 ] ≤ Vk − Uk + µk         l=[k−τk +1]+ Sl − νk Sk + ωk ,
+
+which is exactly (10). Note that the quantities in (62) are exactly (9) and (11).                               □
+
+B.4 Supporting lemmas for convergence analysis
+This appendix establishes a supporting lemma for our convergence analysis in the main text.
+
+Lemma 10 Given a bounded sequence {τk } with   P 0 ≤ τk ≤ τ for some fixed τ ≥ 1, tk = tk−1 + 1, and a
+nonnegative random sequence {Zk }, if we have ∞  k=0 tk (tk − s)Zk < +∞ almost surely, then the following
+bound also holds almost surely
+                               P∞                Pk
+                                 k=0 tk (tk − s)  l=[k−τk +1]+ Zl < +∞.                              (63)
+                                                                  P∞
+Proof Since τk ≤ τ , using Fubini-Tonelli’s theorem and             k=0 tk (tk − s)Zk < +∞ almost surely, we have
+                                             P∞                   Pk
+                                      A :=      k=0 tk (tk − s)     l=[k−τk +1]+ Zl
+                                             P∞                   Pk
+                                        ≤       k=0 tk (tk − s)     l=[k−τ +1]+ Zl
+                                             P∞          Pl+τ −1
+                                        =       l=0 Zl
+                                                    k=l    tk (tk − s)
+                                             P∞    Pτ −1
+                                        =  l=0 Z l  j=0  tj+l (tj+l − s)
+                                           P∞
+                                        ≤ τ l=0 tl+τ −1 (tl+τ −1 − s)Zl
+                                        < +∞        almost surely,
+                                                     tl+τ −1 (tl+τ −1 −s)
+where the last inequality holds due to liml→∞              tl (tl −s)
+                                                                          = 1.                                  □
+
+
+References
+
+ 1. Alekh Agarwal and John C. Duchi. Distributed delayed stochastic optimization. In John Shawe-Taylor,
+    Richard S. Zemel, Peter L. Bartlett, Fernando Pereira, and Kilian Q. Weinberger, editors, Advances in
+    Neural Information Processing Systems, volume 24, pages 873–881. Curran Associates, Inc., 2011.
+ 2. R. P. Agarwal, M. Meehan, and D. O’regan. Fixed point theory and applications, volume 141. Cambridge
+    university press, 2001.
+ 3. Z. Allen-Zhu and L. Orecchia. Linear coupling: An ultimate unification of gradient and mirror descent. In
+    8th Innovations in Theoretical Computer Science Conference (ITCS 2017). Schloss Dagstuhl-Leibniz-
+    Zentrum fuer Informatik, 2017.
+ 4. G.R. Andrews. Foundations of Multithreaded, Parallel, and Distributed Programming. Addison-Wesley,
+    University of Arizona, 2000.
+ 5. Y. Arjevani, O. Shamir, and N. Srebro. A tight convergence analysis for stochastic gradient descent
+    with delayed updates. In Algorithmic Learning Theory, pages 111–132. PMLR, 2020.
+ 6. Yossi Arjevani, Ohad Shamir, and Nathan Srebro. A tight convergence analysis for stochastic gradient
+    descent with delayed updates. In Aryeh Kontorovich and Gergely Neu, editors, Proceedings of the
+    31st International Conference on Algorithmic Learning Theory, volume 117 of Proceedings of Machine
+    Learning Research, pages 111–132. PMLR, 08 Feb–11 Feb 2020.
+36                                                                         N. Nguyen-Trung, Q. Tran-Dinh
+
+
+ 7. H. Attouch and A. Cabot. Convergence of a relaxed inertial proximal algorithm for maximally monotone
+    operators. Math. Program., 184(1):243–287, 2020.
+ 8. H. Attouch and J. Fadili. From the Ravine method to the Nesterov method and vice versa: A dynamical
+    system perspective. SIAM J. Optim., 32(3):2074–2101, 2022.
+ 9. H. Attouch and J. Peypouquet. The rate of convergence of Nesterov’s accelerated forward-backward
+    method is actually faster than O(1/k2 ). SIAM J. Optim., 26(3):1824–1834, 2016.
+10. H. Attouch and J. Peypouquet. Convergence of inertial dynamics and proximal algorithms governed by
+    maximally monotone operators. Math. Program., 174(1-2):391–432, 2019.
+11. Rotem Zamir Aviv, Ido Hakimi, Assaf Schuster, and Kfir Yehuda Levy. Asynchronous distributed learn-
+    ing: Adapting to gradient delays without prior knowledge. In Marina Meilă and Tong Zhang, editors,
+    Proceedings of the 38th International Conference on Machine Learning, volume 139 of Proceedings of
+    Machine Learning Research, pages 436–445. PMLR, 18–24 Jul 2021.
+12. N. Bansal and A. Gupta.          Potential-function proofs for first-order methods.      arXiv preprint
+    arXiv:1712.04581, 2017.
+13. H. H. Bauschke and P. Combettes. Convex analysis and monotone operators theory in Hilbert spaces.
+    Springer-Verlag, 2nd edition, 2017.
+14. A. Beck. First-order methods in optimization, volume 25. SIAM, 2017.
+15. A. Beck and M. Teboulle. A fast iterative shrinkage-thresholding algorithm for linear inverse problems.
+    SIAM J. Imaging Sci., 2(1):183–202, 2009.
+16. D. P. Bertsekas. Distributed asynchronous computation of fixed points. Math. Program., 27(1):107–120,
+    1983.
+17. D.P. Bertsekas and J. N. Tsitsiklis. Parallel and distributed computation: Numerical methods. Prentice
+    Hall, 1989.
+18. F.F. Bonsall. Lectures on some fixed point theorems of functional analysis. Notes by K.D. Vedak, Tata
+    Institute of Fundamental Research, Bombay, 1962.
+19. R. I. Bot and D. K. Nguyen. Fast Krasnoselśkii-Mann algorithm with a convergence rate of the fixed
+    point iteration of o(1/k). SIAM J. Numer. Anal., 61(6):2813–2843, 2023.
+20. Radu Ioan Boţ and Dang Khoa Nguyen. Fast krasnosel’skiı̆–mann algorithm with a convergence rate of
+    the fixed-point iteration of o(1/k). SIAM Journal on Numerical Analysis, 61(6):2813–2843, November
+    2023.
+21. M. Bravo, R. Cominetti, and M. Pavez-Signé. Rates of convergence for inexact Krasnoselskii–Mann
+    iterations in Banach spaces. Math. Program., 175(1):241–262, 2019.
+22. X. Cai, A. Alacaoglu, and J. Diakonikolas. Variance reduced halpern iteration for finite-sum monotone
+    inclusions. In The 12th International Conference on Learning Representations (ICLR), pages 1–33,
+    2024.
+23. X. Cai, C. Song, C. Guzmán, and J. Diakonikolas. A stochastic Halpern iteration with variance reduction
+    for stochastic monotone inclusion problems. In Proceedings of the 12th International Conference on
+    Learning Representations (ICLR 2022), 2022.
+24. A. Chambolle and C. Dossal. On the convergence of the iterates of the “Fast iterative shrink-
+    age/thresholding algorithm”. J. Optim. Theory Appl., 166(3):968–982, 2015.
+25. Y. T. Chow, T. Wu, and W. Yin. Cyclic coordinate-update algorithms for fixed-point problems: Analysis
+    and applications. SIAM J. Sci. Comput., 39(4):A1280–A1300, 2017.
+26. Alon Cohen, Amit Daniely, Yoel Drori, Tomer Koren, and Mariano Schain. Asynchronous stochastic
+    optimization robust to arbitrary delays. In Marc’Aurelio Ranzato, Alina Beygelzimer, Yann Dauphin,
+    Percy Liang, and Jennifer Wortman Vaughan, editors, Advances in Neural Information Processing
+    Systems 34 (NeurIPS 2021), pages 9024–9035, 2021. NeurIPS 2021.
+27. P. Combettes and J.-C. Pesquet. Fixed-Point Algorithms for Inverse Problems in Science and En-
+    gineering, chapter Proximal Splitting Methods in Signal Processing, pages 185–212. Springer-Velarg,
+    2011.
+28. P. L. Combettes and J. Eckstein. Asynchronous block-iterative primal-dual decomposition methods for
+    monotone inclusions. Math. Program., 168(1):645–672, 2018.
+29. D. Cortild and J. Peypouquet. Krasnoselskii–Mann iterations: Inertia, perturbations and approximation.
+    J. Optim. Theory Appl., 204(2):35, 2025.
+30. D. Davis. SMART: The stochastic monotone aggregated root-finding algorithm. arXiv preprint
+    arXiv:1601.00698, 2016.
+31. D. Davis. Variance reduction for root-finding problems. Math. Program., pages 1–36, 2022.
+32. A. Defazio, F. Bach, and S. Lacoste-Julien. SAGA: A fast incremental gradient method with support
+    for non-strongly convex composite objectives. In Advances in Neural Information Processing Systems
+    (NIPS), pages 1646–1654, 2014.
+33. O. Devolder, F.Glineur, and Y. Nesterov. First-order methods of smooth convex optimization with
+    inexact oracle. Math. Program., 146(1–2):37–75, 2014.
+A Class of Accelerated Fixed-Point-Based Methods with Delayed Inexact Oracles                            37
+
+
+34. J. Diakonikolas. Halpern iteration for near-optimal and parameter-free monotone inclusion and strong
+    solutions to variational inequalities. In Conference on Learning Theory, pages 1428–1451. PMLR, 2020.
+35. P. Dvurechensky and A. Gasnikov. Stochastic intermediate gradient method for convex problems with
+    stochastic inexact oracle. J. Optim. Theory Appl., 171(1):121–145, 2016.
+36. F. Facchinei and J.-S. Pang. Finite-dimensional variational inequalities and complementarity problems,
+    volume 1-2. Springer-Verlag, 2003.
+37. H. R. Feyzmahdavian and M. Johansson. Asynchronous iterations in optimization: New sequence results
+    and sharper algorithmic guarantees. Journal of Machine Learning Research, 24(158):1–75, 2023.
+38. Hamid Reza Feyzmahdavian, Arda Aytekin, and Mikael Johansson. An asynchronous mini-batch algo-
+    rithm for regularized stochastic optimization. IEEE Transactions on Automatic Control, 61(12):3740–
+    3754, December 2016.
+39. Kazimierz Goebel and W. A. Kirk. Topics in Metric Fixed Point Theory. Cambridge Studies in
+    Advanced Mathematics. Cambridge University Press, 1990.
+40. R. Hannah and W. Yin. On unbounded delays in asynchronous parallel fixed-point algorithms. Journal
+    of Scientific Computing, 76(1):299–326, 2018.
+41. Robert Hannah, Fei Feng, and Wotao Yin. A2bcd: Asynchronous acceleration with optimal complexity.
+    In International Conference on Learning Representations (ICLR), 2019. Published as a conference
+    paper at ICLR 2019.
+42. H. Heaton and Y. Censor. Asynchronous sequential inertial iterations for common fixed points problems
+    with an application to linear systems. J. Global Optim., 74(1):95–119, 2019.
+43. Rie Johnson and Tong Zhang. Accelerating stochastic gradient descent using predictive variance reduc-
+    tion. In NIPS, pages 315–323, 2013.
+44. D. Kim. Accelerated proximal point method for maximally monotone operators. Math. Program.,
+    190:57–87, 2021.
+45. G. Lan. First-order and Stochastic Optimization Methods for Machine Learning. Springer, 2020.
+46. Guanghui Lan, Zhaosong Lu, and Renato DC Monteiro. Primal-dual first-order methods with iteration-
+    complexity for cone programming. Mathematical Programming, 126(1):1–29, 2011.
+47. Rémi Leblond, Fabian Pederegosa, and Simon Lacoste-Julien. Improved asynchronous parallel opti-
+    mization analysis for stochastic incremental methods. arXiv preprint arXiv:1801.03749, 2018.
+48. Rémi Leblond, Fabian Pedregosa, and Simon Lacoste-Julien. Asaga: Asynchronous parallel SAGA.
+    In Aarti Singh and Jerry Zhu, editors, Proceedings of the 20th International Conference on Artificial
+    Intelligence and Statistics, volume 54 of Proceedings of Machine Learning Research, pages 46–54. PMLR,
+    20–22 Apr 2017.
+49. Yann LeCun, Léon Bottou, Yoshua Bengio, and Patrick Haffner. Gradient-based learning applied to
+    document recognition. Proceedings of the IEEE, 86(11):2278–2324, 1998.
+50. Xiangru Lian, Yijun Huang, Yuncheng Li, and Ji Liu. Asynchronous parallel stochastic gradient for
+    nonconvex optimization. In Corinna Cortes, Neil D. Lawrence, Daniel D. Lee, Masashi Sugiyama, and
+    Roman Garnett, editors, Advances in Neural Information Processing Systems 28 (NeurIPS 2015), pages
+    2737–2745. Curran Associates, Inc., 2015.
+51. Jingwei Liang, Jalal Fadili, and Gabriel Peyré. Convergence rates with inexact non-expansive operators.
+    Math. Program., 159:403–434, 2016. Published online: 30 Nov 2015.
+52. F. Lieder. On the convergence rate of the halpern-iteration. Optim. Letters, 15(2):405–418, 2021.
+53. J. Liu and S. J. Wright. Asynchronous stochastic coordinate descent: Parallelism and convergence
+    properties. SIAM J. Optim., 25(1):351–376, 2015.
+54. P.-E. Maingé. Accelerated proximal algorithms with a correction term for monotone inclusions. Applied
+    Mathematics & Optimization, 84(2):2027–2061, 2021.
+55. P. E. Maingé. Fast convergence of generalized forward-backward algorithms for structured monotone
+    inclusions. J. Convex Anal., 29:893–920, 2022.
+56. H. Mania, X. Pan, D. Papailiopoulos, B. Recht, K. Ramchandran, and M. I. Jordan. Perturbed Iterate
+    Analysis for Asynchronous Stochastic Optimization. SIAM J. Optim., pages 2202–2229, 2015.
+57. G. J. Minty. Monotone (nonlinear) operators in Hilbert space. Duke Mathematical journal, 29(3):341–
+    346, 1962.
+58. A. Nemirovski. Mini-course on convex programming algorithms. Lecture notes, 2013.
+59. A. Nemirovski, A. Juditsky, G. Lan, and A. Shapiro. Robust stochastic approximation approach to
+    stochastic programming. SIAM J. on Optimization, 19(4):1574–1609, 2009.
+60. Y. Nesterov. A method for unconstrained convex minimization problem with the rate of convergence
+    O(1/k2 ). Doklady AN SSSR, 269:543–547, 1983. Translated as Soviet Math. Dokl.
+61. Y. Nesterov. Introductory lectures on convex optimization: A basic course, volume 87 of Applied Opti-
+    mization. Kluwer Academic Publishers, 2004.
+62. Y. Nesterov. Smooth minimization of non-smooth functions. Math. Program., 103(1):127–152, 2005.
+38                                                                         N. Nguyen-Trung, Q. Tran-Dinh
+
+
+63. L. M. Nguyen, J. Liu, K. Scheinberg, and M. Takáč. SARAH: A novel method for machine learning
+    problems using stochastic recursive gradient. In Proceedings of the 34th International Conference on
+    Machine Learning, pages 2613–2621, 2017.
+64. J. Park and E. K. Ryu. Exact optimal accelerated complexity for fixed-point iterations. In International
+    Conference on Machine Learning, pages 17420–17457. PMLR, 2022.
+65. J. Park and E. K. Ryu. Exact optimal accelerated complexity for fixed-point iterations. In International
+    Conference on Machine Learning, pages 17420–17457. PMLR, 2022.
+66. Z. Peng, Y. Xu, M. Yan, and W. Yin. ARock: an algorithmic framework for asynchronous parallel
+    coordinate updates. SIAM J. Scientific Comput., 38(5):2851–2879, 2016.
+67. Huiqiang Qi and Hong-Kun Xu. Convergence of halpern’s iteration method with applications in opti-
+    mization. Numerical Functional Analysis and Optimization, 42(15):1839–1854, 2021.
+68. Benjamin Recht, Christopher Re, Stephen Wright, and Feng Niu. Hogwild!: A Lock-Free Approach to
+    Parallelizing Stochastic Gradient Descent. In J. Shawe-Taylor, R. S. Zemel, P. L. Bartlett, F. Pereira,
+    and K. Q. Weinberger, editors, Advances in Neural Information Processing Systems 24, pages 693–701.
+    Curran Associates, Inc., 2011.
+69. H. Robbins and D. Siegmund. A convergence theorem for non negative almost supermartingales and
+    some applications. In Optimizing methods in statistics, pages 233–257. Elsevier, 1971.
+70. R.T. Rockafellar and R. J-B. Wets. Variational Analysis. Springer-Verlag, 1997.
+71. E. K. Ryu and S. Boyd. Primer on monotone operator methods. Appl. Comput. Math, 15(1):3–43, 2016.
+72. S. Sabach and S. Shtern. A first order method for solving convex bilevel optimization problems. SIAM
+    J. Optim., 27(2):640–660, 2017.
+73. M. Schmidt, N.L. Roux, and F. Bach. Convergence rates of inexact proximal-gradient methods for
+    convex optimization. NIPS, Granada, Spain, 2011.
+74. G. Schnitger. Parallel and Distributed Algorithms, February 2006.
+75. Sebastian U. Stich and Sai Praneeth Karimireddy. The error-feedback framework: Better rates for sgd
+    with delayed gradients and compressed updates. Journal of Machine Learning Research, 21(237):1–36,
+    2020.
+76. I. Sutskever, J. Martens, G. Dahl, and G. Hinton. On the importance of initialization and momentum
+    in deep learning. In International conference on machine learning, pages 1139–1147. pmlr, 2013.
+77. Q. Tran-Dinh. From Halpern’s fixed-point iterations to Nesterov’s accelerated interpretations for root-
+    finding problems. Comput. Optim. Appl., 87(1):181–218, 2024.
+78. Q. Tran-Dinh. Variance-Reduced Fast Krasnoselkii-Mann Methods for Finite-Sum Root-Finding Prob-
+    lems. arXiv preprint arXiv:2406.02413, 2024.
+79. Q. Tran-Dinh. Variance-Reduced Fast Operator Splitting Methods for Stochastic Generalized Equa-
+    tions. Tech. Report – UNC-STOR, 2025.
+80. Q. Tran-Dinh and Y. Luo. Halpern-type accelerated and splitting algorithms for monotone inclusions.
+    arXiv preprint arXiv:2110.08150, 2021.
+81. Q. Tran-Dinh and Y. Luo. Randomized Block-Coordinate Optimistic Gradient Algorithms for Root-
+    Finding Problems. Math. Oper. Res., in press, 2025.
+82. Q. Tran-Dinh and N. Nguyen-Trung. Revisiting Extragradient-type methods–Part 2: Generaliza-
+    tion and Unified Convergence Analysis of Anchored Extragradient-Type Variants. arXiv preprint
+    arXiv:2409.16859, 2025.
+83. Q. Tran-Dinh, N. H. Pham, D. T. Phan, and L. M. Nguyen. A hybrid stochastic optimization framework
+    for stochastic composite nonconvex optimization. Math. Program., 191:1005–1071, 2022.
+84. P. Tseng. On the rate of convergence of a partially asynchronous gradient projection algorithm. SIAM
+    J. Optim., 1(4):603–619, 1991.
+85. E. Wei and A. Ozdaglar. On the O(1/k)-convergence of asynchronous distributed alternating direction
+    method of multipliers. In Global Conference on Signal and Information Processing (GlobalSIP), pages
+    551–554. IEEE, 2013.
+86. T. Yoon and E. K. Ryu. Accelerated algorithms for smooth convex-concave minimax problems with
+    O(1/k2 ) rate on squared gradient norm. In International Conference on Machine Learning, pages
+    12098–12109. PMLR, 2021.
+

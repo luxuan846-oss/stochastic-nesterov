@@ -1,0 +1,1854 @@
+                                                       FAST KRASNOSEL’SKIı̆-MANN ALGORITHM
+                                                   WITH A CONVERGENCE RATE OF THE   FIXED POINT
+                                                                ITERATION OF o k1 ∗
+                                                                                 
+
+                                                                 RADU IOAN BOŢ† AND DANG-KHOA NGUYEN‡
+
+                                               Abstract. The Krasnosel’skiı̆-Mann (KM) algorithm is the most fundamental iterative scheme
+                                           designed to find a fixed point of an averaged operator in the framework of a real Hilbert space,
+
+
+
+
+arXiv:2206.09462v2 [math.OC] 24 Aug 2023
+                                           since it lies at the heart of various numerical algorithms for solving monotone inclusions and convex
+                                           optimization problems. We enhance the Krasnosel’skiı̆-Mann algorithm with Nesterov’s momentum
+                                           updates and show that    the resulting numerical method exhibits a convergence rate for the fixed
+                                           point residual of o k1 while preserving the weak convergence of the iterates to a fixed point of
+                                           the operator. Numerical experiments illustrate the superiority of the resulting so-called Fast KM
+                                           algorithm over various fixed point iterative schemes, and also its oscillatory behavior, which is a
+                                           specific of Nesterov’s momentum optimization algorithms.
+
+                                               Key words. nonexpansive operator, averaged operator, Krasnosel’skiı̆-Mann iteration, Nes-
+                                           terov’s momentum, Lyapunov analysis, convergence rates, convergence of iterates
+
+                                              MSC codes. 47J20, 47H05, 65K15, 65Y20
+
+
+                                               1. Introduction. Let H be a real Hilbert space with inner product ⟨·, ·⟩ and
+                                           induced norm ∥·∥. In this paper we are interested in formulating a fast numerical
+                                           method for solving the fixed point problem
+
+                                           (1.1)                          Find x ∈ H such that x = T (x) ,
+
+                                           where T : H → H is a θ-averaged operator with θ ∈ (0, 1]. Recall that an operator
+                                           R : H → H is nonexpansive if it is 1-Lipschitz continuous, that is
+
+                                                                      ∥R (x) − R (y)∥ ≤ ∥x − y∥         ∀x, y ∈ H.
+
+                                           Then T is said to be averaged with constant θ or θ-averaged if there exists a nonex-
+                                           pansive operator R : H → H such that
+
+                                                                                 T = (1 − θ) Id + θR,
+
+                                           where Id : H → H denotes the identity mapping on H. Obviously, an operator T is
+                                           nonexpansive if it is at least 1-averaged. We denote the set of all fixed points of T by
+                                           FixT := {x ∈ H | x = T (x)}.
+                                               The most naive approach when looking for a fixed point of T is the following
+                                           process, also called Banach-Picard iteration,
+
+                                           (1.2)                              xk+1 := T (xk )      ∀k ≥ 0,
+
+                                           where x0 ∈ H is a starting point.
+                                              ∗ Received by the editors June 21, 2022; accepted for publication (in revised form) August 22,
+
+                                           2023;
+                                                Funding: The work of the first author was supported by the Austrian Science Fund (FWF),
+                                           projects W 1260 and P 34922-N. The work of the second author was supported by the Austrian
+                                           Science Fund (FWF), projects P 34922-N.
+                                              † Faculty of Mathematics, University of Vienna, Oskar-Morgenstern-Platz 1, 1090 Vienna, Austria
+
+                                           (radu.bot@univie.ac.at).
+                                              ‡ Faculty of Mathematics, University of Vienna, Oskar-Morgenstern-Platz 1, 1090 Vienna, Austria
+
+                                           (dang-khoa.nguyen@univie.ac.at).
+                                                                                            1
+2                            R. I. BOŢ AND D.-K. NGUYEN
+
+
+     According to the Banach-Picard fixed point theorem, if T is a contraction, namely,
+T is Lipschitz continuous with modulus δ ∈ [0, 1), then the sequence (xk )k≥0 generated
+by (1.2) converges strongly to the unique fixed point of T with linear convergence rate.
+If T is just nonexpansive, then this statement is no longer true. To illustrate this, it
+is enough to choose T = −Id and x0 ̸= 0, in which case the Banach-Picard iteration
+not only fails approach a fixed point of T , but also generates a sequence that does not
+satisfy the asymptotic regularity property. We say that the sequence (xk )k≥0 satisfies
+the asymptotic regularity property if the difference xk − T (xk ) converges strongly to
+0 as k tends to +∞. This property is crucial for guaranteeing the convergence of the
+iterates, as we will see later.
+     In order to overcome the restrictive contraction assumption on T , Krasnosel’skiı̆
+proposed in [26] to apply the Banach-Picard iteration (1.2) to the operator 21 Id +
+1
+2 T instead of T . Following on the idea of using convex combinations the so-called
+Krasnosel’skiı̆-Mann (KM) iteration
+
+(1.3)                  xk+1 := (1 − sk ) xk + sk T (xk )   ∀k ≥ 0,
+
+where (sk )k≥0 is a sequence in (0, 1], emerged. It turned out that a fundamental step
+in proving the convergence of the iterates of (1.3) is to show that xk − T (xk ) → 0
+as k → +∞, as it was done by Browder and Petryshyn in [11] in the constant case
+sk ≡ s ∈ (0, 1). The extension  P to nonconstant sequences was achieved by Groetsch
+in [20] who proved that, if k≥0 sk (1 − sk ) = +∞, then the asymptotic regularity
+property is satisfied. The weak convergence of the iterates was then studied in various
+settings in [20, 24, 37, 8, 3]. Tikhonov regularization based techniques to improve the
+convergence of the iterates from weak to strong have been recently studied in [5, 7].
+     By considering convex combinations with a fixed so-called anchor point x0 ∈ H
+one obtains the Halpern iteration [21]
+
+(1.4)                  xk+1 := (1 − sk ) x0 + sk T (xk )   ∀k ≥ 0,
+
+a method that has recently attracted a lot of interest [29, 39, 36, 35]. The asymptotic
+regularity property of this iterative scheme has been studied in [42, 43].
+     Despite having ubiquitous applications in various fields, the study of the com-
+putational complexity of fixed point iteration schemes is still limited. One natural
+measure to quantify this is by means of the rate of convergence of the fixed point
+residual ∥xk − T (xk )∥. Notice that the asymptotic regularity property does not au-
+tomatically provide an explicit convergence rate.
+     Sabach and Shtern proved in [38] for a general form of the Halpern iteration that
+the rate of convergence of the fixed point residual is of O k1 . Lieder tightened this
+                                                                                  1
+results in [29] by a constant factor, for the Halpern iteration with sk := 1 − k+2     for
+                                                                                     1
+                                                                                       
+every k ≥ 0, whereas Park and Ryu proved in [35] that the convergence rate of O k is
+optimal for this iterative scheme, which means that it can not be improved in general.
+On the other hand, the convergence of the Krasnosel’skiı̆-Mann iteration
+                                                                        expressed in
+terms of the fixed point residual was in the nineties proved to be of o √1k in [2] in the
+case of a constant sequence (sk )k≥0 . Later on, in the case of a nonconstant sequence,
+                                                      
+it was proved to be of O √1k in [12, 28], and of o √1k in [9, 15, 32], whereas in
+[4] it was shown that the asymptotic rate of convergence for the fixed point residual
+                                                                                
+                                                                                     1
+of the continuous time counterpart of the Krasnosel’skiı̆-Mann iteration is of o     √
+                                                                                       t
+                                                                                           .
+Recently, Fierro, Maulén and Peypouquet proved in [18] that the rate of convergence
+                      FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                                 3
+
+of the
+      fixed
+            point residual of a general inertial Krasnosel’skiı̆-Mann algorithm is also
+        1
+of o   √
+         k
+            . Noticeably, Contreras and Cominetti showed in [13] that in the Banach
+                                                                            
+space setting the lower bound of the Krasnosel’skiı̆-Mann iteration is O √1k , which
+does not say anything about the lower bound in the Hilbert space setting.
+     For a family of general approaches aimed to “accelerate” the convergence of se-
+quences relying on Shanks transformation and including Anderson acceleration, which
+can be applied also to fixed point problems, we refer to [10].
+     In this paper we introduce an iterative method for solving the fixed point problem
+(1.1) which exhibits a rate of convergence for the fixed point residual of o k1 and
+                                                                                   
+
+guarantees the weak convergence of the iterates to a fixed point of T . The method is
+obtained by enhancing the Krasnosel’skiı̆-Mann iteration with Nesterov’s momentum
+updates and follows via the temporal discretization of the second order dynamical
+system with vanishing damping term proposed in [6] for solving monotone equations.
+The iterative scheme exploits the coercivity of the operator Id − T and has conse-
+quently a much more simple formulation than the Fast OGDA algorithm introduced
+in [6] for solving monotone equations, which requires the construction of auxiliary se-
+quences. Numerical experiments show that the resulting so-called Fast KM algorithm
+outperforms various fixed point iterative schemes including recently introduced ones
+using anchoring. The numerical experiments also illustrate the oscillatory behavior
+of the method, which is a specific of algorithms with Nesterov’s momentum updates.
+     As a by-product of our proposed approach we obtain several fast splitting meth-
+ods for solving monotone inclusions. It is well-known that some of the most prominent
+splitting schemes result as particular instances of the Krasnosel’skiı̆-Mann iteration,
+since they can be reduced to the solving of a fixed point problem governed by an aver-
+age operator. This is the case for the Douglas-Rachford splitting [17, 30], the forward-
+backward splitting [30], and the three operator splitting [16, 14]. For a comprehensive
+study of operator splitting schemes we refer to [3]. Recent contributions to the accel-
+eration of the convergence of splitting methods have been made in [25, 39, 27, 41, 35].
+    2. A fast Krasnosel’skiı̆-Mann iteration. In our approach, we rely on the
+simple observation that
+
+                            x∗ ∈ FixT ⇔ (Id − T ) (x∗ ) = 0,
+
+which allows us to benefit from the recent development on a continuous fast method for
+solving monotone equations in [6]. To be more specific, we have that T is θ-averaged
+                          1
+if and only if Id − T is 2θ -cocoercive [3, Proposition 4.39], that is
+
+(2.1)   ⟨x − y, (Id − T ) (x) − (Id − T ) (y)⟩
+                                     1                                2
+                                  ≥    ∥(Id − T ) (x) − (Id − T ) (y)∥ ≥ 0   ∀x, y ∈ H.
+                                    2θ
+From here one can immediately see that it follows immediately that Id−T is monotone.
+Furthermore, from the Cauchy-Schwarz inequality we can see that Id − T is at most
+2θ-Lipschitz continuous.
+    As a direct consequence of (2.1) we have that for every x∗ ∈ FixT it holds
+                                          1             2
+                 ⟨x − x∗ , x − T (x)⟩ ≥      ∥x − T (x)∥ ≥ 0   ∀x ∈ H.
+                                          2θ
+    The dynamical system studied in [6], formulated for the monotone equation
+4                               R. I. BOŢ AND D.-K. NGUYEN
+
+
+(Id − T ) (x) = 0 and for constant time scaling term β (t) ≡ 1, reads
+            
+                      α         d                     α
+              ẍ (t) + ẋ (t) +    (Id − T ) (x (t)) + (Id − T ) (x (t)) = 0
+            
+(2.2)                 t         dt                    2t
+            x (t ) = x and ẋ (t ) = ẋ ,
+                 0        0          0       0
+
+
+where α ≥ 2, (x0 , ẋ0 ) ∈ H × H. The Lipschitz continuity of Id − T guarantees the
+existence and uniqueness of a strong global solution x : [t0 , +∞] → H, which means
+that x and ẋ are locally absolutely continuous, x (t0 ) = x0 , ẋ (t0 ) = ẋ0 and x fulfills
+the first equation in (2.2) almost everywhere.
+    We set the time scaling term equal to one since our aim is to derive via temporal
+discretization an explicit iterative fixed point scheme, whereas nonconstant time scal-
+ing terms are known to positively impact the convergence rates of implicit numerical
+algorithms; see [6, Remark 2] for a detailed discussion on this issue.
+    Consider the first-order formulation of the first equation in (2.2)
+                (
+                    u̇ (t) = (2 − α) (Id − T ) (x (t))
+(2.3)
+                    u (t) = 2 (α − 1) x (t) + 2tẋ (t) + 2t (Id − T ) (x (t)) .
+
+We fix a time step s > 0, set sk := s (k + 1) for every k ≥ 1, and approximate
+x (sk ) ≈ xk+1 , and u (sk ) ≈ uk+1 . The explicit finite-difference scheme for (2.3) at
+time t := sk gives for every k ≥ 1
+(2.4)
+   uk+1 − uk = (2 − α) (Id − T ) (x )
+  
+                                       k
+          s
+  u
+      k+1         = 2 (α − 1) xk+1 + 2 (k + 1) (xk+1 − xk ) + 2s (k + 1) (Id − T ) (xk ) ,
+
+with the initialization u0 := x0 − sẋ0 and u1 := x0 . Different to [6], where for the
+discretization of the argument of Id − T we used an auxiliary sequence, this time we
+can use (xk )k≥0 . This is thanks to the stronger property of cocoercivity the operator
+Id − T is enhanced with and which will be reflected in the convergence analysis. We
+will see that this allows us not only to design a simpler algorithm, but also to consider
+larger step sizes than for the one proposed in [6].
+     Next we will simplify the sequence (uk )k≥0 . The second equation in (2.4) gives
+for every k ≥ 1
+
+               uk = 2 (α − 1) xk + 2k (xk − xk−1 ) + 2sk (Id − T ) (xk−1 ) .
+
+Taking the difference we obtain for every k ≥ 1
+
+        uk+1 − uk = 2 (k + α) (xk+1 − xk ) − 2k (xk − xk−1 ) + 2s (Id − T ) (xk )
+                       + 2sk ((Id − T ) (xk ) − (Id − T ) (xk−1 ))
+(2.5)                = (2 − α) s (Id − T ) (xk ) ,
+
+where the last relation comes from the first equation in (2.4). After rearranging (2.5),
+we obtain for every k ≥ 1
+
+(2.6)      2 (k + α) (xk+1 − xk ) = 2k (xk − xk−1 ) − αs (Id − T ) (xk )
+                                         − 2sk ((Id − T ) (xk ) − (Id − T ) (xk−1 )) .
+                      FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                                5
+
+From here, we deduce that for every k ≥ 1
+                             k                         sα
+               xk+1 = xk +        (xk − xk−1 ) −             (Id − T ) (xk )
+                           k+α                     2 (k + α)
+                         sk
+                     −        ((Id − T ) (xk ) − (Id − T ) (xk−1 ))
+                       k+α
+                                    
+                               sα              (1 − s) k
+                    = 1−               xk +              (xk − xk−1 )
+                           2 (k + α)            k+α
+                           sα                 sk
+                     +           T (xk ) +         (T (xk ) − T (xk−1 )) .
+                       2 (k + α)           k+α
+     Summing up, the algorithm we propose in this paper for solving (1.1) has the
+following formulation.
+
+Algorithm 2.1 Fast KM algorithm
+  Let α > 2, x0 , x1 ∈ H and 0 < s ≤ θ1 .
+  for k = 1, 2, · · ·
+    Compute
+                                         
+                                   sα            (1 − s) k
+                  xk+1 := 1 −               xk +           (xk − xk−1 )
+                               2 (k + α)          k+α
+                                sα                sk
+    (2.7)                 +           T (xk ) +        (T (xk ) − T (xk−1 )) .
+                            2 (k + α)            k+α
+
+  end for
+
+    Remark 2.1. For the step size choice s := 1 which is allowed for every θ-averaged
+operator T with θ ∈ (0, 1], our iterative scheme becomes
+(2.8)                 
+                 α                  α                k
+xk+1 := 1 −               xk +            T (xk ) +     (T (xk ) − T (xk−1 )) ∀k ≥ 1.
+             2 (k + α)          2 (k + α)           k+α
+Notice that for a nonexpansive operator T , which corresponds to the case θ = 1, the
+value s := 1 is the largest step size that can be taken.
+    The numerical algorithm (2.8) can be interpreted as a Krasnosel’skiı̆-Mann iter-
+                                                k
+ation enhanced with the extrapolation term k+α     (T (xk ) − T (xk−1 )) which proves to
+have an accelerating effect on the convergence of the fixed point residual. We learn
+form here that, in order to improve the convergence rate while preserving the conver-
+gence of the iterates, one must address iterative schemes that go beyond the classical
+Mann iteration [31]. The latter allows in the update rule only nonnegative coefficients
+for both the previous iterates and the operator evaluations at the previous iterates.
+    Remark 2.2. A direct application of the explicit Fast OGDA method in [6] to the
+solving of themonotone equation (Id − T ) (x) = 0 leads for given α > 2, x0 , x1 , y0 ∈ H,
+                1 1−θ
+0 < s < max 4θ   , 2θ to the following iterative scheme: for every k ≥ 1 set
+                                     
+                                  α                          αs
+(2.9a)         yk := xk + 1 −           (xk − xk−1 ) −             (Id − T ) (yk−1 )
+                               k+α                       2 (k + α)
+                                       
+                          s         k
+(2.9b)       xk+1 := yk −     1+          ((Id − T ) (yk ) − (Id − T ) (yk−1 )) .
+                          2       k+α
+6                                 R. I. BOŢ AND D.-K. NGUYEN
+                                                            n        o
+                                                                  θ
+If T is θ-averaged, then Id − T is L-Lipschitz with L := min 2θ, 1−θ   (here we
+make the convention 10 := +∞), thus the upper bound of the step size is 2L       1
+                                                                                     =
+      1 1−θ                                                    1
+max 4θ , 2θ . Indeed, we already noticed that, since Id − T is 2θ -cocoercive, it is at
+most 2θ-Lipschitz continuous. On the other hand, T is θ-averaged if and only if (see
+[3, Proposition 4.35])
+
+                       2            2    1−θ                                2
+     ∥T (x) − T (y)∥ ≤ ∥x − y∥ −             ∥(Id − T ) (x) − (Id − T ) (y)∥        ∀x, y ∈ H,
+                                          θ
+                                                                              θ
+which implies that Id − T is Lipschitz continuous with modulus at most 1−θ       .
+     Noticeably, the step size upper bound for algorithm (2.9) is more restrictive com-
+pared to the one in the Fast KM iteration (2.7). In addition, (2.7) has an obviously
+simpler formulation than (2.9). Even if one rewrites (2.9) in terms of a single sequence
+(yk )k≥0 , it would require yk , yk−1 and yk−2 to compute yk+1 . In comparison, (2.7)
+requires xk and xk−1 to compute xk+1 .
+     3. Convergence analysis. The fundamental tool of the convergence analysis is
+the following discrete energy function which, for fixed x∗ ∈ FixT and 0 ≤ λ ≤ α − 1,
+is defined for every k ≥ 1 as
+                                                                                                  2
+              1                                        1
+    Eλ,k :=      2λ (xk − x∗ ) + 2k (xk − xk−1 ) +           (3α − 2) sk (Id − T ) (xk−1 )
+              2                                    2 (α − 1)
+                                         2      1
+              + 2λ (α − 1 − λ) ∥xk − x∗ ∥ +         (α − 2) λsk ⟨xk − x∗ , (Id − T ) (xk−1 )⟩
+                                              α−1
+                     1                       2 2                   2
+              +          2 (α − 2) (3α − 2) s k ∥(Id − T ) (xk−1 )∥ .
+                8 (α − 1)
+
+The discrete energy function is defined in analogy with the Lyapunov energy functions
+used in the study of continuous time dynamical systems associated with convex min-
+imization problems and monotone equations ([1, 6]). While in convex minimization,
+the distance from the objective function at the current iterate to its minimal objective
+value plays the prominent role in the definition of the discrete energy function, in the
+                                                          2
+present setting, this role is taken by ∥(Id − T ) (xk−1 )∥ . The coefficient k 2 in front
+of this term suggests the rate at which we expect this term to converge, provided
+the energy sequence converges as k → +∞. The same reasoning applies to the third
+summand in the discrete energy function, while the first two summands will play an
+important role in proving the convergence of the iterates.
+    The properties of the discrete energy function are presented in the following
+lemma, with the proof deferred to the Appendix B.
+    Lemma 3.1. Let x∗ ∈ FixT and (xk )k≥0 be the sequence generated by Algorithm 2.1.
+Then the following statements are true:
+(i) for 0 ≤ λ ≤ α − 1 and every k ≥ 1 it holds
+
+      (3.1)      Eλ,k+1 − Eλ,k
+                                                                              2
+              ≤ 2 (2 − α) λs ⟨xk − x∗ , (Id − T ) (xk )⟩ + ω1 k ∥xk+1 − xk ∥
+                                                                                             2
+                    + s (ω2 k + ω3 ) ⟨xk+1 − xk , (Id − T ) (xk )⟩ + ω4 s2 k ∥(Id − T ) (xk )∥
+                                              
+                          1                  1                                                2
+                    +          (α − 2) s −         sk 2 ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥ ,
+                      (α − 1)                θ
+                         FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                               7
+
+    where
+
+
+    (3.2a)
+         ω1 := 4 (λ + 1 − α) ≤ 0,
+    (3.2b)
+                  1                                   
+         ω2 :=        4 (α − 1) (λ + 1 − α) + α (2 − α) ≤ 0,
+                 α−1
+    (3.2c)
+                  1                                        2
+                                                                                
+         ω3 :=        2α (α − 1) (λ + 1 − α) + α − 2 (α − 1) + 2 (2 − α) (α − 1) ,
+                 α−1
+    (3.2d)
+                     1
+         ω4 :=             (2 − α) (3α − 2) ≤ 0;
+                 2 (α − 1)
+
+                      1
+(ii) for 0 ≤ λ ≤ 3α
+                  4 − 2 the sequence (Eλ,k )k≥1 is nonnegative.
+
+     In the following lemma, we demonstrate that there exist infinitely many choices
+for the parameter λ (depending on α) for which an essential quantity in the expression
+on the right-hand side of (3.1) becomes non-positive after a finite number of iterations.
+As we will see in Proposition 3.3, this behaviour will lead to the convergence of the
+corresponding discrete energy function Eλ,k as k → +∞. The proof of Lemma 3.2 can
+also be found in the Appendix B.
+
+    Lemma 3.2. Let
+
+
+(3.3a)
+                α2       α−1       1            p
+ λ (α) :=              +     −           (α − 2) (α − 2) (5α − 2) > 0,
+             8 (α − 1)    2    8 (α − 1)
+(3.3b)
+                              α2
+                                                                              
+                     3α 1              α−1       1            p
+ λ (α) := min           − ,          +     +           (α − 2) (α − 2) (5α − 2) .
+                      4  2 8 (α − 1)    2    8 (α − 1)
+
+
+Then for every λ satisfying λ (α) < λ < λ (α) one can find an integer k (λ) ≥ 1 with
+the property that the following inequality holds for every k ≥ k (λ)
+
+         s
+               5α − 2                    2
+ Rk :=                  ω1 k ∥xk+1 − xk ∥ + s (ω2 k + ω3 ) ⟨xk+1 − xk , (Id − T ) (xk )⟩
+             2 (3α − 2)
+                                                s
+                                                     5α − 2                            2
+(3.4)                                         +               ω4 s2 k ∥(Id − T ) (xk )∥ ≤ 0,
+                                                   2 (3α − 2)
+
+
+where ω1 , ω2 , ω3 and ω4 are the constants defined in (3.2).
+
+    Proposition 3.3. Let x∗ ∈ FixT and (xk )k≥0 be the sequence generated by Algo-
+8                                R. I. BOŢ AND D.-K. NGUYEN
+
+
+rithm 2.1. Then it holds
+                                         X
+(3.5a)                                         ⟨xk − x∗ , (Id − T ) (xk )⟩ < +∞,
+                                         k≥1
+                                                   X                        2
+(3.5b)                                                   k ∥xk+1 − xk ∥ < +∞,
+                                                   k≥1
+                                                X                           2
+(3.5c)                                                k ∥(Id − T ) (xk )∥ < +∞,
+                                                k≥1
+                       X
+                    1                                               2
+(3.5d)                −s   k 2 ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥ < +∞.
+                    θ
+                           k≥1
+
+
+In addition, the sequence (Eλ,k )k≥1 converges for every λ (α) < λ < λ (α), where the
+                  
+pair λ (α) , λ (α) is defined in (3.3). Consequently, the sequence (xk )k≥0 is bounded.
+                             
+    Proof. Let λ (α) , λ (α) be the pair defined in (3.3) and λ (α) < λ < λ (α). By
+Lemma 3.2, there exists an integer k (λ) ≥ 1 such that for every k ≥ k(λ) it holds
+
+       s (ω2 k + ω3 ) ⟨xk+1 − xk , (Id − T ) (xk )⟩
+          s                                    s
+              5α − 2                      2         5α − 2                            2
+      ≤−                ω1 k ∥xk+1 − xk ∥ −                  ω4 s2 k ∥(Id − T ) (xk )∥ .
+            2 (3α − 2)                            2 (3α − 2)
+
+By plugging this inequality into (3.1) it follows that for every k ≥ k(λ) it holds
+
+     Eλ,k+1 − Eλ,k
+                                                           s                !
+                                                                 5α − 2                             2
+    ≤ 2 (2 − α) λs ⟨xk − x∗ , (Id − T ) (xk )⟩ +      1−                        ω1 k ∥xk+1 − xk ∥
+                                                               2 (3α − 2)
+                 s            !
+                     5α − 2                              2
+         + 1−                   ω4 s2 k ∥(Id − T ) (xk )∥
+                   2 (3α − 2)
+                                  
+              1                  1                                             2
+         +         (α − 2) s −       sk 2 ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥ .
+           (α − 1)               θ
+                                                            5α−2
+Taking into account that ω1 , ω4 ≤ 0 (see (3.2)), and 2(3α−2)       < 1, we can apply
+Lemma A.3 to obtain the summability results in (3.5) as well as the fact that the
+sequence (Eλ,k )k≥1 is convergent. Since 0 < λ (α) < λ < λ (α) < α − 1, the bound-
+edness of (xk )k≥0 will then follow from the definition of the discrete energy function
+(Eλ,k )k≥1 .
+    Next we will show the convergence of the sequence of iterates. The proof relies on
+the Opial Lemma (see Lemma A.1) and the demiclosedness principle for nonexpansive
+operators. According to this principle, if (zk )k≥0 ⊆ H is a sequence which converges
+weakly to z ∈ H such that zk − T (zk ) converges strongly to 0 as k → +∞, then
+z ∈ FixT (see [3, Corollary 4.28]).
+     Theorem 3.4. Let (xk )k≥0 be the sequence generated by Algorithm 2.1. Then
+(xk )k≥0 converges weakly to an element in FixT as k → +∞.
+                                         
+     Proof. Let x∗ ∈ FixT , λ (α) , λ (α) be the pair defined in (3.3) and λ (α) < λ <
+                          FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                                        9
+
+λ (α). By the definition we have for every k ≥ 1
+
+                                                                                      
+                                                   1
+(3.6) Eλ,k = 2λ xk − x∗ , 2k (xk − xk−1 ) +              (3α − 2) sk (Id − T ) (xk−1 )
+                                               2 (α − 1)
+                                     2      1
+             + 2λ (α − 1) ∥xk − x∗ ∥ +           (α − 2) λsk ⟨xk − x∗ , (Id − T ) (xk−1 )⟩
+                                          α−1
+                                                                              2
+               k2                         1
+             +      2 (xk − xk−1 ) +             (3α − 2) s (Id − T ) (xk−1 )
+                2                     2 (α − 1)
+                    1                         2 2                     2
+             +           2 (α − 2) (3α − 2) s k ∥(Id − T ) (xk−1 )∥ ,
+               8 (α − 1)
+
+which implies for every λ (α) < λ1 < λ2 < λ (α) and every k ≥ 1
+
+                                          
+(3.7)       Eλ2 ,k − Eλ1 ,k = 4 (λ2 − λ1 ) k ⟨xk − x∗ , xk − xk−1 + s (Id − T ) (xk−1 )⟩
+                                                      1                   2
+                                                                            
+                                                   + (α − 1) ∥xk − x∗ ∥ .
+                                                      2
+
+For every k ≥ 1 we set
+
+                1                    2
+(3.8)      pk :=  (α − 1) ∥xk − x∗ ∥ + k ⟨xk − x∗ , xk − xk−1 + s (Id − T ) (xk−1 )⟩ ,
+                2
+                                   k
+                1           2
+                                 X
+(3.9)      qk := ∥xk − x∗ ∥ + s        ⟨xi − x∗ , (Id − T ) (xi−1 )⟩ .
+                2                i=1
+
+
+We notice that for every k ≥ 2
+
+                                                1             2
+  qk − qk−1 = ⟨xk − x∗ , xk − xk−1 ⟩ −            ∥xk − xk−1 ∥ + s ⟨xk − x∗ , (Id − T ) (xk )⟩ ,
+                                                2
+
+and thus
+
+
+  (α − 1) qk + k (qk − qk−1 )
+                                          k
+                                          X                                       k             2
+                       = pk + (α − 1) s         ⟨xi − x∗ , (Id − T ) (xi−1 )⟩ −     ∥xk − xk−1 ∥ .
+                                          i=1
+                                                                                  2
+
+
+Since the discrete energy function converges for every λ (α) < λ1 < λ2 < λ (α), we
+obtain that limk→+∞ (Eλ2 ,k − Eλ1 ,k ) ∈ R exists. This implies in view of (3.7) and
+(3.8) that
+
+(3.10)                                lim pk ∈ R exists.
+                                     k→+∞
+
+
+Moreover, thanks to the triangle inequality and the statements (3.5a) - (3.5c) in
+10                                R. I. BOŢ AND D.-K. NGUYEN
+
+
+Proposition 3.3, we have for every k ≥ 1
+     k
+     X
+           |⟨xi − x∗ , (Id − T ) (xi−1 )⟩|
+     i=1
+     k
+     X                                           k
+                                                 X
+ ≤         |⟨xi − xi−1 , (Id − T ) (xi−1 )⟩| +         ⟨xi−1 − x∗ , (Id − T ) (xi−1 )⟩
+     i=1                                         i=1
+      k                    k                         k
+   1X                2  1X                       2
+                                                    X
+ ≤       ∥xi − xi−1 ∥ +       ∥(Id − T ) (xi−1 )∥ +     ⟨xi−1 − x∗ , (Id − T ) (xi−1 )⟩
+   2 i=1                2 i=1                       i=1
+   1X                2  1X                       2
+                                                    X
+ ≤       ∥xi − xi−1 ∥ +       ∥(Id − T ) (xi−1 )∥ +     ⟨xi−1 − x∗ , (Id − T ) (xi−1 )⟩
+   2                    2
+      i≥1                        i≥1                              i≥1
+
+ < + ∞.
+                                  Pk
+This means that the series           i=1 ⟨xi − x∗ , (Id − T ) (xi−1 )⟩ is absolutely convergent.
+In addition, due to (3.5b),
+                                                              2
+                                       lim k ∥xk − xk−1 ∥ = 0,
+                                     k→+∞
+
+which implies that
+
+                          lim ((α − 1) qk + k (qk − qk−1 )) ∈ R exists.
+                        k→+∞
+
+From Proposition 3.3, we have that (xk )k≥0 is bounded, hence (qk )k≥1 is also bounded.
+This allows us to apply Lemma A.2 to conclude that limk→+∞ qk ∈ R also exists. Once
+again, by the definition of qk in (3.9) and the fact that the sequence
+                            k
+                                                             !
+                          X
+                              ⟨xi−1 − x∗ , (Id − T ) (xi−1 )⟩
+                               i=1                                      k≥1
+
+converges, it follows that limk→+∞ ∥xk − x∗ ∥ ∈ R exists. In other words, the hypoth-
+esis (i) in Opial Lemma (see Lemma A.1) is fulfilled.
+     Now let x be a weak sequential cluster point of (xk )k≥0 , meaning that there exists
+a subsequence (xkn )n≥0 such that
+
+                            xkn converges weakly to x as n → +∞.
+On the other hand, according to (3.5c),
+
+                    (Id − T ) (xkn ) converges strongly to 0 as n → +∞.
+Due to the demiclosedness principle we conclude from here that x ∈ FixT . This shows
+that the hypothesis (ii) in Opial Lemma is also fulfilled, and completes the proof.
+    The following results proves the convergence rate of the Fast KM algorithm in
+terms of the discrete velocity and fixed point residual.
+    Theorem 3.5. Let (xk )k≥0 be the sequence generated by Algorithm 2.1. Then it
+holds
+                                                            
+                     1                                        1
+   ∥xk − xk−1 ∥ = o         and       ∥xk−1 − T (xk−1 )∥ = o       as k → +∞.
+                     k                                        k
+                                FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                                            11
+                                        
+    Proof. Let x∗ ∈ FixT , λ (α) , λ (α) be the pair defined in (3.3) and λ (α) < λ <
+λ (α). According to Proposition 3.3, the sequence (Eλ,k )k≥1 converges.
+    From (3.6) and (3.8) we have that for every k ≥ 1
+                                                                                                           2
+                                k2                      1
+         Eλ,k = 4λpk +             2 (xk − xk−1 ) +           (3α − 2) s (Id − T ) (xk−1 )
+                                2                   2 (α − 1)
+                            1                          2 2                   2
+                 +                 2 (α − 2) (3α − 2) s k ∥(Id − T ) (xk−1 )∥ .
+                      8 (α − 1)
+We set for every k ≥ 1
+                                                                                               2
+                  k2                                    1
+          hk :=              2 (xk − xk−1 ) +                 (3α − 2) s (Id − T ) (xk−1 )
+                  2                                 2 (α − 1)
+                                                                                                   !
+                                           1                             2                     2
+                                   +               2 (α − 2) (3α − 2) s      ∥(Id − T ) (xk−1 )∥       ,
+                                       4 (α − 1)
+
+so that Eλ,k = 4λpk + hk . Furthermore, since limk→+∞ Eλ,k ∈ R and limk→+∞ pk ∈ R
+(see also (3.10)), it holds
+
+                                               lim hk ∈ R exists.
+                                               k→+∞
+
+On the other hand, in view of (3.5b) and (3.5c) in Proposition 3.3 we have
+  X1                  X                        2
+             hk ≤ 4         k ∥xk − xk−1 ∥
+         k
+  k≥1                 k≥1
+                                   1                          2
+                                                                   X                               2
+                        +                2 (3α − 2) (7α − 6) s            k ∥(Id − T ) (xk−1 )∥ < +∞.
+                             8 (α − 1)                             k≥1
+
+Consequently, limk→+∞ hk = 0, which yields
+                                                         1
+                  lim k 2 (xk − xk−1 ) +                       (3α − 2) s (Id − T ) (xk−1 )
+                  k→∞                                2 (α − 1)
+               = lim k ∥(Id − T ) (xk−1 )∥ = 0.
+                  k→∞
+
+This immediately implies limk→+∞ k ∥xk − xk−1 ∥ = 0.
+    Remark 3.6. In [35], Park and Ryu established a fixed point residual lower bound
+of O( k1 ) for various fixed point iterations designed to find a fixed point of a 1-Lipschitz
+continuous operator. In the following, we will explain that this statement is not in
+contradiction with the convergence rate statement in Theorem 3.5.
+    According to [35, Theorem 4.6], for given K ≥ 2, d ≥ K and every initial point
+x0 ∈ Rd , there exists an 1-Lipschitz continuous operator T : Rd → Rd with x∗ ∈ FixT
+such that the inequality
+                                                                2∥x0 − x∗ ∥
+(3.11)                              ∥xK−1 − T (xK−1 )∥ ≥                    ,
+                                                                    K
+holds for every iterates (xk )k=0,...,K−1 satisfying
+
+(3.12)                   xk ∈ x0 + span{x0 − T (x0 ), ..., xk−1 − T (xk−1 )}
+12                            R. I. BOŢ AND D.-K. NGUYEN
+
+
+for k = 1, ..., K−1. It is evident that the sequence generated by the Fast KM algorithm
+with x1 := x0 fulfills (3.12). Consequently, there exists such an 1-Lipschitz continuous
+operator T : Rd → Rd that fulfills (3.11) for the sequence of iterates generated by
+the Fast KM algorithm with x1 := x0 . In contrast, according to Theorem 3.5, for the
+same operator (as it is the case for every 1-Lipschitz continuous operator), it holds
+k∥xk−1 − T (xk−1 )∥ → 0 as k → +∞, which means that there exists k0 > K such that
+
+                                                       2∥x0 − x∗ ∥
+                            ∥xk−1 − T (xk−1 )∥ <
+                                                            k
+for every k ≥ k0 .
+     Remark 3.7. In [13], Contreras and Cominetti presented an example of a 1-
+Lipschitz continuous operator defined on a Banach space with the property that the
+fixed point residual of the Mann iteration is bounded from below by O( k1 ). For given
+initial points y0 and x0 , the Mann iterates are defined for every k ≥ 0 recursively as
+follows
+                                                 k
+                                                 X
+                             xk+1 := sk+1
+                                      0   y0 +         sk+1
+                                                        i+1 T (xi ),
+                                                 i=0
+                                               Pk+1
+where sk+1
+        i   ≥ 0 for every i = 0, ..., k + 1 and i=0 sk+1
+                                                     i    = 1.
+    As observed in Remark 2.1, the Fast KM algorithm is not a Mann iteration since
+not all the weights are nonnegative, although they do sum up to 1. This observation
+suggests that in order to obtain a fixed point residual rate of o( k1 ) in Banach spaces,
+one might have to go beyond general Mann iterations and allow, for instance, negative
+weights in the iterative scheme.
+     4. Application to several splitting algorithms. In the light of the fact that
+fixed point methods lie at the heart of important splitting iterative schemes for mono-
+tone inclusions, we will discuss in this section how the Fast KM algorithm impacts
+the latter. In addition, we will review some recent acceleration approaches of splitting
+algorithms from the literature.
+     Consider the following monotone inclusion problem
+
+(4.1)                Find x ∈ H such that 0 ∈ A (x) + B (x) + C (x) ,
+
+where A, B : H → 2H are set-valued maximally monotone operators and C : H → H
+is a β-cocoercive operator with β > 0.
+     Davis and Yin introduced in [16] the following operator
+
+(4.2)      TDY : H → H,        TDY := JγA ◦ (2JγB − Id − γC ◦ JγB ) + Id − JγB ,
+                                              −1
+where 0 < γ ≤ 2β and JγA := (Id + γA)         denotes the resolvent operator of γA
+with constant γ. The set of zeros of A + B + C, denoted by Zer (A + B + C), can be
+characterized in terms of TDY by (see [16, Lemma 2.2])
+
+                            Zer (A + B + C) = JγB (FixTDY ) .
+
+     The Krasnosel’skiı̆-Mann iteration applied to TDY gives rise to the three-operator
+splitting method
+
+                       xk+1 := (1 − sk ) xk + sk TDY (xk )       ∀k ≥ 0,
+                      FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                            13
+                                     i
+                                    γ                          2β
+where x0 ∈ H and (sk )k≥0 ⊆ 0, 2 − 2β   . The operator TDY is 4β−γ -averaged, here
+we use the convention β := +∞ whenever C ≡ 0, in which case the operator is 12 -
+averaged. According to [23], this constant is tight. It has been shown in [14]
+                                                                            that
+                                                                                the
+convergence rate of three-operator splitting method is, as expected, of O √1k .
+    The theoretical statements of the previous section applied to this particular set-
+ting lead to the following result.
+                                                                               γ
+    Corollary 4.1. Let α > 2, x0 , x1 ∈ H, 0 < γ ≤ 2β and 0 < s ≤ 2 − 2β         . For
+every k ≥ 1 we set
+                                  
+                             sα            (1 − s) k
+          xk+1 := 1 −                xk +            (xk − xk−1 )
+                         2 (k + α)          k+α
+                         sα                   sk
+                   +            TDY (xk ) +        (TDY (xk ) − TDY (xk−1 )) .
+                     2 (k + α)              k+α
+
+Then the following statements are true:
+ (i) (xk )k≥0 converges weakly to an element x∗ in FixTDY such that JγB (x∗ ) is a
+     solution of (4.1);
+(ii) it holds
+                                                              
+                         1                                      1
+       ∥xk − xk−1 ∥ = o         and   ∥xk−1 − TDY (xk−1 )∥ = o     as k → +∞.
+                         k                                      k
+
+    In the following we will revisit some of the particular formulations of (4.1) and
+of the corresponding underlying operator TDY also in order to emphasize the broad
+applicability of Corollary 4.1.
+    Resolvent operator. For B ≡ C ≡ 0, the problem (4.1) reduces to
+
+                           Find x ∈ H such that 0 ∈ A (x) ,
+
+and, for γ > 0,
+                                     TDY = JγA ,
+
+which is 21 -averaged.
+    The fixed point residual of the classical proximal point algorithm
+
+                              xk+1 = JγA (xk )   ∀k ≥ 0,
+                                  
+is known to be in general of O √1k , whereas Gu and Yang have shown in [19] that,
+for H := Rn , it can be tightened to
+                                       
+                                          1
+                                     
+                                      O    ,            if n = 1,
+                                          k
+                                     
+                                     
+                                                   
+                 ∥JγA (xk ) − xk ∥ =          1
+                                     
+                                     
+                                      O q           , if n ≥ 2.
+                                                  k
+                                            1 + k1 k
+                                     
+                                     
+
+     In the same setting of finite-dimensional Hilbert spaces, Kim proposed in [25] (see
+also [35]) the following accelerated proximal point method, which, given y1 = x0 = x1 ∈
+14                             R. I. BOŢ AND D.-K. NGUYEN
+
+
+H and γ > 0, reads: for every k ≥ 1 set
+                  yk+1 := JγA (xk ) ,
+(4.3)                               k                  k
+                  xk+1 := yk+1 +       (yk+1 − yk ) −     (yk − xk−1 ) .
+                                   k+2                k+2
+Using the performance estimation approach, the the author proved      that the method
+exhibits a convergence rate of the fixed point residual of O k1 .
+                                                               
+
+    By comparison, the algorithm in Corollary 4.1 for γ > 0, 0 < s ≤ 2 and TDY =
+JγA exhibits a convergence rate of the fixed point residual of o k1 .
+     Forward-backward operator. For B ≡ 0, the problem (4.1) reduces to
+
+                         Find x ∈ H such that 0 ∈ A (x) + C(x),
+and, for 0 < γ ≤ 2β,
+                              TDY := TF B = JγA ◦ (Id − γC),
+          2β
+which is 4β−γ -averaged.
+     The Krasnosel’skiı̆-Mann iteration gives rise in this case to the classical forward-
+backward algorithm,
+                which is known to exhibit a convergence rate of the fixed point
+residual of O √1k . By comparison, the algorithm in Corollary 4.1 for TDY = TF B
+exhibits a convergence rate of the fixed point residual of o k1 .
+                                                                
+
+     Douglas-Rachford operator. For C ≡ 0, the problem (4.1) reduces to
+
+                         Find x ∈ H such that 0 ∈ A (x) + B(x),
+and, for γ > 0,
+                      TDY := TDR = JγA ◦ (2JγB − Id) + Id − JγB ,
+which is 21 -averaged.
+   The Krasnosel’skiı̆-Mann iteration gives rise in this case to the classical Douglas-
+Rachford algorithm (see [17], [30]),
+                                which is known to exhibit a convergence rate
+of the fixed point residual of O √1k (see [22]). By comparison, the algorithm in
+Corollary 4.1 for γ > 0, 0 < s ≤ 2 and TDY = TDR exhibits a convergence rate of the
+fixed point residual of o k1 .
+     Recent contributions to acceleration approaches. The idea of the Halpern
+iteration of considering in the iterative schemes convex combinations with an anchor
+point has been recently extensively exploited as it led to convergence rate improve-
+ments of numerical methods. This has been first done for fixed point iterations ([38],
+[29]), then for algorithms for solving monotone equations and minimax problems ([39],
+[27]), and later on for variants of splitting algorithms like the forward-backward, the
+Douglas-Rachford and the three-operator splitting method ([36, 41, 40, 44]).
+     Our method, however, relies on the continuous time approach from [6] and uses
+the idea of Nesterov’s momentum updates ([33]).
+     5. Numerical experiments.
+    5.1. Proximal point type methods. In order to illustrate the numerical per-
+formances of the Fast KM algorithm by comparison to other iterative schemes we
+consider first, for n ≥ 1, the fixed point problem
+                            Find x ∈ R2n such that JA (x) = x,
+                      FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                            15
+
+where JA : R2n → R2n is the resolvent of the maximally monotone operator given by
+the matrix
+                                             
+                                1      O I
+                         A=                     ∈ R2n×2n ,
+                              M − 1 −I O
+where M is a positive constant, I and O denote the identity and the all-zeros matrix
+in Rn×n , respectively. This operator has been used in the literature to illustrate
+the worse-case performance of the proximal point method and of the Banach-Picard
+iteration (see [19, 35]). Notice that x = 0 is the unique fixed point of JA and that JA
+is 21 -averaged, therefore we take as step size s := 2.
+
+
+
+
+Fig. 1: Comparison of the behaviour of the fixed point residual for different methods
+
+
+     We solve the fixed point problem with the Banach-Picard iteration, which corre-
+sponds to the proximal point algorithm, the Krasnosel’skiı̆-Mann iteration (1.3), which
+corresponds to the relaxed proximal point algorithm, the Halpern iteration (1.4), the
+accelerated proximal point method (APPM) (4.3), and the Fast KM algorithm (2.7)
+with α = 3.                                             
+                                                         1n
+     For all iterative methods we consider as starting         ∈ R2n , where 1n and 0n
+                                                         0n
+denote then all ones and all zeros vector in Rn , respectively.
+     In a first experiment, we run all these methods in case n := 5000. The values of
+the corresponding fixed point residuals are plotted in Figure 1 in logarithmic scale. It
+is obvious that the Fast KM algorithm outperforms all other numerical algorithms.
+     In a second experiment, we run the Fast KM algorithm for different values of α
+in {3, 5, 10, 20}. The values of the corresponding fixed point residuals are plotted in
+Figure 2 in logarithmic scale. As there is almost no difference between the methods
+in the first 100 iterations, one can notice that the speed of convergence of the fixed
+point residual increases with increasing α and it is consistently faster than o (1/k).
+This phenomenon seems to be common for algorithms enhanced with Nesterov’s mo-
+mentum update (see also [6]). However, whereas in the case of Nesterov’s acceleration
+algorithms for minimizing smooth and convex function the values of α are correlated
+with the speed of convergence of the objective function values, here this applies to
+the fixed point residual.
+16                           R. I. BOŢ AND D.-K. NGUYEN
+
+
+
+
+Fig. 2: The parameter α influences the convergence behaviour of the Fast KM algo-
+rithm
+
+
+
+
+    In addition, the plots of the fixed point residual exhibit a strong oscillatory behav-
+iour, very similar to the behaviour of the objective function values of Nesterov’s accel-
+eration algorithms for convex minimization. This is another evidence that Nesterov’s
+momentum improves the convergence behaviour of numerical algorithms beyond the
+optimization setting (see also [6]).
+
+
+
+
+Fig. 3: The trajectory of the Banach-         Fig. 4: The trajectory of the Kras-
+Picard iteration/proximal point algo-         nosel’skiı̆-Mann iteration/relaxed proxi-
+rithm                                         mal point algorithm
+
+
+
+    In Figure 3 - Figure 10 we plot the trajectories generated by all methods consid-
+ered in the numerical experiments in case n := 1. From the convergence analysis we
+know that they all converge to the unique fixed point of the operator, however, as the
+plots show, after spiralling around it. It is also obvious that the spiralling effect in
+case of the Fast KM algorithm is less pronounced than for the other algorithms.
+                     FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                         17
+
+
+
+
+Fig. 5: The trajectory of Halpern itera-   Fig. 6: The trajectory of the accelerated
+tion                                       proximal point method
+
+
+
+
+Fig. 7: The trajectory of the Fast KM      Fig. 8: The trajectory of the Fast KM
+algorithm for α = 3                        algorithm for α = 5
+
+
+
+
+Fig. 9: The trajectory of the Fast KM      Fig. 10: The trajectory of the Fast KM
+algorithm for α = 10                       algorithm for α = 20
+
+
+
+
+    5.2. Douglas-Rachford type methods. For the second family of numerical
+experiments we consider the following feasibility problem
+
+                      Find x ∈ R2n such that x ∈ R2n
+                                                  + ∩ Hu,ν ,
+18                            R. I. BOŢ AND D.-K. NGUYEN
+
+
+where R2n
+        + is the set of vectors in R
+                                     2n
+                                        with nonnegative entries and, for a given vector
+     2n
+u ∈ R and real number ν ∈ R,
+
+                            Hu,ν := x ∈ R2n : ⟨x, u⟩ = ν .
+                                   
+
+If R2n
+    + ∩ Hu,ν ̸= ∅, then (see, for instance, [3, Corollary 27.6])
+                                                           
+                       R2n
+                        +  ∩  H u,ν = Zer   N  2n
+                                              R+  + N H u,ν
+                                                              ̸= ∅,
+
+where ND : R2n ⇒ R2n denotes the normal cone operator of a nonempty closed
+convex set D ⊆ Rn . The normal cone operator ND is a maximally monotone and its
+resolvent JND is nothing else than the projection ProjD onto the set D.
+    The Douglas-Rachford (DR) algorithm is known as one of the most successful
+numerical method for solving such feasibility problems. In this concrete case it reads
+
+                       xk+1 := (1 − sk )xk + sk TDR (xk ) ∀k ≥ 0,
+
+where x0 ∈ R2n , (sk )k≥0 ⊆ (0, 2] and TDR := ProjR2n+
+                                                         ◦(2ProjHu,ν −Id)+Id−ProjHu,ν .
+    In the following we compare the performances of the DR algorithm for various
+choices for (sk )k≥0 ⊆ (0, 2] with the ones of the Halpern algorithm ([21]) and of the
+Fast KM algorithm, which make also use of the Douglas-Rachford operator TDR . For
+the Fast KM algorithm we consider α ∈ {5, 10, 30, 100, 500} and as a step size s := 2.
+    In the numerical experiments we generate for different values for the dimension
+                                                                                    2n
+n ≥ 1 a number of Ntest pairs (u, ν) ∈ R2n + × R+ , such that the intersection of R+
+and Hu,ν is nonempty, and a number of Ninit normally distributed starting points
+x0 ∈ R2n , which we scale then by 100. For each generated hyperplane Hu,ν and
+starting point x0 we run several variants of the DR algorithm, the Fast KM method
+and the Halpern algorithm. The algorithms terminate either after kmax iterations or
+once the following condition is fulfilled
+                                                               
+(5.1)               ProjHu,ν (xk ) − ProjR2n
+                                          +
+                                               Proj H u,ν
+                                                          (x k )  ≤ Tol,
+
+where Tol denotes the tolerance error. This condition is motivated by the fact that
+for the Douglas-Rachford methods the so-called shadow sequence is the one that
+converges to a solution; in other words, (5.1) guarantees that ProjHu,ν (xk ) is close
+to the intersection R2n    + ∩ Hu,ν . A trial fulfilling (5.1) before kmax iterations will
+be counted as a successful attempt. In Table 1 and Table 2 we report the ratio of
+successfully solved problems and the average number of iterations the algorithms need
+until termination.
+     Table 1 shows the results for three settings determined by three choices for the
+triple (n, Ntest , Ninit ) with Tol := 10−16 for the first two and Tol := 10−12 for the
+third one, and kmax := 100. For each setting we write in boldface the best values for
+the ratios and the average number of iterates for the DR algorithms. It is evident that
+the Fast KM algorithm outperforms in both criteria the best performing variants of
+the Douglas-Rachford algorithm and the Halpern algorithm already for α = 30, and
+even more so for larger values of α.
+     Table 2 shows the results obtained for the Fast KM algorithm for larger values
+of n, Tol := 10−8 and kmax := 200. It emphasizes once more that the numerical
+performances of our method become better when α takes larger values. Different from
+the class of DR algorithms, the growing dimension seems to less affect the number of
+iterations needed by Fast KM to provide a solution.
+                                   FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                                                                    19
+
+                                                                                                                             
+   (n, Ntest , Ninit )                   1, 102 , 104                          5, 102 , 104                         50, 102 , 103
+
+          method               ratio             iterations         ratio            iterations           ratio            iterations
+
+
+   DR : sk = 1 − 1             0.9939           7.6181 ± 6.26       0.9887        14.5431 ± 12.54         0.8456        42.823 ± 20.99
+                k+2
+   DR : sk ≡ 1                 0.9940          4.8877 ± 6.00        0.9907        11.6671 ± 12.17         0.8700        39.1163 ± 21.08
+
+   DR : sk = 1 +  1            0.9944           5.9398 ± 6.23       0.9923        12.0513 ± 10.52         0.8949        36.6431 ± 20.41
+                k+2
+   DR : sk ≡ 7                 0.9976           6.8541 ± 6.61       0.9952          13.291 ± 7.85         0.9428       33.5245 ± 17.25
+             5
+   DR : sk ≡ 3                 0.9980           7.6111 ± 6.54       0.9957         15.0055 ± 7.06         0.9514        34.1237 ± 15.8
+             2
+   DR : sk ≡ 7                 0.9992          12.1969 ± 7.59       0.9965          27.535 ± 5.69         0.9644        46.8346 ± 10.99
+             4
+   DR : sk = 9 − 1             0.9992           9.3479 ± 6.96       0.9968         23.3639 ± 6.36         0.9648        47.6916 ± 11.91
+             5   k+2
+   DR : sk ≡ 9                 0.9994          14.5185 ± 8.64       0.9966         34.2205 ± 6.08         0.9649        54.9974 ± 10.09
+             5
+   DR : sk = 9 + 1             0.9996          23.1938 ± 11.67      0.9963         47.9954 ± 6.10         0.9598        64.4231 ± 7.85
+             5   k+2
+   Halpern                     0.2400          32.8750 ± 22.87      0.0000              −//−              0.0000             −//−
+
+   Fast KM : α = 5             0.9690          22.4536 ± 18.26      0.4973        70.4548 ± 16.42         0.0000             −//−
+
+   Fast KM : α = 10            1.0000           9.7566 ± 6.83       0.9996        27.5816 ± 11.78         0.8753        65.5713 ± 14.46
+
+   Fast KM : α = 30            1.0000           4.9323 ± 2.23       1.0000         10.0186 ± 2.41         1.0000         17.6134 ± 3.3
+
+   Fast KM : α = 100           1.0000           3.5014 ± 1.35       1.0000          6.2383 ± 1.19         1.0000         9.5427 ± 1.43
+
+   Fast KM : α = 500           1.0000           2.6151 ± 1.00       1.0000          4.3118 ± 0.73         1.0000         6.2944 ± 0.75
+
+
+
+Table 1: The ratio of successfully solved problems and the average number of iterations
+for several algorithms
+
+
+
+                         (n, Ntest , Ninit )                (500; 100; 500)                     (5000, 50, 100)
+
+                              method               ratio           iterations           ratio          iterations
+
+
+                         Fast KM : α = 10          0.6076       154.5383 ± 24.31        0.0000           −//−
+
+                         Fast KM : α = 30          1.0000        29.3096 ± 5.14         1.0000       40.7248 ± 3.56
+
+                         Fast KM : α = 100         1.0000        13.8564 ± 1.77         1.0000       17.4264 ± 1.18
+
+                         Fast KM : α = 500         1.0000        8.5773 ± 0.94          1.0000       10.282 ± 0.70
+
+
+
+Table 2: The ratio of successfully solved problems and the average number of iterations
+for the Fast KM algorithm
+
+
+
+    To further illustrate the behaviour of the considered numerical methods, we plot
+below some generated trajectories in case n := 1, and for u = (1, 5)T and ν := 6. The
+generated sequences by the different methods may converge to different solutions for
+the same starting point which is plotted as a black square in the figures. However,
+the way the iterates of the DR algorithms and the Halpern algorithm, on the one
+hand, an the Fast KM algorithm, on the other hand, tend to their limits through are
+totally different. While the iterates of the DR algorithms and the Halpern algorithm
+move along a curve above the hyperplane Hu,ν , the ones generated by the Fast KM
+algorithm approach in a more straight manner the solution.
+    In the figures Figure 17 and Figure 18 we plot the trajectory generated by the
+Halpern algorithm for two different starting points in order to emphasize their pro-
+nounced spiralling around the limit point. This also explains why (see also Figure 14),
+even if the algorithm finds a solution in less than kmax steps, it requires more iterations
+than the DR algorithms and significantly more than the Fast KM algorithm.
+20                          R. I. BOŢ AND D.-K. NGUYEN
+
+
+
+
+Fig. 11: The trajectory of the Douglas-     Fig. 12: The trajectory of the Douglas-
+                                  1
+Rachford algorithm for sk := 1 − k+2        Rachford algorithm for sk := 1
+
+
+
+
+Fig. 13: The trajectory of the Douglas-     Fig. 14: The trajectory of the Halpern
+Rachford algorithm for sk := 23             algorithm
+
+
+
+
+Fig. 15: The trajectory of the Fast KM      Fig. 16: The trajectory of the Fast KM
+algorithm for α = 5                         algorithm for α = 30
+
+
+
+    Appendix. In the appendix, we have compiled some auxiliary results and pro-
+vided the proofs of the two technical lemmas used in the convergence analysis of the
+Fast KM algorithm.
+     Appendix A. Auxiliary results.
+     The Opial Lemma ([34]) is used in the proof of the convergence of the iterates.
+                     FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                           21
+
+
+
+
+Fig. 17: An instance for which the
+                                             Fig. 18: The spiral behavior of the
+Halpern algorithm does not terminates in
+                                             Halpern algorithm
+less than kmax iterations
+
+
+
+    Lemma A.1. Let S be a nonempty subset of H and (xk )k≥0 be a sequence in H.
+Assume that
+(i) for every x∗ ∈ S, lim ∥xk − x∗ ∥ exists;
+                      k→+∞
+(ii) every weak sequential cluster point of the sequence (xk )k≥0 as k → +∞ belongs
+     to S.
+Then (xk )k≥0 converges weakly to a point in S as k → +∞.
+   For the proof of the following result, which is the discrete counterpart of [1,
+Lemma A.2], we refer to [6, Lemma 21].
+    Lemma A.2. Let a ≥ 1 and (qk )k≥0 be a bounded sequence in H such that
+                                               
+                                    k
+                     lim    qk+1 + (qk+1 − qk ) = l ∈ H.
+                    k→+∞            a
+
+Then it holds lim qk = l.
+              k→+∞
+
+    The following result is a particular instance of [3, Lemma 5.31].
+    Lemma A.3. Let (ak )k≥1 , (bk )k≥1 and (dk )k≥1 be sequences of real numbers. As-
+sume that (ak )k≥1 isPbounded from below, and (bk )k≥1 and (dk )k≥1 are nonnegative
+sequences such that k≥1 dk < +∞. If
+
+                              ak+1 ≤ ak − bk + dk   ∀k ≥ 1,
+
+then the following statements are true:       P
+ (i) the sequence (bk )k≥1 is summable, namely k≥1 bk < +∞;
+(ii) the sequence (ak )k≥1 is convergent.
+    The following elementary result is used several times in the paper.
+    Lemma A.4. Let a, b, c ∈ R be such that a < 0 and b2 − ac ≤ 0. Then it holds
+                          2                    2
+                     a ∥x∥ + 2b ⟨x, y⟩ + c ∥y∥ ≤ 0     ∀x, y ∈ H.
+22                            R. I. BOŢ AND D.-K. NGUYEN
+
+
+   Appendix B. Proofs of the technical lemmas used in the analysis of the
+Fast KM algorithm.
+   In this subsection we provide the proofs of Lemma 3.1 and Lemma 3.2.
+    Proof of Lemma 3.1. (i) Let 0 ≤ λ ≤ α − 1. First we will show that for every
+k ≥ 1 the following identity holds
+(B.1)
+                                                              
+                  1                                          2
+     Eλ,k+1 +           (α − 2) αs2 (k + 1) ∥(Id − T ) (xk )∥
+              4 (α − 1)
+                                                               
+                      1                                       2
+       − Eλ,k +             (α − 2) αs2 k ∥(Id − T ) (xk−1 )∥
+                  4 (α − 1)
+                                                                                          2
+ = 2 (2 − α) λs ⟨xk+1 − x∗ , (Id − T ) (xk )⟩ + 2 (λ + 1 − α) (2k + α + 1) ∥xk+1 − xk ∥
+           1                                                                 2
+                 (2 − α) s2 2 (3α − 2) k + 2α2 + α − 2 ∥(Id − T ) (xk )∥
+                                                          
+   +
+      4 (α − 1)
+         1                                      
+   +          4 (α − 1) (λ + 1 − α) + α (2 − α) sk ⟨xk+1 − xk , (Id − T ) (xk )⟩
+      α−1
+         1                                             2
+                                                          
+   +          2α (α − 1) (λ + 1 − α) + α − 2 (α − 1) s ⟨xk+1 − xk , (Id − T ) (xk )⟩
+      α−1
+         1
+   +         (2 − α) s (k + α) k ⟨xk+1 − xk , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+      α−1
+           1                                                                2
+                 (2 − α) s2 k 2k + α ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥ .
+                                    
+   +
+      4 (α − 1)
+     For brevity we denote for every k ≥ 0
+(B.2)          uλ,k+1 := 2λ (xk+1 − x∗ ) + 2 (k + 1) (xk+1 − xk )
+                                 1
+                          +            (3α − 2) s (k + 1) (Id − T ) (xk ) ,
+                             2 (α − 1)
+which means that for every k ≥ 1 it holds
+                                                     1
+(B.3) uλ,k = 2λ (xk − x∗ ) + 2k (xk − xk−1 ) +             (3α − 2) sk (Id − T ) (xk−1 ) .
+                                                 2 (α − 1)
+     Subtracting (B.3) from (B.2) and then using (2.6) we obtain for every k ≥ 1
+(B.4)      uλ,k+1 − uλ,k
+         = 2 (λ + 1 − α) (xk+1 − xk ) + 2 (k + α) (xk+1 − xk ) − 2k (xk − xk−1 )
+                  1
+           +            (3α − 2) s (Id − T ) (xk )
+              2 (α − 1)
+                  1                                                   
+           +            (3α − 2) sk (Id − T ) (xk ) − (Id − T ) (xk−1 )
+              2 (α − 1)
+                                              1     
+                                                                   2
+                                                                     
+         = 2 (λ + 1 − α) (xk+1 − xk ) +              α − 2 (α − 1) s (Id − T ) (xk )
+                                         2 (α − 1)
+                  1                                                  
+           +            (2 − α) sk (Id − T ) (xk ) − (Id − T ) (xk−1 ) .
+              2 (α − 1)
+In the following we want to use the identity
+(B.5)
+  1          2         2
+                                                     1                2
+     ∥uλ,k+1 ∥ − ∥uλ,k ∥ = ⟨uλ,k+1 , uλ,k+1 − uλ,k ⟩ − ∥uλ,k+1 − uλ,k ∥          ∀k ≥ 1.
+  2                                                   2
+                         FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                                             23
+
+Thanks to the relations (B.2) and (B.4), we derive for every k ≥ 1 that
+(B.6)
+  ⟨uλ,k+1 , uλ,k+1 − uλ,k ⟩
+= 4λ (λ + 1 − α) ⟨xk+1 − x∗ , xk+1 − xk ⟩
+       1                  2
+                             
+  +         α − 2 (α − 1) λs ⟨xk+1 − x∗ , (Id − T ) (xk )⟩
+    α−1
+       1
+  +        (2 − α) λsk ⟨xk+1 − x∗ , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+    α−1
+                                        2
+  + 4 (λ + 1 − α) (k + 1) ∥xk+1 − xk ∥
+       1                  2
+                                                      
+  +         α − 2 (α − 1) + (3α − 2) (λ + 1 − α) s (k + 1) ⟨xk+1 − xk , (Id − T ) (xk )⟩
+    α−1
+       1
+  +        (2 − α) s (k + 1) k ⟨xk+1 − xk , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+    α−1
+         1                
+                                          2
+                                            
+                                                                          2
+  +           2 (3α −  2)   α − 2 (α − 1)     s2 (k + 1) ∥(Id − T ) (xk )∥
+    4 (α − 1)
+         1                         2
+  +           2 (3α − 2) (2 − α) s (k + 1) k ⟨(Id − T ) (xk ) ,
+    4 (α − 1)
+                                                         (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩ ,
+and
+(B.7)
+        1                 2
+   −      ∥uλ,k+1 − uλ,k ∥
+        2
+                                             1                                  2
+                     2              2                                        2                               2
+ = − 2 (λ + 1 − α) ∥xk+1 − xk ∥ −                    2       α − 2 (α − 1)            s2 ∥(Id − T ) (xk )∥
+                                        8 (α − 1)
+            1             22 2                                                   2
+   −           2 (2 − α) s k ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥
+     8 (α − 1)
+        1                 2
+                             
+   −         α − 2 (α − 1) (λ + 1 − α) s ⟨xk+1 − xk , (Id − T ) (xk )⟩
+     α−1
+        1
+   −        (2 − α) (λ + 1 − α) sk ⟨xk+1 − xk , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+     α−1
+          1      
+                               2
+                                 
+   −           2 α − 2 (α − 1)     (2 − α) s2 k ⟨(Id − T ) (xk ) ,
+     4 (α − 1)
+                                             (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩ .
+A direct computation shows that for every k ≥ 0
+                                                                            
+                                        2                                    2
+    (3α − 2) (λ + 1 − α) + α − 2 (α − 1) (k + 1) − (λ + 1 − α) α − 2 (α − 1)
+                                         
+                                        2                                         2
+= (3α − 2) (λ + 1 − α) + α − 2 (α − 1) k + 2α (α − 1) (λ + 1 − α) + α − 2 (α − 1)
+                                                  
+                                        2
+= (3α − 2) (λ + 1 − α) + α − 2 (α − 1) − (2 − α) λ k + (2 − α) λk
+                                                 2
+ + 2α (α − 1) (λ + 1 − α) + α − 2 (α − 1)
+                                  
+= 4 (α − 1) (λ + 1 − α) + α (2 − α) k + (2 − α) λk
+                                                 2
+  + 2α (α − 1) (λ + 1 − α) + α − 2 (α − 1) .
+24                            R. I. BOŢ AND D.-K. NGUYEN
+
+
+Therefore, by plugging (B.6) and (B.7) into (B.5), we get for every k ≥ 1
+(B.8)
+   1           2           2
+                              
+      ∥uλ,k+1 ∥ − ∥uλ,k ∥
+   2
+ = 4λ (λ + 1 − α) ⟨xk+1 − x∗ , xk+1 − xk ⟩
+      1                  2
+                            
+ +         α − 2 (α − 1) λs ⟨xk+1 − x∗ , (Id − T ) (xk )⟩
+   α−1
+      1
+ +        (2 − α) λsk ⟨xk+1 − x∗ , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+   α−1
+                                                   2
+ + 2 (λ + 1 − α) (2k + α + 1 − λ) ∥xk+1 − xk ∥
+        1      
+                                2
+                                  
+                                                                                    2
+                                    s2 2 (3α − 2) k + 2α2 + α − 2 ∥(Id − T ) (xk )∥
+                                                                    
+ +           2 α − 2 (α − 1)
+   8 (α − 1)
+      1                                                      
+ +         4 (α − 1) (λ + 1 − α) + α (2 − α) + (2 − α) λ sk ⟨xk+1 − xk , (Id − T ) (xk )⟩
+   α−1
+      1                                              2
+                                                        
+ +         2α (α − 1) (λ + 1 − α) + α − 2 (α − 1) s ⟨xk+1 − xk , (Id − T ) (xk )⟩
+   α−1
+      1
+ +        (2 − α) s (k + α − λ) k ⟨xk+1 − xk , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+   α−1
+        1               2
+ +           2 (2 − α) s ((3α − 2) k + 2 (α − 1) α) k ⟨(Id − T ) (xk ) ,
+   4 (α − 1)
+                                             (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+        1              2 2 2                                        2
+ −           2 (2 − α) s k ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥ .
+   8 (α − 1)
+    Notice that by the definition of the energy function we have for every k ≥ 1
+                       1                                       2
+(B.9)      Eλ,k +             (α − 2) αs2 k ∥(Id − T ) (xk−1 )∥
+                   4 (α − 1)
+            1        2                             2
+        = ∥uλ,k ∥ + 2λ (α − 1 − λ) ∥xk − x∗ ∥
+            2
+                 1
+           +         (α − 2) λsk ⟨xk − x∗ , (Id − T ) (xk−1 )⟩
+              α−1
+                   1              2                                              2
+           +            2 (α − 2)s k ((3α − 2) k + 2(α − 1)α) ∥(Id − T ) (xk−1 )∥ .
+              8 (α − 1)
+Later we will subtract the above identity at consecutive indices and to this end we
+will make use of the following identities which hold for every k ≥ 1:
+                        2              2                                                2
+(B.10)     ∥xk+1 − x∗ ∥ − ∥xk − x∗ ∥ = 2 ⟨xk+1 − x∗ , xk+1 − xk ⟩ − ∥xk+1 − xk ∥ ,
+
+(B.11)     2λs (k + 1) ⟨xk+1 − x∗ , (Id − T ) (xk )⟩ − 2λsk ⟨xk − x∗ , (Id − T ) (xk−1 )⟩
+                                                                            
+         = 2λsk ⟨xk+1 − x∗ , (Id − T ) (xk )⟩ − ⟨xk − x∗ , (Id − T ) (xk−1 )⟩
+           + 2λs ⟨xk+1 − x∗ , (Id − T ) (xk )⟩
+         = 2λsk ⟨xk+1 − x∗ , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+           + 2λsk ⟨xk+1 − xk , (Id − T ) (xk−1 )⟩ + 2λs ⟨xk+1 − x∗ , (Id − T ) (xk )⟩
+         = 2λsk ⟨xk+1 − x∗ , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+           − 2λsk ⟨xk+1 − xk , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+           + 2λsk ⟨xk+1 − xk , (Id − T ) (xk )⟩ + 2λs ⟨xk+1 − x∗ , (Id − T ) (xk )⟩ ,
+                      FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                              25
+
+and
+
+(B.12)
+      1                                                                  2
+            s2 (k + 1) (3α − 2) (k + 1) + 2 (α − 1) α ∥(Id − T ) (xk )∥
+                                                      
+  4 (α − 1)
+         1                                                        2
+               s2 k (3α − 2) k + 2 (α − 1) α ∥(Id − T ) (xk−1 )∥
+                                              
+  −
+     4 (α − 1)
+      1                                                      2
+            s2 2 (3α − 2) k + 2α2 + α − 2 ∥(Id − T ) (xk )∥
+                                            
+=
+  4 (α − 1)
+         1                                      
+                                                                2                      2
+                                                                                         
+  +            s2 k ((3α − 2) k + 2 (α − 1) α) ∥(Id − T ) (xk )∥ − ∥(Id − T ) (xk−1 )∥
+     4 (α − 1)
+      1                                                      2
+            s2 2 (3α − 2) k + 2α2 + α − 2 ∥(Id − T ) (xk )∥
+                                            
+=
+  4 (α − 1)
+         1
+               s2 k (3α − 2) k + 2 (α − 1) α ⟨(Id − T ) (xk ) ,
+                                              
+  +
+     2 (α − 1)
+                                                  (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+         1                                                                        2
+               s2 k (3α − 2) k + 2 (α − 1) α ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥ .
+                                              
+  −
+     4 (α − 1)
+
+                                                       1
+     Therefore, by multiplying (B.11) and (B.12) by 2(α−1) (α − 2), relation (B.9) gives
+for every k ≥ 1
+                                                              
+                1                                            2
+ Eλ,k+1 +             (α − 2) αs2 (k + 1) ∥(Id − T ) (xk )∥
+           4 (α − 1)
+                                                              
+                    1                                        2
+   − Eλ,k +               (α − 2) αs2 k ∥(Id − T ) (xk−1 )∥
+                4 (α − 1)
+   1            2         2
+                                                 
+                                                                  2              2
+                                                                                   
+=      ∥uλ,k+1 ∥ − ∥uλ,k ∥ + 2λ(α − 1 − λ) ∥xk+1 − x∗ ∥ − ∥xk − x∗ ∥
+   2
+     1
++        (α − 2) λs ⟨xk+1 − x∗ , (Id − T ) (xk )⟩
+  α−1
+     1
++        (α − 2) λsk ⟨xk+1 − x∗ , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+  α−1
+     1
+−        (α − 2) λsk ⟨xk+1 − xk , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+  α−1
+     1
++        (α − 2) λsk ⟨xk+1 − xk , (Id − T ) (xk )⟩
+  α−1
+       1               2                    2
+                                                                         2
++           2 (α − 2) s 2 (3α − 2) k + 2α + α − 2 ∥(Id − T ) (xk )∥
+  8 (α − 1)
+       1               2
+                                                      
++           2 (α − 2) s k (3α − 2) k + 2 (α − 1) α ⟨(Id − T ) (xk ) ,
+  4 (α − 1)
+                                                   (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+       1               2
+                                                                                       2
+−           2 (α − 2) s k (3α − 2) k + 2 (α − 1) α ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥
+  8 (α − 1)
+
+By multiplying (B.10) by 2λ(α − 1 − λ) and by taking into consideration (B.8) and
+26                                   R. I. BOŢ AND D.-K. NGUYEN
+
+
+that
+                                             2
+                              α − 2 (α − 1) + α − 2 = 2 (α − 1) (2 − α)
+                                 2
+                    − (α − 2) − (α − 2) (3α − 2) = −4 (α − 2) (α − 1) ,
+
+we immediately obtain from here identity (B.1).
+     Next we will focus on the term ⟨xk+1 − xk , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩ for
+which we will provide an upper bound by exploiting the cocoercivity of Id − T . Pre-
+cisely, the relations (2.1) and (2.6) guarantee that for every k ≥ 1
+
+        − 2sk (k + α) ⟨xk+1 − xk , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+      = − 2sk 2 ⟨xk − xk−1 , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+                                                         2
+        + 2s2 k 2 ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥
+        + αs2 k ⟨(Id − T ) (xk ) , (Id − T ) (xk ) − (Id − T ) (xk−1 )⟩
+                
+               1                                               2   1                   2
+      ≤ 2s −       sk 2 ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥ + αs2 k ∥(Id − T ) (xk )∥
+               θ                                                   2
+          1                                              2    1                     2
+        + αs2 k ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥ − αs2 k ∥(Id − T ) (xk−1 )∥
+        2                                                 2
+                 1          1                                             2
+      ≤    2s −      sk 2 + αs2 k ∥(Id − T ) (xk ) − (Id − T ) (xk−1 )∥
+                 θ          2
+          1                                2    1                       2
+        + αs2 (k + 1) ∥(Id − T ) (xk )∥ − αs2 k ∥(Id − T ) (xk−1 )∥ .
+          2                                     2
+                                        1
+After multiplying this inequality by 2(α−1) (α − 2) > 0, adding it to(B.1), and using
+that
+
+       2 (2 − α) λs ⟨xk+1 − x∗ , (Id − T ) (xk )⟩
+     = 2 (2 − α) λs ⟨xk+1 − xk , (Id − T ) (xk )⟩ + 2 (2 − α) λs ⟨xk − x∗ , (Id − T ) (xk )⟩ ,
+                                                                                                            2
+we deduce the desired inequality (3.1). To obtain the coefficients of ∥xk+1 − xk ∥
+                     2
+and ∥(Id − T ) (xk )∥ as given in (3.2), one also has to take into consideration that
+λ + 1 − α ≤ 0 and 2α2 + α − 2 > 0, as α > 2. The assumptions we made on α and λ
+immediately imply that ω1 , ω2 and ω4 are nonpositive numbers.
+    (ii) Since
+     1
+          (α − 2) λsk ⟨xk − x∗ , (Id − T ) (xk )⟩
+   α−1
+           1                         2 2                 2
+   +            2 (α − 2) (3α − 2) s k ∥(Id − T ) (xk )∥
+      8 (α − 1)
+                   
+      1                1
+ =         (α − 2)          (3α − 2) λsk ⟨xk − x∗ , (Id − T ) (xk )⟩
+   3α − 2            α−1
+                                                                                                    !
+                                                     1                2 2 2                     2
+                                             +               2 (3α − 2)   s k ∥(Id − T ) (xk )∥
+                                                 8 (α − 1)
+                                                                                           2
+         1                  1                     1
+ =            (α − 2)         2λ (xk − x∗ ) +           (3α − 2) sk (Id − T ) (xk−1 )
+       3α − 2               2                 2 (α − 1)
+                                                                                                    
+                                                                                                2
+                                                                             − 2λ2 ∥xk − x∗ ∥           ,
+                            FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                               27
+
+we deduce that for every k ≥ 1
+                                                                                           2
+            1                                        1
+ Eλ,k =        2λ (xk − x∗ ) + 2k (xk − xk−1 ) +            (3α − 2) sk (Id − T ) (xk−1 )
+            2                                    2 (α − 1)
+                                        2     1
+            + 2λ (α − 1 − λ) ∥xk − x∗ ∥ +         (α − 2) λsk ⟨xk − x∗ , (Id − T ) (xk−1 )⟩
+                                             α−1
+                   1                        2 2                   2
+            +           2 (α − 2) (3α − 2) s k ∥(Id − T ) (xk−1 )∥
+              8 (α − 1)
+                                                                                           2
+            1                                       1
+       =      2λ (xk − x∗ ) + 2k (xk − xk−1 ) +           (3α − 2) sk (Id − T ) (xk−1 )
+            2                                   2 (α − 1)
+                                                                                               2
+                   1                                 1
+            +            (α − 2) 2λ (xk − x∗ ) +           (3α − 2) sk (Id − T ) (xk−1 )
+              2 (3α − 2)                         2 (α − 1)
+                                    
+                                4λ               2
+            + 2λ (α − 1) 1 −           ∥xk − x∗ ∥ .
+                              3α − 2
+Using the identity
+
+                        2       2   1        2         2
+                                                          
+                    ∥x∥ + ∥y∥ =        ∥x + y∥ + ∥x − y∥           ∀x, y ∈ H,
+                                    2
+we obtain for every k ≥ 1
+(B.13)
+
+     Eλ,k
+                                                                                               2
+       α                                           1
+ =           2λ (xk − x∗ ) + 2k (xk − xk−1 ) +           (3α − 2) sk (Id − T ) (xk−1 )
+     3α − 2                                    2 (α − 1)
+              1
+       +            (α − 2) 4λ (xk − x∗ ) + 2k (xk − xk−1 )
+         4 (3α − 2)
+                                                                                  2
+                                          1
+                                          +   (3α − 2) sk (Id − T ) (xk−1 )
+                                         α−1
+                                                                   
+             1             2            2                     4λ                2
+         +        (α − 2) k ∥xk − xk−1 ∥ + 2λ (α − 1) 1 −             ∥xk − x∗ ∥ ,
+           3α − 2                                           3α − 2
+This shows that for 0 ≤ λ ≤ 3α    1
+                              4 − 2 all terms in the expression (B.13) are nonnegative,
+thus the sequence (Eλ,k )k≥1 is nonnegative, too.
+   Proof of Lemma 3.2. For the quadratic expression in Rk we calculate
+                                                            
+∆k                2  2(5α − 2)        2   2   2(5α − 2)
+   := (ω2 k + ω3 ) −           ω1 ω4 k = ω2 −           ω1 ω4 k 2 + 2ω2 ω3 k + ω32 .
+s2                    3α − 2                   3α − 2
+It suffices to guarantee that ω22 − 2(5α−2)
+                                     3α−2 ω1 ω4 < 0 in order to be sure that there exits
+some integer k (λ) ≥ 1 such that ∆k ≤ 0 for every k ≥ k (λ) and to obtain from here,
+due to Lemma A.4, that Rk ≤ 0 for every k ≥ k (λ).
+     We will show that there exists a nonempty open interval contained in [0, α − 1]
+                               2(5α − 2)
+with the property that ω22 −              ω1 ω4 < 0 holds when λ is chosen within this
+                                  3α − 2
+open interval. To this end we set ξ := λ + 1 − α ≤ 0 and get
+             1                                                    2
+  ω2 =           4 (α − 1) ξ − α (α − 2)       and     ω1 ω4 = −       (α − 2) (3α − 2) ξ.
+            α−1                                                    α−1
+28                                   R. I. BOŢ AND D.-K. NGUYEN
+
+
+Written in terms of ξ, we have first to guarantee that
+
+            2(5α − 2)
+         ω22 −           ω1 ω4
+              3α − 2
+          1      
+                                              2
+                                                                                 
+     =         2   (4 (α −  1) ξ − α (α  − 2))  + 4 (5α − 2) (α −  1) (α  − 2) ξ
+       (α − 1)
+          1      
+                               2 2                                      2          2
+                                                                                     
+     =         2   16 (α −  1)   ξ +  4 (α − 1) (α − 2) (3α − 2) ξ +  α   (α − 2)      < 0.
+       (α − 1)
+
+A direct computation shows that
+                                       
+                 2       2        2                  2       3
+  ∆ξ = 16 (α − 1) (2 − α) (3α − 2) − 4α2 = 16 (α − 1) (α − 2) (5α − 2) > 0.
+
+Hence, in order to get (5), we have to choose ξ between the two roots of the quadratic
+function arising in this formula, in other words
+                 1                                             p        
+ξ1 (α) :=               2       −4 (α − 1) (α − 2) (3α − 2) −       ∆ξ
+            32 (α − 1)
+                 1                      p                  
+         =−            (α − 2) 3α − 2 + (α − 2) (5α − 2)
+             8 (α − 1)
+                                          1                                      p 
+         < ξ = λ + 1 − α < ξ2 (α) :=            2   −4 (α − 1) (α − 2) (3α − 2) +  ∆ξ
+                                     32 (α − 1)
+                 1                      p                  
+         =−            (α − 2) 3α − 2 − (α − 2) (5α − 2) .
+             8 (α − 1)
+                                                                             2    2
+Obviously ξ1 (α) < 0 and from Viète’s formula ξ1 (α) · ξ2 (α) = α16(α−1)
+                                                                    (α−2)
+                                                                          2 , it follows
+
+that we must have ξ2 (α) < 0 as well.
+    Therefore, going back to λ, in order to be sure that ω22 − 2(5α−2)
+                                                                3α−2 ω1 ω4 < 0 this
+must be chosen such that
+
+                                 α − 1 + ξ1 (α) < λ < α − 1 + ξ2 (α) .
+
+Next we will show that
+                                           1                        3α 1
+(B.14)                0<α−1−                     (α − 2) (3α − 2) <    − .
+                                       8 (α − 1)                     4  2
+
+Indeed, the inequality on the left-hand side follows immediately, since
+                         1                            1
+                                                             5α2 − 8α + 4
+                                                                           
+          α−1−                 (α − 2) (3α − 2) =
+                     8 (α − 1)                    8 (α − 1)
+                                                      1     
+                                                                             2
+                                                                               
+                                                =             α2 + 4 (α − 1) > 0.
+                                                  8 (α − 1)
+
+Using this relation, one can notice that the inequality on the right-hand side of (B.14)
+can be equivalently written as
+
+             5α2 − 8α + 4 < 2 (α − 1) (3α − 2) ⇔ 0 < α2 − 2α = α (α − 2) ,
+
+which is true as α > 2.
+                        FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                                    29
+
+    From (B.14) we immediately deduce that
+                                                                      3α 1
+                 0 < α − 1 + ξ2 (α)        and    α − 1 + ξ1 (α) <       − .
+                                                                       4  2
+This allows us to choose
+
+  λ (α) := α − 1 + ξ1 (α)
+             α2       α−1         1             p
+         =          +       −           (α − 2) (α − 2) (5α − 2)
+          8 (α − 1)      2    8 (α − 1)
+                                     
+                 3α 1
+< λ (α) := min      − , α − 1 + ξ2 (α)
+                  4    2
+                           α2
+                                                                              
+                3α 1                α−1          1            p
+        = min       − ,           +        +           (α − 2) (α − 2) (5α − 2) ,
+                 4    2 8 (α − 1)     2      8 (α − 1)
+
+since
+             1          1              1            p
+                   α2 + (α − 1) −            (α − 2) (α − 2) (5α − 2) > 0.
+         8 (α − 1)      2          8 (α − 1)
+                   √                 √             √        √
+Indeed, as (α − 1) α − 1 > (α − 2) α − 2 and 4 α − 1 > 5α − 2 we can easily
+deduce that
+                            2            2
+                                                    p
+              α2 + 4 (α − 1) > 4 (α − 1) > (α − 2) (α − 2) (5α − 2)
+
+and the claim follows.
+    In conclusion, choosing λ to satisfy λ (α) < λ < λ (α), we have
+
+                                          2(5α − 2)
+                                  ω22 −             ω1 ω4 < 0
+                                           3α − 2
+and therefore there exists some integer k (λ) ≥ 1 such that Rk ≤ 0 for every k ≥ k (λ).
+    Acknowledgments. The authors express their gratitude to the handling edi-
+tor and three anonymous reviewers for their valuable comments and remarks, which
+significantly improved the quality of the manuscript.
+
+                                          REFERENCES
+
+ [1] H. Attouch, J. Peypouquet, and P. Redont, Fast convex optimization via inertial dynamics
+         with Hessian driven damping, J. Differential Equations, 261 (2016), pp. 5734–5783, https:
+         //doi.org/10.1016/j.jde.2016.08.020.                                 √
+ [2] J. B. Baillon and R. E. Bruck, The rate of asymptotic regularity is o(1/ n), in Theory and
+         Applications of Nonlinear Operators of Accretive and Monotone Types, vol. 178, Dekker,
+         1996, pp. 51–81.
+ [3] H. H. Bauschke and P. L. Combettes, Convex Analysis and Monotone Operator Theory in
+         Hilbert Spaces, CMS Books in Mathematics, Springer, New York, 2nd ed., 2017.
+ [4] R. I. Boţ and E. Csetnek, A dynamical system associated with the fixed points set of a
+         nonexpansive operator, J. Dynam. Differential Equations, 29 (2017), pp. 155–168, https:
+         //doi.org/10.1007/s10884-015-9438-x.
+ [5] R. I. Boţ, E. Csetnek, and D. Meier, Inducing strong convergence into the asymptotic
+         behaviour of proximal splitting algorithms in Hilbert spaces, Optim. Methods Softw., 34
+         (2019), pp. 489–514, https://doi.org/10.1080/10556788.2018.1457151.
+ [6] R. I. Boţ, E. R. Csetnek, and D.-K. Nguyen, Fast OGDA in continuous and discrete time,
+         arXiv:2203.10947.
+30                              R. I. BOŢ AND D.-K. NGUYEN
+
+
+ [7] R. I. Boţ and D. Meier, A strongly convergent Krasnosel’skii-Mann-type algorithm for finding
+          a common fixed point of a countably infinite family of nonexpansive operators in Hilbert
+          spaces, J. Comput. Appl. Math., 395 (2021), https://doi.org/10.1016/j.cam.2021.113589.
+ [8] J. Borwein, S. Reich, and I. Shafrir, Krasnoselski-Mann iterations in normed spaces, Canad.
+          Math. Bull., 35 (1992), pp. 21–28, https://doi.org/10.4153/CMB-1992-003-0.
+ [9] M. Bravo and R. Cominetti, Sharp convergence rates for averaged nonexpansive maps, Israel
+          J. Math., 227 (2018), pp. 163–188, https://doi.org/10.1007/s11856-018-1723-z.
+[10] C. Brezinski, M. Redivo-Zaglia, and Y. Saad, Shanks sequence transformations and
+          Anderson acceleration, SIAM Rev., 60 (2018), pp. 646–669, https://doi.org/10.1137/
+          17M1120725.
+[11] F. E. Browder and W. V. Petryshyn, The solution by iteration of nonlinear functional
+          equations in Banach spaces, Bull. Amer. Math. Soc., 72 (1966), pp. 571–575.
+[12] R. Cominetti, J. A. Soto, and J. Vaisman, On the rate of convergence of Krasnosel’skiı̆-
+          Mann iterations and their connection with sums of Bernoullis, Israel J. Math., 199 (2014),
+          pp. 757–772, https://doi.org/10.1007/s11856-013-0045-4.
+[13] J. P. Contreras and R. Cominetti, Optimal error bounds for nonexpansive fixed-point it-
+          erations in normed spaces, Math. Program., 199 (2023), pp. 343–374, https://doi.org/10.
+          1007/s10107-022-01830-7.
+[14] D. Davis, Convergence rate analysis of the forward-Douglas-Rachford splitting scheme, SIAM
+          J. Optim., 25 (2015), pp. 1760–1786, https://doi.org/10.1137/140992291.
+[15] D. Davis and W. Yin, Convergence rate analysis of several splitting schemes, in Splitting
+          Methods in Communication, Imaging, Science, and Engineering, R. Glowinski, S. J. Osher,
+          and W. Yin, eds., Springer International Publishing, 2016, pp. 115–163, https://doi.org/
+          10.1007/978-3-319-41589-5 4.
+[16] D. Davis and W. Yin, A three-operator splitting scheme and its optimization applications, Set-
+          Valued Var. Anal., 25 (2017), pp. 829–858, https://doi.org/10.1007/s11228-017-0421-z.
+[17] J. Douglas and H. H. Rachford, On the numerical solution of heat conduction problems
+          in two and three space variables, Trans. Amer. Math. Soc., 82 (1956), pp. 421–439, https:
+          //doi.org/10.2307/1993056.
+[18] I. Fierro, J. Maulén, and J. Peypouquet, Inertial Krasnoselskii-Mann iterations, arXiv:
+          2210.03791.
+[19] J. Y. G. Gu, Tight sublinear convergence rate of the proximal point algorithm for maximal
+          monotone inclusion problems, SIAM J. Optim., 30 (2020), pp. 1905–1921, https://doi.org/
+          10.1137/140992291.
+[20] C. W. Groetsch, A note on segmenting Mann iterates, J. Math. Anal. Appl., 40 (1972),
+          pp. 369–372, https://doi.org/10.1016/0022-247X(72)90056-X.
+[21] B. Halpern, Fixed points of nonexpanding maps, Bull. Amer. Math. Soc., 73 (1967), pp. 957–
+          961, https://doi.org/10.1137/140992291.
+[22] B. He and X. Yuan, On the convergence rate of Douglas-Rachford operator splitting method,
+          Math. Program., 153 (2015), pp. 715–722, https://doi.org/10.1007/s10107-014-0805-x.
+[23] X. Huang, E. K. Ryu, and W. Yin, Tight coefficients of averaged operators via scaled relative
+          graph, J. Math. Anal. Appl., 490 (2020), p. 124211, https://doi.org/10.1016/j.jmaa.2020.
+          124211.
+[24] S. Ishikawa, Fixed points and iteration of a nonexpansive mapping in a Banach space, Proc.
+          Amer. Math. Soc., 59 (1976), pp. 65–71, https://doi.org/10.2307/2042038.
+[25] D. Kim, Accelerated proximal point method for maximally monotone operators, Math. Pro-
+          gram., 190 (2021), pp. 57–87, https://doi.org/10.1007/s10107-021-01643-0.
+[26] M. A. Krasnosel’skiı̆, Two remarks on the method of successive approximations, Uspekhi
+          Mat. Nauk, 10 (1955), pp. 123–127.
+[27] S. Lee and D. Kim, Fast extra gradient methods for smooth structured nonconvex-nonconcave
+          minimax problems, in Advances in Neural Information Processing Systems, vol. 34, 2021,
+          pp. 22588–22600.
+[28] J. Liang, J. Fadili, and G. Peyré, Convergence rates with inexact non-expansive operators,
+          Math. Program., 159 (2016), pp. 403–434, https://doi.org/10.1007/s10107-015-0964-4.
+[29] F. Lieder, On the convergence rate of the Halpern-iteration, Optim. Lett., 15 (2021), pp. 405–
+          418, https://doi.org/10.1007/s11590-020-01617-9.
+[30] P.-L. Lions and B. Mercier, Splitting algorithms for the sum of two nonlinear operators,
+          SIAM J. Numer. Anal., 16 (1979), pp. 964–979, https://doi.org/10.1137/0716071.
+[31] W. R. Mann, Mean value methods in iteration, Proc. Amer. Math. Soc., 4 (1953), pp. 506–510,
+          https://doi.org/10.1090/S0002-9939-1953-0054846-3.
+[32] S.-Y. Matsushita, On the convergence rate of the Krasnosel’skiı̆-Mann iteration, Bull. Aust.
+          Math. Soc., 96 (2017), pp. 162–170, https://doi.org/10.1017/S000497271600109X.
+                        FAST KRASNOSEL’SKIı̆-MANN ALGORITHM                                       31
+
+[33] Y. Nesterov,  A method of solving a convex programming problem with convergence rate
+         O 1/k2 , Soviet Math. Dokl., 27 (1983), pp. 372–376.
+[34] Z. Opial, Weak convergence of the sequence of successive approximations for nonexpan-
+         sive mappings, Bull. Amer. Math. Soc., 73 (1967), pp. 591–597, https://doi.org/10.1090/
+         S0002-9904-1967-11761-0.
+[35] J. Park and E. K. Ryu, Exact optimal accelerated complexity for fixed-point iterations, in Pro-
+         ceedings of the 39th International Conference on Machine Learning, vol. 162 of Proceedings
+         of Machine Learning Research, 2022, pp. 17420–17457.
+[36] H. Qi and H.-K. Xu, Convergence of Halpern’s iteration method with applications in op-
+         timization, Numer. Funct. Anal. Optim., 42 (2021), pp. 1839–1854, https://doi.org/10.
+         1080/01630563.2021.2001826.
+[37] S. Reich, Weak convergence theorems for nonexpansive mappings in Banach spaces, J. Math.
+         Anal. Appl., 67 (1979), pp. 274–276, https://doi.org/10.1016/0022-247X(79)90024-6.
+[38] S. Sabach and S. Shtern, A first order method for solving convex bilevel optimization prob-
+         lems, SIAM J. Optim., 27 (2017), pp. 640–660, https://doi.org/10.1137/16M105592X.
+[39] E. K. R. T. H.   Yoon, Accelerated algorithms for smooth convex-concave minimax problems
+         with O 1/k2 rate on squared gradient norm, in Proceedings of the 38th International
+         Conference on Machine Learning, vol. 139 of Proceedings of Machine Learning Research,
+         2022, pp. 12098–12109.
+[40] Q. Tran-Dinh, The connection between Nesterov’s accelerated methods and Halpern fixed-point
+         iterations, arXiv:2203.04869.
+[41] Q. Tran-Dinh and Y. Luo, Halpern-type accelerated and splitting algorithms for monotone
+         inclusions, arXiv:2110.08150.
+[42] R. Wittmann, Approximation of fixed points of nonexpansive mappings, Arch. Math. (Basel),
+         58 (1992), pp. 486–491, https://doi.org/10.1007/BF01190119.
+[43] H.-K. Xu, Iterative algorithms for nonlinear operators, J. Lond. Math. Soc., 66 (2002), pp. 240–
+         256, https://doi.org/10.1112/S0024610702003332.
+[44] T. H. Yoon and E. K. Ryu, Accelerated minimax algorithms flock together, arXiv:2205.11093.
+

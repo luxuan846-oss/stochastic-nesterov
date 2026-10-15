@@ -1,0 +1,1981 @@
+Patrick L. Combettes
+Patrick L. Combettes
+Distinguished Professor, IEEE Fellow, SIAM Fellow
+Department of Mathematics
+North Carolina State University
+SAS Hall 3276
++1 (919) 515-2671
+[my3initials]@math.ncsu.edu
+Corrected 2nd ed., 2019
+Publications
+Citations
+Events
+People
+Prox repository
+Talks
+Teaching
+Genealogy
+Biography
+Maths at NC State
+Publications
+Citations
+Events
+People
+Prox. repository
+Talks
+Teaching
+Genealogy
+Biography
+Maths at NC State
+Biography
+Editorial boards
+Advances in Approximation Theory, 2026-present
+Applied Mathematics and Optimization, 2022-present
+SIAM Journal on Mathematics of Data Science, 2019-present
+Numerical Algorithms, 2018-present
+Journal of Nonsmooth Analysis and Optimization, 2019-present
+Journal of Approximation Theory, 2008-2026
+(board resignation;
+press article)
+Journal of Mathematical Analysis and Applications,
+2013-2026 (resignation)
+SIAM Journal on Imaging Sciences, 2016-2025
+SIAM Journal on Optimization, 2007-2019
+IEEE Transactions on Image Processing, 1997-2002
+Scientific awards
+SIAM Fellow, 2024
+For contributions to the theory and applications of convex
+optimization, especially proximal methods
+IEEE Fellow, 2005
+For contributions to set-theoretic methods and convex
+analysis in signal and image processing
+Best Paper Award,
+IEEE Signal Processing Society, 1993
+Administrative positions
+Founding director (2009-2013) of the
+CNRS
+research consortium
+MOA
+on mathematical optimization and its applications.
+Academic positions
+2016-present:
+North Carolina State University
+Department of Mathematics
+8/2016: Distinguished Professor
+1999-2016:
+Université Pierre et Marie Curie –
+Paris 6 (now called "Sorbonne Université"),
+Laboratoire Jacques-Louis Lions, Faculté de
+Mathématiques
+9/2010: Professeur, classe exceptionnelle (CNU)
+9/2003: Professeur, première classe (CNU)
+9/1999: Professeur, deuxième classe
+1990-1999:
+City University of New York
+City College and Graduate Center
+1/1999: Full Professor
+1/1994: Associate Professor
+9/1990: Assistant Professor
+Visiting positions
+Columbia University, New York
+Courant Institute, New York
+Simons Foundation, New York
+Baptist University, Hong Kong
+Chinese University, Hong Kong
+University of the Philippines, Diliman
+Université Paris-Saclay
+Vietnam Institute for Advanced Studies in Mathematics, Hanoi
+Publications
+[PRx]
+[Bx]
+[Dx]
+[Jx]
+[Ex]
+[Cx]
+[Sx]
+Preprint
+Book
+Edited book
+Journal article
+Book chapter
+Conference proceedings paper
+Guest edition of a special issue of a journal
+Preprints
+[PR2]
+P. L. Combettes and J. I. Madariaga,
+Almost supermartingale extensions of Olivier's theorem.
+[arXiv]
+[PR1]
+P. L. Combettes and J. I. Madariaga,
+Asymptotic analysis of an abstract stochastic scheme for
+solving monotone inclusions.
+[arXiv]
+2027
+[J115]
+M. N. Bùi and P. L. Combettes,
+Interchange rules for integral functions,
+Annali della
+Scuola Normale Superiore di Pisa, Classe di Scienze,
+to appear.
+[pdf]
+2026
+[J114]
+P. L. Combettes and D. J. Cornejo,
+Proximal comixture minimization models for image recovery and
+data analysis.
+SIAM Journal
+on Imaging Sciences, to appear.
+[pdf]
+[J113]
+P. L. Combettes and J. I. Madariaga,
+A geometric framework for stochastic iterations,
+Mathematics of Computation,
+to appear.
+[pdf]
+[J112]
+P. L. Combettes and J. N. Mayrand,
+Lower bounds on the Haraux function,
+Journal of Approximation Theory,
+vol. 315, art. 106284 (28 pp.), May 2026.
+[pdf]
+[J111]
+P. L. Combettes and D. J. Cornejo,
+Variational analysis of proximal compositions and integral
+proximal mixtures,
+Evolution Equations and Control Theory,
+vol. 17, pp. 106–139, March 2026.
+[pdf]
+2025
+[E06]
+P. L. Combettes,
+La méthode du gradient proximé,
+Techniques de l'Ingénieur
+– Sciences Fondamentales/Mathématiques,
+art. AF493, 10 pp., July 2025.
+[pdf]
+[J110]
+P. L. Combettes and J. I. Madariaga,
+Almost-surely convergent randomly activated monotone
+operator splitting methods,
+SIAM Journal
+on Imaging Sciences,
+vol. 18, no. 4, pp. 2177–2205, October 2025.
+[pdf]
+[J109]
+M. N. Bùi and P. L. Combettes,
+Hilbert direct integrals of monotone operators,
+Canadian Journal of Mathematics,
+vol. 77, no. 4, pp. 1425–1456, August 2025.
+[pdf]
+[J108]
+L. M. Briceño-Arias, P. L. Combettes, and F. J. Silva,
+Perspective functions with nonlinear scaling,
+Communications in Contemporary Mathematics,
+vol. 27, no. 1, art. 2350065 (37 pp.), January 2025.
+[pdf]
+[C65]
+P. L. Combettes and J. I. Madariaga,
+Stochastic block-iterative parallel subgradient projections
+method with super relaxations,
+Proceedings of the European Signal Processing Conference,
+pp. 2757–2761. Palermo, Italy, Sept. 8–12, 2025.
+[pdf]
+2024
+[J107]
+M. N. Bùi and P. L. Combettes,
+Integral resolvent and proximal mixtures,
+Journal of Optimization Theory and Applications,
+vol. 203, no. 3, pp. 2328–2353, December 2024.
+[pdf]
+[J106]
+L. M. Briceño-Arias, P. L. Combettes, and F. J. Silva,
+Proximity operators of perspective functions with nonlinear
+scaling,
+SIAM Journal on Optimization,
+vol. 34, no. 4, pp. 3212–3234, October 2024.
+[pdf]
+[J105]
+P. L. Combettes,
+The geometry of monotone operator splitting methods,
+Acta Numerica,
+vol. 33, pp. 487–632, September 2024.
+[pdf]
+[J104]
+L. M. Briceño-Arias and P. L. Combettes,
+A perturbation framework for convex minimization and monotone
+inclusion problems with nonlinear compositions,
+Mathematics of Operations Research,
+vol. 49, no. 3, pp. 1890–1914, August 2024.
+[pdf]
+[C64]
+P. L. Combettes and J. I. Madariaga,
+Randomly activated proximal methods for nonsmooth convex
+minimization,
+Proceedings of the European Signal Processing Conference,
+pp. 2642–2646. Lyon, France, August 26–30, 2024.
+[C63]
+P. L. Combettes and D. J. Cornejo,
+Signal recovery with proximal comixtures,
+Proceedings of the European Signal Processing Conference,
+pp. 2637–2641. Lyon, France, August 26–30, 2024.
+[pdf]
+2023
+[J103]
+P. L. Combettes,
+Resolvent and proximal compositions,
+Set-Valued and Variational Analysis,
+vol. 31, no. 3, art. 22, 29 pp., September 2023.
+[pdf]
+[C62]
+P. L. Combettes, J.-C. Pesquet, and A. Repetti,
+A variational inequality model for learning neural networks,
+Proceedings of the IEEE International Conference on Acoustics,
+Speech, and Signal Processing, 5 pp.
+Rhodes Island, Greece, June 4–10, 2023.
+[pdf]
+2022
+[J102]
+M. N. Bùi and P. L. Combettes,
+Analysis and numerical solution of a modular convex Nash
+equilibrium problem,
+Journal of Convex Analysis,
+vol. 29, no. 4, pp. 1007–1021, December 2022.
+[pdf]
+[J101]
+M. N. Bùi and P. L. Combettes,
+Multivariate monotone inclusions in saddle form,
+Mathematics of Operations Research,
+vol. 47, no. 2, pp. 1082–1109, May 2022.
+[pdf]
+[J100]
+P. L. Combettes and Z. C. Woodstock,
+A variational inequality model for the
+construction of signals from inconsistent nonlinear
+equations,
+SIAM Journal
+on Imaging Sciences,
+vol. 15, no. 1, pp. 84–109, January 2022. [pdf]
+[C61]
+M. N. Bùi, P. L. Combettes, and Z. C. Woodstock,
+Block-activated algorithms for multicomponent fully
+nonsmooth minimization,
+Proceedings of the IEEE International Conference on Acoustics,
+Speech, and Signal Processing,
+pp. 5428–5432. Singapore, May 22–27, 2022.
+[pdf]
+[C60]
+P. L. Combettes and Z. C. Woodstock,
+Signal recovery from inconsistent nonlinear observations,
+Proceedings of the IEEE International Conference on Acoustics,
+Speech, and Signal Processing,
+pp. 5872–5876. Singapore, May 22–27, 2022.
+2021
+[J99]
+M. N. Bùi and P. L. Combettes,
+Bregman forward-backward operator splitting,
+Set-Valued and Variational Analysis,
+vol. 29, no. 3, pp. 583–603, September 2021.
+[pdf]
+[J98]
+P. L. Combettes and J.-C. Pesquet,
+Fixed point strategies in data science,
+IEEE Transactions on Signal Processing,
+vol. 69, pp. 3878–3905, August 2021.
+[pdf]
+[J97]
+P. L. Combettes and Z. C. Woodstock,
+Reconstruction of functions from prescribed proximal points,
+Journal of Approximation Theory,
+vol. 268, art. 105606, 26 pp., August 2021.
+[pdf]
+[J96]
+P. L. Combettes and C. L. Müller,
+Regression models for compositional data:
+General log-contrast formulations, proximal optimization,
+and microbiome data applications,
+Statistics in Biosciences,
+vol. 13, no. 2, pp. 217–242, July 2021.
+[pdf]
+[J95]
+P. L. Combettes and L. E. Glaudin,
+Solving composite fixed point problems with block updates,
+Advances in Nonlinear Analysis,
+vol. 10, pp. 1154–1177, March 2021.
+[pdf]
+[C59]
+P. L. Combettes and Z. C. Woodstock,
+A fixed point framework for recovering signals from nonlinear
+transformations,
+Proceedings of the European Signal Processing Conference,
+pp. 2120–2124. Amsterdam, The Netherlands, January
+18–22, 2021.
+[pdf]
+2020
+[J94]
+M. N. Bùi and P. L. Combettes,
+Warped proximal iterations for monotone inclusions,
+Journal of Mathematical
+Analysis and Applications,
+vol. 491, no. 1, art. 124315, 21 pp., November 2020.
+[pdf]
+[J93]
+P. L. Combettes and J.-C. Pesquet,
+Deep neural network structures solving variational inequalities,
+Set-Valued and Variational Analysis,
+vol. 28, no. 3, pp. 491–518, September 2020.
+[pdf]
+[J92]
+P. L. Combettes and J.-C. Pesquet,
+Lipschitz certificates for layered network structures driven
+by averaged activation operators,
+SIAM
+Journal on Mathematics of Data Science,
+vol. 2, no. 2, pp. 529–557, June 2020.
+[pdf]
+[J91]
+M. N. Bùi and P. L. Combettes,
+The Douglas-Rachford algorithm converges only weakly,
+SIAM Journal on Control and Optimization,
+vol. 58, no. 2, pp. 1118–1120, April 2020.
+[pdf]
+[J90]
+P. L. Combettes and C. L. Müller,
+Perspective maximum likelihood-type estimation via proximal
+decomposition,
+Electronic Journal of Statistics,
+vol. 14, no. 1, pp. 207–238, January 2020.
+[pdf]
+2019
+[J89]
+P. L. Combettes and L. E. Glaudin,
+Proximal activation of smooth functions in
+splitting algorithms for convex image recovery,
+SIAM Journal
+on Imaging Sciences,
+vol. 12, no. 4, pp. 1905–1935, November 2019.
+[pdf]
+[J88]
+P. L. Combettes, A. M. McDonald, C. A. Micchelli, and M. Pontil,
+Learning with optimal interpolation norms,
+Numerical Algorithms,
+vol. 81, no. 2, pp. 695–717, June 2019.
+[pdf]
+[J87]
+P. L. Combettes and J.-C. Pesquet,
+Stochastic quasi-Fejér block-coordinate fixed
+point iterations with random sweeping II: Mean-square and linear
+convergence,
+Mathematical Programming,
+vol. B174, no. 1, pp. 433–451, April 2019.
+[pdf]
+[C58]
+P. L. Combettes and L. E. Glaudin,
+Fully proximal splitting algorithms in image recovery,
+Proceedings of the European Signal Processing Conference,
+pp. 525-529. A Coruña, Spain, September 2–6, 2019.
+2018
+[J86]
+P. L. Combettes,
+Monotone operator theory in convex optimization,
+Mathematical Programming,
+vol. B170, no. 1, pp. 177–206, July 2018.
+[pdf]
+[J85]
+P. L. Combettes,
+Perspective functions: Properties, constructions, and examples,
+Set-Valued and Variational Analysis,
+vol. 26, no. 2, pp. 247–264, June 2018.
+[pdf]
+[J84]
+P. L. Combettes and J. Eckstein,
+Asynchronous block-iterative primal-dual decomposition methods
+for monotone inclusions,
+Mathematical Programming,
+vol. B168, no. 1, pp. 645–672, March 2018.
+[pdf]
+[J83]
+P. L. Combettes and C. L. Müller,
+Perspective functions: Proximal calculus and applications in
+high-dimensional statistics,
+Journal of Mathematical
+Analysis and Applications,
+vol. 457, no. 2, pp. 1283–1306, January 2018.
+[pdf]
+[J82]
+P. L. Combettes, S. Salzo, and S. Villa,
+Regularized learning schemes in feature Banach spaces,
+Analysis and Applications,
+vol. 16, no. 1, pp. 1–54, January 2018.
+[pdf]
+[J81]
+P. L. Combettes, S. Salzo, and S. Villa,
+Consistent learning by composite proximal thresholding,
+Mathematical Programming,
+vol. B167, no. 1, pp. 99–127, January 2018.
+[pdf]
+[C57]
+P. L. Combettes and J.-C. Pesquet,
+Linear convergence of stochastic block-coordinate fixed point
+algorithms,
+Proceedings of the European Signal Processing Conference,
+pp. 747–751. Rome, Italy, September 3–7, 2018.
+2017
+[B02]
+H. H. Bauschke and P. L. Combettes,
+Convex Analysis
+and Monotone Operator Theory in Hilbert Spaces,
+second edition.
+Springer, New York, 2017.
+[pdf]
+[J80]
+P. L. Combettes and L. E. Glaudin,
+Quasinonexpansive iterations on the affine hull of orbits: From
+Mann's mean value algorithm to inertial methods,
+SIAM Journal on Optimization,
+vol. 27, no. 4, pp. 2356–2380, December 2017.
+[pdf]
+[J79]
+M. Barlaud, W. Belhajali, P. L. Combettes, and L. Fillatre,
+Classification and regression using an outer approximation
+projection-gradient method,
+IEEE Transactions on Signal Processing,
+vol. 65, no. 17, pp. 4635–4644, September 2017.
+[pdf]
+2016
+[J78]
+H. Attouch, L. M. Briceño-Arias, and P. L. Combettes,
+A strongly convergent primal-dual method for nonoverlapping
+domain decomposition,
+Numerische Mathematik,
+vol. 133, no. 3, pp. 433–470, July 2016.
+[pdf]
+[J77]
+P. L. Combettes and Q. V. Nguyen,
+Solving composite monotone inclusions in reflexive Banach spaces
+by constructing best Bregman approximations from their
+Kuhn-Tucker set,
+Journal of Convex Analysis,
+vol. 23, no. 2, pp. 481–510, May 2016. Special issue
+dedicated to the memory of Jean Jacques Moreau.
+[pdf]
+[J76]
+P. L. Combettes and Đinh Dũng,
+Kolmogorov n-widths of function classes
+induced by a non-degenerate differential
+operator: A convex duality approach,
+Set-Valued and Variational Analysis,
+vol. 24, no. 1, pp. 83–99, March 2016.
+[pdf]
+[J75]
+P. L. Combettes and J.-C. Pesquet,
+Stochastic approximations and perturbations in
+forward-backward splitting for monotone operators,
+Pure and Applied Functional Analysis,
+vol. 1, no. 1, pp. 13–37, January 2016.
+[pdf]
+[C56]
+P. L. Combettes and J.-C. Pesquet,
+Stochastic forward-backward and primal-dual approximation
+algorithms with application to online image restoration,
+Proceedings of the European Signal Processing Conference,
+5 pages. Budapest, Hungary, August 29-September 3, 2016.
+[pdf]
+2015
+[J74]
+A. Alotaibi, P. L. Combettes, and N. Shahzad,
+Best approximation from the Kuhn-Tucker set
+of composite monotone inclusions,
+Numerical Functional Analysis and Optimization,
+vol. 36, no. 12, pp. 1513–1532, December 2015.
+[pdf]
+[J73]
+P. L. Combettes and J.-C. Pesquet,
+Stochastic quasi-Fejér block-coordinate fixed
+point iterations with random sweeping,
+SIAM Journal on Optimization,
+vol. 25, no. 2, pp. 1221–1248, July 2015.
+[pdf]
+[J72]
+P. L. Combettes and I. Yamada,
+Compositions and convex combinations of averaged nonexpansive
+operators,
+Journal of Mathematical Analysis and Applications,
+vol. 425, no. 1, pp. 55–70, May 2015.
+[pdf]
+2014
+[S01]
+P. L. Combettes, J.-B. Hiriart-Urruty, and M. Théra
+(Guest editors),
+Modern convex analysis,
+Mathematical Programming,
+vol. B148, nos. 1–2, December 2014.
+[pdf]
+[J71]
+A. Alotaibi, P. L. Combettes, and N. Shahzad,
+Solving coupled composite monotone inclusions by successive
+Fejér approximations of their Kuhn-Tucker set,
+SIAM Journal on Optimization,
+vol. 24, no. 4, pp. 2076–2095, December 2014.
+[pdf]
+[J70]
+M. A. Alghamdi, A. Alotaibi, P. L. Combettes, and N. Shahzad,
+A primal-dual method of partial inverses for composite
+inclusions,
+Optimization Letters,
+vol. 8, no. 8, pp. 2271–2284, December 2014.
+[pdf]
+[J69]
+P. L. Combettes and B. C. Vũ,
+Variable metric forward-backward splitting
+with applications to monotone inclusions in
+duality,
+Optimization,
+vol. 63, no. 9, pp. 1289–1318, September 2014.
+[pdf] (published online 2012-12-13)
+[J68]
+J.-B. Baillon, P. L. Combettes, and R. Cominetti,
+Asymptotic behavior of compositions of under-relaxed
+nonexpansive operators,
+Journal of Dynamics and Games,
+vol. 1, no. 3, pp. 331–346, July 2014.
+[pdf]
+[J67]
+S. R. Becker and P. L. Combettes,
+An algorithm for splitting parallel sums
+of linearly composed monotone operators, with applications to
+signal recovery,
+Journal of Nonlinear and Convex Analysis,
+vol. 15, no. 1, pp. 137–159, January 2014.
+[pdf]
+[C55]
+P. L. Combettes, L. Condat, J.-C. Pesquet, and B. C. Vũ,
+A forward-backward view of some primal-dual optimization
+methods in image recovery,
+Proceedings of the IEEE International Conference on Image
+Processing.
+Paris, France, October 27–30, 2014.
+[pdf]
+2013
+[J66]
+P. L. Combettes,
+Systems of structured monotone inclusions:
+Duality, algorithms, and applications,
+SIAM Journal on Optimization,
+vol. 23, no. 4, pp. 2420–2447, December 2013.
+[pdf]
+[J65]
+P. L. Combettes and N. N. Reyes,
+Moreau's decomposition in Banach spaces,
+Mathematical Programming,
+vol. 139, no. 1, pp. 103–114, June 2013.
+[pdf]
+[J64]
+P. L. Combettes and B. C. Vũ,
+Variable metric quasi-Fejér monotonicity,
+Nonlinear Analysis: Theory, Methods, and Applications,
+vol. 78, pp. 17–31, February 2013.
+[pdf]
+[E05]
+L. M. Briceño-Arias and P. L. Combettes,
+Monotone operator methods for Nash equilibria in non-potential
+games, in:
+Computational and Analytical Mathematics,
+(D. Bailey, H. H. Bauschke, P. Borwein, F. Garvan, M. Théra,
+J. Vanderwerff, and H. Wolkowicz, Editors), pp. 143–159.
+Springer, New York, 2013.
+[pdf]
+2012
+[J63]
+P. L. Combettes and J.-C. Pesquet,
+Primal-dual splitting algorithm for solving inclusions with
+mixtures of composite, Lipschitzian, and parallel-sum type
+monotone operators,
+Set-Valued and Variational Analysis,
+vol. 20, no. 2, pp. 307–330, June 2012.
+[pdf]
+[J62]
+Y. Censor, W. Chen, P. L. Combettes, R. Davidi, and G. T. Herman,
+On the effectiveness of projection methods for convex feasibility
+problems with linear inequality constraints,
+Computational Optimization and Applications,
+vol. 51, no. 3, pp. 1065–1088, April 2012.
+[pdf]
+[J61]
+J.-B. Baillon, P. L. Combettes, and R. Cominetti,
+There is no variational characterization of the cycles in
+the method of periodic projections,
+Journal of Functional Analysis,
+vol. 262, no. 1, pp. 400–408, January 2012.
+[pdf]
+2011
+[B02]
+H. H. Bauschke and P. L. Combettes,
+Convex Analysis and Monotone Operator Theory in Hilbert Spaces.
+Springer, New York, 2011.
+[pdf excerpt]
+[J60]
+L. M. Briceño-Arias and P. L. Combettes,
+A monotone+skew splitting model for composite monotone
+inclusions in duality,
+SIAM Journal on Optimization,
+vol. 21, no. 4, pp. 1230–1250, October 2011.
+[pdf]
+[J59]
+L. M. Briceño-Arias, P. L. Combettes, J.-C. Pesquet, and N.
+Pustelnik,
+Proximal algorithms for multicomponent image recovery problems,
+Journal of Mathematical Imaging and Vision,
+vol. 41, no. 1, pp. 3–22, September 2011.
+[pdf]
+[J58]
+P. L. Combettes, Đinh Dũng, and B. C. Vũ,
+Proximity for sums of composite functions,
+Journal of Mathematical Analysis and Applications,
+vol. 380, no. 2, pp. 680–688, August 2011.
+[pdf]
+[E04]
+P. L. Combettes and J.-C. Pesquet, Proximal splitting methods in
+signal processing, in:
+Fixed-Point Algorithms for Inverse Problems in Science and Engineering,
+(H. H. Bauschke, R. S. Burachik, P. L. Combettes, V. Elser,
+D. R. Luke, and H. Wolkowicz, Editors), pp. 185–212.
+Springer, New York, 2011.
+[pdf]
+[D01]
+H. H. Bauschke, R. S. Burachik, P. L. Combettes, V. Elser,
+D. R. Luke, and H. Wolkowicz (Editors),
+Fixed-Point Algorithms for Inverse Problems in Science and Engineering.
+Springer, New York, 2011.
+2010
+[J57]
+P. L. Combettes, Đinh Dũng, and B. C. Vũ,
+Dualization of signal recovery problems,
+Set-Valued and Variational Analysis,
+vol. 18, pp. 373–404, December 2010.
+[pdf]
+[J56]
+H. H. Bauschke and P. L. Combettes,
+The Baillon-Haddad theorem revisited,
+Journal of Convex Analysis,
+vol. 17, no. 4, pp. 781–787, December 2010.
+[pdf]
+[J55]
+P. L. Combettes and N. N. Reyes,
+Functions with prescribed best linear approximations,
+Journal of Approximation Theory,
+vol. 162, no. 5, pp. 1095–1116, May 2010.
+[pdf]
+[J54]
+H. Attouch, L. M. Briceño-Arias, and P. L. Combettes,
+A parallel splitting method for coupled monotone inclusions,
+SIAM Journal on Control and Optimization,
+vol. 48, no. 5, pp. 3246–3270, January 2010.
+[pdf]
+[C54]
+L. M. Briceño-Arias, P. L. Combettes,
+J.-C. Pesquet, and N. Pustelnik,
+Proximal method for geometry and texture image decomposition,
+Proceedings of the IEEE International Conference on Image
+Processing.
+Hong-Kong, September 26–29, 2010.
+[C53]
+J. Bolte, P. L. Combettes, and J.-C. Pesquet,
+Alternating proximal algorithm for blind image recovery,
+Proceedings of the IEEE International Conference on Image
+Processing.
+Hong-Kong, September 26–29, 2010.
+[pdf]
+2009
+[J53]
+P. L. Combettes,
+Iterative construction of the resolvent of a sum of maximal monotone
+operators,
+Journal of Convex Analysis,
+vol. 16, no. 4, pp. 727-748, December 2009.
+[pdf]
+[J52]
+L. M. Briceño-Arias and P. L. Combettes,
+Convex variational formulation with smooth coupling for
+multicomponent signal decomposition and recovery,
+Numerical Mathematics: Theory, Methods, and Applications,
+vol. 2, no. 4, pp. 485–508, November 2009.
+[pdf]
+[C52]
+P. L. Combettes and J.-C. Pesquet,
+Split convex minimization algorithm for signal recovery,
+Proceedings of the IEEE International Conference on Acoustics,
+Speech, and Signal Processing,
+pp. 685–688. Taipei, Taiwan, April 19–24, 2009.
+2008
+[J51]
+P. L. Combettes and J.-C. Pesquet,
+A proximal decomposition method for solving convex variational
+inverse problems,
+Inverse Problems,
+vol. 24, no. 6, article ID 065014, 27 pp., December 2008.
+[pdf]
+[J50]
+H. H. Bauschke and P. L. Combettes,
+A Dykstra-like algorithm for two monotone operators,
+Pacific Journal of Optimization,
+vol. 4, no. 3, pp. 383–391, September 2008.
+[pdf]
+[J49]
+P. L. Combettes and S. A. Hirstoaga,
+Visco-penalization of the sum of two monotone operators,
+Nonlinear Analysis: Theory, Methods, and Applications,
+vol. 69, no. 2, pp. 579–591, July 2008.
+[pdf]
+2007
+[J48]
+P. L. Combettes and J.-C. Pesquet,
+A Douglas-Rachford splitting approach to nonsmooth convex variational
+signal recovery,
+IEEE Journal of Selected Topics in Signal Processing,
+vol. 1, no. 4, pp. 564–574, December 2007.
+[pdf]
+[J47]
+P. L. Combettes and J.-C. Pesquet,
+Proximal thresholding algorithm for minimization over orthonormal bases,
+SIAM Journal on Optimization,
+vol. 18, no. 4, pp. 1351–1376, November 2007.
+[pdf]
+[J46]
+C. Chaux, P. L. Combettes, J.-C. Pesquet, and V. R. Wajs,
+A variational formulation for frame-based inverse problems,
+Inverse Problems,
+vol. 23, no. 4, pp. 1495–1518, August 2007.
+[pdf]
+[E03]
+T. D. Capricelli and P. L. Combettes,
+A convex programming algorithm for noisy discrete tomography, in:
+Advances in Discrete Tomography and Its Applications,
+(G. T. Herman and A. Kuba, Editors), pp. 207–226.
+Boston, MA: Birkhäuser, 2007.
+[pdf]
+[C51]
+C. Chaux, P. L. Combettes, J.-C. Pesquet, and V. R. Wajs,
+Opérateurs proximaux pour la restauration bayésienne
+de signaux,
+Proceedings of the 21st GRETSI Symposium,
+pp. 1277–1280. Troyes, France, 11–14 Septembre 2007.
+[C50]
+P. L. Combettes and J.-C. Pesquet,
+Sparse signal recovery by iterative proximal thresholding,
+Proceedings of the 15th European Signal Processing Conference,
+4 pages. Poznan, Poland, September 3–7, 2007.
+2006
+[J45]
+P. L. Combettes and S. A. Hirstoaga,
+Approximating curves for nonexpansive and monotone operators,
+Journal of Convex Analysis,
+vol. 13, nos. 3–4, pp. 633–646, December 2006.
+[pdf]
+[J44]
+H. H. Bauschke, P. L. Combettes, and D. Noll,
+Joint minimization with alternating Bregman proximity operators,
+Pacific Journal of Optimization,
+vol. 2, no. 3, pp. 401–424, September 2006.
+[pdf]
+[J43]
+H. H. Bauschke, P. L. Combettes, and D. R. Luke,
+A strongly convergent reflection method for finding the projection
+onto the intersection of two closed convex sets in a Hilbert
+space,
+Journal of Approximation Theory,
+vol. 141, no. 1, pp. 63–69, July 2006.
+[pdf]
+[J42]
+H. H. Bauschke, P. L. Combettes, and S. G. Kruk,
+Extrapolation algorithm for affine-convex feasibility problems,
+Numerical Algorithms,
+vol. 41, no. 3, pp. 239–274, March 2006.
+[pdf]
+[C49]
+C. Chaux, P. L. Combettes, J.-C. Pesquet, and V. R. Wajs,
+Iterative image deconvolution using overcomplete representations,
+Proceedings of the 14th European Signal Processing Conference,
+4 pages. Florence, Italy, September 4–8, 2006.
+[C48]
+H. H. Bauschke, P. L. Combettes, and J.-C. Pesquet,
+A decomposition method for nonsmooth convex variational signal
+recovery,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+vol. 5, pp. 989–992. Toulouse, France, May 14–19, 2006.
+2005
+[J41]
+P. L. Combettes and V. R. Wajs,
+Signal recovery by proximal forward-backward splitting,
+Multiscale Modeling and Simulation,
+vol. 4, no. 4, pp. 1168–1200, November 2005.
+[pdf]
+[J40]
+P. L. Combettes and S. A. Hirstoaga,
+Equilibrium programming in Hilbert spaces,
+Journal of Nonlinear and Convex Analysis,
+vol. 6, no. 1, pp. 117–136, April 2005.
+[pdf]
+[J39]
+H. H. Bauschke, P. L. Combettes, and S. Reich,
+The asymptotic behavior of the composition of two resolvents,
+Nonlinear Analysis: Theory, Methods, and Applications,
+vol. 60, no. 2, pp. 283–301, January 2005.
+[pdf]
+[C47]
+C. Chaux, P. L. Combettes, J.-C. Pesquet, and V. R. Wajs,
+A forward-backward algorithm for image restoration with sparse
+representations,
+Proceedings of the International Conference on Signal Processing
+with Adaptative Sparse Structured Representations,
+pp. 49–52. Rennes, France, November 16–18, 2005.
+[C46]
+T. D. Capricelli and P. L. Combettes,
+Éclatement des contraintes en reconstruction tomographique,
+Proceedings of the 20th GRETSI Symposium,
+pp. 655–658. Louvain-la-Neuve, Belgium, 6–9 Septembre 2005.
+[C45]
+T. D. Capricelli and P. L. Combettes,
+Parallel block-iterative reconstruction algorithms for binary
+tomography,
+Electronic Notes in Discrete Mathematics,
+vol. 20, pp. 263–280, July 2005.
+[C44]
+H. H. Bauschke, P. L. Combettes, and D. R. Luke,
+A new generation of iterative transform algorithms for phase contrast
+tomography,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing, vol. 4, pp. 89–92.
+Philadelphia, PA, March 19–23, 2005.
+2004
+[J38]
+P. L. Combettes,
+Solving monotone inclusions via compositions of nonexpansive averaged
+operators,
+Optimization,
+vol. 53, no. 5–6, pp. 475–504, December 2004.
+[pdf]
+[J37]
+P. L. Combettes and J. C. Pesquet, Wavelet-constrained image restoration,
+International Journal of Wavelets, Multiresolution, and Information
+Processing,
+vol. 2, no. 4, pp. 371–389, December 2004.
+[pdf]
+[J36]
+P. L. Combettes and T. Pennanen,
+Proximal methods for cohypomonotone operators,
+SIAM Journal on Control and Optimization,
+vol. 43, no. 2, pp. 731–742, October 2004.
+[pdf]
+[J35]
+P. L. Combettes and J. C. Pesquet,
+Image restoration subject to a total variation constraint,
+IEEE Transactions on Image Processing,
+vol. 13, no. 9, pp. 1213–1222, September 2004.
+[pdf]
+[J34]
+H. H. Bauschke, P. L. Combettes, and D. R. Luke,
+Finding best approximation pairs relative to two closed convex sets
+in Hilbert spaces,
+Journal of Approximation Theory,
+vol. 127, no. 2, pp. 178–192, March 2004.
+[pdf]
+[C43]
+P. L. Combettes and V. R. Wajs,
+Theoretical analysis of some regularized image denoising methods,
+Proceedings of the IEEE International Conference on Image
+Processing, vol. 1, pp. 969–972.
+Singapore, October 24–27, 2004.
+[C42]
+P. L. Combettes and J. C. Pesquet,
+Estimating first-order finite-difference information in image
+restoration problems,
+Proceedings of the IEEE International Conference on Image
+Processing, vol. 1, pp. 321–324.
+Singapore, October 24–27, 2004.
+[C41]
+P. L. Combettes and J. C. Pesquet,
+Constraint construction in convex set theoretic signal recovery via
+Stein's principle,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing, vol. 2, pp. 813–816.
+Montréal, Canada, May 17–21, 2004.
+2003
+[J33]
+H. H. Bauschke and P. L. Combettes,
+Construction of best Bregman approximations in reflexive Banach spaces,
+Proceedings of the American Mathematical Society,
+vol. 131, no. 12, pp. 3757–3766, December 2003.
+[pdf]
+[J32]
+P. L. Combettes, A block-iterative surrogate constraint splitting
+method for quadratic signal recovery,
+IEEE Transactions on Signal Processing,
+vol. 51, no. 7, pp. 1771–1782, July 2003.
+[pdf]
+[J31]
+H. H. Bauschke, J. M. Borwein, and P. L. Combettes,
+Bregman monotone optimization algorithms,
+SIAM Journal on Control and Optimization,
+vol. 42, no. 2, pp. 596–636, June 2003.
+[pdf]
+[J30]
+H. H. Bauschke, P. L. Combettes, and D. R. Luke,
+Hybrid projection-reflection method for phase retrieval,
+Journal of the Optical Society of America A,
+vol. 20, no. 6, pp. 1025–1034, June 2003.
+[pdf]
+[J29]
+H. H. Bauschke and P. L. Combettes, Iterating Bregman retractions,
+SIAM Journal on Optimization,
+vol. 13, no. 4, pp. 1159–1173, April 2003.
+[pdf]
+[C40]
+P. L. Combettes and J. C. Pesquet,
+Image deconvolution with total variation bounds,
+Proceedings of the Seventh International Symposium on Signal
+Processing and Its Applications, vol. 1, pp. 441–444.
+Paris, France, July 1–4, 2003.
+[C39]
+P. L. Combettes and J. C. Pesquet,
+Incorporating total variation information in image recovery,
+Proceedings of the IEEE International Conference on Image
+Processing, vol. 3, pp. 373–376.
+Barcelona, Spain, September 14–17, 2003.
+2002
+[J28]
+P. L. Combettes and T. Pennanen,
+Generalized Mann iterates for constructing fixed points in Hilbert spaces,
+Journal of Mathematical Analysis and Applications,
+vol. 275, no. 2, pp. 521–536, November 2002.
+[pdf]
+[J27]
+P. L. Combettes and J. Luo,
+An adaptive level set method for nondifferentiable constrained image
+recovery,
+IEEE Transactions on Image Processing,
+vol. 11, no. 11, pp. 1295–1304, November 2002.
+[pdf]
+[J26]
+H. H. Bauschke, P. L. Combettes, and D. R. Luke,
+Phase retrieval, error reduction algorithm, and Fienup variants: A
+view from convex optimization,
+Journal of the Optical Society of America A,
+vol. 19, no. 7, pp. 1334–1345, July 2002.
+[pdf]
+[C38]
+H. H. Bauschke, P. L. Combettes, and D. R. Luke,
+On the structure of some phase retrieval algorithms,
+Proceedings of the IEEE International Conference on Image
+Processing,
+vol. 2, pp. 841–844.
+Rochester, NY, September 22–25, 2002.
+2001
+[J25]
+H. H. Bauschke, J. M. Borwein, and P. L. Combettes,
+Essential smoothness, essential strict convexity, and
+Legendre functions in Banach spaces,
+Communications in Contemporary Mathematics,
+vol. 3, no. 4, pp. 615–647, 2001.
+[pdf]
+[J24]
+H. H. Bauschke and P. L. Combettes,
+A weak-to-strong convergence principle for Fejér-monotone
+methods in Hilbert spaces,
+Mathematics of Operations Research,
+vol. 26, no. 2, pp. 248–264, May 2001.
+[pdf]
+[J23]
+P. L. Combettes,
+On the numerical robustness of the parallel projection method in
+signal synthesis,
+IEEE Signal Processing Letters,
+vol. 8, no. 2, pp. 45–47,
+February 2001.
+[E02]
+P. L. Combettes,
+Quasi-Fejérian analysis of some optimization algorithms, in
+Inherently Parallel Algorithms in Feasibility and Optimization and Their Applications,
+(D. Butnariu, Y. Censor, and S. Reich, Eds.), pp. 115–152.
+New York: Elsevier, 2001.
+[pdf]
+[E01]
+P. L. Combettes, Fejér-monotonicity in convex optimization, in
+Encyclopedia of Optimization
+(C. A. Floudas and P. M. Pardalos, Eds.),
+vol. 2, pp. 106–114.
+Springer-Verlag, New York, 2001.
+[pdf]
+[C37]
+P. L. Combettes,
+Convex set theoretic image recovery with inexact projection algorithms,
+Proceedings of the IEEE International Conference on Image
+Processing,
+vol. 1, pp. 257–260.
+Thessaloniki, Greece, October 7–10, 2001.
+[C36]
+P. L. Combettes, Convexité et signal,
+Actes du Congrès de Mathématiques Appliquées
+et Industrielles SMAI'01, pp. 6–16. Pompadour, France,
+May 28-June 1, 2001.
+[pdf]
+2000
+[J22]
+P. L. Combettes, Strong convergence of block-iterative outer approximation
+methods for convex optimization,
+SIAM Journal on Control and Optimization
+, vol. 38, no. 2, pp. 538–565, February 2000.
+[pdf]
+[C35]
+P. L. Combettes,
+A parallel constraint disintegration and approximation
+scheme for quadratic signal recovery,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing, vol. 1, pp. 165–168.
+Istanbul, Turkey, June 5–9, 2000.
+[C34]
+J. Luo and P. L. Combettes, A level-set subgradient projection algorithm
+for non-differentiable signal restoration with multiple constraints,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing, vol. 1, pp. 225–228.
+Istanbul, Turkey, June 5–9, 2000.
+1999
+[J21]
+P. L. Combettes and P. Bondon, Hard-constrained inconsistent signal
+feasibility problems,
+IEEE Transactions on Signal Processing,
+vol. 47, no. 9, pp. 2460–2468, September 1999.
+[pdf]
+[C33]
+J. Luo and P. L. Combettes, A subgradient projection algorithm for
+nondifferentiable signal recovery,
+Proceedings of the IEEE Workshop on Nonlinear Signal and Image
+Processing,
+pp. 452–456. Antalya, Turkey, June 20–23, 1999.
+1998
+[J20]
+P. L. Combettes and J. C. Pesquet,
+Convex multiresolution analysis,
+IEEE Transactions on Pattern Analysis and Machine Intelligence,
+vol. 20, no. 12, pp. 1308–1318, December 1998.
+Gzipped PostScript
+[C32]
+P. L. Combettes and J. C. Pesquet,
+Nonlinear multiresolution image analysis via convex projections,
+Proceedings of the IEEE International Conference on Image
+Processing,
+vol. 2, pp. 762–765. Chicago, IL, October 4–7, 1998.
+[C31]
+P. L. Combettes and P. Bondon, Constrained pulse shape synthesis for
+digital communications,
+Proceedings of the European Signal Processing Conference,
+pp. 573–576. Island of Rhodes, Greece, September 8–11, 1998.
+[C30]
+P. L. Combettes, A block-iterative quadratic signal recovery algorithm,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing, vol. 5, pp. 2917–2920.
+Seattle, WA, May 12–15, 1998.
+1997
+[J19]
+P. L. Combettes,
+Hilbertian convex feasibility problem: Convergence of projection
+methods,
+Applied Mathematics and Optimization,
+vol. 35, no. 3, pp. 311–330, May 1997.
+[pdf]
+[J18]
+P. L. Combettes,
+Convex set theoretic image recovery by extrapolated iterations of
+parallel subgradient projections,
+IEEE Transactions on Image Processing,
+vol. 6, no. 4, pp. 493–506, April 1997.
+[pdf]
+[C29]
+P. L. Combettes and P. Bondon, Hard-constrained signal feasibility
+problems,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+vol. 4, pp. 2569–2572. Munich, Germany, April 21–24, 1997.
+1996
+[J17]
+P. L. Combettes and T. J. Chaussalet,
+Combining statistical information in set theoretic estimation,
+IEEE Signal Processing Letters,
+vol. 3, no. 3, pp. 61–62, March 1996.
+[Gzipped PostScript]
+[J16]
+J. C. Pesquet and P. L. Combettes,
+Wavelet synthesis by alternating projections,
+IEEE Transactions on Signal Processing,
+vol. 44, no. 3, pp. 728–732, March 1996.
+[B01]
+P. L. Combettes,
+The Convex Feasibility Problem in Image Recovery,
+vol. 95 of
+Advances in Imaging and Electron Physics,
+Academic Press, New York, 1996.
+[pdf]
+[C28]
+P. L. Combettes, Generalized convex set theoretic image recovery,
+Proceedings of the IEEE International Conference on Image Processing,
+vol. 2, pp. 453–456. Lausanne, Switzerland, September 16–19, 1996.
+[C27]
+P. L. Combettes, Bounded-error models in inverse problems,
+Proceedings of the 1996 IMACS/IEEE MultiConference on Computational
+Engineering in Systems Applications, vol. 2, pp. 1023–1027.
+Lille, France, July 9–12, 1996.
+[C26]
+P. L. Combettes and J. C. Pesquet, Convex multiresolution analysis,
+Proceedings of the IEEE International Symposium on
+Time-Frequency and Time-Scale Analysis, pp. 301–304.
+Paris, France, June 18–21, 1996.
+[C25]
+H. Puh and P. L. Combettes, Operator theoretic image coding,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+vol. 4, pp. 1863–1866. Atlanta, GA, May 7–10, 1996.
+[C24]
+H. Puh and P. L. Combettes, Set theoretic vector quantization,
+Proceedings of the Ninth IEEE Workshop on Image and Multidimensional
+Signal Processing,
+pp. 48–49. Belize City, Belize, March 3–6, 1996.
+1995
+[J15]
+P. Bondon, P. L. Combettes, and B. Picinbono,
+Volterra filtering and higher order whiteness,
+IEEE Transactions on Signal Processing,
+vol. 43, no. 9, pp. 2209–2212, September 1995.
+[Gzipped PostScript]
+[J14]
+P. L. Combettes,
+Construction d'un point fixe commun à une famille de
+contractions fermes,
+Comptes Rendus de l'Académie des Sciences de
+Paris, Série I (Mathématique)
+,
+vol. 320, no. 11, pp. 1385–1390, June 1995.
+[pdf]
+[J13]
+P. L. Combettes and H. J. Trussell,
+Deconvolution with bounded uncertainty,
+International Journal of Adaptive Control and Signal Processing,
+vol. 9, no. 1, pp. 3–17, January 1995.
+[pdf]
+[C23]
+P. L. Combettes, Constrained image recovery in a product space,
+Proceedings of the IEEE International Conference on Image Processing,
+vol. 2, pp. 25–28. Washington, DC, October 23–26, 1995.
+[C22]
+P. L. Combettes,
+Restauration ensembliste d'images par itérations
+parallèles extrapolées de sous-gradients,
+Proceedings of the 15th GRETSI Symposium,
+pp. 447–450. Juan-les-Pins, France, September 18–22, 1995.
+[C21]
+P. L. Combettes and P. Bondon, Adaptive linear filtering with convex
+constraints,
+Proceedings of the IEEE International Conference on Acoustics,
+Speech, and Signal Processing,
+vol. 2, pp. 1372–1375. Detroit, MI, May 8–12, 1995.
+1994
+[J12]
+P. L. Combettes,
+Inconsistent signal feasibility problems: Least-squares solutions in
+a product space,
+IEEE Transactions on Signal Processing,
+vol. 42, no. 11, pp. 2955–2966, November 1994.
+[pdf]
+[J11]
+P. L. Combettes and H. Puh,
+Iterations of parallel convex projections in Hilbert spaces,
+Numerical Functional Analysis and Optimization,
+vol. 15, nos. 3–4, pp. 225–243, 1994.
+[C20]
+P. L. Combettes,
+Convex set theoretic image recovery via chaotic iterations
+of approximate projections,
+Proceedings of the IEEE International Conference on Image Processing,
+vol. 3, pp. 182–186. Austin, TX, November 13–16, 1994.
+[C19]
+P. L. Combettes and T. J. Chaussalet, Selecting statistical information
+in set theoretic signal processing,
+Proceedings of the Seventh IEEE Workshop on Statistical Signal and
+Array Processing,
+pp. 55–58. Québec City, Canada, June 26–29, 1994.
+[C18]
+P. L. Combettes, Set theoretic signal processing,
+Proceedings of the Seventh IEEE Workshop on Statistical Signal and
+Array Processing,
+pp. 1–6. Québec City, Canada, June 26–29, 1994.
+[C17]
+P. L. Combettes and H. Puh, A fast parallel projection algorithm for
+set theoretic image recovery,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+vol. 5, pp. 473–476. Adelaide, Australia, April 19–22, 1994.
+[C16]
+J. C. Pesquet and P. L. Combettes,
+Synthèse ensembliste d'ondelettes,
+Proceedings of the Conference on Time-Frequency, Wavelets, and
+Multiresolution, pp. 14.1–14.10.
+Lyon, France, March 9–11, 1994.
+1993
+[J10]
+P. L. Combettes, Signal recovery by best feasible approximation,
+IEEE Transactions on Image Processing,
+vol. 2, no. 2, pp. 269–271, April 1993.
+[J09]
+P. L. Combettes, The foundations of set theoretic estimation,
+Proceedings of the IEEE,
+vol. 81, no. 2, pp. 182–208, February 1993.
+[pdf]
+[C15]
+P. L. Combettes and T. J. Chaussalet,
+Estimation en présence de modèles incertains:
+Sélection de formulations ensemblistes,
+Proceedings of the 14th GRETSI Symposium,
+pp. 205–208. Juan-les-Pins, France, September 13–16, 1993.
+[C14]
+P. L. Combettes, A simultaneous projection method for inconsistent signal
+and image feasibility problems,
+Proceedings of the Eighth IEEE Workshop on Image and Multidimensional
+Signal Processing,
+pp. 32–33. Cannes, France, September 8–10, 1993.
+[C13]
+P. L. Combettes and H. Puh, Parallel projection methods for set theoretic
+signal reconstruction and restoration,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+vol. 5, pp. 297–300. Minneapolis, MN, April 27–30, 1993.
+[C12]
+P. Bondon, P. L. Combettes, and B. Picinbono, Volterra prediction models
+and higher order whiteness,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+vol. 4, pp. 212–215. Minneapolis, MN, April 27–30, 1993.
+1992
+[J08]
+P. L. Combettes, Convex set theoretic image recovery: History,
+current status, and new directions,
+Journal of Visual Communication and Image Representation,
+vol. 3, no. 4, pp. 307–315, December 1992.
+[J07]
+P. L. Combettes and H. J. Trussell, Best stable
+and invertible approximations for ARMA systems,
+IEEE Transactions on Signal Processing,
+vol. 40, no. 12, pp. 3066–3069, December 1992.
+[J06]
+J. W. Silverstein and P. L. Combettes,
+Signal detection via spectral theory of large dimensional random
+matrices,
+IEEE Transactions on Signal Processing,
+vol. 40, no. 8, pp. 2100–2105, August 1992.
+[pdf of long version]
+[J05]
+M. S. Zilovic, L. M. Roytman, P. L. Combettes, and M. N. S. Swamy,
+A bound for the zeros of polynomials,
+IEEE Transactions on Circuits and Systems I,
+vol. 39, no. 6, pp. 476–478, June 1992.
+[C11]
+J. W. Silverstein and P. L. Combettes, Large dimensional random matrix
+theory for signal detection and estimation in array processing,
+Proceedings of the Sixth IEEE Workshop on Statistical Signal and
+Array Processing,
+pp. 276–279. Victoria, BC, Canada, October 7–9, 1992.
+[C10]
+P. L. Combettes and W. W. Edmonson, What is a good estimate?,
+Proceedings of the European Signal Processing Conference,
+pp. 713–716. Brussels, Belgium, August 24–27, 1992.
+[C09]
+P. L. Combettes, M. Benidir, and B. Picinbono, A general framework for the
+incorporation of uncertainty in set theoretic estimation,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+vol. 3, pp. 349–352. San Francisco, CA, March 23–26, 1992.
+1991
+[J04]
+P. L. Combettes and H. J. Trussell,
+Set theoretic estimation by random search,
+IEEE Transactions on Signal Processing,
+vol. 39, no. 7, pp. 1669–1671, July 1991.
+[J03]
+P. L. Combettes and H. J. Trussell, The use of noise
+properties in set theoretic estimation,
+IEEE Transactions on Signal Processing,
+vol. 39, no. 7, pp. 1630–1641, July 1991.
+[pdf]
+[C08]
+P. L. Combettes and T. J. Chaussalet, Critères de qualité en
+estimation ensembliste,
+Proceedings of the 13th GRETSI Symposium,
+pp. 249–252. Juan-les-Pins, France, September 16–20, 1991.
+[C07]
+P. L. Combettes and M. R. Civanlar, The foundations of set theoretic
+estimation,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+pp. 2921–2924. Toronto, Canada, May 14–17, 1991.
+1990
+[J02]
+P. L. Combettes and H. J. Trussell,
+Method of successive projections for finding a common point of sets
+in metric spaces,
+Journal of Optimization Theory and Applications,
+vol. 67, no. 3, pp. 487–507, December 1990.
+[pdf]
+[C06]
+P. L. Combettes and H. J. Trussell, Set theoretic
+autoregressive spectral estimation,
+Proceedings of the Fifth IEEE ASSP Workshop on Spectrum Estimation and
+Modeling,
+pp. 261–264. Rochester, NY, October 10–12, 1990.
+[C05]
+P. L. Combettes and H. J. Trussell, New methods for the
+synthesis of set theoretic estimates,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+pp. 2531–2534. Albuquerque, NM, April 3–6, 1990.
+1989
+[J01]
+P. L. Combettes and H. J. Trussell,
+Methods for digital restoration of signals degraded by a stochastic
+impulse response,
+IEEE Transactions on Acoustics, Speech, and Signal
+Processing,
+vol. 37, no. 3, pp. 393–401, March 1989.
+[C04]
+P. L. Combettes and H. J. Trussell, General order moments
+in set theoretic estimation,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+pp. 2531–2534. Glasgow, Scotland, May 23–26, 1989.
+1988
+[C03]
+P. L. Combettes and H. J. Trussell, Stability of the
+linear prediction filter: A set theoretic approach,
+Proceedings of the IEEE International Conference on Acoustics, Speech,
+and Signal Processing,
+pp. 2288–2291. New York, NY, April 11–14, 1988.
+1987
+[C02]
+P. L. Combettes and H. J. Trussell, Modèles et
+algorithmes en vue de la restauration numérique d'images rayons-X,
+Proceedings of MARI-Cognitiva Electronic Image,
+pp. 146–151. Paris, France, May 18–22, 1987.
+[pdf]
+[C01]
+H. J. Trussell and P. L. Combettes, Considerations for the
+restoration of stochastic degradations,
+Proceedings of the IEEE International Conference on Acoustics,
+Speech, and Signal Processing,
+pp. 1209–1212. Dallas, TX, April 6–9, 1987.
+Citations
+Most cited mathematician
+MathSciNet
+Publons
+ResearchGate
+Semantic Scholar
+Recent conference talks
+Stochastic block-iterative splitting of systems of monotone inclusions,
+International Conference on Optimization and Machine Learning.
+Taipei, Taiwan, July 27–29, 2026.
+Sharpening some classical inequalities in nonlinear analysis,
+Workshop
+on Optimization and Decision Theory.
+ICISE, Quy Nhón, Vietnam, July 17, 2026.
+Deterministic and stochastic projective splitting methods,
+SIAM Optimization Conference.
+Edinburgh, Scotland, June 2–5, 2026.
+How small is the Haraux function?,
+2nd
+Latin American Congress on Industrial and Applied Mathematics.
+Valparaíso, Chile, January 19–23, 2026.
+A stochastic iteration framework,
+16th International Seminar on Optimization and Related Areas.
+Cusco, Peru, October 6–10, 2025.
+Stochastic block-iterative parallel subgradient projections
+method with super relaxations,
+European Signal Processing Conference.
+Palermo, Italy, Sept. 8–12, 2025.
+Stochastic quasi-Fejér iterations and
+applications,
+XVIIth Conference on Stochastic Programming.
+École des Ponts, France,
+July 28–August 1, 2025.
+Stochastic Krasnosel'skiĭ--Mann iterations,
+Tenth French-Chilean Optimization Conference.
+Rouen, France, July 8–11, 2025.
+Integral proximal mixtures,
+4th International Conference on Variational Analysis and Optimization.
+Santiago, Chile, January 14–17, 2025.
+Randomly activated proximal methods for nonsmooth convex
+minimization,
+European Signal Processing Conference.
+Lyon, France, August 26–30, 2024.
+Signal recovery with proximal comixtures,
+European Signal Processing Conference.
+Lyon, France, August 26–30, 2024.
+Proximal expectations,
+9th European Congress of Mathematics.
+Seville, Spain, July 15–19, 2024.
+The geometry of monotone operator splitting,
+One World Optimization Workshop.
+Vienna, Austria, June 3–7, 2024.
+Arbitrary products of monotone operators,
+3rd International Conference on Variational Analysis and Optimization.
+Santiago, Chile, January 16–19, 2024.
+Solving monotone inclusions involving nonlinear compositions,
+15th International Seminar on Optimization and Related Areas.
+Arequipa, Peru, October 2–6, 2023.
+A perturbation framework for convex minimization with
+nonlinear compositions,
+10th International Congress on
+Industrial and Applied Mathematics.
+Tokyo, Japan, August 20–25, 2023.
+Proximal compositions and cocompositions,
+Conference on Nonsmooth and Variational Analysis.
+Dijon, France, June 26–28, 2023.
+A variational inequality model for learning neural
+networks,
+IEEE International Conference on Acoustics,
+Speech, and Signal Processing.
+Rhodes Island, Greece, June 4–10, 2023.
+Resolvent and proximal compositions,
+Workshop on Optimization, Learning, and Games.
+Viña del Mar, Chile, January 8–11, 2023.
+A monotone operator approach to convex Nash equilibria,
+European Association of Operational Research Societies
+Conference.
+Espoo, Finland, July 3–6, 2022.
+Block-activated algorithms for multicomponent fully
+nonsmooth minimization,
+IEEE International Conference on Acoustics, Speech, and Signal
+Processing.
+Singapore, May 22–27, 2022.
+Signal recovery from inconsistent nonlinear observations,
+IEEE International Conference on Acoustics, Speech, and Signal
+Processing.
+Singapore, May 22–27, 2022.
+Image recovery from perturbed nonlinear observations,
+SIAM Conference on Imaging Science.
+Berlin, Germany, March 21–25, 2022.
+Warped resolvent iterations,
+Workshop on Optimization and Operator Theory dedicated to Professor Lev Bregman.
+Haifa, Israel, November 15–17, 2021.
+Signal recovery and synthesis from nonlinear equations
+models, Signal Processing Symposium 2021.
+Tokyo, Japan, November 9–12, 2021.
+Solving composite fixed point problems with block updates, IFIP
+Conference on System Modelling and Optimization.
+Quito, Ecuador, August 30–September 3, 2021.
+Solving composite fixed point problems with
+block updates,
+SIAM
+Conference on Optimization.
+Spokane, USA, July 20–23, 2021.
+Multivariate monotone inclusions in saddle form,
+18th Workshop
+on Advances in Continuous Optimization (EUROPT).
+Toulouse, France, July 7–9, 2021.
+Reconstruction of functions from prescribed proximal
+points,
+Mathematical Symposium in Memory of Professor Noli Reyes.
+Quezon City, Philippines, June 5, 2021.
+Proximal analysis of deep neural networks,
+2020 Winter Meeting of the Canadian Mathematical Society.
+Montréal, Canada, December 3–8, 2020.
+Back to single-resolvent iterations, with warping,
+One World Optimization Seminar.
+Earth, Universe, May 25, 2020.
+[slides]
+[video]
+Variational and proximal analysis of neural networks,
+Workshop on Optimization and Variational
+Analysis, in honor of Terry Rockafellar's 85th birthday.
+Santiago, Chile, January 20–21, 2020.
+The warped proximal point algorithm,
+International Seminar on Optimization and Related Areas.
+Lima, Peru, October 7–11, 2019.
+Fully proximal splitting algorithms in image recovery,
+European Signal Processing Conference.
+A Coruña, Spain, September 2–6, 2019.
+Bregman-based forward-backward splitting for monotone inclusions,
+International Conference
+on Continuous Optimization.
+Berlin, Germany, August 5–8, 2019.
+The pervasiveness of proximal point iterations – with a proximal analysis of neural networks,
+Fifth Bay
+Optimization Meeting.
+Santa Cruz, CA, May 17, 2019.
+Between subdifferentials and monotone operators,
+Modern Maximal Monotone Operator Theory: From Nonsmooth Optimization to Differential Inclusions.
+Vienna, Austria, February 25-March 1, 2019.
+Perspective maximum likelihood-type estimation via proximal decomposition,
+Mes Temático en Análisis Variacional y Teoría de Juegos.
+Santiago, Chile, January 9, 2019.
+Purely implicit first order splitting methods,
+69th Workshop
+on Variational Analysis and Applications.
+Erice, Italy, Aug. 28–Sept. 5, 2018.
+Proximal activation of smooth functions in splitting algorithms for convex minimization,
+10th
+Asian Conference on Fixed Point Theory and Optimization.
+Chiang Mai, Thailand, July 16–18, 2018.
+Monotone operator theory in convex optimization,
+International Symposium on Mathematical Programmming.
+Bordeaux, France, July 1–6, 2018. [slides]
+Proximal activation of smooth functions in splitting algorithms
+for convex minimization,
+Workshop Fundamentals and Algorithms for Structured
+Optimization.
+Toulouse, France, June 28–29, 2018.
+Image recovery by block-iterative asynchronous proximal splitting,
+SIAM Conference on Imaging Science.
+Bologna, Italy, June 5–8, 2018.
+Self-dual classes of operators in nonlinear analysis
+and optimization,
+SIAM Great Lakes Section Annual Meeting.
+Detroit, USA, April 21, 2018.
+Data analysis via perspective functions,
+Conference on Machine Learning and Optimisation in Economics.
+London, England, March 8–9, 2018.
+Primal-dual monotone operator splitting by successive
+outer Bregman projections,
+International Workshop on Optimization and Variational Analysis.
+Termas de Cauquenes, Chile, January 10–11, 2018.
+Méthodes d'éclatement d'opérateurs
+primales-duales monotones au sens de Bregman,
+Journées Annuelles des GdR MOA et MIA.
+Bordeaux, France, October 17–20, 2017.
+Parallel, block-iterative, primal-dual monotone operator splitting,
+BIRS
+Workshop on Splitting Algorithms, Modern Operator Theory, and Applications.
+Oaxaca, Mexico, September 17–22, 2017. [video]
+Optimization via nonautonomous difference equations with affine
+weights,
+Eighth French-Chilean
+Optimization Conference.
+Toulouse, France, July 4–7, 2017.
+Perspective-based proximal data processing,
+SIAM Conference
+on Optimization.
+Vancouver, Canada, May 22–25, 2017.
+Perspective functions: Constructions and applications,
+Jon Borwein's remembrance conference.
+Institut Henri Poincaré, Paris, France, February 10, 2017.
+Fonctions perspectives et statistique en grande dimension,
+1ère Journée Statistiques-Optimisation MAS-MODE de
+la SMAI.
+Paris, France, January 9, 2017.
+Méthodes proximales pour la régression statistique en
+grande dimension via des fonctions perspectives,
+Journées Annuelles du GdR MOA.
+Saint-Anne, Guadeloupe, France, November 20–24, 2016.
+Block-iterative asynchronous variational image recovery,
+Workshop on Optimization in Image Processing.
+Harvard University, Cambridge, MA, June 27–30, 2016.
+Méthodes asynchrones d'éclatement d'opérateurs
+avec balayage par blocs,
+Conférence SMAI-MODE 2016.
+Toulouse, France, March 23–25, 2016.
+Asynchronous block-iterative proximal processing of large data
+sets,
+International Conference Optimization without Borders,
+in Honor of Yurii Nesterov's 60th Birthday.
+Les Houches, France, February 7–12, 2016.
+Horizontal and vertical block decomposition of monotone
+operator splitting algorithms,
+International Conference on Variational Analysis, Optimization, and Quantitative Finance in Honor of Terry Rockafellar's 80th Birthday.
+Limoges, France, May 18–22, 2015.
+Splitting techniques in the face of huge problem sizes:
+Block-coordinate approaches,
+Optimization and Big Data 2015.
+Edinburgh, Scotland, May 6–9, 2015.
+Un processus itératif stochastique et ses applications
+à l'éclatement d'opérateurs par blocs de
+variables,
+Journées
+annuelles du GdR Mathématiques de l'Optimisation et
+Applications.
+Limoges, France, December 3–5, 2014.
+Some aspects of the interplay between convex analysis and monotone
+operator theory,
+Worshop on Optimization and Dynamical Processes in Learning and Inverse Problems.
+Sestri-Levante, Italy, September 8–12, 2014.
+Relaxation of inconsistent common zero problems,
+Second
+International Conference on Variational Analysis and Optimization.
+Santiago, Chile, January 7–10, 2014.
+On the formulation of inverse problems as minimization problems,
+First Workshop on
+Optimization for Image and Signal Processing.
+École Polytechnique, Palaiseau, France, November 18–20, 2013.
+Can one genuinely split m>2 monotone operators?
+Workshop on Algorithms and Dynamics for Games and Optimization.
+Playa Blanca, Tongoy, Chile, October 14–18, 2013.
+[pdf]
+From convex feasibility to optimization in signal recovery
+and learning,
+SPARS 2013 - Signal Processing with Adaptive Sparse Structured Representations.
+Lausanne, Switzerland, July 8–11, 2013.
+Parallel-sum approximation of inconsistent common zero problems,
+26th European Conference on
+Operations Research.
+Rome, Italy, July 1–4, 2013.
+Systems of structured monotone inclusions: Duality, algorithms,
+and applications,
+Nonlinear Optimization: a Bridge from Theory to Applications.
+Erice, Italy, June 10–17, 2013.
+Algorithmes proximaux pour les problèmes d'optimisation
+structurés,
+Horizon Maths Conference.
+La Défense, France, December 19–20, 2012.
+Moreau's proximal decomposition in Banach spaces,
+ALEL 2012 Conference on Optimization.
+Limoges, France, July 2–4, 2012.
+The dynamics of forward-backward splitting,
+Games and Strategy in Paris.
+Paris, France, June 11–13, 2012.
+Une extension de la décomposition proximale de Moreau,
+Journées Annuelles du GdR MOA.
+Saint-François, Guadeloupe, France, 4–7 juin 2012.
+How many splitting algorithms are there?
+Latin American Workshop on Optimization and Control.
+Valparaíso, Chile, January 10–13, 2012.
+Solving composite variational image recovery problems:
+Recent developments and old myths,
+Symposium on Variational Image Analysis.
+Heidelberg, Germany, July 4–7, 2011.
+Monotone+skew decomposition of inclusion problems:
+algorithms and applications,
+Computational and Analytical Mathematics.
+Vancouver, Canada, May 16–20, 2011.
+On the cycles in the method of periodic projections,
+Escola de Verão em Otimização e
+Aplicações.
+Florianópolis, Brazil, March 28-April 1, 2011.
+Open questions around the Baillon-Haddad theorem,
+French-Chilean
+Workshop on Dynamics, Optimization and Learning.
+Valparaíso, Chile, November 22–26, 2010.
+Proximity and information,
+Riken
+Conference on Mathematical Sciences and Their Applications.
+Kamisuwa, Japan, September 19-October 2, 2010.
+Solving composite monotone inclusions,
+Second South Pacific Conference on Mathematics.
+Nouméa, Nouvelle-Calédonie, France,
+August 30-September 3, 2010.
+Splitting methods for constructing the resolvent of a
+sum of maximal monotone operators,
+Workshop on Functional Analysis and Optimization.
+Sevilla, Spain, April 12–13, 2010.
+Méthodes d'éclatement proximales en traitement de l'image,
+Deuxième Colloque Mathématiques pour l'Image.
+Orléans, France, March 29-April 1, 2010.
+Proximal splitting methods in signal recovery,
+Mathematics and Image Analysis 2009 - MIA'09
+. Paris, France, December 14–16, 2009. [slides]
+Duality schemes for solving inclusions, with applications to inverse problems,
+Interdisciplinary Workshop on Fixed-Point Algorithms for Inverse
+Problems in Science and Engineering.
+Banff, Canada, November 1–6, 2009.
+Primal-dual solution of some monotone inclusions,
+Conference on Variational Analysis and Optimization.
+Montpellier, France, September 9–12, 2009.
+Fenchel-Rockafellar dualization of signal recovery problems,
+Approximation and Optimization in Image
+Restoration and Reconstruction.
+Porquerolles, France, June 8–12, 2009.
+Proximal methods for nonsmooth inverse problems,
+International Conference on Scientific Computing and Partial
+Differential Equations.
+Hong Kong, December 8–13, 2008.
+Splitting methods for the resolvent of a sum of monotone operators,
+West Coast Optimization Meeting.
+Kelowna, Canada, September 5–6, 2008.
+Dykstra's method for monotone operators,
+Dynamics and Optimization Conference.
+Paris, France, June 9–11, 2008.
+On the moment problem,
+Sixth French-Chilean Optimization Conference.
+Toulon, France, May 19–21, 2008.
+Visco-penalization of the sum of two monotone operators,
+Seventh
+International Conference on Optimization: Techniques and
+Applications. Kobe, Japan, December 12–15, 2007.
+Sparsities and iterative thresholding,
+Rencontre sur le Traitement Mathématique des Images.
+CIRM, Luminy, France, September 3–7, 2007.
+Cyclic minimizations,
+Conférence Optimisation, Jeux et Dynamique de la
+Décision. Avignon, France, June 25–26, 2007.
+Proximal thresholding algorithm for minimization over orthonormal bases,
+International Conference on Nonlinear and Variational Analysis.
+Limoges, France, June 20–22, 2007.
+Signal-theoretic applications of monotone operator splitting methods,
+International Conference on Mathematics of Optimization and Decision
+Making.
+Guadeloupe, France, April 18–21, 2006.
+Convergence of approximating curves for monotone inclusions
+and their associated dynamical systems,
+International Congress on the Applications of Mathematics.
+Santiago, Chile, March 13–17, 2006.
+Décomposition d'opérateurs pour les formulations
+variationnelles lisses et non-lisses en traitement de l'image,
+Journées Mathématiques de l'Image.
+Nice, France, January 12–13, 2006.
+Operator splitting methods in inverse problems,
+First South Pacific Conference on Mathematics.
+Nouméa, Nouvelle Calédonie, France,
+August 29-September 2, 2005.
+Viscosity solutions of joint equilibrium problems,
+VII French-Latin American Congress on Applied Mathematics.
+Santiago, Chile, January 11–18, 2005.
+Proximal image denoising and recovery,
+Workshop Contenu Informatif des Images Numériques.
+Cachan, France, November 25–26, 2004.
+Events: conference and seminar organization
+Nonlinear Analysis Seminar
+Department of Mathematics, North Carolina State University
+[web]
+VIASM Summer School on Optimization and Decision
+Theory
+Quy Nhón, Vietnam, July 13–15, 2026.
+[web]
+Neuvièmes Journées Franco-Chiliennes d'Optimisation
+Perpignan, France, 29 juin–1er juillet 2022.
+[web]
+3rd Workshop on Operator Splitting Methods in Data Analysis
+Flatiron Institute, New York, USA,
+March 2020
+[web]
+2nd Workshop on Operator Splitting Methods in Data Analysis
+New York, USA, March 2019
+[web]
+1st Workshop on Operator Splitting Methods in Data Analysis
+SAMSI, Research Triangle Park, USA, March 2018
+[web]
+French Days on Optimization & Decision
+Science
+Autrans, France, March 2018
+[web] [poster]
+GdR MOA
+Guadeloupe, France, Novembre 2016
+[web]
+Data Science 2015
+Paris, France, Juillet 2015
+[web]
+Ottimizzazione e Processi Dinamici in Apprendimento
+istico e Problemi Inversi
+Sestri Levante, Italia, Settembre 2014
+[web]
+Algorithms and Dynamics for Games and Optimization
+Playa Blanca, Chile, October 2013
+[web]
+Optimization, Games, and Dynamics
+Paris, France, November 2011
+[web]
+Dynamiques, Optimisation et Apprentissage
+Valparaiso, Chile, November 2010
+[web]
+Fixed-Point Algorithms for Inverse Problems in Science
+and Engineering
+Banff, Canada, November 2009
+[web]
+Approximation and Optimization in Image Restoration and
+Reconstruction
+Porquerolles, France, June 2009
+[web]
+Conférence sur l'Optimisation and la
+Décision
+Paris, France, Avril 2007
+[web]
+Mathematical Methods for Multi-Channel
+Image Processing
+Beijing, China, July 2006
+[web]
+Mathématiques du Traitement de
+l'Image
+Hanoi, Vietnam, Septembre 2004
+[web]
+Mathématiques de l'Optimisation et de la
+Décision
+Le Havre, France, Mars 2004
+[web]
+Monotone Operators and Applications
+Nice, France, February 2003
+[web]
+CEMRACS
+Luminy, France, Juillet 2002
+[web]
+Teaching
+MA716 Advanced Functional Analysis,
+Fall 2026
+[syllabus]
+MA715 Measure and Integration Theory,
+Spring 2026
+[syllabus]
+MA542 Convex Optimization Methods in Data
+Science,
+Spring 2026
+[syllabus]
+MA719 Vector Space Methods in Systems
+Optimization – Optima and Equilibria,
+Fall 2025
+[syllabus]
+MA493/MA591 Introduction to Hilbert Spaces,
+Fall 2024
+[syllabus]
+MA532 Dynamical Systems and Ordinary Differential
+Equations,
+Spring 2024
+[syllabus]
+MA797 Convex Analysis, Fall 2021
+[syllabus]
+Academic genealogy
+Mathematics Genealogy Project
+Sharaf al-Dīn al-Ṭūsī
+Kamāl al-Dīn Ibn Yūnus
+Nasir al-Dīn al-Ṭūsī
+Shams al‐Dīn al‐Bukhārī (Maragheh Observatory)
+Gregory Chioniadis (Ilkhans Court at Tabriz, 1296)
+Manuel Bryennios
+Theodore Metochites (1315)
+Gregory Palamas
+Nilos Kabasilas (1363)
+Demetrios
+Kydones
+Georgios
+Plethon Gemistos (1380)
+Basilios
+Bessarion (Mystras, 1436)
+Johannes
+Argyropoulos (Università degli Studi di Padova, 1444)
+Marsilio
+Ficino (Università degli Studi di Firenze, 1462)
+Angelo
+Poliziano (Università degli Studi di Firenze, 1477)
+Scipione
+Fortiguerra (Università degli Studi di Firenze, 1493)
+Girolamo
+Aleandro (Università degli Studi di Padova, 1499)
+Rutger Rescius (Université de Paris, 1513)
+Johannes Winter von Andernach
+(Université de Louvain, 1527)
+Guillaume Rondelet (Université de Paris, 1538)
+Felix Plater (Université de Montpellier, 1557)
+Petrus Ryff (Universität Basel, 1584)
+Emmanuel Stupanus (Universität Basel, 1613)
+Nikolaus Eglinger (Universität Basel, 1660)
+Johann
+Bernoulli (Universität Basel, 1690)
+Leonhard Euler (Universität Basel, 1726)
+Joseph-Louis Lagrange (Università di Torino, 1754)
+Siméon D. Poisson
+(École Polytechnique, 1800)
+Michel Chasles (École Polytechnique, 1814)
+Hubert A. Newton (Yale University, 1850)
+E. Hastings Moore (Yale University, 1885)
+George D. Birkhoff (University of Chicago, 1907)
+Marshall H. Stone (Harvard University, 1926)
+William F. Eberlein (Harvard University, 1942)
+A. Wayne Wymore (University of Wisconsin-Madison, 1955)
+Bobby R. Hunt (University of Arizona, 1967)
+H. Joel Trussell (University of New Mexico, 1976)
+Patrick L. Combettes
+(North Carolina State University, 1989)
+Hong
+Puh (City University of New York, 1996)
+Jian Luo
+(City University of New York, 2000)
+Sever A. Hirstoaga
+(Université Pierre et Marie Curie, 2006)
+Valérie R. Wajs
+(Université Pierre et Marie Curie, 2007)
+Thomas D. Capricelli
+(Université Pierre et Marie Curie, 2008)
+Luis M. Briceño-Arias
+(Université Pierre et Marie Curie, 2011)
+Bằng Công Vũ
+(Université Pierre et Marie Curie, 2013)
+Quang Văn Nguyễn
+(Université Pierre et Marie Curie, 2015)
+Lilian E. Glaudin
+(Sorbonne Université, 2019)
+Zev C. Woodstock
+(North Carolina State University, 2021)
+Minh N. Bùi
+(North Carolina State University, 2021)
+Diego J. Cornejo
+(North Carolina State University, 2026)
+Javier I. Madariaga
+(North Carolina State University, 2026)
+People
+Left: PLC with Ph.D. students Vivar-Vargas, Mayrand, Madariaga, and
+Cornejo, NC State, April 2026.
+Current Ph.D. students
+Julien N. Mayrand
+Cristóbal L. Vivar-Vargas
+Former Ph.D. students
+Javier I.
+Madariaga,
+North Carolina State University, 2026
+Stochastic Iterations in Hilbertian Nonlinear
+Analysis
+Diego J. Cornejo,
+North Carolina State University,
+2026Resolvent and Proximal Compositions: Theory
+and Applications
+Minh N. Bùi, North Carolina State University,
+2021The Warped Resolvent of a Set-Valued Operator: Theory
+and Applications
+Zev C. Woodstock, North Carolina State University,
+2021
+Construction of Functions from Nonlinear Transformations
+Lilian E.
+Glaudin, Sorbonne Université
+(formerly Université Pierre et Marie Curie), 2019
+Stratégies Multicouche, avec Mémoire, et
+à Métrique Variable en Méthodes de Point Fixe
+pour l'Éclatement d'Opérateurs Monotones et
+l'Optimisation
+(Strategies with Multiple Layers, Memory, and
+Variable Metric in Fixed Point Methods for Monotone Operator
+Splitting and Optimization)
+Quang Văn Nguyễn, Université Pierre et Marie Curie, 2015
+Méthodes d'Éclatement Basées sur
+les Distances de Bregman pour les Inclusions Monotones Composites
+et l'Optimisation
+(Splitting Methods Based on Bregman Distances for Composite
+Monotone Inclusions and Optimization)
+Bằng Công Vũ, Université Pierre et Marie Curie, 2013
+Inclusions Monotones en Dualité et Applications
+(Monotone Inclusions in Duality and Applications)
+Luis M. Briceño-Arias, Université Pierre et Marie Curie, 2011
+Problèmes d'Inclusions Couplées :
+Éclatement, Algorithmes et Applications
+(Coupled Inclusions Problems: Splitting, Algorithms, and
+Applications)
+Thomas D. Capricelli, Université Pierre et Marie Curie, 2008
+Algorithmes de Projections Convexes
+Généralisées et Applications en Imagerie
+Médicale
+(Generalized Convex Projection Algorithms and Applications
+in Medical Imaging)
+Valérie R. Wajs, Université Pierre et Marie Curie, 2007
+Décompositions et Algorithmes Proximaux pour
+l'Analyse et le Traitement Itératif des Signaux
+(Proximal Decompositions and Algorithms for Signal Analysis
+and Iterative Signal Processing)
+Sever A. Hirstoaga, Université Pierre et Marie Curie, 2006
+Approximation et Résolution de Problèmes
+d'Équilibre, de Point Fixe et d'Inclusion Monotone
+(Approximation and Numerical Solution of Equilibrium, Fixed
+Point, and Monotone Inclusion Problems)
+Jian Luo, City University of New York, 2000
+Non-Differentiable Constrained Signal Restoration by Subgradient Level Methods
+Hong Puh, City University of New York, 1996
+Operator Theoretic Image Coding
+Nonlinear Analysis Thematic Group
+[web]

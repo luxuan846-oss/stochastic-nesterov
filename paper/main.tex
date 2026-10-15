@@ -1,0 +1,338 @@
+\documentclass[10pt]{article}
+\usepackage{amsthm,mathtools}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{ifpdf}
+\usepackage{lineno,etoolbox}
+% Keep paragraph line numbers continuous around displayed equations.
+\BeforeBeginEnvironment{equation}{\begin{linenomath}}
+\AfterEndEnvironment{equation}{\end{linenomath}}
+\BeforeBeginEnvironment{equation*}{\begin{linenomath}}
+\AfterEndEnvironment{equation*}{\end{linenomath}}
+
+\numberwithin{equation}{section}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\input{share}
+
+\newcommand{\HH}{\mathcal H}
+\newcommand{\FF}{\mathcal F}
+\DeclareMathOperator{\Fix}{Fix}
+\newcommand{\norm}[1]{\lVert #1\rVert}
+\newcommand{\ip}[2]{\langle #1,#2\rangle}
+
+\title{Stochastic Fast Krasnosel'ski\u{i}--Mann Iteration\\
+with Unbiased Oracle Evaluations}
+\author{}
+\date{Working draft --- October 15, 2026}
+
+\begin{document}
+\maketitle
+\linenumbers
+
+\begin{abstract}
+We consider the problem of finding a fixed point of a nonexpansive operator
+in a real Hilbert space using conditionally unbiased stochastic oracle
+evaluations. The operator and its fixed-point set are deterministic, whereas
+the oracle responses and the iterates are random. We focus on a stochastic
+implementation of the Fast Krasnosel'ski\u{i}--Mann method that uses one new
+oracle evaluation per iteration and retains the preceding evaluation.
+The objective is to identify noise conditions under which the last-iterate
+fixed-point residual decays at an accelerated almost-sure rate and the
+iterates converge weakly almost surely. This initial draft specifies the
+problem, the oracle model, and the iteration; stochastic convergence
+theorems and sharp noise thresholds remain to be established.
+\end{abstract}
+
+\noindent\textbf{Key words.} nonexpansive operator, fixed-point problem,
+Fast KM, stochastic oracle, almost-sure convergence.
+
+\section{Introduction}\label{sec:introduction}
+
+We study the problem of finding a fixed point of a nonexpansive operator
+$T:\HH\to\HH$ using noisy evaluations of $T$. Such problems arise from
+convex optimization and operator splitting, where the fixed points of a
+suitable update map encode solutions of the underlying problem
+\cite{bot2023fast,yang2026ikm}. The map $T$ is fixed throughout the
+iteration. Randomness enters through the computation of its values.
+For instance, in smooth convex stochastic optimization, a sampled gradient
+provides an unbiased estimate of the gradient of a deterministic expectation
+objective \cite[Section~4.3]{bravo2024stochastic}.
+
+\subsection{Background and motivation}\label{sec:motivation}
+
+The Krasnosel'ski\u{i}--Mann (KM) iteration is a basic method for
+nonexpansive fixed-point problems. Bo\c{t} and Nguyen
+\cite[Algorithm~2.1 and Theorems~3.4--3.5]{bot2023fast} proposed the
+Fast KM method, which combines inertial and operator-difference terms.
+Under their parameter conditions, the deterministic method satisfies
+$\norm{x_k-Tx_k}=o(1/k)$ and its iterates converge weakly to a fixed point.
+These guarantees motivate the study of the same iteration with stochastic
+oracle evaluations.
+
+Replacing exact evaluations by noisy responses introduces a specific
+dependence on past errors. In the implementation considered here, the
+previous oracle response is stored and used again in the next update.
+Consequently, the update contains both the current error and the preceding
+error, with opposite signs and different coefficients. The preceding error
+is already known before the current query, so conditional unbiasedness
+does not remove all error terms from a one-step energy estimate. The
+question is how this dependence affects the noise conditions needed for
+almost-sure residual rates and convergence of the iterates.
+
+\subsection{Related work}\label{sec:related-work}
+
+Bravo and Cominetti \cite{bravo2024stochastic} analyze stochastic KM
+iterations in finite-dimensional normed spaces, including almost-sure
+convergence and bounds on the expected fixed-point residual.
+Yang et al.\ \cite[Theorem~1]{yang2026ikm} study stochastic inertial KM
+with one oracle response per update. Their parameter schedule depends on
+a prescribed horizon, and their main result controls the root-mean-square
+residual at the last iterate. Their oracle model allows a predictable
+bias; we restrict attention to its conditionally unbiased case.
+Almost-sure accelerated residual rates are also available for other
+inexact fixed-point methods, including the AFP framework of
+Nguyen-Trung and Tran-Dinh \cite[Theorem~2]{nguyentrung2025afp}, under
+the assumptions of that theorem. Thus, an almost-sure accelerated rate
+alone does not distinguish the present research question.
+
+Our focus is the stochastic Fast KM recurrence specified in
+Section~\ref{sec:algorithm}, run indefinitely with parameters independent
+of a terminal horizon. We seek noise conditions for the deterministic
+residual rate to persist almost surely, together with weak convergence of
+the iterates. Comparing those conditions across noise distributions and
+query implementations is a further objective. No sharp threshold or
+novelty claim is asserted in this draft.
+
+\section{Problem formulation and stochastic oracle}\label{sec:problem}
+
+\subsection{Nonexpansive fixed-point problem}\label{sec:fixed-point}
+
+Let $\HH$ be a real separable Hilbert space with inner product
+$\ip{\cdot}{\cdot}$ and induced norm $\norm{\cdot}$.
+
+\begin{assumption}[Operator and solution set]\label{ass:operator}
+The deterministic operator $T:\HH\to\HH$ is nonexpansive:
+\begin{equation}\label{eq:nonexpansive}
+ \norm{Tx-Ty}\leq\norm{x-y},\qquad x,y\in\HH.
+\end{equation}
+Its fixed-point set $\Fix T:=\{x\in\HH:Tx=x\}$ is nonempty.
+\end{assumption}
+
+The problem is
+\begin{equation}\label{eq:problem}
+ \text{find }x^\star\in\HH\quad\text{such that}\quad Tx^\star=x^\star.
+\end{equation}
+We measure accuracy by the fixed-point residual
+\begin{equation}\label{eq:residual}
+ r(x):=\norm{x-Tx},\qquad r_k:=r(x_k).
+\end{equation}
+For $V:=\Id-T$, problem~\eqref{eq:problem} is equivalently $Vx^\star=0$.
+Nonexpansiveness of $T$ is equivalent to $1/2$-cocoercivity of this $V$:
+\begin{equation}\label{eq:cocoercivity}
+ \ip{Vx-Vy}{x-y}\geq\tfrac12\norm{Vx-Vy}^{2},\qquad x,y\in\HH.
+\end{equation}
+Indeed, expanding $\norm{(x-y)-(Vx-Vy)}^2\leq\norm{x-y}^2$
+gives~\eqref{eq:cocoercivity}, and the expansion is reversible.
+The residual does not by itself provide a bound on the distance to
+$\Fix T$ without an additional error-bound condition.
+
+\subsection{Conditionally unbiased oracle}\label{sec:oracle}
+
+Work on a probability space $(\Omega,\FF,\PP)$ equipped with a
+filtration $(\FF_k)_{k\geq0}$. The sigma-algebra $\FF_k$ contains all
+information available immediately before query $k$. At an
+$\FF_k$-measurable point $x_k$, the oracle returns
+\begin{equation}\label{eq:oracle}
+ \widehat T_k(x_k)=Tx_k+e_k.
+\end{equation}
+All Hilbert-space-valued random variables are strongly measurable.
+The error $e_k$ is square-integrable and $\FF_{k+1}$-measurable.
+We impose conditional unbiasedness:
+\begin{equation}\label{eq:unbiased}
+ \EE[e_k\mid\FF_k]=0\qquad\text{almost surely}.
+\end{equation}
+This is the specialization $b_k=0$ of the oracle model in
+\cite[Section~2.2, equation~(6)]{yang2026ikm}. Independence of errors
+across iterations is not assumed.
+
+Let $(\sigma_k^2)_{k\geq0}$ be a deterministic sequence of finite,
+nonnegative numbers satisfying
+\begin{equation}\label{eq:variance-budget}
+ \EE[\norm{e_k}^2\mid\FF_k]\leq\sigma_k^2
+ \qquad\text{almost surely}.
+\end{equation}
+We distinguish two noise conditions used in the research plan:
+\begin{description}
+ \item[\textnormal{(N2)}] Uniformly bounded conditional variance:
+ $\sup_{k\geq0}\sigma_k^2<\infty$.
+ \item[\textnormal{(N6)}] Weighted square summability, specialized here to
+ fixed-step Fast KM:
+ \begin{equation}\label{eq:n6}
+  \sum_{k=0}^{\infty}(k+1)^2\sigma_k^2<\infty.
+ \end{equation}
+\end{description}
+The shift by one includes the initialization error and does not change
+the asymptotic summability requirement. We use (N6) as a candidate
+sufficient condition to investigate, not as an established convergence
+theorem for the recurrence below. A bounded variance budget in (N2)
+alone does not require the errors to vanish.
+
+\begin{remark}[The target is deterministic]\label{rem:target}
+The operator $T$ and the set $\Fix T$ are deterministic. The oracle
+responses and the iterates are random. A limit selected by the iteration
+may consequently be a random variable with values in $\Fix T$.
+The model does not require the sampled mappings to have a common fixed
+point or to be individually nonexpansive.
+\end{remark}
+
+\subsection{A stochastic optimization example}\label{sec:example}
+
+Let $f(x)=\EE_{\zeta}[F(x,\zeta)]$ be convex and differentiable,
+with $L$-Lipschitz gradient, $L>0$, and a nonempty set of minimizers.
+For $0<\gamma\leq2/L$, the operator
+\begin{equation}\label{eq:gradient-map}
+ Tx=x-\gamma\nabla f(x)
+\end{equation}
+is nonexpansive and $\Fix T=\argmin f$.
+Assume that a sampled gradient $g_k$ at $x_k$ satisfies
+$\EE[g_k\mid\FF_k]=\nabla f(x_k)$ and has finite conditional
+second moment. This unbiasedness must be justified by the sampling
+model and, when using $\nabla_xF$, the interchange of differentiation
+and expectation. Then
+\begin{equation}\label{eq:gradient-oracle}
+ \widehat T_k(x_k)=x_k-\gamma g_k,
+ \qquad e_k=-\gamma\bigl(g_k-\nabla f(x_k)\bigr)
+\end{equation}
+satisfies~\eqref{eq:unbiased}. This is the stochastic-gradient
+interpretation of KM described in
+\cite[Section~4.3]{bravo2024stochastic}.
+
+\begin{remark}[Unbiasedness of the full operator evaluation]\label{rem:prox}
+An unbiased gradient passed through a nonlinear proximal map need not
+produce an unbiased estimate of the resulting fixed-point operator.
+For example, let $P(u)=\max\{u,0\}$ and let $\xi$ be an integrable,
+nonzero symmetric scalar noise. Then
+\[
+ \EE[P(-\gamma\xi)]=\frac{\gamma}{2}\EE|\xi|>0=P(0).
+\]
+Thus, for a proximal-gradient map, condition~\eqref{eq:unbiased}
+must be checked for the complete oracle response. The existence of a
+deterministic splitting formulation alone does not verify this condition.
+\end{remark}
+
+\section{Fast KM iteration}\label{sec:algorithm}
+
+\subsection{The Krasnosel'ski\u{i}--Mann iteration}\label{sec:km}
+
+For the fixed-point problem~\eqref{eq:problem}, the Krasnosel'ski\u{i}--Mann
+(KM) iteration takes the form
+\begin{equation}\label{eq:km}
+ x_{k+1}=(1-\lambda_k)x_k+\lambda_k Tx_k,\qquad k\geq0,
+\end{equation}
+where $x_0\in\HH$ and $\lambda_k\in(0,1)$ is a relaxation parameter.
+Each update is a convex combination of the current iterate and its image
+under $T$. Under Assumption~\ref{ass:operator}, for a fixed relaxation
+parameter $\lambda_k\equiv\lambda\in(0,1)$, the iterates converge weakly
+to a point in $\Fix T$ and the fixed-point residual satisfies
+$\norm{x_k-Tx_k}=o(k^{-1/2})$; see
+\cite[Section~1, equation~(1.3)]{bot2023fast}.
+
+\subsection{The Fast KM method}\label{sec:deterministic-fast-km}
+
+Bo\c{t} and Nguyen \cite{bot2023fast} accelerate the KM iteration using
+Nesterov's momentum updates. For fixed parameters $\alpha>2$ and
+$0<s\leq1$, and initial points $x_0,x_1\in\HH$, their Fast KM method is
+\begin{equation}\label{eq:deterministic-fast-km}
+\begin{split}
+ x_{k+1}={}&\left(1-\frac{s\alpha}{2(k+\alpha)}\right)x_k
+ +\frac{(1-s)k}{k+\alpha}(x_k-x_{k-1})
+ +\frac{s\alpha}{2(k+\alpha)}Tx_k\\
+ &+\frac{sk}{k+\alpha}(Tx_k-Tx_{k-1}),\qquad k\geq1.
+\end{split}
+\end{equation}
+This is equation~(2.7) in \cite{bot2023fast}, specialized to a
+nonexpansive operator. The update involves both the difference of successive
+iterates and the difference of successive operator values.
+Under Assumption~\ref{ass:operator},
+\cite[Theorems~3.4--3.5]{bot2023fast} give
+\begin{equation}\label{eq:deterministic-guarantees}
+ \norm{x_k-Tx_k}=o(1/k),\qquad
+ x_k\rightharpoonup x^\star\in\Fix T.
+\end{equation}
+
+For $s=1$, the coefficient of $x_k-x_{k-1}$ in
+\eqref{eq:deterministic-fast-km} vanishes, and the iteration becomes
+\begin{equation}\label{eq:fast-km-unit-step}
+ x_{k+1}=\left(1-\frac{\alpha}{2(k+\alpha)}\right)x_k
+ +\frac{\alpha}{2(k+\alpha)}Tx_k
+ +\frac{k}{k+\alpha}(Tx_k-Tx_{k-1}).
+\end{equation}
+As observed in \cite[Remark~2.1]{bot2023fast}, this is a KM iteration
+with the additional extrapolation term
+$\frac{k}{k+\alpha}(Tx_k-Tx_{k-1})$. The extrapolation acts on the
+operator values. For $0<s<1$, the explicit inertial term
+$\frac{(1-s)k}{k+\alpha}(x_k-x_{k-1})$ is also present.
+
+\subsection{Stochastic Fast KM}\label{sec:iteration}
+
+We replace the exact evaluations in~\eqref{eq:deterministic-fast-km}
+by the conditionally unbiased oracle responses from Section~\ref{sec:oracle}.
+Choose deterministic $x_0,x_1\in\HH$ and fixed $\alpha>2$, $0<s\leq1$.
+Initialize by computing and storing $\widehat T_0(x_0)$. For every $k\geq1$,
+compute $\widehat T_k(x_k)$ and set
+\begin{equation}\label{eq:stochastic-fast-km}
+\begin{split}
+ x_{k+1}={}&\left(1-\frac{s\alpha}{2(k+\alpha)}\right)x_k
+ +\frac{(1-s)k}{k+\alpha}(x_k-x_{k-1})
+ +\frac{s\alpha}{2(k+\alpha)}\widehat T_k(x_k)\\
+ &+\frac{sk}{k+\alpha}
+ \bigl(\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})\bigr).
+\end{split}
+\end{equation}
+The preceding response $\widehat T_{k-1}(x_{k-1})$ is stored from the
+previous iteration. Hence, after initialization, each update requires one
+new oracle evaluation. The points $x_{k-1}$ and $x_k$, together with the
+stored response, are $\FF_k$-measurable; $x_{k+1}$ is
+$\FF_{k+1}$-measurable. The parameters are independent of a terminal horizon.
+
+Substituting~\eqref{eq:oracle} into the difference of oracle responses yields
+\begin{equation}\label{eq:oracle-difference}
+ \widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})
+ =Tx_k-Tx_{k-1}+e_k-e_{k-1}.
+\end{equation}
+Relative to the exact update~\eqref{eq:deterministic-fast-km} evaluated
+at the current iterates, the total additive error is
+\begin{equation}\label{eq:perturbed-recurrence}
+ \eta_k=\frac{s\alpha}{2(k+\alpha)}e_k
+       +\frac{sk}{k+\alpha}(e_k-e_{k-1})
+       =\frac{s(k+\alpha/2)}{k+\alpha}e_k
+       -\frac{sk}{k+\alpha}e_{k-1}.
+\end{equation}
+Since $e_{k-1}$ is $\FF_k$-measurable, conditional unbiasedness gives
+\begin{equation}\label{eq:conditional-update-error}
+ \EE[\eta_k\mid\FF_k]=-\frac{sk}{k+\alpha}e_{k-1}.
+\end{equation}
+These identities describe how the current and preceding oracle errors
+enter the stochastic iteration.
+
+Our objective is to identify noise conditions under which
+\begin{equation}\label{eq:target-rate}
+ k\norm{x_k-Tx_k}\longrightarrow0\qquad\text{almost surely},
+\end{equation}
+and, for a $\Fix T$-valued random variable $x_\infty$,
+\begin{equation}\label{eq:target-iterates}
+ x_k\rightharpoonup x_\infty\qquad\text{almost surely}.
+\end{equation}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

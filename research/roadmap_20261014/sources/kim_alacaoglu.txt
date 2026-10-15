@@ -1,0 +1,1932 @@
+                                            Improving the Last-Iterate Guarantees of Anytime Algorithms for
+                                                     Stochastic Monotone Variational Inequalities
+                                                                             Jun-Hyun Kim∗                  Ahmet Alacaoglu†
+
+
+
+
+arXiv:2609.15257v2 [math.OC] 24 Sep 2026
+                                                                                                  Abstract
+                                                      We analyze a stochastic algorithm with Halpern-type anchoring for constrained convex-concave
+                                                  problems and monotone variational inequalities. This single-loop and single-call algorithm uses one
+                                                  unbiased sample of the gradient operator at every iteration, to be applicable to monotone games with
+                                                  noisy feedback. With t denoting the iteration counter, we prove an anytime last-iterate convergence rate
+                                                  of O(t−1/4 ) for both the gradient-mapping norm and restricted gap, bypassing the O(t−1/5 ) constrained-
+                                                  anytime bottleneck in the literature. Specializing then to multi-point oracles, we use variance reduction
+                                                  to achieve the O(t−1/2 ) rate with an anytime single-loop algorithm using 2 samples per iteration. Our
+                                                  results allow constrained problems with a potentially unbounded feasible set; as well as a structured class
+                                                  of stochastic oracles whose variance need not be uniformly bounded.
+
+
+                                           1      Introduction
+                                           We focus on the unifying framework of monotone variational inequalities (VIs) that cover such problems as
+                                           monotone games and convex-concave min-max problems. In particular, we focus on the specific inclusion
+                                           describing this problem, given as
+                                                                                    0 ∈ G(z⋆ ) + ∂r(z⋆ ),                                       (1.1)
+                                           where G : Rd → Rd is monotone, L-Lipschitz; and r : Rd → R ∪ {+∞} is proper, convex, closed. This is
+                                           equivalent to the following form of the monotone VI, where the goal is to find z⋆ such that
+                                                                           ⟨G(z⋆ ), z − z⋆ ⟩ + r(z) − r(z⋆ ) ≥ 0 for every z ∈ Rd .                             (1.2)
+                                           An important application of (1.2) is learning in monotone games [CBL06], where Nash equilibria can be
+                                           characterized as solutions of a monotone VI, see, e.g., [MZ19]. In this setting, one action profile is played
+                                           and one noisy payoff feedback is observed at each round. Hence, single-call methods fit this feedback model,
+                                           whereas two-call methods require an additional gradient evaluation at a different action profile.
+                                               Since the current action profile is the one actually played, the horizon is generally unknown, and we
+                                           are interested in observing the dynamics of the learning process, last-iterate and anytime guarantees are
+                                           particularly relevant [CZ23b]. As a result, standard results for stochastic VI algorithms that show convergence
+                                           rates on the averaged iterate or those that use increasing mini-batches, variance reduction, or multi-loop
+                                           algorithms are not suitable for this setting. Motivated by this setup, in Section 2, we study an anytime,
+                                           single-call algorithm with last iterate guarantees.
+                                               Another classical application outside of the learning in games setting is constrained optimization
+                                                                          min f (x) : Ax ≤ b ⇐⇒ min max f (x) + ⟨Ax − b, y⟩,                                    (1.3)
+                                                                            x                          x   y≥0
+
+                                           where single-call algorithms are not necessary and variance reduced methods are applicable. In particular, we
+                                           often have a large matrix A from which we sample rows or columns to get unbiased estimates for gradients,
+                                           which is amenable to the oracle access for variance reduction. An important aspect in this setting is that
+                                           we need algorithms that can be applied for unbounded constraint sets since neither the primal nor the dual
+                                           domains are bounded in (1.3). In Section 3, we study a single-loop algorithm suitable for the optimization
+                                           setting by using variance reduction with 2 calls per iteration.
+                                               ∗ University of British Columbia, Vancouver. junhyun@student.ubc.ca
+                                               † Department of Mathematics, University of British Columbia, Vancouver. ahmet.alacaoglu@ubc.ca
+
+
+
+
+                                                                                                       1
+                                                       Variance       Last-iterate rate          Variance
+     Method       Constraint      Anytime    Batch
+                                                       Reduction      and measure                assumption
+
+     [ASAI25]     Bounded           ×          2            ×         O(T −1/7 ), gap
+                                                                      e                          Bounded
+
+
+     [ZLS26]      Unbounded         ×          2            ×         O(T −1/4 ), gap            Bounded‡
+
+     [ZLS26]      Unbounded         ✓          2            ×         O(t−1/5 ), gap             Bounded‡
+
+
+     [ITAA26]     Bounded           ×          1            ×         O(T −1/4 ), gap            Bounded
+
+                                                                            −1/5
+     [ITAA26]     Bounded           ✓          1            ×         O(t          ), gap        Bounded
+
+
+     [SYLJ+ 26]   Unconstrained     ✓          1            ×         O(t−1/4 ), grad. norm      (1.7)
+
+
+                                                                      O(t−1/4 ), grad. mapping
+     Section 2    Unbounded         ✓          1            ×                                    Blum-Gladyshev
+                                                                      O(t−1/4 ), gap
+
+
+Table 1: Comparison of single-loop and anytime stochastic methods with last-iterate guarantees. The rates are
+stated with T for fixed horizon and t for anytime results. The Blum-Gladyshev condition is given in Assumption 1.2.
+‡
+  [ZLS26, Section 2.1] remarked that their analysis extends to a stronger variant of our Assumption 1.2, but did not
+provide a proof.
+
+
+Optimality measures. Two standard optimality measures we will consider are gradient mapping norm,
+also known as the natural residual, and the restricted gap function [FP03]. In particular, for a fixed ρ > 0,
+define the gradient mapping by
+                                                   1                       
+                                        Gρ (z) =     z − proxρr (z − ρG(z)) .                                     (1.4)
+                                                   ρ
+The norm ∥Gρ (z)∥ vanishes if and only if (1.1) holds at z. For simplicity we will set ρ = L1 throughout.
+This is an optimality measure generalizing the gradient norm in the unconstrained case and is suitable for
+problems with unbounded feasible sets, in contrast to the gap we introduce next.
+    We present the gap function for the special case of r(z) = δZ (z) where δZ is the indicator function for a
+closed and convex set Z:
+
+                                          gap(z) = max {⟨G(z), z − u⟩} .                                          (1.5)
+                                                      u∈Z
+
+Since this quantity is not suitable when set Z is not bounded, restricted versions of gap functions are often
+used [Nes07]. For restricted gap functions, they generally take the maximum over a compact set U and this
+set needs to satisfy certain requirements for restricted gap functions to be valid optimality measures [Nes07,
+Lemma 1]. For example, the set needs to contain the output of the algorithm and a solution. Since it is
+generally not possible to show the iterates stay bounded for stochastic algorithms, this optimality measure
+is less meaningful without a bounded domain or for stochastic algorithms. On the other hand, when the
+domain is bounded, such as in matrix games, then the gap functions are well-defined optimality measures.
+    To compare with some relevant works, we will prove rates for the gap function, which will be a direct
+consequence of the rates we prove on the natural residual/gradient mapping norm, given in (1.4). The
+relationship between the gap function and the gradient mapping is formalized in Corollary D.2 for completeness,
+which is a standard argument.
+
+Related works. In the deterministic case, optimal last iterate guarantees are obtained recently by
+anytime algorithms [YR21, CZ23a, CZ23b] by using anchoring; and suboptimal guarantees were shown in
+[GPDO20, GTG22] for standard VI algorithms, such as the classical extragradient method [Kor76]. In the
+game setting, last iterate guarantees are proven in [GPD20] for the optimistic gradient algorithm [Pop80, RS13].
+In the stochastic case, last iterate guarantees without using mini-batches or multi-loop algorithms has been
+of interest for learning in games with noisy feedback, and many works focused on this direction, including
+[CM24, AIMM21, ASAI25, SYLJ+ 26, ZLS26, ITAA26, AASI24, HACM22].
+
+
+                                                            2
+                                                                Complexity                  Variance
+              Method      Constraint      Anytime   Batch
+                                                                and output                  assumption
+
+              [CSGD22]    Unconstrained     ×        incr.       O(ε−3 ), last-iter.
+                                                                 e                          Bounded
+
+              [TDNT26]    Unbounded         ×        incr.    O(ε−10/3 ), random-iter.      Bounded
+
+                                                                     −4
+              [AMW25]     Unbounded         ×         2        O(ε        ), random-iter.   Blum-Gladyshev
+
+              Section 3   Unbounded         ✓         2          O(ε−2 ), last-iter.        Blum-Gladyshev
+
+
+         Table 2: Comparison of single-loop methods with last-iterate guarantees and variance reduction.
+
+
+    The literature on the last iterate guarantees for anytime, single-loop algorithms using a single sample (or
+2 samples) at every iteration had recent interesting developments. In particular, for unconstrained problems
+[SYLJ+ 26] showed the O(t−1/4 ) rate for an anchored algorithm. For constrained problems, two parallel works
+showed the anytime rate O(t−1/5 ) for the restricted gap function [ZLS26, ITAA26]. Surprisingly, both of
+these works concluded the following separation: when we let go of the anytime requirement, that is, when
+the horizon T is known in advance, it was possible to get the rate O(T −1/4 ) for the last iterate where T is
+the horizon; yet for the anytime case, both works got the worse O(t−1/5 ) rate.
+    Other single-loop algorithms in the literature are not compatible with the requirements of our setting:
+for example the developments in [CSGD22] focused on unconstrained problems (for monotone and Lipschitz
+operators) and used variance reduction along with increasing batches; the works [PFL+ 23, AK26, AMW25]
+relied on variance reduction and multi-point oracles and did not prove last iterate guarantees. Classical works
+obtain optimal rates (in terms of ε independence) on the gap when it is evaluated at the averaged iterate, see
+for example [NJLS09].
+    A large body of literature used increasing mini-batch sizes to obtain O(ε−4 ) complexity [IJOT17, PXC23,
+KLL22, LK21]. Our complexity in Section 2 matches this by avoiding mini-batches. When we allow increasing
+mini-batches or multi-loop algorithms, the complexity for residual-type optimality measures was improved to
+O(ε−10/3 ) by using mini-batches and variance reduction in the work [TDNT26], under Assumption 3.1. Only
+very recently, methods based on multiple loops obtained the order-optimal O(ε     e −2 ) complexity for gradient
+norm for unconstrained problems [CL24] and natural residual and tangent residual in the constrained case
+[Ala26, JLZ26].
+    To our knowledge, the best complexity with a single-loop method for the residual remained at O(ε−10/3 ).
+We obtain the best-known and order optimal rate O(ε−2 ) under Assumption 3.1 with a single-loop algorithm
+using 2 unbiased oracles at each iteration. Assumption 3.1 is stronger than the assumptions of [Ala26, JLZ26],
+however, unlike these works, we use a single-loop method without using increasing mini-batch sizes and
+multiple loops.
+Context and Contributions. The best anytime rate for the restricted gap stayed at O t−1/5 [ZLS26,
+                                                                                                         
+
+ITAA26], whereas both works could obtain the horizon-dependent O(T −1/4 ) rate where T is the horizon. At
+the same time, an anytime O(t−1/4 ) was known for unconstrained problems [SYLJ+ 26, ZLS26]. The difficulty
+for extending to the constrained case was discussed in [ZLS26, Remark 4.2]; open questions to derive an
+anytime O(t−1/4 ) rate for constrained problems were mentioned in [SYLJ+ 26, Section 7] and [ZLS26, Section
+6]. More technical details are provided in Section 2.3.
+    In this work, we prove
+                         that the separation from [ZLS26, ITAA26] can be avoided, that is, we prove the
+anytime rate O t−1/4 for constrained problems. To allow unbounded constraint sets, we show rates on
+gradient mapping norm (in addition to the gap function), without the bounded variance assumption, by
+allowing variance to grow as fast as the displacement of the iterates from an initial point. Our algorithm is
+of stochastic gradient-type, with anchoring (in view of Halpern [Hal67]), using a single-call of the unbiased
+operator at every iteration.
+    Next, we show that by incorporating the STORM variance reduction, we can improve the rate on the last
+iterate to O(t−1/2 ). The algorithm is still single-loop and anytime, but not single-call anymore since it samples
+two unbiased oracles. This leads to the complexity O(ε−2 ) which is optimal in terms of ε-dependence, under
+the stronger stochastic oracle, see [FSS+ 19]. This complexity was previously obtained only with multi-loop
+algorithms [Ala26, JLZ26].
+
+
+
+                                                          3
+1.1    Assumptions
+Monotonicity and Lipschitz continuity of G mean that, for all x, y, we have
+
+                            ⟨G(x) − G(y), x − y⟩ ≥ 0,          ∥G(x) − G(y)∥ ≤ L∥x − y∥.
+
+We now collect the assumptions made on our main problem.
+Assumption 1.1. The function r : Rd → R ∪ {+∞} is proper, closed, and convex. The operator G : Rd → Rd
+is monotone and L-Lipschitz, and the set of solutions to (1.1) is nonempty.
+    We fix a deterministic initial point z0 ∈ dom r. Let Ft denote the history before the oracle call at iteration
+t, that is, it is the σ-algebra generated by the randomness of ξ0 , . . . , ξt−1 , where zt is Ft -measurable, and we
+write Et [·] = E[· | Ft ]. The oracle returns an unbiased sample whose variance may grow with the distance
+from the initial point.
+Assumption 1.2. At each iteration t ≥ 0, the sample e
+                                                    G(zt , ξt ) satisfies
+
+                  Et [G(z
+                      e t , ξt )] = G(zt )           e t , ξt ) − G(zt )∥2 ≤ B 2 ∥zt − z0 ∥2 + σ 2 .
+                                             and Et ∥G(z                                                        (1.6)
+
+    The case B = 0 recovers the bounded-variance assumption. Let us compare this to the assumption used
+in [SYLJ+ 26] who required in the unconstrained case
+
+                                      G(zt , ξt ) − G(zt )∥2 ≤ σ 2 + c2 ∥G(zt )∥2 .
+                                    E∥ e                                                                        (1.7)
+
+To see that our assumption is weaker, we focus on the unconstrained case where G(z⋆ ) = 0. Then, this
+assumption implies by Lipschitzness of G:
+
+             ∥G(zt )∥2 = ∥G(zt ) − G(z⋆ )∥2 ≤ L2 ∥zt − z⋆ ∥2 ≤ 2L2 ∥zt − z0 ∥2 + ∥z0 − z⋆ ∥2 .
+                                                                                            
+
+That is, the variance assumption of [SYLJ+ 26] implies Assumption 1.2.
+    The reason for focusing on Assumption 1.2 is to support our claims for handling problems without bounded
+domains. In particular, let us assume that we have an affine operator G(z) = Az − b for A ∈ Rd×d and we
+calculate unbiased oracles as G(z)
+                               e    = dA:i zi − b where i is selected uniformly at random and A:i is the i-th
+column. Then, Assumption 1.2 holds whereas standard bounded variance or assumptions of the form (1.7)
+may fail, unless the domain of the problem (dom r in our notation) is bounded. Since problems with affine G
+and unbounded domains are common, such as linearly constrained convex optimization, our analysis is based
+on Assumption 1.2 to cover such problems.
+
+Notation.     When clear from the context,
+                                    n      we shorten e
+                                                      G(z
+                                                       o t , ξt ) as G(zt ). For η > 0, we define the proximal
+                                                                     e
+                                             1
+operator as proxηr (x) = argminz∈Rd r(z) + 2η  ∥z − x∥2 .
+   The optimality condition for the problem appearing in the definition of the proximal operator, under our
+assumptions on r, gives the well known prox-inequality:
+
+           z = proxηr (x)     ⇐⇒     x − z ∈ η∂r(z) ⇐⇒ ⟨z − x, u − z⟩ ≥ η(r(z) − r(u)) ∀u ∈ Rd .                (1.8)
+
+
+2     A Single-Call Algorithm
+Algorithm 1 is a simple extension of stochastic gradient descent (or stochastic forward-backward method),
+when Halpern anchoring is introduced [Hal67]. This algorithm appeared many times in the literature, with
+many different names, see for example [ITAA26, NO24]. It was analyzed by [LK21] with increasing mini-batch
+sizes. This method is a single-call algorithm à la [HIMM19], uses no mini-batch, variance reduction or inner
+loops.
+    We now present our main result which is an anytime convergence rate on the gradient mapping, or natural
+residual, norm. Then, we continue with its implications to anytime rates on gap functions. The proof of the
+result is given in Appendix A.
+
+
+                                                           4
+Algorithm 1 A single-call stochastic Halpern method
+                                                                      a               1
+Require: Initial point z0 ∈ dom r, a ≥ 2, H 2 = L2 + 2B 2 . Set βt = t+a and ηt = H(t+a)3/4 .
+
+ 1: for t = 0, 1, . . . do
+ 2:   Obtain an unbiased estimate G(ze t ) of G(zt )
+                                                    
+ 3:   zt+1 = proxηt r (1 − βt )zt + βt z0 − ηt e
+                                              G(zt )
+ 4: end for
+
+
+
+Theorem 2.1. Let Assumptions 1.1 and 1.2 hold. Then, for every t ≥ 1, Algorithm 1 satisfies
+                                                       (L + B)∥z0 − z⋆ ∥ + σ
+                                  q                                          
+                                                2
+                   E∥G1/L (zt )∥ ≤ E∥G1/L (zt )∥ = O                            .
+                                                                 t1/4
+   We continue with a direct corollary for a rate on the restricted gap, by using Corollary D.2.
+Corollary 2.2. Let r = δZ for a convex, closed set Z. We then have
+                                                             
+                                                            1
+                                       E[gapU (zt )] = O 1/4 ,
+                                                          t
+for any compact set U, where gapU extends (1.5) by taking the maximum over a compact set U ⊆ Z.
+    When we specialize to min-max problems, we can then particularize this result to a rate on the restricted
+primal-dual gap used in [ZLS26]. This result is given in the appendix as Corollary C.1 for direct comparison
+to this work.
+    Finally, we convert the convergence rate guarantees to iteration and sample complexity results.
+Corollary 2.3. Under the same setup as Theorem 2.1, to obtain E∥Gρ (zt )∥ ≤ ε or E gapU (zt ) ≤ ε on the
+last iterate zt , the required total number of stochastic oracles is of the order O(ε−4 ).
+    The proof of Corollaries 2.2 and C.1 are given in Appendix C, and the proof of Corollary 2.3 is omitted
+since it is immediate.
+    We continue with the proof of Theorem 2.1. The structure of our proof is inspired by the simple and
+powerful idea that first appeared in the work [SYLJ+ 26] and then used also for the unconstrained result of
+[ZLS26]. The idea is to first analyze the deterministic shadow sequence given in (2.2) and then provide a
+pointwise bound between the deterministic sequence and the original stochastic sequence.
+    Instead of the gradient norm used in these works, we use the gradient mapping, which satisfies the
+necessary Lipschitz properties and then we show that the gradient mapping norm majorizes the gap function,
+to go around the difficulty of working directly with the gap function.
+
+2.1    Application for Learning in Games
+We now apply our anytime guarantee for monotone games [CBL06]. Following the setup in [CZ23b, ITAA26],
+we have N players where i-th player is denoted as zi and z = (z i ; z −i ) = (z 1 , . . . , z N ). Each player selects
+actions from sets Z i which are assumed to be compact, and Z = Z1 × · · · × ZN . Each player minimizes a
+convex loss function ℓi (z i ; x−i ). The operator G will be defined as
+                                                                   
+                                                         ∇z1 ℓ1 (z)
+                                               G(z) =       ..
+                                                                    .
+                                                                   
+                                                              .
+                                                         ∇zN ℓN (z)
+
+We assume access to noisy estimates of G(z) such that e G(zt ) = G(zt ) + ζt where E[ζt ] = 0 and E∥ζt ∥2 ≤
+ 2          2   2
+B ∥zt − z0 ∥ + σ . Even though this allows handling problems without bounded feasible sets, for this section,
+we assume that Z is compact.
+   For direct comparison with [ITAA26], we define the constants
+
+                                    D = max ∥x − y∥,          U = max ∥G(z)∥.
+                                         x,y∈Z                        z∈Z
+
+
+
+                                                          5
+                                                                          PT −1
+Set a = 2 in Algorithm 1 and define, for u ∈ dom r, the regret RegT (u) = t=0 ⟨G(zt ), zt − u⟩.
+    A direct consequence of Theorem 2.1, Corollary 2.2, and [ITAA26, Section 7] (by selecting parameters as
+this work) is that we obtain the convergence and regret guarantees
+                                            
+                              D(LD + U + σ)                            
+                                                                                          3/4
+                                                                                              
+             E gap(zt ) = O                      and   E Reg T (u) = O   D(LD +  U +  σ)T       .     (2.1)
+                                   t1/4
+
+Remark 2.4. Under the same bounded-domain and bounded-variance setting, [ITAA26, Theorem 5.1] obtained
+the gap bound O(D(LD + U + σ)t−1/5 ). Thus our result improves the anytime rate from O(t−1/5 ) to O(t−1/4 ).
+Our analysis also improves the regret guarantee obtained for the anytime algorithm in [ITAA26] which
+was O(T 4/5 ) to O(T 3/4 ). Of course, the regret guarantee is suboptimal, however, the aim is to prove that
+Algorithm 1 has sublinear regret, while improving the last iterate anytime guarantee for approaching a Nash
+equilibrium.
+   We now continue with the details of the analysis, following the high-level description in Section 2.
+
+2.2    Convergence of the Deterministic Sequence
+Starting from z̄0 := z0 , define the deterministic reference iterates by
+                                                                                   
+                                 z̄t+1 = proxηt r (1 − βt )z̄t + βt z0 − ηt G(z̄t ) .                       (2.2)
+
+These iterates are used only in the analysis. This sequence is indeed the algorithm analyzed by [CZ26],
+referred to as the anchored gradient descent. We follow the arguments of [CZ26], by adapting the parameter
+choices. Their t−1/2 stepsize is replaced here by t−3/4 ; the estimates below require only H ≥ L.
+    The first result proves the uniform boundedness of this deterministic sequence. The proof is deferred to
+Appendix A.1.
+Lemma 2.5. Under Assumption 1.1, for the iterates generated by (2.2), we have for any t ≥ 0 that
+                                            3                                    5
+                            ∥z̄t − z⋆ ∥ ≤     ∥z0 − z⋆ ∥,        ∥z̄t − z0 ∥ ≤     ∥z0 − z⋆ ∥.              (2.3)
+                                            2                                    2
+    Let us remark that using the ideas from [CZ26], we get a guarantee on the optimality measure ∥G(z) + s∥
+where s ∈ ∂r(z). However, we later use this bound to transfer the guarantee to the gradient mapping norm
+since the measure above does not admit the Lipschitzness properties required for the analysis.
+    This is definitely an unsurprising result since it is now classical. Indeed, starting from the work of [YR21]
+which is extended to the constrained case by [KG22, CZ23a, COZ24], it is known how to prove that the
+residual has the last iterate rate of O(1/k) (with more sophisticated algorithms). In our case, since we are
+limited by the pointwise bounds in Section 2.3, we seek a simple bound for this sequence that will be just
+sufficient for our purposes with the parameter choices for βt , ηt . The proof, following [CZ26] is given in
+Appendix A.2.
+Lemma 2.6. Let Assumption 1.1 hold. For every t ≥ 0, we have
+
+                                                                5a∥z0 − z⋆ ∥
+                                            ∥z̄t+1 − z̄t ∥ ≤                 .                              (2.4)
+                                                                  4(t + a)
+
+Moreover, for every t ≥ 1, we find st ∈ ∂r(z̄t ) such that
+
+                                            5aH∥z0 − z⋆ ∥
+                                                                                            
+                                                                     3        L
+                          ∥G(z̄t ) + st ∥ ≤                            +                         .          (2.5)
+                                            2(t − 1 + a)1/4          2 2H(t − 1 + a)3/4
+
+2.3    Pointwise Bounds between Stochastic and Deterministic Sequences
+We follow the stochastic comparison argument of [SYLJ+ 26], bounding the distance between the stochastic
+and deterministic iterates. For the constrained problem, we adapt the argument using Lipschitzness of the
+gradient mapping (which is due to the nonexpansiveness of the proximal operator), under Assumption 1.2.
+
+
+                                                            6
+Since this variance assumption is weaker than the assumption in [SYLJ+ 26] (see Section 1.1), our result
+extends this work even in the unconstrained case.
+    Interestingly, a similar analysis was used in [ZLS26, Section 5.4] in the unconstrained case, but not in
+the constrained case where the strategy was characterizing the solution of a perturbed problem, similar to
+[ITAA26]. Both works got the O(t−1/5 ) anytime rate for the gap.
+    Our insight for the constrained extension departs from [SYLJ+ 26, Section 7] and [ZLS26, Remark 4.2]
+in that we do not directly analyze the gap function in the constrained setting, but go though the gradient
+mapping. The advantages are three-fold: (1) gradient mapping norm is Lipschitz; (2) gradient mapping norm
+is a classical optimality measure for problems without bounded constraint sets, making our result valid for
+problems with unbounded constraint sets; (3) since gradient mapping norm majorizes the (restricted) gap,
+the anytime rate we prove for the gradient mapping norm directly transfers to the same rate on the gap.
+Proof is given in Appendix A.3.
+
+Lemma 2.7. Under Assumptions 1.1 and 1.2, for every t ≥ 0, we have
+
+                               σ 2 + 25  2       ⋆ 2
+                                      2 B ∥z0 − z ∥                     25
+             E∥zt − z̄t ∥2 ≤        2     1
+                                            √        and E∥zt − z0 ∥2 ≤    ∥z0 − z⋆ ∥2 + 2E∥z̄t − zt ∥2 .     (2.6)
+                                  H (a − 2 ) t + a                       2
+
+
+3     A Halpern Method with STORM Variance Reduction
+In this section, we depart from the game setting which came with specific requirements on access to the
+oracle. In particular, in the previous section, it was essential that the algorithm only accessed one unbiased
+oracle per random seed ξ, that is G(z
+                                    e t , ξt ). However, in optimization setting, such as for linearly constrained
+optimization, it is possible to access two-point oracles (G(ze t , ξt ), G(z
+                                                                         e t−1 , ξt )). As we now prove, this oracle
+will helps us obtain a better, in fact ε-optimal, complexity.
+    Algorithm 2 is simple combination of Algorithm 1 and the STORM estimator [CO19]. STORM has
+previously been combined with Halpern anchoring for extragradient methods [AMW25] and forward-backward-
+forward methods [AK26], yet only suboptimal complexity results with e         O(ε−4 ) were shown for a randomly
+selected iterate.
+    We replace the single-call stochastic gradient in Algorithm 1 with the STORM estimator, without an
+additional extragradient correction. This method uses two stochastic-calls and one proximal update, with no
+mini-batch or inner loops. We will prove the ε-optimal complexity of O(ε−2 ) for the last iterate. Because we
+use variance reduction, we will use the mean-square smoothness property for the operator. This assumption
+implies Assumption 1.2 since E∥Gξ (x0 )∥2 is bounded. Moreover, for the example sketched in Section 1.1, the
+following assumption is also satisfied.
+
+Algorithm 2 A STORM proximal Halpern method
+                                                           √                            1
+Require: Initial point z0 ∈ dom r, and H = max 2L, 4 1024Λ2 + 4 + 16B 2 . Set αt = βt = t+1 and
+          1
+   ηt =  √
+         H
+              . Draw ξ0 , set v0 = G(z0 , ξ0 ) and z1 = proxη r (z0 − η0 v0 )
+              t+1
+                                   e
+                                                                   0
+ 1: for t = 1, 2, . . . do
+ 2:   Draw one sample ξt and obtain unbiased estimates G(z
+                                                       e t , ξt ) and G(z
+                                                                      e t−1 , ξt )
+                                                        
+ 3:        G(zt , ξt ) + (1 − αt ) vt−1 − e
+      vt = e                              G(zt−1 , ξt )
+ 4:   zt+1 = proxηt r (1 − βt )zt + βt z0 − ηt vt
+ 5: end for
+
+
+
+Assumption 3.1. For some ξ, we can obtain the multi-point oracle G(x,
+                                                                 e ξ) and G(y,
+                                                                          e ξ). Let G be Lipschitz
+in mean square-sense, that is:
+
+                                        Eξ ∥G(x,   e ξ)∥2 ≤ Λ2 ∥x − y∥2 .
+                                            e ξ) − G(y,
+
+           e 0 , ξ)∥2 < +∞.
+Let also E∥G(z
+
+
+
+                                                            7
+   We now show a last-iterate guarantee for the tangent residual, which is a stronger optimality measure
+than the gradient mapping. In particular, tangent residual (which we often call residual ) is defined as
+
+                                         Res(z) = min ∥G(z) + s∥.
+                                                   s∈∂r(z)
+
+In fact, we prove the rate for the quantity ∥G(z) + s∥, where s ∈ ∂r(z) which majorizes the tangent residual,
+as well as the gradient mapping norm, see for example [CZ23a, Prop. 2].
+Theorem 3.2. Let Assumptions 1.1 and 3.1 hold. Then, for every t ≥ 1, Algorithm 2 satisfies
+                                     27Hmax{σ, 4∥z0 − z⋆ ∥}            
+                       E[Res(zt )] ≤           √             = O t−1/2 .
+                                                 t
+    Proof of this theorem appears in Appendix B. Unlike the analysis of Algorithm 1, we are not using the
+deterministic-tracking argument of [SYLJ+ 26]. Instead, the proof will follow from induction, inspired by
+the proof in [CZ26]. The main distinction is that variance reduction brings a new recursion that is coupled
+with other recursions. In particular, we obtain recursions depending on the sequences E∥zt − zt+1 ∥2 , E∥zt −
+z⋆ ∥2 , E∥vt − G(zt )∥2 . After showing all these sequences have a certain rate, we can convert the result to the
+claimed rate on the residual.
+
+3.1    Three Lemmas
+We start with a recursion showing the evolution of the difference of iterates of the method. The explicit form
+is rather involved, however, we include the orders of the terms in the statement below.
+Lemma 3.3 (See Lemma B.4 for the full expression). Under Assumptions 1.1 and 3.1, for every t ≥ 1 and
+for some a > 1, we have
+                                       
+                          2          a
+             E∥zt+1 − zt ∥ ≤ Θ 1 −        E∥zt − zt−1 ∥2
+                                    t+1
+                                                           
+                                  1                           1
+                             + Θ 2 E∥vt−1 − G(zt−1 )∥ + Θ 3 (E∥zt−1 − z0 ∥2 + σ 2 ).
+                                                         2
+                                  t                           t
+
+    On a high level, one can see that if E∥zt−1 − z0 ∥2 was constant and if E∥vt−1 − G(zt−1 )∥2 had a rate
+O(1/t), then inducting on this inequality would give E∥zt − zt−1 ∥2 = O(1/t2 ). Indeed, we do not have
+boundedness of E∥zt−1 − z0 ∥2 or the rate of decrease of E∥vt−1 − G(zt−1 )∥2 , we will characterize the evolution
+of these sequences and then use induction.
+    We follow with the recursion for the variance reduced estimator vt with its proof in App. B.1.
+Lemma 3.4. Under Assumption 1.1 and 3.1, for every t ≥ 1, the estimator in Algorithm 2 satisfies
+
+                     Et ∥vt − G(zt )∥2 ≤ (1 − αt )2 ∥vt−1 − G(zt−1 )∥2 + 2Λ2 ∥zt − zt−1 ∥2
+                                         + 2αt2 σ 2 + B 2 ∥zt−1 − z0 ∥2 .
+                                                                       
+
+    We next have a recursion on the distance E∥zt − z⋆ ∥2 which is necessary for showing expected boundedness
+of the iterates zt even when the domain of the problem is not bounded. Its proof is given in Appendix B.2.
+Lemma 3.5. Let Assumption 1.1 hold. For every t ≥ 1 we have that
+                                                                     2η 2
+                                   
+                                 βt
+                      ⋆ 2
+             ∥zt+1 − z ∥ ≤ 1 −        ∥zt − z⋆ ∥2 + 2βt ∥z0 − z⋆ ∥2 + t ∥vt − G(zt )∥2 .
+                                  2                                   βt
+
+3.2    Convergence Analysis
+Proof sketch of Theorem 3.2. We use induction on the three estimates given in Lemmas 3.3, 3.4, and 3.5.
+This is carried out in Lemma B.1 and we obtain
+
+                E∥zt − z0 ∥2 < C,    E∥vt − G(zt )∥2 = O(1/k),     E∥zt − zt+1 z∥2 = O(1/k 2 ).             (3.1)
+
+
+                                                       8
+Moreover, expanding on the definition of the tangent residual, we obtain
+                                                                      
+                                            −1                    βt−1
+                   E∥G(zt ) + st ∥ ≤ (L + ηt−1 )E∥zt − zt−1 ∥ +          E∥zt−1 − z0 ∥
+                                                                  ηt−1
+                                                      + E∥vt−1 − G(zt−1 )∥,
+                                                                   √
+where the precise estimation appears in Appendix B. Since ηt = Θ(1/ t) and βt = Θ(1/t), plugging in the
+bounds from (3.1) gives the assertion.                                                               ■
+
+
+4            Preliminary Numerical Results
+Our numerical experiments evaluate two constrained problems to complement our theoretical results. We first
+consider the problem of matrix games given as minx∈∆m maxy∈∆n x⊤ Ay, where ∆d denotes the d-dimensional
+simplex. For this problem, we set m = n = 50 and set A by using the random payoff game of [ASAI25],
+replacing their additive noise with row and column sampling for computing the unbiased oracles. We report the
+gap defined in (1.5), which is equivalent with the primal dual gap for this problem. Next we show the robust
+                                                                                    1
+least squares problem studied by [CSGD22], with ℓ∞ constraints: minx∈X maxy∈Y 2n      ∥Ax − y∥2 − 1.5        2
+                                                                                                  2n ∥y − b∥ ,
+where X = {x : ∥x∥∞ ≤ 1} and Y = {y : ∥y − b∥∞ ≤ 1/2}. Following [CSGD22], we use the same real
+dataset size of 21263 × 81 from [Ham18, DG+ 17]. We estimate the operator by uniformly sampling a data
+row and report the gradient mapping norm.
+    We compare Algorithm 1 and Algorithm 2 with RG and ROG of [ITAA26], and anytime PS-OGDA
+of [ZLS26]. For each method, the hyperparameters are selected using three validations and then fixed for
+evaluation. The reported curves are averages over ten independent runs. We observe that Algorithm 1
+performs comparably to or slightly better than the baselines, while Algorithm 2 outperforms over the baselines
+on both problems.
+
+      100
+
+                                                                                                       100
+
+
+
+
+                                                                               gradient mapping norm
+                                                                                                       10−1
+gap   10−1
+
+
+                                                                                                       10−2
+
+
+
+
+      10−2
+             100   101   102       103      104       105      106                                            100    101   102     103     104    105   106
+                         operator evaluations                                                                              operator evaluations
+
+
+                                   Proximal Halpern         STORM–Halpern GD                            RG          ROG      PS-OGDA
+
+
+
+                               Figure 1: Left: matrix games. Right: robust least squares problem.
+
+
+
+5            Conclusions
+We studied single-loop, anytime algorithms and proved the rates of convergence O(t−1/4 ) and O(t−1/2 ),
+where the former is by using a single call to the unbiased oracle at every iteration with no variance reduction
+and the latter is by using two calls, with variance reduction. Directions for future work include obtaining a
+e −2 ) complexity with a single-loop method, handling nonmonotonicity, and getting optimal dependence on
+O(ε
+non-dominant terms in convergence bounds.
+
+
+
+
+                                                                         9
+AI Usage Disclosure
+The authors used generative AI tools for the straightforward but tedious numerical estimations used in Facts
+D.4 and D.5, in particular to obtain precise constants. The authors then verified, simplified, and rewritten all
+of these estimations. After setting up the algorithm and the proof template for Section 3, and verifying the
+orders of the terms in the analysis for ηt of order 1/t1/3 , the authors asked these tools to check the orders of
+the terms when ηt has order 1/t1/2 to check feasibility. After this, the authors wrote the proof. The authors
+used generative AI tools for coding for the numerical experiments.
+
+
+Acknowledgments
+This research was funded by the Natural Sciences and Engineering Research Council of Canada (NSERC),
+[funding reference number RGPIN-2025-06634].
+
+
+References
+ [AASI24] Kenshi Abe, Kaito Ariu, Mitsuki Sakamoto, and Atsushi Iwasaki. Adaptively perturbed mirror
+          descent for learning in games. In International Conference on Machine Learning, 2024.
+
+[AIMM21] Waı̈ss Azizian, Franck Iutzeler, Jérôme Malick, and Panayotis Mertikopoulos. The last-iterate
+         convergence rate of optimistic mirror descent in stochastic variational inequalities. In Conference
+         on Learning Theory, pages 326–358. PMLR, 2021.
+   [AK26] Ahmet Alacaoglu and Jun-Hyun Kim. Solving stochastic variational inequalities without the
+          bounded variance assumption. In International Conference on Machine Learning, 2026.
+
+   [Ala26] Ahmet Alacaoglu. How to make the gradient mapping small for constrained stochastic min-max
+           problems and beyond. arXiv preprint arXiv:2609.08380, 2026.
+ [AMW25] Ahmet Alacaoglu, Yura Malitsky, and Stephen J Wright. Towards weaker variance assumptions
+         for stochastic optimization. arXiv preprint arXiv:2504.09951, 2025.
+
+ [ASAI25] Kenshi Abe, Mitsuki Sakamoto, Kaito Ariu, and Atsushi Iwasaki. Boosting perturbed gra-
+          dient ascent for last-iterate convergence in games. In International Conference on Learning
+          Representations, volume 2025, pages 93223–93253, 2025.
+  [CBL06] Nicolo Cesa-Bianchi and Gábor Lugosi. Prediction, learning, and games, volume 1. Cambridge
+          university press Cambridge, 2006.
+
+    [CL24] Lesi Chen and Luo Luo. Near-optimal algorithms for making the gradient small in stochastic
+           minimax optimization. Journal of Machine Learning Research, 25(387):1–44, 2024.
+   [CM24] Zaiwei Chen and Eric Mazumdar. Last-iterate convergence for generalized frank-wolfe in monotone
+          variational inequalities. Advances in Neural Information Processing Systems, 37:115440–115467,
+          2024.
+
+   [CO19] Ashok Cutkosky and Francesco Orabona. Momentum-based variance reduction in non-convex
+          SGD. Advances in neural information processing systems, 32, 2019.
+  [COZ24] Yang Cai, Argyris Oikonomou, and Weiqiang Zheng. Accelerated algorithms for constrained
+          nonconvex-nonconcave min-max optimization and comonotone inclusion. In International Con-
+          ference on Machine Learning, 2024.
+
+[CSGD22] Xufeng Cai, Chaobing Song, Cristóbal Guzmán, and Jelena Diakonikolas. Stochastic halpern iter-
+         ation with variance reduction for stochastic monotone inclusions. Advances in Neural Information
+         Processing Systems, 35:24766–24779, 2022.
+
+
+
+                                                       10
+  [CZ23a] Yang Cai and Weiqiang Zheng. Accelerated single-call methods for constrained min-max opti-
+          mization. In International Conference on Learning Representations, 2023.
+  [CZ23b] Yang Cai and Weiqiang Zheng. Doubly optimal no-regret learning in monotone games. In
+          International Conference on Machine Learning, pages 3507–3524. PMLR, 2023.
+
+   [CZ26] Yang Cai and Weiqiang Zheng. Last-iterate convergence of anchored gradient descent. arXiv
+          preprint arXiv:2604.12235, 2026.
+ [DG+ 17] Dheeru Dua, Casey Graff, et al. Uci machine learning repository, 2017. URL http://archive. ics.
+          uci. edu/ml, 2017.
+   [FP03] Francisco Facchinei and Jong-Shi Pang. Finite-dimensional variational inequalities and comple-
+          mentarity problems. Springer, 2003.
+ [FSS+ 19] Dylan J Foster, Ayush Sekhari, Ohad Shamir, Nathan Srebro, Karthik Sridharan, and Blake
+           Woodworth. The complexity of making the gradient small in stochastic convex optimization. In
+           Conference on Learning Theory, pages 1319–1345. PMLR, 2019.
+ [GPD20] Noah Golowich, Sarath Pattathil, and Constantinos Daskalakis. Tight last-iterate convergence
+         rates for no-regret learning in multi-player games. Advances in neural information processing
+         systems, 33:20766–20778, 2020.
+[GPDO20] Noah Golowich, Sarath Pattathil, Constantinos Daskalakis, and Asuman Ozdaglar. Last iterate
+         is slower than averaged iterate in smooth convex-concave saddle point problems. In Conference
+         on Learning Theory, pages 1758–1784. PMLR, 2020.
+
+ [GTG22] Eduard Gorbunov, Adrien Taylor, and Gauthier Gidel. Last-iterate convergence of optimistic
+         gradient method for monotone variational inequalities. Advances in neural information processing
+         systems, 35:21858–21870, 2022.
+[HACM22] Yu-Guan Hsieh, Kimon Antonakopoulos, Volkan Cevher, and Panayotis Mertikopoulos. No-regret
+         learning in games with noisy feedback: Faster rates and adaptivity via learning rate separation.
+         Advances in Neural Information Processing Systems, 35:6544–6556, 2022.
+   [Hal67] Benjamin Halpern. Fixed points of nonexpanding maps. Bulletin of the American Mathematical
+           Society, 73(6):957–961, 1967.
+  [Ham18] Kam Hamidieh. A data-driven statistical model for predicting the critical temperature of a
+          superconductor. Computational Materials Science, 154:346–354, 2018.
+[HIMM19] Yu-Guan Hsieh, Franck Iutzeler, Jérôme Malick, and Panayotis Mertikopoulos. On the convergence
+         of single-call stochastic extra-gradient methods. Advances in Neural Information Processing
+         Systems, 32, 2019.
+ [IJOT17] Alfredo N Iusem, Alejandro Jofré, Roberto Imbuzeiro Oliveira, and Philip Thompson. Extragra-
+          dient method with variance reduction for stochastic variational inequalities. SIAM Journal on
+          Optimization, 27(2):686–724, 2017.
+ [ITAA26] Shinji Ito, Taira Tsuchiya, Kaito Ariu, and Kenshi Abe. Last-iterate convergence of regularized
+          gradient methods for stochastic monotone variational inequalities. In International Conference
+          on Machine Learning, 2026.
+
+   [JLZ26] Yao Ji, Guanghui Lan, and Jason Zhu. Computation of strong solutions to stochastic variational
+           inequalities. arXiv preprint arXiv:2609.04188, 2026.
+   [KG22] Dmitry Kovalev and Alexander Gasnikov. The first optimal algorithm for smooth and strongly-
+          convex-strongly-concave minimax optimization. Advances in Neural Information Processing
+          Systems, 35:14691–14703, 2022.
+
+
+                                                   11
+  [KLL22] Georgios Kotsalis, Guanghui Lan, and Tianjiao Li. Simple and optimal methods for stochastic
+          variational inequalities, i: operator extrapolation. SIAM Journal on Optimization, 32(3):2041–
+          2073, 2022.
+   [Kor76] Galina M Korpelevich. The extragradient method for finding saddle points and other problems.
+           Matecon, 12:747–756, 1976.
+
+   [LK21] Sucheol Lee and Donghwan Kim. Fast extra gradient methods for smooth structured nonconvex-
+          nonconcave minimax problems. Advances in Neural Information Processing Systems, 34:22588–
+          22600, 2021.
+   [MZ19] Panayotis Mertikopoulos and Zhengyuan Zhou. Learning in games with continuous action sets
+          and unknown payoff functions. Mathematical Programming, 173(1):465–507, 2019.
+
+   [Nes07] Yurii Nesterov. Dual extrapolation and its applications to solving variational inequalities and
+           related problems. Mathematical Programming, 109(2):319–344, 2007.
+ [NJLS09] Arkadi Nemirovski, Anatoli Juditsky, Guanghui Lan, and Alexander Shapiro. Robust stochastic
+          approximation approach to stochastic programming. SIAM Journal on optimization, 19(4):1574–
+          1609, 2009.
+   [NO24] Gergely Neu and Nneka Okolo. Dealing with unbounded gradients in stochastic saddle-point
+          optimization. In International Conference on Machine Learning, 2024.
+ [PFL+ 23] Thomas Pethick, Olivier Fercoq, Puya Latafat, Panagiotis Patrinos, and Volkan Cevher. Solving
+           stochastic weak minty variational inequalities without increasing batch size. In International
+           Conference on Learning Representations, 2023.
+   [Pop80] Leonid Denisovich Popov. A modification of the arrow-hurwicz method for search of saddle points.
+           Mathematical notes of the Academy of Sciences of the USSR, 28(5):845–848, 1980.
+  [PXC23] Thomas Pethick, Wanyun Xie, and Volkan Cevher. Stable nonconvex-nonconcave training via
+          linear interpolation. Advances in Neural Information Processing Systems, 36:49830–49841, 2023.
+    [RS13] Sasha Rakhlin and Karthik Sridharan. Optimization, learning, and games with predictable
+           sequences. Advances in Neural Information Processing Systems, 26, 2013.
+[SYLJ+ 26] Motahareh Sohrabi, Jianxin You, Simon Lacoste-Julien, Eduard Gorbunov, and Gauthier Gidel.
+           Accelerated and stable convergence with anchored generalized optimistic method. In International
+           Conference on Machine Learning, 2026.
+[TDNT26] Quoc Tran-Dinh and Nghia Nguyen-Trung. Unbiased and biased variance-reduced forward-
+         reflected-backward splitting methods for stochastic composite inclusions. arXiv preprint
+         arXiv:2603.15576, 2026.
+   [YR21] TaeHo Yoon and Ernest K Ryu. Accelerated algorithms for smooth convex-concave minimax
+          problems with O(1/k 2 ) rate on squared gradient norm. In International conference on machine
+          learning, pages 12098–12109. PMLR, 2021.
+  [ZLS26] Taoli Zheng, Jiajin Li, and Anthony Man-Cho So. Last-iterate convergence of single-loop stochastic
+          methods for constrained convex-concave minimax problems. arXiv preprint arXiv:2607.11056,
+          2026.
+
+
+
+
+                                                    12
+A     Analysis of Algorithm 1
+Proof of Theorem 2.1. Recall that ρ = 1/L. By adding and subtracting Gρ (z̄t ) and applying Young’s
+inequality, we obtain
+
+                             E∥Gρ (zt )∥2 ≤ 2∥Gρ (z̄t )∥2 + 2E∥Gρ (zt ) − Gρ (z̄t )∥2
+                                          ≤ 2∥Gρ (z̄t )∥2 + 2(ρ−2 + L2 )E∥zt − z̄t ∥2 ,                         (A.1)
+
+where the last line is by (D.6). We bound the first term on the right-hand side. By Lemmas 2.6 and D.3, we
+get
+                                          5aH∥z0 − z⋆ ∥ 3
+                                                                              
+                                                                      L
+                            ∥Gρ (z̄t )∥ ≤                  +                     .
+                                          2(t − 1 + a)1/4 2 2H(t − 1 + a)3/4
+Taking the square of both sides and multiplying by 2 give us
+                                                                                     2
+                                               25a2 H 2 ∥z0 − z⋆ ∥2
+                                                                      
+                                                                          3   L
+                             2∥Gρ (z̄t )∥2 ≤       √                        +             ,
+                                                  2 t−1+a                 2 2Ha3/4
+where we used t − 1 + a ≥ a.
+   For the second term on the right-hand side of (A.1), by Lemma 2.7, we have
+
+                                               2(ρ−2 + L2 )
+                                                                                  
+                   −2    2            2                            2  25 2     ⋆ 2
+                2(ρ + L )E∥zt − z̄t ∥ ≤ 2            √            σ + B ∥z0 − z ∥ ,
+                                          H (a − 21 ) t − 1 + a       2
+
+where we used t + a ≥ t − 1 + a.
+   Combining the last two estimates in (A.1) yields
+                                              "                                 2
+                                                25a2 H 2 ∥z0 − z⋆ ∥2
+                                                                     
+                                2       1                                  L
+                     E∥Gρ (zt )∥ ≤ √                                   3+
+                                     t−1+a                 8              Ha3/4
+                                                                                 #
+                                            2(ρ−2 + L2 )
+                                                           
+                                                              2   25 2       ⋆ 2
+                                          +                  σ + B ∥z0 − z ∥        .
+                                             H 2 (a − 21 )         2
+
+Using H ≥ L and a ≥ 2, absorbing numerical constants and Jensen’s inequality, that is,
+                                                                          1/2
+                                         E∥Gρ (zt )∥ ≤ E∥Gρ (zt )∥2              ,
+
+provides the assertion.                                                                                            ■
+
+A.1     Proof of Lemma 2.5
+Proof of Lemma 2.5. By the definition of the solution, we have −G(z⋆ ) ∈ ∂r(z⋆ ) and z⋆ = proxηt r (z⋆ −
+ηt G(z⋆ )). With this, nonexpansiveness of the proximal operator, and triangle inequality, we obtain
+
+                   ∥z̄t+1 − z⋆ ∥ ≤ ∥(1 − βt )z̄t + βt z0 − z⋆ − ηt G(z̄t ) + ηt G(z⋆ )∥
+                                ≤ ∥(1 − βt )(z̄t − z⋆ ) − ηt (G(z̄t ) − G(z⋆ ))∥ + βt ∥z0 − z⋆ ∥.               (A.2)
+
+For the first norm on the right-hand side, we use Lemma D.1 with u = z̄t , s = z⋆ , α = (1 − βt ), γ = ηt to get
+                                        q
+                         ∥z̄t+1 − z⋆ ∥ ≤ (1 − βt )2 + ηt2 L2 ∥z̄t − z⋆ ∥ + βt ∥z0 − z⋆ ∥.                  (A.3)
+
+We first verify the induction base case t = 1. At the first step, z̄0 = z0 , β0 = 1 and η0 = 1/(Ha3/4 ). By
+definition of z̄1 and Lemma D.1 with u = z0 , s = z⋆ , α = 1, γ = η0 , we have
+                                                                                              9
+           ∥z̄1 − z⋆ ∥2 ≤ ∥z0 − z⋆ − η0 (G(z0 ) − G(z⋆ ))∥2 ≤ (1 + η02 L2 )∥z0 − z⋆ ∥2 ≤        ∥z0 − z⋆ ∥2 .
+                                                                                              4
+
+
+                                                          13
+Indeed, η02 L2 = L2 /(H 2 a3/2 ) ≤ a−3/2 ≤ 5/4 since H ≥ L, and a ≥ 2.
+    We now prove the first bound in (2.3) by induction. The case t = 0 follows from z̄0 = z0 , and the
+calculation above proves the case t = 1. Suppose that, for some t ≥ 1, ∥z̄t − z⋆ ∥ ≤ 32 ∥z0 − z⋆ ∥. For t ≥ 1,
+                p
+Fact D.4 gives (1 − βt )2 + ηt2 L2 ≤ 1 − 23 βt . Using this and the inductive assumption in (A.3), we obtain
+                                                     
+                                                   2
+                               ∥z̄t+1 − z⋆ ∥ ≤ 1 − βt ∥z̄t − z⋆ ∥ + βt ∥z0 − z⋆ ∥
+                                                   3
+                                                     
+                                                   2      3
+                                             ≤ 1 − βt       ∥z0 − z⋆ ∥ + βt ∥z0 − z⋆ ∥
+                                                   3      2
+                                              3
+                                             = ∥z0 − z⋆ ∥.
+                                              2
+This completes the induction and proves the first bound in (2.3). Finally, using the triangle inequality and
+the first bound in (2.3) gives the second bound in (2.3).                                                  ■
+
+A.2     Proof of Lemma 2.6
+Proof of Lemma 2.6. This proof follows the structure of [CZ26] only by changing the parameter schedules.
+   By the definition in (2.2) and the definition of the proximal operator gives
+                                       (1 − βt )z̄t + βt z0 − ηt G(z̄t ) − z̄t+1
+                             st+1 :=                                             ∈ ∂r(z̄t+1 ).                 (A.4)
+                                                          ηt
+In particular, z̄t+1 = proxηt+1 r (z̄t+1 + ηt+1 st+1 ) ⇐⇒ z̄t+1 + ηt+1 ∂r(z̄t+1 ) ∋ z̄t+1 + ηt+1 st+1 . We compare
+this expression with the update z̄t+2 = proxηt+1 r ((1 − βt+1 )z̄t+1 + βt+1 z0 − ηt+1 G(z̄t+1 )). By Fact D.4, we
+have ηt+1 /ηt − βt+1 ≥ 0. Nonexpansiveness of the proximal operator and substitution of (A.4) give the first
+inequality below. Collecting the coefficients of z̄t+1 , z̄t , and z0 gives the equality, while the last inequality
+follows from the triangle inequality.
+
+          ∥z̄t+2 − z̄t+1 ∥
+                                                       ηt+1                                              
+           ≤   − βt+1 z̄t+1 + βt+1 z0 − ηt+1 G(z̄t+1 ) −      (1 − βt )z̄t + βt z̄0 − ηt G(z̄t ) − z̄t+1
+                                                        ηt
+                                                                                            
+                 ηt+1                                                                ηt+1
+           =          − βt+1 (z̄t+1 − z̄t ) − ηt+1 G(z̄t+1 ) − G(z̄t ) + βt+1 −            βt (z̄0 − z̄t )
+                  ηt                                                                   ηt
+                           
+                 ηt+1                                                                ηt+1
+           ≤          − βt+1 (z̄t+1 − z̄t ) − ηt+1 G(z̄t+1 ) − G(z̄t ) + βt+1 −             βt ∥z̄0 − z̄t ∥.   (A.5)
+                  ηt                                                                    ηt
+
+We next estimate the first norm on the right-hand side. Using Lemma D.1 with u = z̄t+1 , s = z̄t ,
+α = ηt+1
+     ηt − βt+1 , γ = ηt+1 yields
+
+                                                                                    2
+                               ηt+1                                                 
+                                    − βt+1 (z̄t+1 − z̄t ) − ηt+1 G(z̄t+1 ) − G(z̄t )
+                                ηt
+                               "            2             #
+                                  ηt+1
+                             ≤         − βt+1 + ηt+1 L ∥z̄t+1 − z̄t ∥2 .
+                                                   2      2
+                                   ηt
+
+Taking square roots, substituting this estimate into (A.5), and using Lemma 2.5 gives
+                                            s             2
+                                               ηt+1              2 L2 ∥z̄
+                         ∥z̄t+2 − z̄t+1 ∥ ≤         − βt+1 + ηt+1         t+1 − z̄t ∥
+                                                ηt
+                                                   5        ηt+1
+                                               +     βt+1 −      βt ∥z0 − z⋆ ∥.                                (A.6)
+                                                   2         ηt
+
+
+                                                            14
+By Fact D.4, we have
+                    2                2
+          ηt+1           2    2      3                                          ηt+1               a
+               − βt+1 + ηt+1 L ≤ 1 −       ,                and      βt+1 −          βt ≤                     .
+            ηt                       2s                                          ηt       4(t + a)(t + a + 1)
+Substituting these bounds into (A.6) gives
+                                                                              5a∥z0 − z⋆ ∥
+                                                      
+                                               3
+                   ∥z̄t+2 − z̄t+1 ∥ ≤ 1 −                ∥z̄t+1 − z̄t ∥ +                     .                      (A.7)
+                                          2(t + a + 1)                    8(t + a)(t + a + 1)
+For t = 0, since z̄1 = proxη0 r (z0 − η0 G(z0 )), the definition of the proximal operator gives
+
+                                ⟨z̄1 − z0 + η0 G(z0 ), z⋆ − z̄1 ⟩ ≥ η0 (r(z̄1 ) − r(z⋆ ))
+By 2⟨u, s⟩ = ∥u + s∥2 − ∥u∥2 − ∥s∥2 and adding and subtracting η0 ⟨G(z⋆ ), z⋆ − z̄1 ⟩, we get
+                     ∥z0 − z⋆ ∥2 − ∥z̄1 − z0 ∥2 − ∥z̄1 − z⋆ ∥2 + 2η0 ⟨G(z0 ) − G(z⋆ ), z⋆ − z̄1 ⟩
+                                          ≥ 2η0 (r(z̄1 ) − r(z⋆ ) + ⟨G(z⋆ ), z̄1 − z⋆ ⟩)
+The right-hand side is nonnegative by (1.2) and rearranging gives
+          ∥z̄1 − z0 ∥2 ≤ ∥z0 − z⋆ ∥2 − ∥z̄1 − z⋆ ∥2 − 2η0 ⟨z̄1 − z⋆ , G(z0 ) − G(z⋆ )⟩
+                                                                                                  25
+                      ≤ ∥z0 − z⋆ ∥2 + η02 ∥G(z0 ) − G(z⋆ )∥2 ≤ (1 + a−3/2 )∥z0 − z⋆ ∥2 ≤             ∥z0 − z⋆ ∥2 .
+                                                                                                  16
+Where the last two inequalities use H ≥ L and a ≥ 2, respectively. Taking square roots in the preceding
+estimate gives ∥z̄1 − z̄0 ∥ ≤ 54 ∥z0 − z⋆ ∥, which proves (2.4) for t = 0. Suppose that, for some t ≥ 0,
+                                                               5a∥z0 − z⋆ ∥
+                                            ∥z̄t+1 − z̄t ∥ ≤                .
+                                                                 4(t + a)
+Substituting this bound into (A.7) gives
+                                                           5a∥z0 − z⋆ ∥       5a∥z0 − z⋆ ∥
+                                                        
+                                                 3
+                   ∥z̄t+2 − z̄t+1 ∥ ≤ 1 −                               +
+                                            2(t + a + 1)     4(t + a)     8(t + a)(t + a + 1)
+                                                                          5a∥z0 − z⋆ ∥
+                                                                       
+                                                 3               1
+                                    = 1−                 +
+                                            2(t + a + 1) 2(t + a + 1)       4(t + a)
+                                      5a∥z0 − z⋆ ∥
+                                    =              .
+                                      4(t + a + 1)
+This completes the induction and proves (2.4).
+   Finally, setting t ← t − 1 in (A.4) and rearranging gives
+                                                                βT −1 (z0 − z̄T −1 ) + z̄T −1 − z̄T
+                      G(z̄T ) + sT = G(z̄T ) − G(z̄T −1 ) +                                         .
+                                                                              ηT −1
+Therefore, the triangle inequality and Lipschitzness gives
+                                          βt−1 ∥z0 − z̄t−1 ∥ + ∥z̄t − z̄t−1 ∥
+         ∥G(z̄t ) + st ∥ ≤ L∥z̄t − z̄t−1 ∥ +
+                                                        ηt−1
+                          5aL∥z0 − z⋆ ∥                                                 5a∥z0 − z⋆ ∥
+                                                                                                    
+                                                         3/4        a       5      ⋆
+                        ≤                + H(t − 1 + a)                   · ∥z0 − z ∥ +
+                           4(t − 1 + a)                        t−1+a 2                  4(t − 1 + a)
+                          5aL∥z0 − z⋆ ∥ 15aH∥z0 − z⋆ ∥
+                        =                +
+                           4(t − 1 + a)     4(t − 1 + a)1/4
+                                      ⋆
+                                                                   
+                          5aH∥z0 − z ∥ 3                 L
+                        =                     +                       .
+                          2(t − 1 + a)1/4 2 2H(t − 1 + a)3/4
+                                                                        −1
+The second inequality uses Lemma 2.5, (2.4), βt−1 = a/(t − 1 + a), and ηt−1 = H(t − 1 + a)3/4 . Since
+st ∈ ∂r(z̄t ), this proves (2.5).                                                                  ■
+
+
+                                                           15
+A.3     Proof of Lemma 2.7
+Proof of Lemma 2.7. By the Young’s inequality and Lemma 2.5, we have
+                                                                                          25
+                    ∥zt − z0 ∥2 ≤ 2∥zt − z̄t ∥2 + 2∥z0 − z̄t ∥2 ≤ 2∥zt − z̄t ∥2 +            ∥z0 − z⋆ ∥2 .             (A.8)
+                                                                                           2
+Using the definitions of zt+1 , z̄t+1 , and the nonexpansiveness of the proximal operator, we obtain
+
+                         ∥zt+1 − z̄t+1 ∥2 = ∥ proxηt r (1 − βt )zt + βt z0 − ηt G(z
+                                                                                         
+                                                                                   e t)
+                                              − proxηt r (1 − βt )z̄t + βt z0 − ηt G(z̄t ) ∥2
+                                                                                          
+
+                                                                        e t ) − G(z̄t ) 2 .
+                                                                                         
+                                            ≤ (1 − βt )(zt − z̄t ) − ηt G(z
+
+We add and subtract G(zt ) inside the norm and take conditional expectation. Since the stochastic oracle is
+unbiased, the noise cross term vanishes, yielding
+                                                                                2
+           Et ∥zt+1 − z̄t+1 ∥2 ≤ (1 − βt )(zt − z̄t ) − ηt G(zt ) − G(z̄t )            + ηt2 Et ∥G(z
+                                                                                                 e t ) − G(zt )∥2 .    (A.9)
+
+We use Lemma D.1 with u = zt , s = z̄t , α = 1 − βt , γ = ηt to get
+                                                              q
+                (1 − βt )(zt − z̄t ) − ηt (G(zt ) − G(z̄t )) ≤ (1 − βt )2 + ηt2 L2 ∥zt − z̄t ∥.
+
+Next, Assumption 1.2 and (A.8) bound the last term on the right-hand side as
+
+                 e t ) − G(zt )∥2 ≤ B 2 ∥zt − z0 ∥2 + σ 2 ≤ 2B 2 ∥zt − z̄t ∥2 + 25 B 2 ∥z0 − z⋆ ∥2 + σ 2 .
+             Et ∥G(z                                                                                                  (A.10)
+                                                                                2
+Substituting these two bounds into (A.9) gives
+                                                                                                          
+                        2              2                                               25 2        ⋆ 2   2
+                                           + ηt2 (L2 + 2B 2 ) ∥zt − z̄t ∥2 + ηt2
+                                                             
+       Et ∥zt+1 − z̄t+1 ∥ ≤ (1 − βt )                                                     B ∥z0 − z ∥ + σ .           (A.11)
+                                                                                        2
+
+For the rest of the proof let us set
+                                                     25 2
+                                              V⋆ =     B ∥z0 − z⋆ ∥2 + σ 2 .                                          (A.12)
+                                                     2
+For t ≥ 1, Fact D.4 gives
+                                                                               a
+                                       (1 − βt )2 + ηt2 (L2 + 2B 2 ) ≤ 1 −        .
+                                                                              t+a
+Taking expectation in (A.11) and using the bound together with (A.12) yields
+                                             
+                                            a                       V⋆
+                 E∥zt+1 − z̄t+1 ∥2 ≤ 1 −        E∥zt − z̄t ∥2 + 2           ,                        t ≥ 1.           (A.13)
+                                          t+a                  H (t + a)3/2
+
+At t = 0, z0 = z̄0 . Substituting this into (A.9) and using η02 = 1/(H 2 a3/2 ) gives
+
+                                                                                          V⋆
+                            E∥z1 − z̄1 ∥2 ≤ η02 E∥ e
+                                                  G(z0 ) − G(z0 )∥2 ≤ η02 V⋆ =                   ,
+                                                                                        H 2 a3/2
+where the second inequality used (A.10) and (A.12). Thus, (A.13) also holds at t = 0.
+   We now prove (2.6) by induction. The case t = 0 follows from z0 = z̄0 . Suppose that, for some t ≥ 0,
+
+                                                                     V⋆
+                                           E∥zt − z̄t ∥2 ≤                √      .
+                                                             H 2 (a − 21 ) t + a
+
+
+
+
+                                                             16
+           a
+Since 1 − t+a ≥ 0, substituting the inductive assumption into (A.13) gives
+                                                          
+                                                      a        V⋆                 V⋆
+                      E∥zt+1 − z̄t+1 ∥2 ≤       1−                  √     +
+                                                       H 2 (a − 21 ) t + a H 2 (t + a)3/2
+                                                     t+a
+                                                                           
+                                            V⋆            1             1
+                                        = 2            √       −
+                                         H (a − 21 )     t + a 2(t + a)3/2
+                                                   V⋆
+                                        ≤ 2      1
+                                                    √           .
+                                         H (a − 2 ) t + a + 1
+
+The last inequality follows from convexity of s 7→ s−1/2 for s = t + a, which gives (s + 1)−1/2 ≥ s−1/2 − 12 s−3/2 .
+This completes the induction and proves (2.6) after using (A.12).
+   Finally, taking expectations in (A.8) and using (2.6) gives
+
+                                                 25               25                    2V⋆
+              E∥zt − z0 ∥2 ≤ 2E∥zt − z̄t ∥2 +       ∥z0 − z⋆ ∥2 ≤    ∥z0 − z⋆ ∥2 + 2         √      ,
+                                                 2                2               H (a − 21 ) t + a
+
+which gives (2.6) after using (A.12).                                                                            ■
+
+
+
+
+                                                           17
+B     Analysis for Algorithm 2
+Proof of Theorem 3.2. By the update in Algorithm 2 and the prox-inequality in (1.8), for every t ≥ 1, we
+have
+                                    (1 − βt−1 )zt−1 + βt−1 z0 − zt
+                             st =                                  − vt−1 ∈ ∂r(zt ).                      (B.1)
+                                                 ηt−1
+
+The tangent residual satisfies
+                                  
+          dist 0, G(zt ) + ∂r(zt ) ≤ ∥G(zt ) + st ∥
+                                                (1 − βt−1 )zt−1 + βt−1 z0 − zt
+                                    = G(zt ) +                                  − vt−1
+                                                              ηt−1
+                                                               1                  βt−1
+                                    ≤ ∥G(zt ) − G(zt−1 )∥ +       ∥zt−1 − zt ∥ +       ∥z0 − zt−1 ∥
+                                                             ηt−1                 ηt−1
+                                      + ∥vt−1 − G(zt−1 )∥
+                                             −1                  βt−1
+                                    ≤ (L + ηt−1 )∥zt − zt−1 ∥ +       ∥zt−1 − z0 ∥ + ∥vt−1 − G(zt−1 )∥.
+                                                                 ηt−1
+
+The equality follows from (B.1). The second and last inequalities follow from the triangle inequality and
+Lipschitzness, respectively. Taking expectations and applying Cauchy-Schwarz gives
+                                              −1
+                                                  p
+                       E[Res(zt )] ≤ (L + ηt−1   ) E∥zt − zt−1 ∥2
+                                         βt−1 p                   p
+                                     +           E∥zt−1 − z0 ∥2 + E∥vt−1 − G(zt−1 )∥2 .
+                                         ηt−1
+                                                      √                       √
+By the parameter definitions, we have ηt−1 = 1/(H t) and βt−1 /ηt−1 = H/ t. Substituting (B.2) and (B.3)
+from Lemma B.1 therefore give us
+                                              √ √           √      p
+                                  16(L + H t) C         2H C        (1024Λ2 + 4 + 16B 2 )C
+                    E[Res(zt )] ≤                     + √        +           √
+                                         t+1                 t                 t
+                                                   √                    √
+                                                           2
+                                   16L + 18H + 1024Λ + 4 + 16B        2    C
+                                ≤                      √
+                                                         t
+                                      √
+                                  27H C
+                                ≤    √      .
+                                       t
+                                        √
+The second inequality
+              √       uses t + 1 ≥ t ≥ t for t ≥ 1. The last inequality follows
+                                                                            √ the definition of H, which gives
+L ≤ H/2 and 1024Λ2 + 4 + 16B 2 ≤ H/4. Thus, we have 16L + 18H + 1024Λ2 + 4 + 16B 2 ≤ 27H.                   ■
+
+   We now give the details of the analysis of Algorithm 2. It remains to control the three term, E∥zt − z⋆ ∥,
+E∥zt − zt−1 ∥ and E∥vt − G(zt )∥. The following lemma gives the bounds used in the proof of Theorem 3.2.
+Lemma B.1. Let Assumptions 1.1, 1.2, and 3.1 hold. Then, for every t ≥ 0,
+
+                                                                            (1024Λ2 + 4 + 16B 2 )C
+            E∥zt − z⋆ ∥2 ≤ C,    E∥zt − z0 ∥2 ≤ 4C,     E∥vt − G(zt )∥2 ≤                          ,      (B.2)
+                                                                                    t+1
+and, for every t ≥ 1,
+                                                               256C
+                                           E∥zt − zt−1 ∥2 ≤            .                                  (B.3)
+                                                              (t + 1)2
+                            
+Where we define C as C = max σ 2 , 16∥z0 − z⋆ ∥2 .
+
+
+
+
+                                                        18
+Proof of Lemma B.1. By the definition of C, we have C ≥ σ 2 , ∥z0 − z⋆ ∥2 ≤ C/16 and
+                            E∥v0 − G(z0 )∥2 ≤ σ 2 ≤ C ≤ (1024Λ2 + 4 + 16B 2 )C.
+
+Where the first inequality follows from Assumption 1.2 with definition of v0 = G(z
+                                                                                e 0 ), while the last inequality
+                     2             2
+follows from 1024Λ + 4 + 16B ≥ 4.
+    We first verify the base case at t = 1. Together with prox-inequality of z1 = proxη0 r (z0 − η0 v0 ) and
+z⋆ = proxηt r (z⋆ − ηt G(z⋆ )), using nonexpansiveness of proximal operator gives,
+                                          1                     2
+                  E∥z1 − z⋆ ∥2 ≤ E z0 −     v0 − z⋆ + η0 G(z⋆ )
+                                          H
+                                               1                   2   2
+                                ≤ 2 z0 − z⋆ −     G(z0 ) − G(z⋆ )     + 2 E∥v0 − G(z0 )∥2
+                                              H                        H
+                                         L2
+                                           
+                                                             2
+                                ≤ 2 1 + 2 ∥z0 − z⋆ ∥2 + 2 E∥v0 − G(z0 )∥2
+                                         H                  H
+                                         
+                                         1 C      C      9C
+                                ≤2 1+           +    =      ≤ C.
+                                         4 16      8     32
+Here, the second inequality follows from Young’s inequality, while the third inequality can obtain by
+Lemma D.1 with α = 1, γ = 1/H, u = z0 and s = z ⋆ . The last inequality uses the definition of H, which
+implies L2 /H 2 ≤ 1/4 and (1024Λ2 + 4 + 16B 2 )/H 2 ≤ 1/16.
+   Using Young’s inequality implies
+                                 E∥z1 − z0 ∥2 ≤ 2E∥z1 − z⋆ ∥2 + 2∥z0 − z⋆ ∥2
+                                                     C             256C
+                                              ≤ 2C +    ≤ 64C =            .
+                                                      8           (1 + 1)2
+These bounds finish the base case of induction at t = 1.
+   Now suppose for some t ≥ 1, that
+                                                                             256C
+                    E∥zt − z⋆ ∥2 ≤ C,    E∥zt−1 − z⋆ ∥2 ≤ C,    E∥zt − zt−1 ∥2 ≤     ,
+                                                                            (t + 1)2
+                                                              (1024Λ2 + 4 + 16B 2 )C
+                                    and E∥vt−1 − G(zt−1 )∥2 ≤                        .                    (B.4)
+                                                                        t
+   We first estimate the second term in (B.2). By Young’s inequality, we have
+                                  E∥zt − z0 ∥2 ≤ 2E∥zt − z⋆ ∥2 + 2∥z0 − z⋆ ∥2
+                                                       C
+                                               ≤ 2C +
+                                                       8
+                                               ≤ 4C,                                                      (B.5)
+where the second inequality follows the property in (B.4) and definition of C. The same argument can be
+applied to E∥zt−1 − z0 ∥2 ≤ 4C.
+   We next show the last term in (B.2). Recall the recursion from Lemma 3.4,
+                     Et ∥vt − G(zt )∥2 ≤ (1 − αt )2 ∥vt−1 − G(zt−1 )∥2 + 2Λ2 ∥zt − zt−1 ∥2
+                                         + 2αt2 σ 2 + B 2 ∥zt−1 − z0 ∥2 .
+                                                                       
+
+Taking expectations and using (B.4) and (B.5) gives,
+                                                2
+                                                   (1024Λ2 + 4 + 16B 2 )C
+                                     
+                                             1
+                   E∥vt − G(zt )∥2 ≤ 1 −
+                                           t+1                t
+                                       512Λ2 C    2(C + 4B 2 C)
+                                     +          +
+                                       (t + 1)2      (t + 1)2
+                                     (1024Λ2 + 4 + 16B 2 )C     (1024Λ2 + 4 + 16B 2 )C
+                                   =                         −                                            (B.6)
+                                               t+1                    2(t + 1)2
+
+
+                                                      19
+The equality follows from Fact D.5.
+   Next, we verify first term in (B.2). Taking expectations in Lemma 3.5 give us
+
+                                                                           2η 2
+                                        
+                                      βt
+              E∥zt+1 − z⋆ ∥2 ≤ 1 −         E∥zt − z⋆ ∥2 + 2βt ∥z0 − z⋆ ∥2 + t E∥vt − G(zt )∥2 .       (B.7)
+                                       2                                    βt
+
+Using (B.6) and definition of C which implies ∥z0 − z⋆ ∥2 ≤ C/16, and ηt2 /βt = 1/H 2 ,
+
+                                                                   2(1024Λ2 + 4 + 16B 2 )C
+                                               
+                                           1              C
+                E∥zt+1 − z⋆ ∥2 ≤ 1 −              C+            +
+                                       2(t + 1)        8(t + 1)           H 2 (t + 1)
+                                                                      
+                                           1          1           1
+                                ≤ 1−            +           +            C
+                                       2(t + 1) 8(t + 1) 8(t + 1)
+                                               
+                                           1
+                                = 1−              C ≤ C.                                              (B.8)
+                                       4(t + 1)
+
+The second inequality uses (1024Λ2 + 4 + 16B 2 )/H 2 ≤ 1/16.
+   Finally, we estimate (B.3). Bring the recursion in Lemma 3.3, we have
+                                                             2      !
+                                            1           ηt
+                              2
+                 E∥zt+1 − zt ∥ ≤ 1 +                        − βt + ηt L E∥zt − zt−1 ∥2
+                                                                    2 2
+                                        4(t + 1)       ηt−1
+                                                             2
+                                                 ηt
+                                  + 10(t + 1)        βt−1 − βt E∥zt−1 − z0 ∥2
+                                                ηt−1
+                                  + 10(t + 1)ηt2 αt2 E∥vt−1 − G(zt−1 )∥2
+                                                                                         
+                                  + ηt2 2Λ2 E∥zt − zt−1 ∥2 + 2αt2 σ 2 + B 2 E∥zt−1 − z0 ∥2 .
+
+Applying the (B.4), (B.5) and definition of ηt and βt with σ 2 ≤ C, together with Fact D.5 gives,
+                                                                    2            !
+                             256C              1                  3             1
+           E∥zt+1 − zt ∥2 ≤            1+                1−               +
+                            (t + 1)2       4(t + 1)           2(t + 1)      4(t + 1)
+                                      41(1024Λ2 + 4 + 16B 2 )
+                                                             
+                                                                    C
+                            + 40 +
+                                                2H 2             (t + 1)3
+                                                                    2            !
+                             256C              1                  3             1          64C
+                          ≤            1+                1−               +            +          .
+                            (t + 1)2       4(t + 1)           2(t + 1)      4(t + 1)     (t + 1)3
+
+Moreover, applying Fact D.5 give us,
+                                                              256C
+                                          E∥zt+1 − zt ∥2 ≤            .                               (B.9)
+                                                             (t + 2)2
+
+These estimates give (B.4) with t replaced by t + 1. This completes the induction and proves (B.2) and
+(B.3).                                                                                               ■
+   We prove these bounds through three estimates followed by an induction.
+
+B.1    Proof of Lemma 3.4
+Lemma B.2. Under Assumption 1.1 and 3.1, for every t ≥ 1, the estimator in Algorithm 2 satisfies
+
+                     Et ∥vt − G(zt )∥2 ≤ (1 − αt )2 ∥vt−1 − G(zt−1 )∥2 + 2Λ2 ∥zt − zt−1 ∥2
+                                         + 2αt2 σ 2 + B 2 ∥zt−1 − z0 ∥2 .
+                                                                       
+
+
+
+
+                                                      20
+Proof of Lemma 3.4. Throughout the proof, we use the notations
+
+                               G(zt ) = e
+                               e        G(zt , ξt )   and e
+                                                          G(zt−1 ) = e
+                                                                     G(zt−1 , ξt ).
+
+By the estimator update, we have
+                                                                   
+                   vt − G(zt ) = e
+                                 G(zt ) + (1 − αt ) vt−1 − e
+                                                           G(zt−1 ) − G(zt )
+                                                                                         
+                               = (1 − αt ) vt−1 − G(zt−1 ) + (1 − αt ) G(zt−1 ) − G(z
+                                                                                  e t−1 )
+                                    e t ) − G(zt ).
+                                 + G(z
+
+Since the last two terms on the right-hand side is 0 under conditional expectation and since vt−1 − G(zt−1 )
+is measurable under the conditioning of Et ,we have
+
+                   Et ⟨vt−1 − G(zt−1 ), e
+                                       G(zt ) − G(zt ) + (1 − αt )(G(zt−1 ) − e
+                                                                              G(zt−1 ))⟩ = 0.
+
+Thus, expanding the squared norm and taking expectations give
+
+                       Et ∥vt − G(zt )∥2 = (1 − αt )2 ∥vt−1 − G(zt−1 )∥2
+                                                                                         2
+                                     e t ) − G(zt ) + (1 − αt )(G(zt−1 ) − G(z
+                                + Et G(z                                   e t−1 )           .
+
+Applying Lemma B.5 to last term on right-hand gives the assertion.                                            ■
+
+B.2     Proof of Lemma 3.5
+Lemma B.3 (Restatement of Lemma 3.5). Let Assumption 1.1 hold. For every t ≥ 0 we have that
+
+                                                                    2η 2
+                                  
+                                βt
+            ∥zt+1 − z⋆ ∥2 ≤ 1 −      ∥zt − z⋆ ∥2 + 2βt ∥z0 − z⋆ ∥2 + t ∥vt − G(zt )∥2 .
+                                2                                    βt
+Proof. By the definition of the solution, we have −G(z⋆ ) ∈ ∂r(z⋆ ) and z⋆ = proxηt r (z⋆ −ηt G(z⋆ )). Comparing
+with the update in Algorithm 2, nonexpansiveness of the proximal operator gives
+
+           ∥zt+1 − z⋆ ∥ ≤ ∥(1 − βt )zt + βt z0 − ηt vt − (z⋆ − ηt G(z⋆ ))∥
+                        = ∥(1 − βt )(zt − z⋆ ) − ηt G(zt ) − G(z⋆ ) + βt (z0 − z⋆ ) − ηt vt − G(zt ) ∥.
+                                                                                                   
+
+Taking the square of this inequality and using Young’s inequality with parameter βt /(1 − βt ) gives
+                                           1
+                       ∥zt+1 − z⋆ ∥2 ≤          ∥(1 − βt )(zt − z⋆ ) − ηt G(zt ) − G(z⋆ ) ∥2
+                                                                                         
+                                         1 − βt
+                                           1                                  2
+                                         +     βt (z0 − z⋆ ) − ηt vt − G(zt ) .                           (B.10)
+                                           βt
+We first estimate the first term on the right-hand side, using Lemma D.1 with α = 1 − βt , γ = ηt , u = zt+1
+and s = z⋆ yield
+                                                                           ηt2 L2
+                                                                                 
+                 1                    ⋆                   ⋆
+                                                             2
+                     ∥(1 − βt )(zt − z ) − ηt G(zt ) − G(z ) ∥ ≤ 1 − βt +           ∥zt − z⋆ ∥2
+              1 − βt                                                      1 − βt
+                                                                       
+                                                                     βt
+                                                                ≤ 1−      ∥zt − z⋆ ∥2 ,
+                                                                      2
+where the second inequality follows from Fact D.5.
+   For the second term on the right-hand side of (B.10), Young’s inequality gives
+
+                  1                                  2                    2η 2
+                     βt (z0 − z⋆ ) − ηt vt − G(zt )     ≤ 2βt ∥z0 − z⋆ ∥2 + t ∥vt − G(zt )∥2 .
+                  βt                                                        βt
+Combining these two estimates with (B.10) proves the claim.                                                   ■
+
+
+                                                         21
+B.3     Full Expression of Lemma 3.3 and Its Proof
+Lemma B.4. Under Assumptions 1.1 and 3.1, for every t ≥ 1, we have
+                                                       2       !
+                                      1           ηt
+            E∥zt+1 − zt ∥2 ≤ 1 +                      − βt + ηt2 L2 E∥zt − zt−1 ∥2
+                                  4(t + 1)       ηt−1
+                                                       2
+                                           ηt
+                            + 10(t + 1)        βt−1 − βt E∥zt−1 − z0 ∥2
+                                          ηt−1
+                                    + 10(t + 1)ηt2 αt2 E∥vt−1 − G(zt−1 )∥2
+                                                                                           
+                                    + ηt2 2Λ2 E∥zt − zt−1 ∥2 + 2αt2 σ 2 + B 2 E∥zt−1 − z0 ∥2 .
+
+Proof. Throughout the proof, we use the notations
+                               G(z
+                               e t ) = G(z
+                                       e t , ξt )   and G(z
+                                                        e t−1 ) = G(z
+                                                                  e t−1 , ξt ).
+
+By the previous update and the prox-inequality in (1.8), we have
+                                    (1 − βt−1 )zt−1 + βt−1 z0 − zt
+                             st =                                  − vt−1 ∈ ∂r(zt ).
+                                                 ηt−1
+Consequently, with stepsize ηt , we have zt = proxηt r (zt + ηt st ). Comparing this with the update of zt+1 and
+using nonexansiveness of the proximal operator gives
+                      ∥zt+1 − zt ∥ ≤ ∥(1 − βt )zt + βt z0 − ηt vt − (zt + ηt st )∥
+                                                  
+                                          ηt
+                                   =           − βt (zt − zt−1 )
+                                         ηt−1
+                                                        
+                                           ηt
+                                     +         βt−1 − βt (zt−1 − z0 ) − ηt (vt − vt−1 ) .                (B.11)
+                                         ηt−1
+Here the last equality follows from the definition of st .
+   We first rewrite the last term inside the norm. Using the definition of estimator vt in Algorithm 2, we
+have,
+              vt − vt−1 = G(z
+                          e t ) − G(z
+                                   e t−1 ) − αt (vt−1 − G(z
+                                                         e t−1 ))
+                          G(zt ) − e
+                        = e        G(zt−1 ) − αt (vt−1 − G(zt−1 )) + αt ( e
+                                                                         G(zt−1 , ξt ) − G(zt−1 )).
+Substituting this into (B.11) yields
+                                                
+                                        ηt                                           
+                    ∥zt+1 − zt ∥ ≤          − βt (zt − zt−1 ) − ηt G(zt ) − G(zt−1 )
+                                       ηt−1
+                                                    
+                                         ηt                                               
+                                   +        βt−1 − βt (zt−1 − z0 ) + ηt αt vt−1 − G(zt−1 )
+                                       ηt−1
+                                                                                      
+                                   − ηt G(z
+                                          e t ) − G(zt ) + (1 − αt ) G(zt−1 ) − G(z
+                                                                                e t−1 )   .
+            h                                                i
+Because Et G(ze t ) − G(zt ) + (1 − αt ) G(zt−1 ) − G(z
+                                                     e t−1 ) = 0 and because the terms in the first and second
+lines of the right-hand side in the display equation above are measurable under the conditioning of Et , we
+have
+                                                  
+                                          ηt
+                 Et ∥zt+1 − zt ∥2 ≤
+                                                                                       
+                                              − βt (zt − zt−1 ) − ηt G(zt ) − G(zt−1 )
+                                        ηt−1
+                                                      
+                                           ηt                                                 2
+                                    +         βt−1 − βt (zt−1 − z0 ) + ηt αt vt−1 − G(zt−1 )
+                                         ηt−1
+                                                                                            2
+                                    + ηt2 Et G(z
+                                              e t ) − G(zt ) + (1 − αt ) G(zt−1 ) − G(z
+                                                                                    e t−1 ) .
+
+
+                                                        22
+We now apply Young’s inequality to the first term on the right-hand side with the parameter 1/(4(t + 1)) to
+retain a sufficient contraction.
+                                                      
+                                      1         ηt                                            2
+         Et ∥zt+1 − zt ∥2 ≤ 1 +                      − βt (zt − zt−1 ) − ηt G(zt ) − G(zt−1 )
+                                  4(t + 1)     ηt−1
+                                                              
+                                                ηt                                                 2
+                           + (1 + 4(t + 1))         βt−1 − βt (zt−1 − z0 ) + ηt αt vt−1 − G(zt−1 )
+                                               ηt−1
+                                                                                  2
+                           + ηt2 Et G(z
+                                    e t ) − G(zt ) + (1 − αt ) G(zt−1 ) − G(z
+                                                                          e t−1 ) .                   (B.12)
+
+For the first term on the right-hand side, using Lemma D.1 with α = ηt /ηt−1 − βt ≥ 0 and γ = ηt gives
+                                             
+                            1         ηt                                           2
+                    1+                    − βt (zt − zt−1 ) − ηt G(zt ) − G(zt−1 )
+                        4(t + 1)     ηt−1
+                                                              2          !
+                                               1         ηt
+                                  ≤ 1+                       − βt + ηt L ∥zt − zt−1 ∥2 .
+                                                                         2 2
+                                                                                                    (B.13)
+                                           4(t + 1)     ηt−1
+
+   We next estimate second term of the right-hand side, using Young’s inequality with the fact that
+2(1 + 4(t + 1)) ≤ 10(t + 1) for t ≥ 0.
+                               η
+                                    t
+                                                                                       2
+             (1 + 4(t + 1))              βt−1 − βt (zt−1 − z0 ) + ηt αt vt−1 − G(zt−1 )
+                                  ηt−1
+                                                    2
+                                   ηt
+                ≤ 10(t + 1)              βt−1 − βt        ∥zt−1 − z0 ∥2 + 10(t + 1)ηt2 αt2 ∥vt−1 − G(zt−1 )∥2 .   (B.14)
+                                  ηt−1
+
+Applying Lemma B.5 to last term in Equation (B.12) and substituting the (B.13) and (B.14) into Equa-
+tion (B.12), followed by taking expectation, proves the claim.                                    ■
+
+Lemma B.5. Suppose Assumptions 1.1 and 3.1 hold. Then,
+                                                               2
+               G(zt ) − G(zt ) + (1 − αt ) G(zt−1 ) − e
+            Et e                                      G(zt−1 )    ≤ 2Λ2 ∥zt − zt−1 ∥2
+                                                                               + 2αt2 σ 2 + B 2 ∥zt−1 − z0 ∥2 .
+                                                                                                             
+
+
+Proof. Using Young’s inequality gives
+                                                                       2
+             e t ) − G(zt ) + (1 − αt ) G(zt−1 ) − G(z
+          Et G(z                                   e t−1 )
+                                                                    2
+                      ≤ 2Et e                  G(zt−1 ) + G(zt−1 ) + 2αt2 Et ∥ e
+                             G(zt ) − G(zt ) − e                              G(zt−1 ) − G(zt−1 )∥2
+                      ≤ 2Λ2 ∥zt − zt−1 ∥2 + 2αt2 σ 2 + B 2 ∥zt−1 − z0 ∥2 ,
+                                                                        
+
+
+where the last inequality follows from Assumption 1.1 and Assumption 3.1.                                             ■
+
+
+
+
+                                                                23
+C     Deferred Proofs for Corollaries
+Proof of Corollary 2.2. Setting z = zt in (D.2), taking expectations, and applying Cauchy–Schwarz give
+                                                                                  q
+                                                                       p
+         E gap(zt ) ≤ max ∥z0 − u∥ + ρ∥G(z0 )∥ E∥Gρ (zt )∥ + (1 + ρL) E∥zt − z0 ∥2 E∥Gρ (zt )∥2
+                       u∈B
+
+                        + ρE∥Gρ (zt )∥2 .                                                             (C.1)
+                                     √           √
+By (2.6), because t ≥ 1, we have 1/( t + a) ≤ 1/( a + 1),
+                                          25               2σ 2 + 25B 2 ∥z0 − z⋆ ∥2
+                        E∥zt − z0 ∥2 ≤       ∥z0 − z⋆ ∥2 +                   √      < ∞.
+                                          2                     H 2 (a − 21 ) a
+Combining this bound with Theorem 2.1 gives the assertion.                                                ■
+Corollary C.1. Under the setup of Corollary 2.2, suppose that z = (x, y), U = Ux × Uy , and
+                                                            
+                                                 ∇x f (x, y)
+                                      G(z) =                   ,
+                                                −∇y f (x, y)
+where f is convex in x and concave in y. Then, we have
+                                                                            
+                                               ′              ′              1
+                            E max     f (xt , y ) − min   f (x , yt ) = O 1/4 .
+                               y′ ∈Uy              x′ ∈Ux                  t
+Proof of Corollary C.1. For every (x′ , y′ ) ∈ Ux × Uy , convexity in x and concavity in y give
+                       f (x, y′ ) − f (x′ , y) = f (x, y′ ) − f (x, y) + f (x, y) − f (x′ , y)
+                                             ≤ ⟨∇y f (x, y), y′ − y⟩ + ⟨∇x f (x, y), x − x′ ⟩
+                                                            ′ 
+                                                              x
+                                             = G(z), z −            .
+                                                              y′
+Taking the maximum over (x′ , y′ ) ∈ Ux × Uy gives
+                                     max f (x, y′ ) − min
+                                                      ′
+                                                          f (x′ , y) ≤ gap(z).
+                                    y′ ∈Uy              x ∈Ux
+
+Taking expectations at z = zt and applying Corollary 2.2 proves the result.                               ■
+
+
+D     Technical Results
+The following lemma is generalizing a useful idea from [CZ26] and is used many times in the proofs.
+Lemma D.1. Let G : Rd → Rd be monotone and L-Lipschitz, and α, γ ≥ 0. Then, for any u, s ∈ Rd we have
+                                                     p
+                       ∥α(u − s) − γ(G(u) − G(s))∥ ≤ α2 + γ 2 L2 ∥u − s∥.
+Proof. By expanding the square of the left-hand side, we obtain
+                     ∥α(u − s) − γ(G(u) − G(s))∥2 = α2 ∥u − s∥2 + γ 2 ∥G(u) − G(s)∥2
+                                                                                                      (D.1)
+                                                             − 2αγ⟨u − s, G(u) − G(s)⟩.
+Due to Lipschitzness of G, we have
+                                       γ 2 ∥G(u) − G(s)∥2 ≤ γ 2 L2 ∥u − s∥2 .
+By monotonicity of G, we have
+                                         −2αγ⟨u − s, G(u) − G(s)⟩ ≤ 0.
+Combining the last two estimates in (D.1) and taking the square root of both sides gives the assertion.   ■
+
+
+                                                           24
+D.1     Results on Optimality Measures
+The following standard result proves that the rate of convergence that we prove for the gradient mapping
+norm directly translates to the same rate on the restricted gap, up to an additional multiplicative constant.
+Corollary D.2. Under Assumption 1.1, let U ⊆ Z be a compact set. Let r = δZ , where Z is nonempty,
+closed, and convex, but not necessarily bounded. Then, for every z ∈ Z and any ρ > 0, we have
+                                                                      
+              gapU (z) ≤ max ∥z0 − u∥ + ρ∥G(z0 )∥ + (1 + ρL)∥z − z0 ∥ ∥Gρ (z)∥ + ρ∥Gρ (z)∥2 . (D.2)
+                           u∈B
+
+
+Proof. Fix z ∈ C and let s = projZ (z − ρG(z)). By (1.8), we have z−s−ρG(z)
+                                                                       ρ      ∈ ∂δZ (s), and since Gρ (z) = z−s
+                                                                                                             ρ ,
+we have Gρ (z) − G(z) ∈ ∂δZ (s). As a result, convexity of δZ gives, for every u ∈ B, that
+
+                       0 ≤ ⟨Gρ (z) − G(z), s − u⟩ ⇐⇒ ⟨G(z), s − u⟩ ≤ ⟨Gρ (z), s − u⟩.                     (D.3)
+
+Using z − s = ρGρ (z), we obtain
+
+                                 ⟨G(z), z − u⟩ = ρ⟨G(z), Gρ (z)⟩ + ⟨G(z), s − u⟩
+                                              ≤ ρ⟨G(z), Gρ (z)⟩ + ⟨Gρ (z), s − u⟩
+                                              ≤ (∥s − u∥ + ρ∥G(z)∥) ∥Gρ (z)∥,                             (D.4)
+
+where the first inequality is by (D.3) and the second by Cauchy-Schwarz.
+   Since s = projC (z − ρG(z)) ∈ C, for every u ∈ U, we have
+
+                                   ∥s − u∥ ≤ ∥s − z∥ + ∥z − z0 ∥ + ∥z0 − u∥
+                                           = ρ∥Gρ (z)∥ + ∥z − z0 ∥ + ∥z0 − u∥,
+
+where the first identity is because of z − s = ρGρ (z). Lipschitzness of G gives ∥G(z)∥ ≤ ∥G(z0 )∥ + L∥z − z0 ∥.
+Substituting these inequalities into (D.4) proves (D.2).                                                     ■
+
+    The following result shows that the natural residual (gradient mapping norm) is upper bounded by a
+residual-type quantity. Moreover, we prove that the natural residual is Lipschitz, which is another standard
+property.
+Lemma D.3. Under Assumption 1.1, for z ∈ dom ∂r and any s ∈ ∂r(z), any ρ > 0 and for all x, y ∈ dom r,
+we have
+
+                                             ∥Gρ (z)∥ ≤ ∥G(z) + s∥,                                       (D.5)
+                                                        p
+                                    ∥Gρ (x) − Gρ (y)∥ ≤ ρ−2 + L2 ∥x − y∥.                                 (D.6)
+
+Proof. If s ∈ ∂r(z), then z = proxρr (z + ρs) since the latter is equivalent to z + ρ∂r(z) ∋ z + ρs. Using this
+identity with nonexpansiveness gives
+
+       ρ∥Gρ (z)∥ = ∥z − proxρr (z − ρG(z))∥ = ∥ proxρr (z + ρs) − proxρr (z − ρG(z))∥ ≤ ρ∥G(z) + s∥.
+
+We divide by ρ to obtain (D.5).
+    For the second assertion, the definition of the proximal operator gives Gρ (x) − G(x) ∈ ∂r(x − ρGρ (x))
+since ρGρ (x) = x − proxρr (x − ρG(x)), and the analogous inclusion for y. Monotonicity of ∂r implies
+
+                      ⟨Gρ (x) − G(x) − [Gρ (y) − G(y)], x − ρGρ (x) − [y − ρGρ (y)]⟩ ≥ 0.
+
+Expanding the inner product gives
+
+          ρ∥Gρ (x) − Gρ (y)∥2 ≤ ⟨Gρ (x) − Gρ (y), x − y + ρ(G(x) − G(y))⟩ − ⟨G(x) − G(y), x − y⟩ .        (D.7)
+
+
+
+
+                                                       25
+Young’s inequality gives
+                                                               ρ
+         ⟨Gρ (x) − Gρ (y), x − y + ρ(G(x) − G(y))⟩ ≤             ∥Gρ (x) − Gρ (y)∥2
+                                                               2
+                                            1
+                                              ∥x − y∥2 + 2ρ⟨x − y, G(x) − G(y)⟩ + ρ2 ∥G(x) − G(y)∥2 .
+                                                                                                   
+                                       +
+                                           2ρ
+
+Plugging to (D.7) yields
+                                            ρ                      1         ρ
+                ρ∥Gρ (x) − Gρ (y)∥2 ≤         ∥Gρ (x) − Gρ (y)∥2 + ∥x − y∥2 + ∥G(x) − G(y)∥2 .
+                                            2                     2ρ         2
+After rearranging and using Lipschitz continuity of G, we deduce
+
+                 ∥Gρ (x) − Gρ (y)∥2 ≤ ρ−2 ∥x − y∥2 + ∥G(x) − G(y)∥2 ≤ (ρ−2 + L2 )∥x − y∥2 .
+
+Taking square root of both sides proves (D.6).                                                              ■
+
+D.2     Numerical Consequences of Parameters
+The following fact collects some tedious, yet important estimations we used, which follow from the choice of
+our parameters.
+Fact D.4. Suppose that a ≥ 2, H 2 = L2 + 2B 2 , and
+                                                     a                     1
+                                            βt =        ,      ηt =               .
+                                                    t+a               H(t + a)3/4
+
+Then, for every t ≥ 1,
+                                                                       2
+                                             q
+                                              (1 − βt )2 + ηt2 L2 ≤ 1 − βt .                             (D.8)
+                                                                       3
+Moreover, for every t ≥ 0, we have,
+                                                  2                                     2
+                                    ηt+1                   2                     3
+                                         − βt+1         + ηt+1 L2 ≤    1−                       ,        (D.9)
+                                     ηt                                     2(t + a + 1)
+
+and
+                                                    ηt+1               a
+                                           βt+1 −        βt ≤                     .                     (D.10)
+                                                     ηt       4(t + a)(t + a + 1)
+
+Finally, for every t ≥ 1,
+                                                                                a
+                                         (1 − βt )2 + ηt2 (L2 + 2B 2 ) ≤ 1 −       .                    (D.11)
+                                                                               t+a
+Proof. For the first estimate, we have
+                               2
+                          2                                   2      5
+                       1 − βt        − (1 − βt )2 − ηt2 L2 =    βt − βt2 − ηt2 L2
+                          3                                   3      9
+                                                                              5a2        L2
+                                                                                              
+                                                                1     2a
+                                                            =            −          −   √
+                                                              t+a 3        9(t + a) H 2 t + a
+                                                                              5a2
+                                                                                           
+                                                                1     2a                1
+                                                            ≥            −          −√
+                                                              t+a 3        9(t + a)    t+a
+                                                                                      
+                                                                1     a(a + 6)      1
+                                                            ≥                   −√        ≥ 0.
+                                                              t + a 9(a + 1)       a+1
+
+
+                                                               26
+            √ inequality uses H ≥ L, and the second uses t ≥ 1. The last inequality follows from
+Here, the first
+a(a + 6) ≥ 9 a + 1 for a ≥ 2. This proves (D.8).
+   We next prove the estimates for t ≥ 0. Since
+
+                               ηt+1     (t + a)3/4      t+a             a
+                                    =                ≥       ≥ βt+1 =       ,
+                                ηt    (t + a + 1)3/4   t+a+1          t+a+1
+                                                                                                 3/4
+we have ηt+1 /ηt − βt+1 ≥ 0. Write s = t + a + 1 ≥ 3. By concavity of x3/4 , we have 1 − 1s                   3
+                                                                                                        ≤ 1 − 4s .
+Therefore, by definition of ηt and βt+1 , we have
+                                                             3/4
+                            ηt+1                          1              a     3  a   11
+                         0≤      − βt+1 =              1−            −     ≤1−   − ≤1− ,
+                             ηt                           s              s     4s s   4s
+                                                                          2
+                                                              −3/2
+                                                 2
+where the last inequality uses a ≥ 2. Moreover, ηt+1      L
+                                                     L2 = H 2s     ≤ s−3/2 because H ≥ L. Therefore,
+                                          2                        2                 2
+                             ηt+1                                  11                  3
+                                  − βt+1           2
+                                                + ηt+1 L2 ≤     1−       + s−3/2 ≤ 1 −       .
+                              ηt                                   4s                  2s
+
+The last inequality follows from 52 − 16s
+                                       85
+                                           − s−1/2 ≥ 35    √1
+                                                      48 − 3 > 0 because s ≥ 3. This proves (D.9).
+   Similarly, using the definitions of βt and ηt , we have
+                                                                     3/4
+                                    ηt+1             a           t+a         a
+                             βt+1 −       βt =             −
+                                      ηt         t+a+1          t+a+1      t+a
+                                                                       1/4
+                                                    a            t+a+1
+                                             =             1−
+                                                t+a+1             t+a
+                                                          "         1/4    #
+                                                    a             1
+                                             =                1+          −1 .
+                                                t+a+1            t+a
+                                         1/4                                            1/4
+                                       1                                                1                1
+The last equality follows because 1 + t+a      ≥ 1. Then, concavity of x1/4 yields 1 + t+a      ≤ 1 + 4(t+a) .
+Therefore, we have
+                                                   ηt+1               a
+                                       βt+1 −           βt ≤                     ,
+                                                    ηt       4(t + a)(t + a + 1)
+which proves (D.10).
+   Finally, for t ≥ 1,
+                                                                        a2  L2 + 2B 2
+                     (t + a) 1 − (1 − βt )2 − ηt2 (L2 + 2B 2 ) = 2a −
+                                                             
+                                                                           − 2√
+                                                                       t+a H t+a
+                                                                        a2     1
+                                                                ≥ 2a −     −√      ≥ a.                    (D.12)
+                                                                       t+a    t+a
+Here, the first inequality uses H 2 = L2 + 2B 2 , while the last inequality follows from
+                                            a2     1     a      1
+                                    a−         −√     ≥     −√     ≥0
+                                           t+a    t+a   a+1    a+1
+for t ≥ 1 and a ≥ 2. Dividing (D.12) by t + a proves (D.11).                                                   ■
+                                    √
+Fact D.5. Suppose H = max 2L, 4 1024Λ2 + 4 + 16B 2 and let Γ = 1024Λ2 + 4 + 16B 2 . with
+                                                        1                       1
+                                      αt = βt =            ,    and ηt =       √    .
+                                                       t+1                    H t+1
+Then for every t ≥ 1, following five estimates hold:
+
+
+                                                                27
+  1.
+                                       2
+                                                  512Λ2 C     2(C + 4B 2 C)
+                        
+                                1            ΓC                                ΓC      ΓC
+                         1−                     +         2
+                                                            +            2
+                                                                            =      −          .                     (D.13)
+                               t+1            t   (t + 1)        (t + 1)      t + 1 2(t + 1)2
+
+  2.
+                                                              η 2 L2
+                                                                                 
+                                                                                 βt
+                                                     1 − βt + t             ≤ 1−      .                             (D.14)
+                                                             1 − βt              2
+
+  3.
+                                                              2
+                                                        10(t + 1)ηt2 αt2 ΓC
+                                       
+                                            ηt
+                         40(t + 1)        βt−1 − βt C +
+                                     ηt−1                       t
+                                        2
+                                                                            
+                               2   512Λ C        2  2   2
+                                                                          41Γ     C
+                            + ηt            + 2αt σ + 4B C     ≤ 40 +                    .                          (D.15)
+                                   (t + 1)2                                2H 2 (t + 1)3
+
+  4.
+                                                              41Γ    1321
+                                                       40 +        ≤      ≤ 64.                                     (D.16)
+                                                              2H 2    32
+
+  5.
+                                                                            2                !
+                         256C                 1                       3                   1                64C
+                                       1+                      1−                   +                +
+                        (t + 1)2          4(t + 1)                2(t + 1)            4(t + 1)           (t + 1)3
+                             256C
+                        ≤            .                                                                              (D.17)
+                            (t + 2)2
+
+Proof. Throughout the proof, we use the notations
+
+                                                 Γ = 1024Λ2 + 4 + 16B 2 .
+                                                1     t
+We start from the first statement, because 1 − t+1 = t+1 , the left-hand side satisfies
+                                               2
+                                                           512Λ2 C    2(C + 4B 2 C)
+                                   
+                                           1      ΓC
+                                       1−              +            +
+                                         t+1        t      (t + 1)2      (t + 1)2
+                                       tΓC            ΓC
+                                   =         2
+                                               +
+                                     (t + 1)      2(t + 1)2
+                                     (t + 1/2)ΓC
+                                   =
+                                        (t + 1)2
+                                      ΓC          ΓC
+                                   =        −            ,
+                                     t + 1 2(t + 1)2
+
+which proves (D.13).
+   Then we start the second statement. Using the schedule of βt and ηt , we have βt ≤ 1/2 and ηt2 L2 ≤ βt /4.
+         1
+Using 4(1−β t)
+               ≤ 21 , is suffices to show,
+
+                                      η 2 L2
+                                                                          
+                                                             βt           βt
+                             1 − βt + t        ≤ 1 − βt +            ≤ 1−      ,
+                                     1 − βt               4(1 − βt )      2
+
+for every t ≥ 1. This finishes proof of (D.14).
+
+
+
+
+                                                                   28
+    We next move to the third statement. We estimate first term of the left-hand side, applying the definition
+of ηt and βt gives,
+                                           2                                   !2
+                               ηt                                 1           1
+                  40(t + 1)        βt−1 − βt C = 40(t + 1) p             −          C
+                              ηt−1                              t(t + 1) t + 1
+                                                                                      2
+                                                                          1
+                                               = 40(t + 1) √             √        √       C
+                                                               t(t + 1)( t + 1 + t)
+                √ √          √      p
+Then, because t( t + 1 + t) = t(t + 1) + t ≥ 1, it implies
+                                                  1               1
+                                     √            √       √ ≤          .
+                                         t(t + 1)( t + 1 + t) (t + 1)2
+Therefore, we have
+                                                                   2
+                                                  ηt                            40C
+                                 40(t + 1)              βt−1 − βt        C≤            .
+                                                 ηt−1                         (t + 1)3
+   For the second term, using the definition of ηt and αt ,
+                                      10(t + 1)ηt2 αt2 ΓC    10ΓC
+                                                          = 2
+                                              t            H t(t + 1)2
+                                                           20Γ    C
+                                                          ≤ 2          ,
+                                                           H (t + 1)3
+where we used 1/t ≤ 2/(1 + t) for the last inequality.
+   For the last term, substituting the ηt and αt yield
+                     512Λ2 C                                        512Λ2 C   2(σ 2 + 4B 2 C)
+                                                                                           
+                 2                2  2      2
+                                                         1
+               ηt             + 2αt σ + 4B C       = 2                      +
+                     (t + 1)2                         H (t + 1) (t + 1)2         (t + 1)2
+                                                       Γ      C
+                                                   ≤                ,
+                                                      2H 2 (t + 1)3
+where the last inequality follows from σ 2 ≤ C.
+   Combining the three inequality give us
+                                                                                   
+                        40C     20Γ  C        Γ      C                          41Γ     C
+                               + 2         +               =               40 +               .
+                      (t + 1)3  H (t + 1)3   2H 2 (t + 1)3                      2H 2 (t + 1)3
+Which proves the claim.
+   For the fourth statement, the definition of H gives H 2 ≥ 16Γ. Thus we have Γ/H 2 ≤ 1/16, and
+consequently
+                                            41Γ         41   1321
+                                     40 +        ≤ 40 +    =      ≤ 64.
+                                            2H 2        32    32
+This proves the fourth statement.
+   It remains to prove last statement. Expanding the factor gives,
+                                       2            !
+                                                         16(t + 1)3 − 40(t + 1)2 + 25(t + 1) + 9
+                     
+                1                 3             1
+        1+                1−              +            =                                         .     (D.18)
+            4(t + 1)          2(t + 1)      4(t + 1)                   16(t + 1)3
+   Subtracting the left-hand side of (D.17) from its right-hand side yields
+                                                                 2            !
+                256C       256C             1                  3             1          64C
+                        −            1+               1−               +            −
+              (t + 2)2    (t + 1)2      4(t + 1)           2(t + 1)      4(t + 1)     (t + 1)3
+                             256      16(16(t + 1)3 − 36(t + 1)2 + 25(t + 1) + 9)
+                        =         2
+                                    −
+                          (t + 2)                        (t + 1)5
+                          16(4(t + 1)4 + 31(t + 1)3 − 23(t + 1)2 − 43(t + 1) − 9)
+                        =                                                         ,
+                                              (t + 1)5 (t + 2)2
+
+
+                                                           29
+where the second equality uses (D.18), and the remaining equalities follow from direct calculation.
+   The numerator satisfies
+
+                     4(t + 1)4 + 31(t + 1)3 − 23(t + 1)2 − 43(t + 1) − 9
+                           = (t − 1)(4(t + 1)3 + 39(t + 1)2 + 55(t + 1) + 67) + 125 > 0
+
+for every t ≥ 1. This completes the proof of the last statement.                                      ■
+
+
+
+
+                                                     30
+

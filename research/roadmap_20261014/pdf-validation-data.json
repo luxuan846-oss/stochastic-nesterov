@@ -1,0 +1,116 @@
+{
+  "pages": 12,
+  "page_size_points": [
+    595.280029296875,
+    841.8900146484375
+  ],
+  "outside_page": [],
+  "fonts": [
+    {
+      "name": "TimesNewRomanPSMT",
+      "size_pt": 9.96,
+      "characters": 5995
+    },
+    {
+      "name": "PingFangSC-Regular",
+      "size_pt": 9.96,
+      "characters": 5932
+    },
+    {
+      "name": "TimesNewRomanPSMT",
+      "size_pt": 8.97,
+      "characters": 4303
+    },
+    {
+      "name": "TimesNewRomanPS-ItalicMT",
+      "size_pt": 9.96,
+      "characters": 2898
+    },
+    {
+      "name": "PingFangSC-Regular",
+      "size_pt": 8.97,
+      "characters": 2413
+    },
+    {
+      "name": "TimesNewRomanPS-BoldMT",
+      "size_pt": 9.96,
+      "characters": 1167
+    },
+    {
+      "name": "PingFangSC-Semibold",
+      "size_pt": 9.96,
+      "characters": 822
+    },
+    {
+      "name": "LatinModernMath-Regular",
+      "size_pt": 10.34,
+      "characters": 697
+    },
+    {
+      "name": "LatinModernMath-Regular",
+      "size_pt": 9.3,
+      "characters": 576
+    },
+    {
+      "name": "LatinModernMath-Regular",
+      "size_pt": 7.24,
+      "characters": 252
+    },
+    {
+      "name": "LatinModernMath-Regular",
+      "size_pt": 6.2,
+      "characters": 229
+    },
+    {
+      "name": "PingFangSC-Semibold",
+      "size_pt": 11.96,
+      "characters": 84
+    },
+    {
+      "name": "PingFangSC-Semibold",
+      "size_pt": 8.97,
+      "characters": 64
+    },
+    {
+      "name": "LMMono10-Regular",
+      "size_pt": 9.96,
+      "characters": 50
+    },
+    {
+      "name": "TimesNewRomanPS-BoldMT",
+      "size_pt": 8.97,
+      "characters": 31
+    },
+    {
+      "name": "TimesNewRomanPS-BoldMT",
+      "size_pt": 11.96,
+      "characters": 18
+    },
+    {
+      "name": "PingFangSC-Regular",
+      "size_pt": 17.22,
+      "characters": 17
+    },
+    {
+      "name": "TimesNewRomanPSMT",
+      "size_pt": 11.96,
+      "characters": 15
+    },
+    {
+      "name": "TimesNewRomanPSMT",
+      "size_pt": 17.22,
+      "characters": 7
+    },
+    {
+      "name": "PingFangSC-Regular",
+      "size_pt": 11.96,
+      "characters": 4
+    },
+    {
+      "name": "PingFangSC-Semibold",
+      "size_pt": 14.35,
+      "characters": 2
+    }
+  ],
+  "replacement_characters": 0
+}

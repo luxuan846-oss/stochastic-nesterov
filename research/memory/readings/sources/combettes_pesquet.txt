@@ -1,0 +1,1729 @@
+                                               Stochastic Quasi-Fejér Block-Coordinate Fixed Point Iterations
+                                                                  with Random Sweeping∗
+
+                                                                 Patrick L. Combettes1 and Jean-Christophe Pesquet2
+
+                                                                          1
+                                                                           Sorbonne Universités – UPMC Univ. Paris 06
+
+
+
+
+arXiv:1404.7536v4 [math.OC] 17 Apr 2015
+                                                                           UMR 7598, Laboratoire Jacques-Louis Lions
+                                                                                     F-75005 Paris, France
+                                                                                   plc@ljll.math.upmc.fr
+
+                                                                                       2
+                                                                                      Université Paris-Est
+                                                                 Laboratoire d’Informatique Gaspard Monge – CNRS UMR 8049
+                                                                           F-77454, Marne la Vallée Cedex 2, France
+                                                                       jean-christophe.pesquet@univ-paris-est.fr
+
+
+
+
+                                                                                             Abstract
+
+                                                    This work proposes block-coordinate fixed point algorithms with applications to nonlinear
+                                                analysis and optimization in Hilbert spaces. The asymptotic analysis relies on a notion of stochas-
+                                                tic quasi-Fejér monotonicity, which is thoroughly investigated. The iterative methods under con-
+                                                sideration feature random sweeping rules to select arbitrarily the blocks of variables that are acti-
+                                                vated over the course of the iterations and they allow for stochastic errors in the evaluation of the
+                                                operators. Algorithms using quasinonexpansive operators or compositions of averaged nonex-
+                                                pansive operators are constructed, and weak and strong convergence results are established for
+                                                the sequences they generate. As a by-product, novel block-coordinate operator splitting methods
+                                                are obtained for solving structured monotone inclusion and convex minimization problems. In
+                                                particular, the proposed framework leads to random block-coordinate versions of the Douglas-
+                                                Rachford and forward-backward algorithms and of some of their variants. In the standard case
+                                                of m = 1 block, our results remain new as they incorporate stochastic perturbations.
+
+
+                                             Keywords. Arbitrary sampling, block-coordinate algorithm, fixed-point algorithm, monotone op-
+                                          erator splitting, primal-dual algorithm, stochastic quasi-Fejér sequence, stochastic algorithm, struc-
+                                          tured convex minimization problem.
+
+
+
+
+                                            ∗
+                                              Contact author: P. L. Combettes, plc@ljll.math.upmc.fr, phone: +33 1 4427 6319, fax: +33 1 4427 7200. This
+                                          work was supported by the CNRS MASTODONS project under grant 2013MesureHD.
+1 Introduction
+
+The main advantage of block-coordinate algorithms is to result in implementations with reduced
+complexity and memory requirements per iteration. These benefits have long been recognized
+[3, 18, 50] and have become increasingly important in very large-scale problems. In addition, block-
+coordinate strategies may lead to faster [20] or distributed [41] implementations. In this paper, we
+propose a block-coordinate fixed point algorithmic framework to solve a variety of problems in
+Hilbertian nonlinear numerical analysis and optimization. Algorithmic fixed point theory in Hilbert
+spaces provides a unifying and powerful framework for the analysis and the construction of a wide
+array of solution methods in such problems [5, 7, 19, 22, 66]. Although several block-coordinate
+algorithms exist for solving specific optimization problems in Euclidean spaces, a framework for
+dealing with general fixed point methods in Hilbert spaces and which guarantees the convergence
+of the iterates does not seem to exist at present. In the proposed constructs, a random sweeping
+strategy is employed for selecting the blocks of coordinates which are activated over the iterations.
+The sweeping rule allows for an arbitrary sampling of the indices of the coordinates. Furthermore,
+the algorithms tolerate stochastic errors in the implementation of the operators. This paper provides
+the first general stochastic block-coordinate fixed point framework with guaranteed convergence of
+the iterates. It generates a wide range of new algorithms, which will be illustrated by numerical
+experiments elsewhere.
+
+    A main ingredient for proving the convergence of many fixed point algorithms is the fundamen-
+tal concept of (quasi-)Fejér monotonicity [21, 23, 33, 57]. In Section 2, refining the seminal work
+of [34, 35, 36], we revisit this concept from a stochastic standpoint. By exploiting properties of
+almost super-martingales [59], we establish novel almost sure convergence results for an abstract
+stochastic iteration scheme. In Section 3, this scheme is applied to the design of block-coordinate al-
+gorithms for relaxed iterations of quasinonexpansive operators. A simple instance of such iterations
+is the Krasnosel’skiı̆–Mann method, which has found numerous applications [7, 17]. In Section 4,
+we design block-coordinate algorithms involving compositions of averaged nonexpansive operators.
+The results are used in Section 5 to construct block-coordinate algorithms for structured monotone
+inclusion and convex minimization problems. Splitting algorithms have recently becomes tools of
+choice in signal processing and machine learning; see, e.g., [17, 27, 29, 31, 56, 60]. Providing ver-
+satile block-coordinate versions of these algorithms is expected to benefit these emerging areas, as
+well as more traditional fields of applications of splitting methods, e.g., [39]. One of the offsprings
+of our work is an original block-coordinate primal-dual algorithm which can be employed to solve
+a large class of variational problems.
+
+
+
+2 Stochastic quasi-Fejér monotonicity
+
+Fejér monotonicity has been exploited in various areas of nonlinear analysis and optimization to
+unify the convergence proofs of deterministic algorithms; see, e.g., [7, 23, 33, 57]. In the late
+1960s, this notion was revisited in a stochastic setting in Euclidean spaces [34, 35, 36]. In this
+section, we investigate a notion of stochastic quasi-Fejér monotone sequence in Hilbert spaces and
+apply the results to a general stochastic iterative method. Throughout the paper, the following
+notation will be used.
+
+
+
+                                                  1
+Notation 2.1 H is a separable real Hilbert space with scalar product h· | ·i, associated norm k·k, and
+Borel σ-algebra B. Id denotes the identity operator on H and ⇀ and → denote, respectively, weak
+and strong convergence in H. The sets of strong and weak sequential cluster points of a sequence
+(xn )n∈N in H are denoted by S(xn )n∈N and W(xn )n∈N , respectively. The underlying probability space
+is (Ω, F, P). A H-valued random variable is a measurable map x : (Ω, F) → (H, B). The σ-algebra
+generated by a family Φ of random variables is denoted by σ(Φ). Let F = (Fn )n∈N be a sequence of
+sub-sigma algebras of F such that (∀n ∈ N) Fn ⊂ Fn+1 . We denote by ℓ+ (F ) the set of sequences
+of [0, +∞[-valued random variables (ξn )n∈N such that, for every n ∈ N, ξn is Fn -measurable. We set
+                                (                                          )
+                                                      X
+       (∀p ∈ ]0, +∞[) ℓp+ (F ) = (ξn )n∈N ∈ ℓ+ (F )       ξnp < +∞ P-a.s.                        (2.1)
+                                                        n∈N
+
+and
+                                                       
+      ℓ∞
+       + (F ) =    (ξn )n∈N ∈ ℓ+ (F ) sup ξn < +∞ P-a.s. .                                        (2.2)
+                                       n∈N
+
+Given a sequence (xn )n∈N of H-valued random variables, we define
+
+      X = (Xn )n∈N ,      where (∀n ∈ N) Xn = σ(x0 , . . . , xn ).                                (2.3)
+
+Equalities and inequalities involving random variables will always be understood to hold P-almost
+surely, even if the expression “P-a.s.” is not explicitly written. For background on probability in
+Hilbert spaces, see [37, 42].
+
+Lemma 2.2 [59, Theorem 1] Let F = (Fn )n∈N be a sequence of sub-sigma algebras of F such that
+(∀n ∈ N) Fn ⊂ Fn+1 . Let (αn )n∈N ∈ ℓ+ (F ), (ϑn )n∈N ∈ ℓ+ (F ), (ηn )n∈N ∈ ℓ1+ (F ), and (χn )n∈N ∈
+ℓ1+ (F ) be such that
+
+      (∀n ∈ N) E(αn+1 | Fn ) + ϑn ⩽ (1 + χn )αn + ηn       P-a.s.                                 (2.4)
+
+Then (ϑn )n∈N ∈ ℓ1+ (F ) and (αn )n∈N converges P-a.s. to a [0, +∞[-valued random variable.
+
+Proposition 2.3 Let F be a nonempty closed subset of H, let φ : [0, +∞[ → [0, +∞[ be a strictly
+increasing function such that limt→+∞ φ(t) = +∞, and let (xn )n∈N be a sequence of H-valued random
+variables. Suppose that, for every z ∈ F, there exist (χn (z))n∈N ∈ ℓ1+ (X ), (ϑn (z))n∈N ∈ ℓ+ (X ), and
+(ηn (z))n∈N ∈ ℓ1+ (X ) such that the following is satisfied P-a.s.:
+
+      (∀n ∈ N) E(φ(kxn+1 − zk) | Xn ) + ϑn (z) ⩽ (1 + χn (z))φ(kxn − zk) + ηn (z).                (2.5)
+
+Then the following hold:
+
+                 P                            
+  (i) (∀z ∈ F)        n∈N ϑn (z) < +∞ P-a.s.
+
+ (ii) (xn )n∈N is bounded P-a.s.
+                   e ∈ F such that P(Ω)
+(iii) There exists Ω                 e = 1 and, for every ω ∈ Ω
+                                                              e and every z ∈ F, (kxn (ω) − zk)n∈N
+      converges.
+
+(iv) Suppose that W(xn )n∈N ⊂ F P-a.s. Then (xn )n∈N converges weakly P-a.s. to an F-valued random
+     variable.
+
+                                                    2
+ (v) Suppose that S(xn )n∈N ∩ F 6= ∅ P-a.s. Then (xn )n∈N converges strongly P-a.s. to an F-valued
+     random variable.
+
+ (vi) Suppose that S(xn )n∈N 6= ∅ P-a.s. and that W(xn )n∈N ⊂ F P-a.s. Then (xn )n∈N converges
+      strongly P-a.s. to an F-valued random variable.
+                                                               P
+Proof. (i): Fix z ∈ F. It follows from (2.5) and Lemma 2.2 that n∈N ϑn (z) < +∞ P-a.s.
+
+    (ii): Let z ∈ F and set (∀n ∈ N) ξn = kxn − zk. We derive from (2.5) and Lemma 2.2 that
+(φ(ξn ))n∈N converges P-a.s., say φ(ξn ) → α P-a.s., where α is a [0, +∞[-valued random variable. In
+turn, since limt→+∞ φ(t) = +∞, (ξn )n∈N is bounded P-a.s. and so is (xn )n∈N . For subsequent use,
+let us also note that
+
+     (kxn − zk)n∈N converges to a [0, +∞[-valued random variable P-a.s.                        (2.6)
+
+Indeed, take ω ∈ Ω such that (ξn (ω))n∈N is bounded. Suppose that there exist τ (ω) ∈ [0, +∞[,
+ζ(ω) ∈ [0, +∞[, and subsequences (ξkn (ω))n∈N and (ξln (ω))n∈N such that ξkn (ω) → τ (ω) and
+ξln (ω) → ζ(ω) > τ (ω), and let δ(ω) ∈ ]0, (ζ(ω) − τ (ω))/2[. Then, for n sufficiently large,
+ξkn (ω) ⩽ τ (ω) + δ(ω) < ζ(ω) − δ(ω) ⩽ ξln (ω) and, since φ is strictly increasing, φ(ξkn (ω)) ⩽
+φ(τ (ω) + δ(ω)) < φ(ζ(ω) − δ(ω)) ⩽ φ(ξln (ω)). Taking the limit as n → +∞ yields α(ω) ⩽
+φ(τ (ω) + δ(ω)) < φ(ζ(ω) − δ(ω)) ⩽ α(ω), which is impossible. It follows that τ (ω) = ζ(ω) and,
+in turn, that ξn (ω) → τ (ω). Thus, ξn → τ P-a.s.
+
+    (iii): Since H is separable, there exists a countable set Z such that Z = F. According to (2.6),
+for every z ∈ F, there exists a set Ωz ∈ F such
+                                              T that P(Ωz ) = 1e and, for every ω ∈ Ωz , the sequence
+                                         e
+(kxn (ω) − zk)n∈N converges. Now set Ω = z∈Z Ωz and let ∁Ω be its complement. Then, since Z is
+                                         S                P
+countable, P( eΩ) = 1 − P(∁ e
+                            Ω) = 1 − P( z∈Z ∁Ωz ) ⩾ 1 − z∈Z P(∁Ωz ) = 1, hence P( e Ω) = 1. We now
+fix z ∈ F. Since Z = F, there exists a sequence (zk )k∈N in Z such that zk → z. As just seen, (2.6)
+yields
+
+     (∀k ∈ N)(∃ τk : Ω → [0, +∞[)(∀ω ∈ Ωzk )    kxn (ω) − zk k → τk (ω).                       (2.7)
+            e We have
+Now let ω ∈ Ω.
+
+     (∀k ∈ N)(∀n ∈ N)     − kzk − zk ⩽ kxn (ω) − zk − kxn (ω) − zk k ⩽ kzk − zk.               (2.8)
+
+Therefore
+
+     (∀k ∈ N)    − kzk − zk ⩽ lim kxn (ω) − zk − lim kxn (ω) − zk k
+                               n→+∞                  n→+∞
+
+                            = lim kxn (ω) − zk − τk (ω)
+                               n→+∞
+                            ⩽ lim kxn (ω) − zk − τk (ω)
+                               n→+∞
+                            = lim kxn (ω) − zk − lim kxn (ω) − zk k
+                               n→+∞                  n→+∞
+                            ⩽ kzk − zk.                                                        (2.9)
+
+Hence, taking the limit as k → +∞ in (2.9), we obtain that (kxn (ω) − zk)n∈N converges; more
+precisely, limn→+∞ kxn (ω) − zk = limk→+∞ τk (ω).
+                                    b ∈ F such that P(Ω)
+  (iv): By assumption, there exists Ω                 b = 1 and (∀ω ∈ Ω)b W(xn (ω))n∈N ⊂ F.
+Now define Ωe as in the proof of (iii), let ω ∈ b
+                                                Ω∩ eΩ, and let x(ω) and y(ω) be two points in
+
+                                                 3
+W(xn (ω))n∈N , say xkn (ω) ⇀ x(ω) and xln (ω) ⇀ y(ω). Then (iii) implies that (kxn (ω) − x(ω)k)n∈N
+and (kxn (ω) − y(ω)k)n∈N converge. In turn, since
+
+                                         1                                                        
+   (∀n ∈ N) hxn (ω) | x(ω) − y(ω)i =       kxn (ω) − y(ω)k2 − kxn (ω) − x(ω)k2 + kx(ω)k2 − ky(ω)k2 ,
+                                         2
+                                                                                              (2.10)
+
+the sequence (hxn (ω) | x(ω) − y(ω)i)n∈N converges, say
+
+      hxn (ω) | x(ω) − y(ω)i → ̺(ω).                                                             (2.11)
+
+However, since xkn (ω) ⇀ x(ω), we have hx(ω) | x(ω) − y(ω)i = ̺(ω). Likewise, passing to the limit
+along the subsequence (xln (ω))n∈N in (2.11) yields hy(ω) | x(ω) − y(ω)i = ̺(ω). Thus,
+
+      0 = hx(ω) | x(ω) − y(ω)i − hy(ω) | x(ω) − y(ω)i = kx(ω) − y(ω)k2 .                         (2.12)
+                                        e (xn (ω))n∈N is bounded and we invoke [7, Lemma 2.38]
+This shows that x(ω) = y(ω). Since ω ∈ Ω,
+to conclude that xn (ω) ⇀ x(ω) ∈ F. Altogether, since P(Ω   b∩eΩ) = 1, xn ⇀ x P-a.s. and the
+measurability of x follows from [55, Corollary 1.13].
+
+   (v): Let x ∈ S(xn )n∈N ∩ F P-a.s. Then there exists Ω  b ∈ F such that P( b
+                                                                             Ω) = 1 and (∀ω ∈ bΩ)
+                                   e                          e   b          e   b
+lim kxn (ω) − x(ω)k = 0. Now let Ω be as in (iii) and let ω ∈ Ω ∩ Ω. Then P(Ω ∩ Ω) = 1, x(ω) ∈ F,
+and (iii) implies that (kxn (ω) − x(ω)k)n∈N converges. Thus, lim kxn (ω) − x(ω)k = 0. We conclude
+that xn → x P-a.s.
+
+   (vi)⇒(v): Since ∅ 6= S(xn )n∈N ⊂ W(xn )n∈N ⊂ F P-a.s., we have S(xn )n∈N ∩ F 6= ∅ P-a.s.
+
+Remark 2.4 Suppose that φ : t 7→ t2 in (2.5). Then special cases of Proposition 2.3 are stated in
+several places in the literature. Thus, stochastic quasi-Fejér sequences were first discussed in [34]
+in the case when H is a Euclidean space and for every n ∈ N, ϑn = χn = 0 and ηn is deterministic.
+A Hilbert space version of the results of [34] appears in [4] without proof. Finally, the case when
+all the processes are deterministic in (2.5) is discussed in [21].
+
+    The analysis of our main algorithms will rely on the following key illustration of Proposition 2.3.
+This result involves a general stochastic iterative process and it should also be of interest in the
+analysis of the asymptotic behavior of a broad class of stochastic algorithms, beyond those discussed
+in the present paper.
+
+Theorem 2.5 Let F be a nonempty closed subset of H, let (λn )n∈N be a sequence in ]0, 1], and let
+(tn )n∈N , (xn )n∈N , and (en )n∈N be sequences of H-valued random variables. Suppose that the following
+hold:
+
+  (i) (∀n ∈ N) xn+1 = xn + λn (tn + en − xn ).
+      P       p
+                       2
+ (ii)   n∈N λn E(ken k | Xn ) < +∞ P-a.s.
+
+(iii) For every z ∈ F, there exist (θn (z))n∈N ∈ ℓ+ (X ), (µn (z))n∈N ∈ ℓ∞ + (X ), and (νn (z))n∈N ∈
+       ∞                                  1                         1/2
+      ℓ+ (X ) such that (λn µn (z))n∈N ∈ ℓ+ (X ), (λn νn (z))n∈N ∈ ℓ+ (X ), and the following is satis-
+      fied P-a.s.:
+
+            (∀n ∈ N) E(ktn − zk2 | Xn ) + θn (z) ⩽ (1 + µn (z))kxn − zk2 + νn (z).               (2.13)
+
+                                                   4
+Then
+                    X                                  
+       (∀z ∈ F)             λn θn (z) < +∞ P-a.s.                                                (2.14)
+                      n∈N
+
+and
+       X
+             λn (1 − λn )E(ktn − xn k2 | Xn ) < +∞ P-a.s.                                        (2.15)
+       n∈N
+
+Furthermore, suppose that:
+
+(iv) W(xn )n∈N ⊂ F P-a.s.
+
+Then (xn )n∈N converges weakly P-a.s. to an F-valued random variable x. If, in addition,
+
+ (v) S(xn )n∈N 6= ∅ P-a.s.,
+
+then (xn )n∈N converges strongly P-a.s. to x.
+Proof. Let z ∈ F and set
+                                 p
+       (∀n ∈ N)        εn = λn       E(ken k2 | Xn ).                                            (2.16)
+
+It follows from Jensen’s inequality and (iii) that
+                                    p
+       (∀n ∈ N) E(ktn − zk | Xn ) ⩽ E(ktn − zk2 | Xn )
+                                    p
+                                  ⩽ (1 + µn (z))kxn − zk2 + νn (z)
+                                    p                      p
+                                  ⩽ 1 + µn (z)kxn − zk + νn (z)
+                                                            p
+                                  ⩽ (1 + µn (z)/2)kxn − zk + νn (z).                             (2.17)
+
+On the other hand, (i) and the triangle inequality yield
+
+       (∀n ∈ N) kxn+1 − zk ⩽ (1 − λn )kxn − zk + λn ktn − zk + λn ken k.                         (2.18)
+
+Consequently,
+
+       (∀n ∈ N) E(kxn+1 − zk | Xn ) ⩽ (1 − λn )kxn − zk + λn E(ktn − zk | Xn ) + λn E(ken k | Xn )
+                                          λn µn (z)              p              p
+                                    ⩽ 1+              kxn − zk + λn νn (z) + λn E(ken k2 | Xn )
+                                               2
+                                          λn µn (z)            p
+                                    = 1+              kxn − zk + λn νn (z) + εn .                (2.19)
+                                               2
+Upon applying Proposition 2.3(ii) with φ : t 7→ t, we deduce from (2.19) that (xn )n∈N is almost
+surely bounded and, by virtue of assumption (iii), that (E(ktn − zk2 | Xn ))n∈N is likewise. Thus, there
+exist ρ1 (z) and ρ2 (z) in ]0, +∞[ such that, almost surely,
+                                              p
+      (∀n ∈ N) kxn − zk ⩽ ρ1 (z) and            E(ktn − zk2 | Xn ) ⩽ ρ2 (z).                     (2.20)
+
+
+                                                            5
+Now set
+                   
+                   
+                    χn (z) = λn µn (z)
+                   
+                   
+                   ξ (z) = 2λ (1 − λ )kx − zk ke k + 2λ2 kt − zk ke k + λ2 ke k2
+                      n         n        n    n        n       n n        n n n
+     (∀n ∈ N)                                                     2
+                                                                                                    (2.21)
+                   
+                    ϑn (z) = λn θn (z) + λn (1 − λn )E(ktn − xn k | Xn )
+                   
+                   
+                   η (z) = E(ξ (z) | X ) + λ ν (z).
+                      n          n       n      n n
+
+On the one hand, it follows from (2.21), the Cauchy-Schwarz inequality, and (2.16) that
+
+     (∀n ∈ N) E(ξn (z) | Xn ) = 2λn (1 − λn )kxn − zk E(ken k | Xn )
+                                   + 2λ2n E(ktn − zk ken k | Xn ) + λ2n E(ken k2 | Xn )
+                                                p
+                                 ⩽ 2λn kxn − zk E(ken k2 | Xn )
+                                          p                   p
+                                   + 2λn E(ktn − zk2 | Xn ) E(ken k2 | Xn ) + λ2n E(ken k2 | Xn )
+                                 ⩽ 2(ρ1 (z) + ρ2 (z))εn + ε2n .                                     (2.22)
+
+In turn, we deduce from (2.16), (2.21), (ii), and (iii) that
+                                        
+       ηn (z) n∈N ∈ ℓ1+ (X ) and χn (z) n∈N ∈ ℓ1+ (X ).                                             (2.23)
+
+On the other hand, we derive from (i), [7, Corollary 2.14], and (2.21) that
+
+     (∀n ∈ N) kxn+1 − zk2 = k(1 − λn )(xn − z) + λn (tn − z)k2
+                                                                      
+                                   + 2λn (1 − λn )(xn − z) + λn tn − z | en + λ2n ken k2
+                                 ⩽ (1 − λn )kxn − zk2 + λn ktn − zk2
+                                    − λn (1 − λn )ktn − xn k2 + ξn (z).                             (2.24)
+
+Hence, (iii), (2.21), and (2.22) imply that
+
+  (∀n ∈ N) E(kxn+1 − zk2 | Xn )
+      ⩽ (1 − λn )kxn − zk2 + λn E(ktn − zk2 | Xn ) − λn (1 − λn )E(ktn − xn k2 | Xn ) + E(ξn (z) | Xn )
+                                                                        
+      ⩽ (1 − λn )kxn − zk2 + λn (1 + µn (z))kxn − zk2 + νn (z) − θn (z)
+          − λn (1 − λn )E(ktn − xn k2 | Xn ) + E(ξn (z) | Xn )
+      ⩽ (1 + χn (z))kxn − zk2 − ϑn (z) + ηn (z).                                                    (2.25)
+                                                                            P
+Thus, in view of (2.23), applying Proposition 2.3(i) with φ : t 7→ t2 yields n∈N ϑn (z) < +∞ P-a.s.
+and it follows from (2.21) that (2.14) and (2.15) are established. Finally, the weak convergence
+assertion follows from (iv) and Proposition 2.3(iv) applied with φ : t 7→ t2 . Likewise, the strong
+convergence assertion follows from (iv)–(v) and Proposition 2.3(vi) applied with φ : t 7→ t2 .
+
+Definition 2.6 An operator T : H → H is nonexpansive if it is 1-Lipschitz, and demicompact at y ∈ H
+if for every bounded sequence (yn )n∈N in H such that Tyn − yn → y, we have S(yn )n∈N 6= ∅ [54].
+
+   Although our primary objective is to apply Theorem 2.5 to block-coordinate methods, it also
+yields new results for classical methods. As an illustration, the following application describes a
+Krasnosel’skiı̆–Mann iteration with stochastic errors.
+
+                                                       6
+                                                            P
+Corollary 2.7 Let (λn )n∈N be a sequence in [0, 1] such that n∈N λn (1 − λn ) = +∞ and let T : H → H
+be a nonexpansive operator such that Fix T 6= ∅. Let x0 and (en )n∈N be H-valued random variables.
+Iterate
+
+       n = 0, 1, . . .
+      for                                                                                         (2.26)
+        xn+1 = xn + λn Txn + en − xn .
+                           P            p
+In addition, assume that       n∈N λn       E(ken k2 | Xn ) < +∞ P-a.s. Then the following hold:
+
+  (i) (xn )n∈N converges weakly P-a.s. to a (Fix T)-valued random variable.
+
+ (ii) Suppose that T is demicompact at 0 (see Definition 2.6). Then (xn )n∈N converges strongly P-a.s.
+      to a (Fix T)-valued random variable.
+Proof. Set F = Fix T. Since T is continuous, T is measurable and F is closed. Now let z ∈ F and set
+(∀n ∈ N) tn = Txn . Then, using the nonexpansiveness of T, we obtain
+                 
+                 xn+1 = xn + λn (tn + en − xn )
+                 
+      (∀n ∈ N)      E(ktn − xn k2 | Xn ) = kTxn − xn k2                                      (2.27)
+                 
+                             2                     2
+                    E(ktn − zk | Xn ) = kTxn − Tzk ⩽ kxn − zk .2
+
+
+It follows that properties (i)–(iii) in Theorem 2.5 are satisfied with (∀n ∈ N) θn = 0, µn = 0, and
+νn = 0. Hence, (2.15) and (2.27) imply the existence of Ω e ∈ F such that P( e
+                                                                             Ω) = 1 and
+                  X
+             e
+       (∀ω ∈ Ω)       λn (1 − λn )kTxn (ω) − xn (ω)k2 < +∞.                                  (2.28)
+                  n∈N
+
+Moreover,
+
+     (∀n ∈ N) kTxn+1 − xn+1 k = kTxn+1 − Txn + (1 − λn )(Txn − xn ) − λn en k
+                                        ⩽ kTxn+1 − Txn k + (1 − λn )kTxn − xn k + λn ken k
+                                        ⩽ kxn+1 − xn k + (1 − λn )kTxn − xn k + λn ken k
+                                        ⩽ λn kTxn − xn k + (1 − λn )kTxn − xn k + 2λn ken k
+                                        = kTxn − xn k + 2λn ken k                                  (2.29)
+
+and, therefore,
+
+     (∀n ∈ N) E(kTxn+1 − xn+1 k | Xn ) ⩽ kTxn − xn k + 2λn E(ken k | Xn )
+                                                           p
+                                       ⩽ kTxn − xn k + 2λn E(ken k2 | Xn ).                        (2.30)
+
+                                             b⊂Ω
+In turn, Lemma 2.2 implies that there exists Ω e such that Ω
+                                                           b ∈ F, P(Ω)
+                                                                    b = 1, and, for every ω ∈ Ω,
+                                                                                              b
+(kTxn (ω) − xn (ω)k)n∈N converges.
+                                                                       b and let x ∈ W(xn (ω))n∈N ,
+                                          (iv) of Theorem 2.5. Let ω ∈ Ω
+   (i): It is enough to establish propertyP
+say xkn (ω) ⇀ x. In view of (2.28), since n∈N λn (1−λn ) = +∞, we have lim kTxn (ω)−xn (ω)k = 0.
+Therefore,
+
+     kTxn (ω) − xn (ω)k → 0.                                                                       (2.31)
+
+
+                                                         7
+Altogether, xkn (ω) ⇀ x and Txkn (ω) − xkn (ω) → 0. Since T is nonexpansive, the demiclosed
+principle [7, Corollary 4.18] asserts that x ∈ F.
+
+   (ii): It is enough to establish property (v) of Theorem 2.5. Let ω ∈ Ω.   b As shown above,
+(xn (ω))n∈N converges weakly and it is therefore bounded [7, Lemma 2.38]. Hence, by demicom-
+pactness, (2.31) implies that S(xn (ω))n∈N 6= ∅. Thus, S(xn )n∈N 6= ∅ P-a.s.
+
+Remark 2.8 Corollary 2.7 extends [21, Theorem 5.5], which is restricted to deterministic processes
+and therefore less realistic error models. As shown in [7, 19, 21], the Krasnosel’skiı̆–Mann iteration
+process is at the core of many algorithms in variational problems and optimization. Corollary 2.7
+therefore provides stochastically perturbed versions of these algorithms.
+
+
+
+3 Single-layer random block-coordinate fixed point algorithms
+
+In the remainder of the paper, the following notation will be used.
+
+Notation 3.1 H1 , . . . , Hm are separable real Hilbert spaces and H = H1 ⊕ · · · ⊕ Hm is their direct
+Hilbert sum. The scalar products and associated norms of these spaces are all denoted by h· | ·i
+and k · k, respectively, and x = (x1 , . . . , xm ) denotes a generic vector in H. Given a sequence
+(xn )n∈N = (x1,n , . . . , xm,n )n∈N of H-valued random variables, we set (∀n ∈ N) Xn = σ(x0 , . . . , xn ).
+
+   We recall that an operator T : H → H with fixed point set Fix T is quasinonexpansive if [7]
+
+       (∀z ∈ Fix T)(∀x ∈ H)       kTx − zk ⩽ kx − zk.                                                 (3.1)
+
+Theorem 3.2 Let (λn )n∈N be a sequence in ]0, 1[ such that inf n∈N λn > 0 and supn∈N λn < 1 and set
+D = {0, 1}m r {0}. For every n ∈ N, let Tn : H → H : x 7→ (Ti,n x)1⩽i⩽m be a quasinonexpansive
+operator where, for every i ∈ {1, . . . , m}, Ti,n : H → Hi is measurable. Let x0 and (an )n∈N be H-valued
+random variables, and let (εn )n∈N be identically distributed D-valued random variables. Iterate
+
+         n = 0, 1, . . .
+        for
+            i = 1, . . . , m
+           for                                                                                       (3.2)
+             xi,n+1 = xi,n + εi,n λn Ti,n (x1,n , . . . , xm,n ) + ai,n − xi,n ,
+and set (∀n ∈ N) En = σ(εn ). In addition, assume that the following hold:
+          T
+  (i) F = n∈N Fix Tn 6= ∅.
+      P     p
+ (ii)   n∈N   E(kan k2 | Xn ) < +∞.
+(iii) For every n ∈ N, En and Xn are independent.
+(iv) (∀i ∈ {1, . . . , m}) pi = P[εi,0 = 1] > 0.
+
+Then
+
+       Tn xn − xn → 0 P-a.s.                                                                          (3.3)
+
+Furthermore, suppose that:
+
+                                                          8
+ (v) W(xn )n∈N ⊂ F P-a.s.
+
+Then (xn )n∈N converges weakly P-a.s. to an F-valued random variable x. If, in addition,
+
+ (vi) S(xn )n∈N 6= ∅ P-a.s.,
+
+then (xn )n∈N converges strongly P-a.s. to x.
+Proof. We define a norm ||| · ||| on H by
+                            m
+                            X 1
+      (∀x ∈ H) |||x|||2 =              kxi k2 .                                                           (3.4)
+                                  pi
+                            i=1
+
+We are going to apply Theorem 2.5 in (H, ||| · |||). Let us set
+            (
+              tn = (ti,n )1⩽i⩽m
+ (∀n ∈ N)                              where (∀i ∈ {1, . . . , m}) ti,n = xi,n +εi,n (Ti,n xn −xi,n ). (3.5)
+              en = (εi,n ai,n )1⩽i⩽m ,
+
+Then it follows from (3.2) that
+                                          
+      (∀n ∈ N) xn+1 = xn + λn tn + en − xn ,                                                              (3.6)
+
+while (ii) implies that
+      X                            X
+          λn E(|||en |||2 | Xn ) ⩽   E(|||an |||2 | Xn ) < +∞.                                            (3.7)
+      n∈N                         n∈N
+
+Since the operators (Tn )n∈N are quasinonexpansive, F is closed [6, Section 2]. Now let z ∈ F and
+set
+
+      (∀n ∈ N)(∀i ∈ {1, . . . , m})       qi,n : H × D → R : (x, ǫ) 7→ kxi − zi + ǫi (Ti,n x − xi )k2 .   (3.8)
+
+Note that, for every n ∈ N and every i ∈ {1, . . . , m}, since Ti,n is measurable, so are the functions
+(qi,n (·, ǫ))ǫ∈D . Consequently, since, for every n ∈ N, (iii) asserts that the events ([εn = ǫ])ǫ∈D
+form an almost sure partition of Ω and are independent from Xn , and since the random variables
+(qi,n (xn , ǫ))1⩽i⩽m are Xn -measurable, we obtain [44, Section 28.2]
+              ǫ∈D
+                                                                                   X             
+                                                       2
+      (∀n ∈ N)(∀i ∈ {1, . . . , m})       E(kti,n − zi k | Xn ) = E qi,n (xn , εn )   1[εn =ǫ] Xn
+                                                                                      ǫ∈D
+                                                                   X
+                                                               =         E(qi,n (xn , ǫ)1[εn =ǫ] | Xn )
+                                                                   ǫ∈D
+                                                                   X
+                                                               =         E(1[εn =ǫ] | Xn )qi,n (xn , ǫ)
+                                                                   ǫ∈D
+                                                                   X
+                                                               =         P[εn = ǫ]qi,n (xn , ǫ).          (3.9)
+                                                                   ǫ∈D
+
+
+
+
+                                                           9
+Thus, (3.4), (3.5), (3.9), (3.8), (iv), and (3.1) yield
+
+  (∀n ∈ N) E(|||tn − z|||2 | Xn )
+        Xm
+           1
+      =       E(kti,n − zi k2 | Xn )
+           pi
+          i=1
+          m
+          X 1 X
+      =                    P[εn = ǫ]kxi,n − zi + ǫi (Ti,n xn − xi,n )k2
+                pi
+          i=1        ǫ∈D
+                                                                                                            
+          m
+          X                X                                               X
+            1
+      =                             P[εn = ǫ] kTi,n xn − zi k2 +                     P[εn = ǫ] kxi,n − zi k2 
+                pi
+          i=1            ǫ∈D,ǫi =1                                       ǫ∈D, ǫi =0
+                                 m
+                                 X 1 − pi
+      = kTn xn − zk2 +                         kxi,n − zi k2
+                                          pi
+                                 i=1
+      = |||xn − z||| + kTn xn − zk2 − kxn − zk2
+                           2
+
+      ⩽ |||xn − z|||2 .                                                                                                  (3.10)
+
+Altogether, properties (i)–(iii) of Theorem
+                                     P      2.5 are satisfied with (∀n ∈ N) θn = µn = νn = 0. We
+therefore derive from (2.15) that n∈N λn (1 − λn )E(|||tn − xn |||2 | Xn ) < +∞ P-a.s. In view of our
+conditions on (λn )n∈N , this yields
+
+      E(|||tn − xn |||2 | Xn ) → 0 P-a.s.                                                                                (3.11)
+
+On the other hand, proceeding as in (3.9) leads to
+                                                                               X
+      (∀n ∈ N)(∀i ∈ {1, . . . , m})            E(kti,n − xi,n k2 | Xn ) =             ǫi P[εn = ǫ]kTi,n xn − xi,n k2 .   (3.12)
+                                                                               ǫ∈D
+
+Hence, it follows from (3.4), (3.5), and (iv) that
+                                                      m
+                                                      X 1
+      (∀n ∈ N) E(|||tn − xn ||| | Xn ) =  2
+                                                                 E(kti,n − xi,n k2 | Xn )
+                                                            pi
+                                                      i=1
+                                                      m
+                                                      X 1 X
+                                                  =                    ǫi P[εn = ǫ]kTi,n xn − xi,n k2
+                                                            pi
+                                                      i=1        ǫ∈D
+                                                      Xm           X
+                                                            1
+                                                  =                        P[εn = ǫ]kTi,n xn − xi,n k2
+                                                            pi
+                                                      i=1 ǫ∈D,ǫi =1
+
+                                                  = kTn xn − xn k2 .                                                     (3.13)
+
+Accordingly, (3.11) yields Tn xn −xn → 0 P-a.s. In turn, the weak and strong convergence assertions
+are consequences of Theorem 2.5.
+
+Remark 3.3 Let us make a few comments about Theorem 3.2.
+
+  (i) The binary variable εi,n signals whether the i-th coordinate Ti,n of the operator Tn is activated
+      or not at iteration n.
+
+
+                                                                   10
+ (ii) Assumption (iv) guarantees that each operator in (Ti,n )1⩽i⩽m is activated with a nonzero
+      probability at each iteration n of Algorithm (4.1). The simplest scenario corresponds to the
+      case when the block sweeping process assigns nonzero probabilities to multivariate indices
+      ǫ ∈ D having a single component equal to 1. Then only one of the operators in (Ti,n )1⩽i⩽m
+      is activated randomly. In general, the sweeping rule allows for an arbitrary sampling of the
+      indices {1, . . . , m}.
+                                                         b ∈ F such that P( b
+(iii) In view of (3.3), (v) is satisfied if there exists Ω                 Ω) = 1 and
+                        h                                                     i
+                   b
+            (∀ω ∈ Ω)      Tn xn (ω) − xn (ω) → 0 ⇒ W(xn (ω))n∈N ⊂ F .                           (3.14)
+
+     In the deterministic case, this is akin to the focusing conditions of [5]; see [5, 6, 21] for
+                                                                                           b ∈ F such
+     examples of suitable sequences (Tn )n∈N . Likewise, (vi) is satisfied if there exists Ω
+            b
+     that P(Ω) = 1 and
+                                                                                                
+            b
+      (∀ω ∈ Ω)      sup kxn (ω)k < +∞ and Tn xn (ω) − xn (ω) → 0             ⇒ S(xn (ω))n∈N 6= ∅ .
+                        n∈N
+                                                                                                (3.15)
+
+     In the deterministic case, this is the demicompactness regularity condition of [21, Defini-
+     tion 6.5]. Examples of suitable sequences (Tn )n∈N are provided in [21].
+
+   Our first corollary is a random block-coordinate version of the Krasnosel’skiı̆–Mann iteration.
+
+Corollary 3.4 Let (λn )n∈N be a sequence in ]0, 1[ such that inf n∈N λn > 0 and supn∈N λn < 1, set
+D = {0, 1}m r {0}, and let T : H → H : x 7→ (Ti x)1⩽i⩽m be a nonexpansive operator such that
+Fix T 6= ∅ where, for every i ∈ {1, . . . , m}, Ti : H → Hi . Let x0 and (an )n∈N be H-valued random
+variables, and let (εn )n∈N be identically distributed D-valued random variables. Iterate
+
+        n = 0, 1, . . .
+       for
+           i = 1, . . . , m
+          for                                                                                  (3.16)
+            xi,n+1 = xi,n + εi,n λn Ti (x1,n , . . . , xm,n ) + ai,n − xi,n ,
+
+and set (∀n ∈ N) En = σ(εn ). In addition, assume that properties (ii)–(iv) of Theorem 3.2 hold. Then
+(xn )n∈N converges weakly P-a.s. to a (Fix T)-valued random variable. The convergence is strong if T is
+demicompact at 0 (see Definition 2.6).
+Proof. This is an application of Theorem 3.2 with F = Fix T and (∀n ∈ N) Tn = T. Indeed, (3.14)
+follows from the demiclosed principle [7, Corollary 4.18] and (3.15) follows from the demicom-
+pactness assumption.
+
+Remark 3.5 A special case of Corollary 3.4 appears in [41]. It corresponds to the scenario in which
+H is finite-dimensional, T is firmly nonexpansive, and, for every n ∈ N, λn = 1, an = 0, and
+only one block is activated as in Remark 3.3(ii). Let us also note that a renorming similar to that
+performed in (3.4) was employed in [49].
+
+   Next, we consider the construction of a fixed point of a family of averaged operators.
+
+Definition 3.6 Let T : H → H be nonexpansive and let α ∈ ]0, 1[. Then T is averaged with constant
+α, or α-averaged, if there exists a nonexpansive operator R : H → H such that T = (1 − α)Id + αR.
+
+                                                        11
+Proposition 3.7 [7, Proposition 4.25] Let T : H → H be nonexpansive and let α ∈ ]0, 1[. Then T is
+                                                                   1−α
+α-averaged if and only if (∀x ∈ H)(∀y ∈ H) kTx − Tyk2 ⩽ kx − yk2 −     k(Id − T)x − (Id − T)yk2 .
+                                                                    α
+Corollary 3.8 Let χ ∈ ]0, 1[, let (αn )n∈N be a sequence in ]0, 1[, and set D = {0, 1}m r {0}. For
+every n ∈ N, let λn ∈ [χ/αn , (1 − χ)/αn ] and let Tn : H → H : x 7→ (Ti,n x)1⩽i⩽m be an αn -averaged
+operator, where, for every i ∈ {1, . . . , m}, Ti,n : H → Hi . Furthermore, let x0 and (an )n∈N be H-valued
+random variables, and let (εn )n∈N be identically distributed D-valued random variables. Iterate
+
+        n = 0, 1, . . .
+       for
+           i = 1, . . . , m
+          for                                                                                      (3.17)
+            xi,n+1 = xi,n + εi,n λn Ti,n (x1,n , . . . , xm,n ) + ai,n − xi,n ,
+
+                                                                    b ∈ F such that P( b
+and set (∀n ∈ N) En = σ(εn ). Furthermore, assume that there exists Ω                 Ω) = 1 and
+the following hold:
+          T
+  (i) F = n∈N Fix Tn 6= ∅.
+      P        p
+             −1 E(ka k2 | X ) < +∞.
+ (ii)   n∈N αn        n    n
+
+(iii) For every n ∈ N, En and Xn are independent.
+
+(iv) (∀i ∈ {1, . . . , m}) P[εi,0 = 1] > 0.
+                h                                         i
+            b α−1 Tn xn (ω) − xn (ω) → 0 ⇒ W(xn (ω))n∈N ⊂ F .
+ (v) (∀ω ∈ Ω)        n
+
+
+Then (xn )n∈N converges weakly P-a.s. to an F-valued random variable x. If, in addition,
+                 h                                                                           i
+(vi) (∀ω ∈ b
+           Ω)         supn∈N kxn (ω)k < +∞ and α−1
+                                                n  T x
+                                                    n n (ω) − xn (ω)  → 0   ⇒ S(x n (ω))n∈N 6
+                                                                                            = ∅   ,
+
+then (xn )n∈N converges strongly P-a.s. to x.
+Proof. Set (∀n ∈ N) Rn = (1 − α−1           −1                                           −1       −1
+                                   n )Id + αn Tn and (∀i ∈ {1, . . . , m}) Ri,n = (1 − αn )Id + αn Ti,n .
+                                                    −1
+Moreover, set (∀n ∈ N) µn = αn λn and bn = αn an . Then (∀n ∈ N) Fix Rn = Fix Tn and Rn is
+nonexpansive. In addition, we derive from (3.17) that
+                                                                                 
+      (∀n ∈ N)(∀i ∈ {1, . . . , m}) xi,n+1 = xi,n + εi,n µn Ri,n xn + bi,n − xi,n .               (3.18)
+                                       P     p                   P          p
+Since (µn )n∈N lies in [χ, 1 − χ] and n∈N E(kbn k2 | Xn ) = n∈N α−1       n    E(kan k2 | Xn ) < +∞, the
+result follows from Theorem 3.2 and Remark 3.3(iii).
+
+Remark 3.9 In the special case of a single-block (i.e., m = 1) and of deterministic errors, Corol-
+lary 3.8 reduces to a scenario found in [22, Theorem 4.2].
+
+
+
+4 Double-layer random block-coordinate fixed point algorithms
+
+The algorithm analyzed in this section comprises two successive applications of nonexpansive oper-
+ators at each iteration. We recall that Notation 3.1 is in force.
+
+                                                        12
+Theorem 4.1 Let (αn )n∈N and (βn )n∈N be sequences in ]0, 1[ such that supn∈N αn < 1 and
+supn∈N βn < 1, let (λn )n∈N be a sequence in ]0, 1] such that inf n∈N λn > 0, and set D = {0, 1}m r {0}.
+Let x0 , (an )n∈N , and (bn )n∈N be H-valued random variables, and let (εn )n∈N be identically dis-
+tributed D-valued random variables. For every n ∈ N, let Rn : H → H be βn -averaged and let
+Tn : H → H : x 7→ (Ti,n x)1⩽i⩽m be αn -averaged, where, (∀i ∈ {1, . . . , m}) Ti,n : H → Hi . Iterate
+
+            n = 0, 1, . . .
+           for
+            y n = Rn xn + bn
+                                                                                                 (4.1)
+            for i = 1, . . . , m
+                                                             
+                xi,n+1 = xi,n + εi,n λn Ti,n y n + ai,n − xi,n ,
+and set (∀n ∈ N) En = σ(εn ). In addition, assume that the following hold:
+          T
+  (i) F = n∈N Fix (Tn ◦ Rn ) 6= ∅.
+      P     p                         P   p
+ (ii)   n∈N   E(kan k2 | Xn ) < +∞ and n∈N E(kbn k2 | Xn ) < +∞.
+(iii) For every n ∈ N, En and Xn are independent.
+(iv) (∀i ∈ {1, . . . , m}) pi = P[εi,0 = 1] > 0.
+
+Then
+                                                 
+           (∀z ∈ F) Tn (Rn xn ) − Rn xn + Rn z → z P-a.s.                                         (4.2)
+and
+                                        
+           (∀z ∈ F) xn − Rn xn + Rn z → z P-a.s.                                                  (4.3)
+Furthermore, suppose that:
+
+ (v) W(xn )n∈N ⊂ F P-a.s.
+
+Then (xn )n∈N converges weakly P-a.s. to an F-valued random variable x. If, in addition,
+
+(vi) S(xn )n∈N 6= ∅ P-a.s.,
+
+then (xn )n∈N converges strongly P-a.s. to x.
+Proof. Let us prove that the result is an application of Theorem 2.5 in the renormed Hilbert space
+(H, ||| · |||), where ||| · ||| is defined in (3.4). Note that
+                                           1
+       (∀x ∈ H) kxk2 ⩽ |||x|||2 ⩽               kxk2                                              (4.4)
+                                         min pi
+                                        1⩽i⩽m
+
+and that, since the operators (Rn ◦ Tn )n∈N are nonexpansive, the sets (Fix (Tn ◦ Rn ))n∈N are closed
+[7, Corollary 4.15], and so is F. Next, for every n ∈ N, set r n = Rn xn , and define tn , cn , dn , and
+en coordinate-wise by
+                            
+                            ti,n = xi,n + εi,n (Ti,n r n − xi,n )
+                            
+      (∀i ∈ {1, . . . , m})   ci,n = εi,n ai,n                     and ei,n = ci,n + di,n .        (4.5)
+                            
+                            
+                              di,n = εi,n (Ti,n y n − Ti,n r n )
+
+
+                                                         13
+Then (4.1) implies that
+                                          
+      (∀n ∈ N) xn+1 = xn + λn tn + en − xn .                                                                                 (4.6)
+
+On the other hand, we derive from (4.5) that
+                p                      p                     p
+     (∀n ∈ N)     E(|||en |||2 | Xn ) ⩽ E(|||cn |||2 | Xn ) + E(|||dn |||2 | Xn )
+                                       p                     p
+                                      ⩽ E(|||an |||2 | Xn ) + E(|||dn |||2 | Xn ).                                           (4.7)
+
+However, it follows from (4.5), (4.4), and the nonexpansiveness of the operators (Tn )n∈N that
+                                                           X
+                                                            m                                   
+                                                     1
+      (∀n ∈ N) E(|||dn |||2 | Xn ) ⩽                      E   kεi,n (Ti,n y n − Ti,n r n )k2 Xn
+                                                   min pi
+                                                  1⩽i⩽m         i=1
+                                                 1
+                                             ⩽        E(kTn y n − Tn r n k2 | Xn )
+                                               min pi
+                                                  1⩽i⩽m
+                                                     1
+                                             ⩽            E(ky n − r n k2 | Xn )
+                                                   min pi
+                                                  1⩽i⩽m
+                                                     1
+                                             =            E(kbn k2 | Xn ).                                                   (4.8)
+                                                   min pi
+                                                  1⩽i⩽m
+
+Consequently (4.4), (4.7), and (ii) yield
+      X                                                    X                                  Xp                       
+                 p                                1                p
+            λn       E(|||en   |||2 | X   n) ⩽      √                  E(kan   k2 | X   n) +         E(kbn   k2 | X   n)
+                                               min pi
+      n∈N                                     1⩽i⩽m          n∈N                               n∈N
+
+                                            < +∞.                                                                            (4.9)
+
+Now let z ∈ F, and set
+
+      (∀n ∈ N)(∀i ∈ {1, . . . , m})              qi,n : H × D → R : (x, ǫ) 7→ kxi − zi + ǫi (Ti,n (Rn x) − xi )k2 . (4.10)
+
+Observe that, for every n ∈ N and every i ∈ {1, . . . , m}, by continuity of Rn and Ti,n , Ti,n ◦ Rn is
+measurable, and the functions (qi,n (·, ǫ))ǫ∈D are therefore likewise. Consequently, using (iv) and
+arguing as in (3.9) leads to
+
+      (∀n ∈ N)(∀i ∈ {1, . . . , m})              E(kti,n − zi k2 | Xn )
+                                                               X
+                                                           =        E(qi,n (xn , ǫ)1[εn =ǫ] | Xn )
+                                                                ǫ∈D
+                                                                X
+                                                            =         P[εn = ǫ]kxi,n − zi + ǫi (Ti,n r n − xi,n )k2 .       (4.11)
+                                                                ǫ∈D
+
+
+
+
+                                                                   14
+Hence, recalling (3.4) and (iv), we obtain
+
+   (∀n ∈ N) E(|||tn − z|||2 | Xn )
+        Xm
+           1
+      =       E(kti,n − zi k2 | Xn )
+           pi
+            i=1
+            m
+            X 1 X
+        =                    P[εn = ǫ]kxi,n − zi + ǫi (Ti,n r n − xi,n )k2
+                  pi
+            i=1        ǫ∈D
+                                                                                                        
+            m
+            X                X                                           X
+              1
+        =                             P[εn = ǫ] kTi,n r n − zi k2 +               P[εn = ǫ] kxi,n − zi k2 
+                  pi
+            i=1            ǫ∈D,ǫi =1                                   ǫ∈D,ǫi =0
+                                  m
+                                  X      1 − pi
+        = kTn r n − zk2 +                       kxi,n − zi k2
+                                           pi
+                                   i=1
+        = |||xn − z||| + kTn r n − zk2 − kxn − zk2 .
+                             2
+                                                                                                               (4.12)
+
+However, we deduce from (i) and Proposition 3.7 that
+                                              1 − αn
+     (∀n ∈ N) kTn r n − zk2 +                        kr n − Tn r n − Rn z + zk2 ⩽ kr n − Rn zk2 .              (4.13)
+                                                αn
+Combining (4.12) with (4.13) yields
+
+                                                     1 − αn
+     (∀n ∈ N) E(|||tn − z|||2 | Xn ) +                      kr n − Tn r n − Rn z + zk2
+                                                       αn
+                                                          ⩽ |||xn − z|||2 + kRn xn − Rn zk2 − kxn − zk2 . (4.14)
+
+Now set χ = min{1/supk∈N αk , 1/supk∈N βk } − 1. Then χ ∈ ]0, +∞[ and since, for every n ∈ N, Rn
+is βn -averaged, Proposition 3.7 and (4.14) yield
+
+     (∀n ∈ N) E(|||tn − z|||2 | Xn ) + θn (z) ⩽ |||xn − z|||2 ,                                                (4.15)
+
+where
+                                                                            
+     (∀n ∈ N) θn (z) = χ kr n − Tn rn − Rn z + zk2 + kxn − r n − z + Rn zk2                                    (4.16)
+                       1 − αn                              1 − βn
+                     ⩽        kr n − Tn r n − Rn z + zk2 +        kxn − r n − z + Rn zk2 .                     (4.17)
+                         αn                                  βn
+We have thus shown that properties (i)–(iii) of Theorem 2.5 hold with (∀n ∈ N) µn = νn = 0. Next,
+let Z be a countable set which is dense in F. Then (2.14) asserts that
+                                                          X
+      (∀z ∈ Z)(∃ Ωz ∈ F) P(Ωz ) = 1 and (∀ω ∈ Ωz )            λn θn (z, ω) < +∞.           (4.18)
+                                                                              n∈N
+
+                    e =T
+Moreover, the event Ω                                          e
+                            z∈Z Ωz is almost certain, i.e., P(Ω) = 1. Now fix z ∈ F. By density, we
+can extract from Z a sequence (zk )k∈N such that zk → z. In turn, since inf n∈N λn > 0, we derive
+from (4.16) and (4.18) that
+                         (
+                            r n (ω) − Tn r n (ω) − Rn zk + zk → 0
+     (∀k ∈ N)(∀ω ∈ eΩ)                                                                      (4.19)
+                            xn (ω) − r n (ω) − zk + Rn zk → 0.
+
+                                                                15
+                    p
+Now set ζ = supn∈N βn /(1 − βn ), and (∀n ∈ N) Sn = Id − Rn and pn = r n − Tn r n . Then it follows
+from Proposition 3.7 that the operators (Sn )n∈N are ζ-Lipschitzian. Consequently
+
+     (∀k ∈ N)(∀n ∈ N)(∀ω ∈ e
+                           Ω)        − ζkzk − zk ⩽ −kSn zk − Sn zk
+                         ⩽ kpn (ω) + Sn zk − kpn (ω) + Sn zk k ⩽ kSn zk − Sn zk ⩽ ζkzk − zk (4.20)
+
+and, therefore, (4.19) yields
+
+     (∀k ∈ N)    − ζkzk − zk ⩽ lim kpn (ω) + Sn zk − lim kpn (ω) + Sn zk k
+                                  n→+∞                   n→+∞
+
+                                = lim kpn (ω) + Sn zk
+                                  n→+∞
+                                ⩽ lim kpn (ω) + Sn zk
+                                  n→+∞
+                                ⩽ lim kpn (ω) + Sn zk − lim kpn (ω) + Sn zk k
+                                  n→+∞                   n→+∞
+                                ⩽ ζkzk − zk.                                                   (4.21)
+
+Since kzk − zk → 0 and P(Ω)e = 1, we obtain pn + Sn z → 0 P-a.s., which proves (4.2). Likewise, set
+(∀n ∈ N) q n = xn −r n . Then, proceeding as in (4.21), (4.19) yields q n +Sn z → 0, which establishes
+(4.3). Finally, the weak and strong convergence claims follow from (v), (vi), and Theorem 2.5.
+
+Remark 4.2
+
+  (i) Consider the special case when only one-block is present (m = 1) and when the error se-
+      quences (an )n∈N and (bn )n∈N , as well as x0 , are deterministic. Then the setting of Theo-
+      rem 4.1 is found in [22, Theorem 6.3]. Our framework therefore makes it possible to design
+      block-coordinate versions of the algorithms which comply with the two-layer format of [22,
+      Theorem 6.3], such as the forward-backward algorithm [22] or the algorithms of [14] and
+      [56]. Theorem 4.1 will be applied to block-coordinate forward-backward splitting in Sec-
+      tion 5.2.
+
+ (ii) Theorem 4.1(v) gives a condition for the P-a.s. weak convergence of a sequence (xn )n∈N
+      produced by algorithm 4.1 to a solution x. In infinite-dimensional spaces, examples have been
+      constructed for which the convergence is only weak and not strong, i.e., (kxn − xk)n∈N does
+      not converge to 0 P-a.s. [29, 40]. Even if, as in Theorem 4.1(vi), (kxn − xk)n∈N does converge
+      to 0 P-a.s., there is in general no theoretical upper bound on the worst-case behavior of the
+      rate of convergence, which can be arbitrarily slow [9]. The latter behavior is also possible in
+      Euclidean spaces [8, 65].
+
+
+
+5 Applications to operator splitting
+
+Let A : H → 2H be a set-valued operator and let A−1 be its inverse, i.e., (∀(x, u) ∈ H2 ) x ∈ A−1 u ⇔
+u ∈ Ax. The resolvent of A isJA = (Id + A)−1 . The domain of A is dom A = x ∈ H Ax 6= ∅
+and the graph of A is gra A = (x, u) ∈ H × H u ∈ Ax . If A is monotone, then JA is single-valued
+and nonexpansive and, furthermore, if A is maximally monotone, then dom JA = H. We denote by
+
+
+                                                 16
+Γ0 (H) the class of lower semicontinuous convex functions f : H → ]−∞, +∞] such that f 6≡ +∞.
+The Moreau subdifferential of f ∈ Γ0 (H) is the maximally monotone operator
+                        
+      ∂f : H → 2H : x 7→ u ∈ H (∀y ∈ H) hy − x | ui + f(x) ⩽ f(y) .                       (5.1)
+
+For every x ∈ H, f + kx − ·k2 /2 has a unique minimizer, which is denoted by proxf x [47]. We have
+
+        proxf = J∂f .                                                                                              (5.2)
+
+For background on convex analysis and monotone operator theory, see [7]. We continue to use the
+standing Notation 3.1.
+
+
+5.1 Random block-coordinate Douglas-Rachford splitting
+
+We propose a random sweeping, block-coordinate version of the Douglas-Rachford algorithm with
+stochastic errors. The purpose of this algorithm is to construct iteratively a zero of the sum of
+two maximally monotone operators and it has found applications in numerous areas; see, e.g.,
+[7, 11, 13, 24, 27, 32, 38, 43, 51, 52, 53].
+
+Proposition 5.1 Set D = {0, 1}m r {0} and, for every i ∈ {1, . . . , m}, let Ai : Hi → 2Hi be maximally
+monotone and let Bi : H → 2Hi . Suppose that B : H → 2H : x 7→ ×m    i=1 Bi x is maximally monotone and
+that the set F of solutions to the problem
+
+        find x1 ∈ H1 , . . . , xm ∈ Hm such that (∀i ∈ {1, . . . , m})         0 ∈ Ai xi + Bi (x1 , . . . , xm )   (5.3)
+                                      m
+is nonempty. Set B−1 : u 7→ ×i=1 Ci u where, for every i ∈ {1, . . . , m}, Ci : H → 2Hi . We also consider
+the set F∗ of solutions to the dual problem
+
+    find u1 ∈ H1 , . . . , um ∈ Hm such that (∀i ∈ {1, . . . , m}) 0 ∈ −A−1
+                                                                         i (−ui ) + Ci (u1 , . . . , um ). (5.4)
+
+Let γ ∈ ]0, +∞[, let (µn )n∈N be a sequence in ]0, 2[ such that inf n∈N µn > 0 and supn∈N µn < 2, let
+x0 , z 0 , (an )n∈N , and (bn )n∈N be H-valued random variables, and let (εn )n∈N be identically distributed
+D-valued random variables. Set JγB : x 7→ (Qi x)1⩽i⩽m where, for every i ∈ {1, . . . , m}, Qi : H → Hi ,
+iterate
+
+          n = 0, 1, . . .
+         for
+          for i = 1, . . . , m
+          $                                                               
+             zi,n+1 = zi,n + εi,n Qi (x1,n , . . . , xm,n ) + bi,n − zi,n                                         (5.5)
+                                                                               
+                  xi,n+1 = xi,n + εi,n µn JγAi (2zi,n+1 − xi,n ) + ai,n − zi,n+1 ,
+
+and set (∀n ∈ N) En = σ(εn ). Assume that the following hold:
+
+        P         p                              P         p
+  (i)       n∈N       E(kan k2 | Xn ) < +∞ and       n∈N       E(kbn k2 | Xn ) < +∞.
+
+ (ii) For every n ∈ N, En and Xn are independent.
+
+(iii) (∀i ∈ {1, . . . , m}) pi = P[εi,0 = 1] > 0.
+
+
+
+                                                           17
+Then (xn )n∈N converges weakly P-a.s. to a H-valued random variable x such that z = JγB x is an
+F-valued random variable and u = γ −1 (x − z) is an F∗ -valued random variable. Furthermore, suppose
+that:
+
+(iv) JγB is weakly sequentially continuous and bn ⇀ 0 P-a.s.
+
+Then z n ⇀ z P-a.s. and γ −1 (xn − z n ) ⇀ u P-a.s.
+                                  m
+Proof. Set A : H → 2H : x 7→ ×i=1 Ai xi and (∀i ∈ {1, . . . , m}) Ti = (2JγAi − Id ) ◦ (2Qi − Id ). Then
+T = (2JγA − Id ) ◦ (2JγB − Id ) is nonexpansive as the composition of two nonexpansive operators
+[7, Corollary 23.10(ii)]. Furthermore Fix T 6= ∅ since [22, Lemma 2.6(iii)]
+
+      JγB (Fix T) = zer (A + B) = F 6= ∅.                                                           (5.6)
+
+Now set
+                                                                                       
+ (∀n ∈ N) λn = µn /2       and en = 2 JγA (2JγB xn +2bn −xn )−JγA (2JγB xn −xn )+an −bn . (5.7)
+
+Then we derive from (5.5) that
+                                                                                                        
+      (∀n ∈ N)(∀i ∈ {1, . . . , m})   xi,n+1 = xi,n + εi,n µn JγAi 2Qi xn + 2bi,n − xi,n + ai,n − zi,n+1
+                                                                                                 
+                                             = xi,n + εi,n λn 2JγAi 2Qi xn − xi,n + ei,n − 2Qi xn
+                                                                                 
+                                             = xi,n + εi,n λn Ti xn + ei,n − xi,n ,                  (5.8)
+
+which is precisely the iteration process (3.16). Furthermore, we infer from (5.7) and the nonexpan-
+siveness of JγA [7, Corollary 23.10(i)] that
+
+      (∀n ∈ N) ken k2 ⩽ 4kJγA (2JγB xn + 2bn − xn ) − JγA (2JγB xn − xn ) + an − bn k2
+                                                                                                   
+                         ⩽ 12 kJγA (2JγB xn + 2bn − xn ) − JγA (2JγB xn − xn )k2 + kan k2 + kbn k2
+                                               
+                         ⩽ 12 kan k2 + 5kbn k2                                                   (5.9)
+
+and therefore that
+                 p                    √ p                 √ p               
+     (∀n ∈ N)      E(ken k2 | Xn ) ⩽ 2 3  E(kan k2 | Xn ) + 5 E(kbn k2 | Xn ) .                    (5.10)
+                                 P       p
+Thus, we deduce from (i) that n∈N E(ken k2 | Xn ) < +∞. Altogether, the almost sure weak
+convergence of (xn )n∈N to a (Fix T)-valued random variable x follows from Corollary 3.4. In turn,
+(5.6) asserts that z = JγB x ∈ F P-a.s. Now set u = γ −1 (x − z). Then, P-a.s.,
+
+      z = JγB x ⇔ x − z ∈ γBz ⇔ z ∈ B−1 u                                                          (5.11)
+
+and
+
+      x ∈ Fix T ⇔ x = (2JγA − Id )(2z − x)
+                  ⇔ z = JγA (2z − x)
+                  ⇔ z − x ∈ γAz
+                  ⇔ −z ∈ −A−1 (−u).                                                                (5.12)
+
+
+                                                    18
+These imply that 0 ∈ −A−1 (−u) + B−1 u P-a.s., i.e., that u ∈ F∗ P-a.s. Finally, assume that (iv)
+holds. Then there exists e   Ω ∈ F such that P( e Ω) = 1 and (∀ω ∈ e   Ω) JγB xn (ω) ⇀ JγB x(ω) = z(ω).
+Now let i ∈ {1, . . . , m}, ω ∈ e
+                                Ω, and v ∈ H. Then hQi xn (ω) | vi i → hzi (ω) | vi i and (5.5) yields
+                                                                                                                    
+   (∀n ∈ N) hzi,n+1 (ω) | vi i = hzi,n (ω) | vi i + εi,n (ω) hQi xn (ω) | vi i + hbi,n (ω) | vi i − hzi,n (ω) | vi i .
+                                                                                                                           (5.13)
+However, according to (iii), at the expense of possibly taking ω in a smaller almost sure event,
+εi,n (ω) = 1 infinitely often. Hence, there exists a monotone sequence (kn )n∈N in N such that
+kn → +∞ and, for n ∈ N sufficiently large,
+      hzi,n+1 (ω) | vi i = hQi xkn (ω) | vi i + hbi,kn (ω) | vi i.                                                         (5.14)
+                                 hzi (ω) | vi i and hbi,kn (ω) | vi i → 0, hzi,n+1 (ω) − zi (ω) | vi i → 0.
+Thus, since hQi xkn (ω) | vi i → P
+Hence, hz n+1 (ω) − z(ω) | vi = m  i=1 hzi,n+1 (ω) − zi (ω) | vi i → 0. This shows that z n ⇀ z P-a.s.,
+which allows us to conclude that γ −1 (xn − z n ) ⇀ u P-a.s.
+
+Remark 5.2 Let us make some connections between Proposition 5.1 and existing results.
+
+  (i) In the standard case of a single block (m = 1) and when all the variables are deterministic,
+      the above primal convergence result goes back to [32] and to [43] in the unrelaxed case.
+ (ii) In minimization problems, the alternating direction method of multipliers (ADMM) is strongly
+      related to an application of the Douglas-Rachford algorithm to the dual problem [38]. This
+      connection can be used to construct a random block-coordinate ADMM algorithm. Let us note
+      that such an algorithm was recently proposed in [41] in a finite-dimensional setting, where
+      single-block, unrelaxed, and error-free iterations were used.
+
+   Next, we apply Proposition 5.1 to devise a primal-dual block-coordinate algorithm for solving a
+class of structured inclusion problems investigated in [25].
+
+Corollary 5.3 Set D = {0, 1}m+p r {0}, let (Gk )1⩽k⩽p be separable real Hilbert spaces, and set G =
+G1 ⊕ · · · ⊕ Gp . For every i ∈ {1, . . . , m}, let Ai : Hi → 2Hi be maximally monotone and, for every
+k ∈ {1, . . . , p}, let Bk : Gk → 2Gk be maximally monotone, and let Lki : Hi → Gk be linear and
+bounded. It is assumed that the set F of solutions to the problem
+                                                                              p
+                                                                              X         m
+                                                                                        X        
+                                                                                 ∗
+   find x1 ∈ H1 , . . . , xm ∈ Hm such that (∀i ∈ {1, . . . , m}) 0 ∈ Ai xi +   Lki Bk     Lkj xj (5.15)
+                                                                                    k=1              j=1
+
+is nonempty. We also consider the set F∗ of solutions to the dual problem
+                                                                             m
+                                                                             X                      p
+                                                                                                     X               
+      find v1 ∈ G1 , . . . , vp ∈ Gp such that (∀k ∈ {1, . . . , p}) 0 ∈ −         Lki A−1
+                                                                                        i        −         L∗li vl       + B−1
+                                                                                                                            k vk .
+                                                                             i=1                     l=1
+                                                                                                                           (5.16)
+Let γ ∈ ]0, +∞[, let (µn )n∈N be a sequence in ]0, 2[ such that inf n∈N µn > 0 and supn∈N µn < 2, let
+x0 , z 0 , (an )n∈N , and (cn )n∈N be H-valued random variables, let y 0 , w0 , (bn )n∈N , and (dn )n∈N be
+G-valued random variables, and let (εn )n∈N be identically distributed D-valued random variables. Set
+             (                                                                     m
+                                                                                           )
+                                                                                   X
+       V = (x1 , . . . , xm , y1 , . . . , yp ) ∈ H ⊕ G (∀k ∈ {1, . . . , p}) yk =   Lki xi ,       (5.17)
+                                                                                   i=1
+
+
+                                                          19
+let PV : x 7→ (Qj x)1⩽j⩽m+p be its projection operator, where (∀i ∈ {1, . . . , m}) Qi : H ⊕ G → Hi and
+(∀k ∈ {1, . . . , p}) Qm+k : H ⊕ G → Gk , iterate
+
+          n = 0, 1, . . .
+         for
+          for i = 1, . . . , m
+          $                                                                                     
+             zi,n+1 = zi,n + εi,n Qi (x1,n , . . . , xm,n , y1,n , . . . , yp,n ) + ci,n − zi,n
+                                                                                        
+         
+             xi,n+1 = xi,n + εi,n µn JγAi (2zi,n+1 − xi,n ) + ai,n − zi,n+1                             (5.18)
+         
+          for k = 1, . . . , p
+          $                                                                                         
+             wk,n+1 = wk,n + εm+k,n Qm+k (x1,n , . . . , xm,n , y1,n , . . . , yp,n ) + dk,n − wk,n
+                                                                                               
+              yk,n+1 = yk,n + εm+k,n µn JγBk (2wk,n+1 − yk,n ) + bk,n − wk,n+1 ,
+
+and set (∀n ∈ N) Yn = σ(xj , y j )0⩽j⩽n and En = σ(εn ). In addition, assume that the following hold:
+
+        P     p                        P     p                       P     p
+  (i)     n∈N   E(kan k2 | Yn ) < +∞,    n∈N   E(kbn k2 | Yn ) < +∞,   n∈N   E(kcn k2 | Yn ) < +∞,
+        P     p
+          n∈N   E(kdn k2 | Yn ) < +∞, cn ⇀ 0 P-a.s., and dn ⇀ 0 P-a.s.
+
+ (ii) For every n ∈ N, En and Yn are independent.
+
+(iii) (∀j ∈ {1, . . . , m + p}) P[εj,0 = 1] > 0.
+
+Then (z n )n∈N converges weakly P-a.s. to an F-valued random variable, and (γ −1 (wn − y n ))n∈N con-
+verges weakly P-a.s. to an F∗ -valued random variable.
+              : H → 2 : x 7→ ×i=1 Ai xi , B : G → 2 : y 7→ ×k=1 Bk yk , and L : H → G : x 7→
+                         H          m               G        p
+ Pm Set A
+Proof.
+   i=1 Lki xi 1⩽k⩽p . Furthermore, let us introduce
+                                                                       
+        K = H ⊕ G,      C : K → 2K : (x, y) 7→ Ax × By,         and V = (x, y) ∈ K Lx = y .              (5.19)
+
+Then the primal-dual problem (5.15)–(5.16) can be rewritten as
+                               (
+                                 0 ∈ Ax + L∗ BLx
+     find (x, v) ∈ K such that                                                                           (5.20)
+                                 0 ∈ −LA−1 (−L∗ v) + B−1 v.
+
+The normal cone operator to V is [7, Example 6.42]
+                             (
+                              V⊥ , if Lx = y;             
+     NV : K → 2K : (x, y) 7→                    where V⊥ = (u, v) ∈ K u = −L∗ v .                        (5.21)
+                              ∅,    if Lx 6= y,
+
+Now let (x, y) ∈ K. Then
+                                              (
+                                                  (x, y) ∈ V
+        (0, 0) ∈ C(x, y) + NV (x, y) ⇔
+                                                  (0, 0) ∈ (Ax × By) + V⊥
+                                              (
+                                                  Lx = y
+                                        ⇔
+                                                  (∃ u ∈ Ax)(∃ v ∈ By) u = −L∗ v
+                                        ⇒ (∃ v ∈ B(Lx)) − L∗ v ∈ Ax
+                                        ⇒ (∃ v ∈ G) L∗ v ∈ L∗ BLx and − L∗ v ∈ Ax
+                                        ⇔ x solves (5.15).                                               (5.22)
+
+                                                         20
+Since C and NV are maximally monotone, it follows from [7, Proposition 23.16] that the iteration
+process (5.18) is an instance of (5.5) for finding a zero of C + NV in K. The associated dual problem
+consists of finding a zero of −C−1 (−·) + N−1 V . Let (u, v) ∈ K. Then (5.21) yields
+
+
+      (0, 0) ∈ −C−1 (−u, −v) + N−1                     −1
+                                V (u, v) ⇔ (0, 0) ∈ −C (−u, −v) + NV⊥ (u, v)
+                                           (
+                                             (u, v) ∈ V⊥
+                                         ⇔                                   
+                                             (0, 0) ∈ − A−1 (−u) × −B−1 (−v) + V
+                                           (
+                                             u = −L∗ v
+                                         ⇔
+                                             (∃ x ∈ −A−1 (−u))(∃ y ∈ −B−1 (−v)) Lx = y
+                                                    ⇒ (∃ x ∈ −A−1 (L∗ v)) Lx ∈ −B−1 (−v)
+                                                    ⇒ (∃ x ∈ H) Lx ∈ −LA−1 (L∗ v)) and − Lx ∈ B−1 (−v)
+                                                    ⇔ −v solves (5.16).                                        (5.23)
+
+The convergence result therefore follows from Proposition 5.1 using (5.22), (5.23), and the weak
+continuity of PV = JγNV [7, Proposition 28.11(i)].
+
+Remark 5.4 The parametrization (5.19) made it possible to reduce the structured primal-dual
+problem (5.15)–(5.16) to a basic two-operator inclusion, to which the block-coordinate Douglas-
+Rachford algorithm (5.5) could be applied. A similar parametrization was used in [1] in a different
+context. We also note that, at each iteration of Algorithm (5.18), components of the projector PV
+need to be activated. This operator is expressed as
+                      
+      ∀(x, y) ∈ H ⊕ G PV : (x, y) 7→ (t, Lt) = (x − L∗ s, y + s)                            (5.24)
+where t = (Id + L∗ L)−1 (x + L∗ y) and s = (Id + LL∗ )−1 (Lx − y) [1, Lemma 3.1]. This formula allows
+us to compute the components of PV , which is especially simple when Id + L∗ L or Id + LL∗ is easily
+inverted.
+
+   The previous result leads to a random block-coordinate primal-dual proximal algorithm for solv-
+ing a wide range of structured convex optimization problems.
+
+Corollary 5.5 Set D = {0, 1}m+p r {0}, let (Gk )1⩽k⩽p be separable real Hilbert spaces, and set G =
+G1 ⊕ · · · ⊕ Gp . For every i ∈ {1, . . . , m}, let fi ∈ Γ0 (Hi ) and, for every k ∈ {1, . . . , p}, let gk ∈ Γ0 (Gk ),
+and let Lki : Hi → Gk be linear and bounded. It is assumed that there exists (x1 , . . . , xm ) ∈ H such that
+                                              X p           m
+                                                             X          
+                                                     ∗
+      (∀i ∈ {1, . . . , m}) 0 ∈ ∂fi (xi ) +        Lki ∂gk        Lkj xj .                                     (5.25)
+                                              k=1           j=1
+
+Let F be the set of solutions to the problem
+                        Xm             p
+                                       X    X
+                                             m        
+        minimize            fi (xi ) +   gk    Lki xi                                                          (5.26)
+      x1 ∈H1 ,...,xm ∈Hm
+                            i=1        k=1       i=1
+
+and let F∗ be the set of solutions to the dual problem
+                      Xm      X  p         X  p
+        minimize           ∗
+                          fi −         ∗
+                                     Lki vk +      gk∗ (vk ).                                                  (5.27)
+      v1 ∈G1 ,...,vp ∈Gp
+                           i=1     k=1              k=1
+
+
+                                                          21
+Let γ ∈ ]0, +∞[, let (µn )n∈N be a sequence in ]0, 2[ such that inf n∈N µn > 0 and supn∈N µn < 2,
+let x0 , z 0 , (an )n∈N , and (cn )n∈N be H-valued random variables, let y 0 , w 0 , (bn )n∈N , and (dn )n∈N
+be G-valued random variables, and let (εn )n∈N be identically distributed D-valued random variables.
+Define V as in (5.17) and set PV : x 7→ (Qj x)1⩽j⩽m+p where (∀i ∈ {1, . . . , m}) Qi : H ⊕ G → Hi and
+(∀k ∈ {1, . . . , p}) Qm+k : H ⊕ G → Gk , and iterate
+
+        n = 0, 1, . . .
+       for
+        for i = 1, . . . , m
+        $                                                                                     
+           zi,n+1 = zi,n + εi,n Qi (x1,n , . . . , xm,n , y1,n , . . . , yp,n ) + ci,n − zi,n
+                                                                                        
+       
+           xi,n+1 = xi,n + εi,n µn proxγfi (2zi,n+1 − xi,n ) + ai,n − zi,n+1                          (5.28)
+       
+        for k = 1, . . . , p
+        $                                                                                         
+           wk,n+1 = wk,n + εm+k,n Qm+k (x1,n , . . . , xm,n , y1,n , . . . , yp,n ) + dk,n − wk,n
+                                                                                                
+            yk,n+1 = yk,n + εm+k,n µn proxγgk (2wk,n+1 − yk,n ) + bk,n − wk,n+1 .
+
+In addition, assume that conditions (i)–(iii) of Corollary 5.3 are satisfied. Then (z n )n∈N converges
+weakly P-a.s. to an F-valued random variable, and (γ −1 (wn − y n ))n∈N converges weakly P-a.s. to an
+F∗ -valued random variable.
+Proof. Using the same arguments as in [25, Proposition 5.4] one sees that this is an application of
+Corollary 5.3 with, for every i ∈ {1, . . . , m}, Ai = ∂fi and, for every k ∈ {1, . . . , p}, Bk = ∂gk .
+
+Remark 5.6 Sufficient conditions for (5.25) to hold are provided in [25, Proposition 5.3].
+
+
+5.2 Random block-coordinate forward-backward splitting
+
+The forward-backward algorithm addresses the problem of finding a zero of the sum of two
+maximally monotone operators, one of which has a strongly monotone inverse (see [2, 22] for
+historical background). It has been applied to a wide variety of problems among which me-
+chanics, partial differential equations, best approximation, evolution inclusions, signal and image
+processing, convex optimization, learning theory, inverse problems, statistics, and game theory
+[2, 7, 16, 17, 22, 27, 29, 31, 39, 46, 61, 62, 63]. In this section we design a block-coordinate
+version of this algorithm with random sweeping and stochastic errors.
+
+Definition 5.7 [2, Definition 2.3] An operator A : H → 2H is demiregular at x ∈ dom A if, for every
+sequence ((xn , un ))n∈N in gra A and every u ∈ Ax such that xn ⇀ x and un → u, we have xn → x.
+
+Lemma 5.8 [2, Proposition 2.4] Let A : H → 2H be monotone and suppose that x ∈ dom A. Then A is
+demiregular at x in each of the following cases:
+
+  (i) A is uniformly monotone at x, i.e., there exists an increasing function θ : [0, +∞[ → [0, +∞] that
+      vanishes only at 0 such that (∀u ∈ Ax)(∀(y, v) ∈ gra A) hx − y | u − vi ⩾ θ(kx − yk).
+
+ (ii) A is strongly monotone, i.e., there exists α ∈ ]0, +∞[ such that A − αId is monotone.
+
+(iii) JA is compact, i.e., for every bounded set C ⊂ H, the closure of JA (C) is compact. In particular,
+      dom A is boundedly relatively compact, i.e., the intersection of its closure with every closed ball is
+      compact.
+
+
+                                                       22
+(iv) A : H → H is single-valued with a single-valued continuous inverse.
+
+ (v) A is single-valued on dom A and Id − A is demicompact.
+
+(vi) A = ∂f, where f ∈ Γ0 (H) is uniformly convex at x, i.e., there exists an increasing function
+     θ : [0, +∞[ → [0, +∞] that vanishes only at 0 such that
+                                                 
+        (∀α ∈ ]0, 1[)(∀y ∈ dom f) f αx+(1−α)y +α(1−α)θ(kx−yk) ⩽ αf(x)+(1−α)f(y). (5.29)
+                                                    
+(vii) A = ∂f, where f ∈ Γ0 (H) and, for every ξ ∈ R, x ∈ H f(x) ⩽ ξ is boundedly compact.
+
+   Our block-coordinate forward-backward algorithm is the following.
+
+Proposition 5.9 Set D = {0, 1}m r {0} and, for every i ∈ {1, . . . , m}, let Ai : Hi → 2Hi be maximally
+monotone and let Bi : H → Hi . Suppose that
+                                                  m
+                                                  X                                    m
+                                                                                       X                   2
+        (∃ ϑ ∈ ]0, +∞[)(∀x ∈ H)(∀y ∈ H)                 hxi − yi | Bi x − Bi yi ⩾ ϑ          Bi x − Bi y       ,   (5.30)
+                                                  i=1                                  i=1
+
+and that the set F of solutions to the problem
+
+        find x1 ∈ H1 , . . . , xm ∈ Hm such that (∀i ∈ {1, . . . , m})       0 ∈ Ai xi + Bi (x1 , . . . , xm )     (5.31)
+
+is nonempty. Let (γn )n∈N be a sequence in ]0, 2ϑ[ such that inf n∈N γn > 0 and supn∈N γn < 2ϑ, and
+let (λn )n∈N be a sequence in ]0, 1] such that inf n∈N λn > 0. Let x0 , (an )n∈N , and (cn )n∈N be H-valued
+random variables, and let (εn )n∈N be identically distributed D-valued random variables. Iterate
+
+         n = 0, 1, . . .
+        for
+            i = 1, . . . , m
+           for                                                                                                   (5.32)
+             xi,n+1 = xi,n + εi,n λn Jγn Ai xi,n − γn (Bi (x1,n , . . . , xm,n ) + ci,n ) + ai,n − xi,n ,
+
+and set (∀n ∈ N) En = σ(εn ). Furthermore, assume that the following hold:
+
+        P         p                              P         p
+  (i)       n∈N       E(kan k2 | Xn ) < +∞ and       n∈N       E(kcn k2 | Xn ) < +∞.
+
+ (ii) For every n ∈ N, En and Xn are independent.
+
+(iii) (∀i ∈ {1, . . . , m}) P[εi,0 = 1] > 0.
+
+Then (xn )n∈N converges weakly P-a.s. to an F-valued random variable x. If, in addition, one of the
+following holds:
+
+(iv) for every x ∈ F and every i ∈ {1, . . . , m}, Ai is demiregular at xi ;
+
+ (v) the operator x 7→ (Bi x)1⩽i⩽m is demiregular at every point in F;
+
+then (xn )n∈N converges strongly P-a.s. to x.
+
+
+
+                                                           23
+                                                                             m
+Proof. We are going to apply Theorem 4.1. Set A : H → 2H : x 7→ ×i=1 Ai xi , B : H → H : x 7→
+(Bi x)1⩽i⩽m , and, for every n ∈ N, αn = 1/2, βn = γn /(2ϑ), Tn = Jγn A , Rn = Id − γn B, and bn =
+−γn cn . Then, F = zer (A + B) and, for every n ∈ N, Tn is αn -averaged [7, Corollary 23.8], Tn : x 7→
+(Jγn Ai xi )1⩽i⩽m [7, Proposition 23.16], Rn is βp
+                                                 n -averaged [7, Proposition 4.33],
+                                                                             p      and Fix (Tn ◦Rn ) = F
+                                          P                           P
+[7, Proposition 25.1(iv)]. Moreover, n∈N E(kbn k | Xn ) ⩽ 2ϑ n∈N E(kcn k2 | Xn ) < +∞ and
+                                                          2
+
+(5.32) is a special case of (4.1). Observe that (4.2) and (4.3) imply the existence of Ω e ∈ F such that
+   e
+P(Ω) = 1 and
+                             (
+                               Tn (Rn xn (ω)) − Rn xn (ω) + Rn z → z
+       (∀ω ∈ e  Ω)(∀z ∈ F)                                                                        (5.33)
+                               Rn xn (ω) − xn (ω) − Rn z → −z.
+
+Consequently, since inf n∈N γn > 0,
+                       (                                                        
+                         Jγ  A x n (ω) − γ n Bx n (ω)  − x n (ω) = Tn R n x n (ω)  − xn (ω) → 0
+  (∀ω ∈ e
+        Ω)(∀z ∈ F)         n
+                                                                                                  (5.34)
+                         Bxn (ω) → Bz.
+
+Now set
+
+      (∀n ∈ N) y n = Jγn A (xn − γn Bxn ) and un = γn−1 (xn − y n ) − Bxn .                       (5.35)
+
+Then (5.34) yields
+            e
+      (∀ω ∈ Ω)(∀z ∈ F) xn (ω) − y n (ω) → 0       and un (ω) → −Bz.                               (5.36)
+
+Now, let us establish condition (v) of Theorem 4.1. To this end, it is enough to fix z ∈ F, x ∈ H,
+a strictly increasing sequence (kn )n∈N in N, and ω ∈ Ω e such that xk (ω) ⇀ x and to show that
+                                                                       n
+x ∈ F. It follows from (5.34) that Bxkn (ω) → Bz. Hence, since [7, Example 20.28] asserts that B is
+maximally monotone, we deduce from [7, Proposition 20.33(ii)] that Bx = Bz. We also derive from
+(5.36) that y kn (ω) ⇀ x and ukn (ω) → −Bz = −Bx. Since (5.35) implies that (y kn (ω), ukn (ω))n∈N
+lies in the graph of A, it follows from [7, Proposition 20.33(ii)] that −Bx ∈ Ax, i.e., x ∈ F. This
+proves that (xn )n∈N converges weakly P-a.s. to an F-valued random variable x, say
+
+      xn (ω) ⇀ x(ω)                                                                               (5.37)
+                    b ∈ F such that Ω
+for every ω in some Ω               b ⊂Ω
+                                       e and P(Ω)
+                                               b = 1.
+
+   Finally take ω ∈ bΩ. First, suppose that (iv) holds. Then A is demiregular at x(ω). In view of
+(5.36) and (5.37), y n (ω) ⇀ x(ω). Furthermore, un (ω) → −Bx(ω) and (y n (ω), un (ω))n∈N lies in
+the graph of A. Altogether y n (ω) → x(ω) and, therefore xn (ω) → x(ω). Now, suppose that (v)
+holds. Then, since (5.34) yields Bxn (ω) → Bx(ω), (5.37) implies that xn (ω) → x(ω).
+
+Remark 5.10 Here are a few remarks regarding Proposition 5.9.
+
+  (i) Proposition 5.9 generalizes [22, Corollary 6.5 and Remark 6.6], which does not allow for
+      block-processing and uses deterministic variables.
+
+ (ii) Problem (5.31) was considered in [2], where it was shown to capture formulations encoun-
+      tered in areas such as evolution equations, game theory, optimization, best approximation,
+      and network flows. It also models domain decomposition problems in partial differential
+      equations [12].
+
+                                                   24
+(iii) Proposition 5.9 generalizes [2, Theorem 2.9], which uses a fully parallel deterministic al-
+      gorithm in which all the blocks are used at each iteration, i.e., (∀n ∈ N)(∀i ∈ {1, . . . , m})
+      εi,n = 1.
+
+ (iv) As shown in [26, 28], strongly monotone composite inclusion problems can be solved by
+      applying the forward-backward algorithm to the dual problem. Using Proposition 5.9 we can
+      obtain a block-coordinate version of this primal-dual framework. Likewise, it was shown in
+      [28, 30, 64] that suitably renormed versions of the forward-backward algorithm applied in
+      the primal-dual space yielded a variety of methods for solving composite inclusions in duality.
+      Block-coordinate versions of these methods can be devised via Proposition 5.9.
+
+   Next, we present an application of Proposition 5.9 to block-coordinate convex minimization.
+
+Corollary 5.11 Set D = {0, 1}m r {0} and let (Gk )1⩽k⩽p be separable real Hilbert spaces. For every
+i ∈ {1, . . . , m}, let fi ∈ Γ0 (Hi ) and, for every k ∈ {1, . . . , p}, let τk ∈ ]0, +∞[, let gk : Gk → R be a
+differentiable convex function with a τk -Lipschitz-continuous
+                                                   Pm                  gradient, and let Lki : Hi → Gk be linear
+                                                               2
+and bounded. It is assumed that min1⩽k⩽p i=1 kLki k > 0 and that the set F of solutions to the
+problem
+                           m
+                           X                  p
+                                              X          X
+                                                          m             
+        minimize                 fi (xi ) +         gk         Lki xi                                   (5.38)
+      x1 ∈H1 ,...,xm ∈Hm
+                           i=1                k=1        i=1
+
+is nonempty. Let
+          Xp    m
+                  X         −1 
+                         ∗
+      ϑ ∈ 0,   τk   Lki Lki       ,                                                                     (5.39)
+                  k=1       i=1
+
+let (γn )n∈N be a sequence in ]0, 2ϑ[ such that inf n∈N γn > 0 and supn∈N γn < 2ϑ, and let (λn )n∈N
+be a sequence in ]0, 1] such that inf n∈N λn > 0. Let x0 , (an )n∈N , and (cn )n∈N be H-valued random
+variables, and let (εn )n∈N be identically distributed D-valued random variables. Iterate
+
+        n = 0, 1, . . .
+       for
+        for i = 1, . . . , m
+        $                              Pp          Pm                       
+           r    = ε        x     − γ        L∗ ∇g         L   x       + c                              (5.40)
+            i,n     i,n      i,n     n  k=1  ki  k    j=1  kj   j,n      i,n
+                                                                 
+            xi,n+1 = xi,n + εi,n λn proxγn fi ri,n + ai,n − xi,n .
+
+In addition, assume that conditions (i)–(iii) in Proposition 5.9 are satisfied. Then (xn )n∈N con-
+verges weakly P-a.s. to an F-valued random variable. If, furthermore, one of the following holds (see
+Lemma 5.8(vi)–(vii) for examples):
+
+  (i) for every x ∈ F and every i ∈ {1, . . . , m}, ∂fi is demiregular at xi ;
+                         P               P
+ (ii) the operator x 7→ ( pk=1 L∗ki ∇gk ( m  j=1 Lkj xj ))1⩽i⩽m is demiregular at every point in F;
+
+
+then (xn )n∈N converges strongly P-a.s. to x.
+
+
+
+
+                                                                    25
+Proof. As shown in [2, Section 4], (5.38) is a special case of (5.31) with
+                                           p
+                                           X                X
+                                                             m           
+     Ai = ∂fi    and Bi : (xj )1⩽j⩽m 7→          L∗ki ∇gk          Lkj xj .                           (5.41)
+                                           k=1               j=1
+                          P         Pm              
+Now set h : H → R : x 7→ pk=1 gk      i=1 Lki xi . Then h is a Fréchet-differentiable convex function
+and B = ∇h is Lipschitz-continuous with constant 1/ϑ, where ϑ is given in (5.39). It therefore
+follows from the Baillon-Haddad theorem [7, Theorem 18.15] that (5.30) holds with this constant.
+Since, in view of (5.2), (5.32) specializes to (5.40), the convergence claims follow from Proposi-
+tion 5.9.
+
+Remark 5.12 Here are a few observations about Corollary 5.11.
+
+  (i) If more assumptions are available about the problem, the Lipschitz constant ϑ of (5.39) can
+      be improved. Some examples are given in [15].
+
+ (ii) Recently, some block-coordinate forward-backward methods have been proposed for not nec-
+      essarily convex minimization problems in Euclidean spaces. Thus, when applied to convex
+      functions satisfying the Kurdyka-Łojasiewicz inequality, the deterministic block-coordinate
+      forward-backward algorithm proposed in [10, Section 3.6] corresponds to the special case
+      of (5.38) in which
+                                                                              m
+                                                                              X
+            H is a Euclidean space,     p = 1,      and (∀x ∈ H)                    L1i xi = x.       (5.42)
+                                                                              i=1
+
+     In that method, the sweeping proceeds by activating only one block at each iteration according
+     to a periodic schedule. Moreover, errors and relaxations are not allowed. This approach was
+     extended in [20] to an error-tolerant form with a cyclic sweeping rule whereby each block is
+     used at least once within a preset number of consecutive iterations.
+
+(iii) A block-coordinate forward-backward method with random seeping was proposed in [58] in
+      the special case of (5.42). That method uses only one block at each iteration, no relaxation,
+      and no error terms. The asymptotic analysis of [58] provides a lower bound on the probability
+      that (f + g1 )(xn ) be close to inf(f + g1 )(H), with no result on the convergence of the sequence
+      (xn )n∈N . Related work is presented in [45, 48].
+
+
+
+References
+ [1] M. A. Alghamdi, A. Alotaibi, P. L. Combettes, and N. Shahzad, A primal-dual method of partial inverses
+     for composite inclusions, Optim. Lett., vol. 8, pp. 2271–2284, 2014.
+ [2] H. Attouch, L. M. Briceño-Arias, and P. L. Combettes, A parallel splitting method for coupled monotone
+     inclusions, SIAM J. Control Optim., vol. 48, pp. 3246–3270, 2010.
+ [3] A. Auslender, Méthodes numériques pour la décomposition et la minimisation de fonctions non
+     différentiables, Numer. Math., vol. 18, pp. 213–223, 1971/72.
+ [4] K. Barty, J.-S. Roy, and C. Strugarek, Hilbert-valued perturbed subgradient algorithms, Math. Oper. Res.,
+     vol. 32, pp. 551–562, 2007.
+
+
+                                                        26
+ [5] H. H. Bauschke and J. M. Borwein, On projection algorithms for solving convex feasibility problems,
+     SIAM Rev., vol. 38, pp. 367–426, 1996.
+ [6] H. H. Bauschke and P. L. Combettes, A weak-to-strong convergence principle for Fejér-monotone meth-
+     ods in Hilbert spaces, Math. Oper. Res., vol. 26, pp. 248–264, 2001.
+ [7] H. H. Bauschke and P. L. Combettes, Convex Analysis and Monotone Operator Theory in Hilbert Spaces.
+     Springer, New York, 2011.
+ [8] H. H. Bauschke, M. N. Dao, D. Noll, and H. M. Phan, Proximal point algorithm, Douglas-Rachford
+     algorithm and alternating projections: a case study, preprint http://arxiv.org/abs/1501.06603
+ [9] H. H. Bauschke, F. Deutsch, and H. Hundal, Characterizing arbitrarily slow convergence in the method
+     of alternating projections, Int. Trans. Oper. Res., vol. 16, pp. 413–425, 2009.
+[10] J. Bolte, S. Sabach, and M. Teboulle, Proximal alternating linearized minimization for nonconvex and
+     nonsmooth problems, Math. Program., vol. 146, pp. 459–494, 2014.
+[11] R. I. Boţ and C. Heinrich, A Douglas-Rachford type primal-dual method for solving inclusions with
+     mixtures of composite and parallel-sum type monotone operators, SIAM J. Optim., 23, pp. 2541–2565,
+     2013.
+[12] L. M. Briceño-Arias, Problèmes d’Inclusions Couplées: Éclatement, Algorithmes et Applications, Thèse de
+     doctorat, Université Pierre et Marie Curie – Paris 6, Paris, 2011.
+[13] L. M. Briceño-Arias, A Douglas-Rachford splitting method for solving equilibrium problems, Nonlinear
+     Anal., vol. 75, pp. 6053–6059, 2012.
+[14] L. M. Briceño-Arias, Forward-Douglas-Rachford splitting and forward-partial inverse method for solving
+     monotone inclusions, Optimization, published online, 2013.
+[15] L. M. Briceño-Arias and P. L. Combettes, Convex variational formulation with smooth coupling for
+     multicomponent signal decomposition and recovery, Numer. Math. Theory Methods Appl., vol. 2, pp.
+     485–508, 2009.
+[16] L. M. Briceño-Arias and P. L. Combettes, Monotone operator methods for Nash equilibria in non-
+     potential games, in Computational and Analytical Mathematics, (D. Bailey et. al., eds.), pp. 143–159.
+     Springer, New York, 2013.
+[17] C. L. Byrne, Iterative Optimization in Inverse Problems. CRC Press, Boca Raton, FL, 2014.
+[18] J. Céa, Optimisation: Théorie et Algorithmes, Dunod, Paris, 1971.
+[19] A. Cegielski, Iterative Methods for Fixed Point Problems in Hilbert Spaces, Lecture Notes in Mathematics,
+     vol. 2057. Springer, Heidelberg, 2012.
+[20] E. Chouzenoux, J.-C. Pesquet, and A. Repetti, A block-coordinate variable metric forward-backward
+     algorithm, J. Convex Nonlinear Anal., to appear.
+[21] P. L. Combettes, Quasi-Fejérian analysis of some optimization algorithms, in: Inherently Parallel Al-
+     gorithms for Feasibility and Optimization, (D. Butnariu, Y. Censor, and S. Reich, eds.), pp. 115–152.
+     Elsevier, New York, 2001.
+[22] P. L. Combettes, Solving monotone inclusions via compositions of nonexpansive averaged operators,
+     Optimization, vol. 53, pp. 475–504, 2004.
+[23] P. L. Combettes, Fejér monotonicity in convex optimization, in: Encyclopedia of Optimization, 2nd ed.
+     (C. A. Floudas and P. M. Pardalos, eds.), pp. 1016–1024. Springer, New York, 2009.
+[24] P. L. Combettes, Iterative construction of the resolvent of a sum of maximal monotone operators, J.
+     Convex Anal., vol. 16, pp. 727–748, 2009.
+[25] P. L. Combettes, Systems of structured monotone inclusions: Duality, algorithms, and applications,
+     SIAM J. Optim., vol. 23, pp. 2420–2447, 2013.
+
+
+                                                      27
+[26] P. L. Combettes, -Dinh Dũng, and B. C. Vũ, Dualization of signal recovery problems, Set-Valued Var.
+     Anal., vol. 18, pp. 373–404, 2010.
+[27] P. L. Combettes and J.-C. Pesquet, Proximal splitting methods in signal processing, in Fixed-Point Al-
+     gorithms for Inverse Problems in Science and Engineering, (H. H. Bauschke et al., eds), pp. 185–212.
+     Springer, New York, 2011.
+[28] P. L. Combettes and B. C. Vũ, Variable metric forward-backward splitting with applications to monotone
+     inclusions in duality, Optimization, vol. 63, pp. 1289–1318, 2014.
+[29] P. L. Combettes and V. R. Wajs, Signal recovery by proximal forward-backward splitting, Multiscale
+     Model. Simul., vol. 4, pp. 1168–1200, 2005.
+[30] L. Condat, A primal-dual splitting method for convex optimization involving Lipschitzian, proximable
+     and linear composite terms, J. Optim. Theory Appl., vol. 158, pp. 460–479, 2013.
+[31] E. De Vito, V. Umanità, and S. Villa, A consistent algorithm to solve Lasso, elastic-net and Tikhonov
+     regularization, J. Complexity, vol. 27, pp. 188–200, 2011.
+[32] J. Eckstein and D. P. Bertsekas, On the Douglas-Rachford splitting method and the proximal point
+     algorithm for maximal monotone operators, Math. Programming, vol. 55, pp. 293–318, 1992.
+[33] I. I. Eremin and L. D. Popov, Fejér processes in theory and practice: Recent results, Russian Math. (Iz.
+     VUZ), vol. 53, pp. 36–55, 2009.
+[34] Yu. M. Ermol’ev, On the method of generalized stochastic gradients and quasi-Fejér sequences, Cyber-
+     netics, vol. 5, pp. 208–220, 1969.
+[35] Yu. M. Ermol’ev, On convergence of random quasi-Fejér sequences, Cybernetics, vol. 7, pp. 655–656,
+     1971.
+[36] Yu. M. Ermol’ev and A. D. Tuniev, Random Fejér and quasi-Fejér sequences, Theory of Optimal Solutions–
+     Akademiya Nauk Ukrainskoı̆ SSR Kiev, vol. 2, pp. 76–83, 1968; translated in: American Mathematical
+     Society Selected Translations in Mathematical Statistics and Probability, vol. 13, pp. 143–148, 1973.
+[37] R. M. Fortet, Vecteurs, Fonctions et Distributions Aléatoires dans les Espaces de Hilbert. Hermès, Paris,
+     1995.
+[38] D. Gabay, Applications of the method of multipliers to variational inequalities, in: M. Fortin and R.
+     Glowinski (eds.), Augmented Lagrangian Methods: Applications to the Numerical Solution of Boundary
+     Value Problems, pp. 299–331. North-Holland, Amsterdam, 1983.
+[39] R. Glowinski and P. Le Tallec, Augmented Lagrangian and Operator-Splitting Methods in Nonlinear Me-
+     chanics. SIAM, Philadelphia, 1989.
+[40] H. S. Hundal, An alternating projection that does not converge in norm, Nonlinear Anal., vol. 57, pp.
+     35–61, 2004.
+[41] F. Iutzeler, P. Bianchi, P. Ciblat, and W. Hachem, Asynchronous distributed optimization using a ran-
+     domized alternating direction method of multipliers, Proc. 52nd Conf. Decision Control, pp. 3671–3676,
+     Florence, Italy, Dec. 10-13, 2013.
+[42] M. Ledoux and M. Talagrand, Probability in Banach Spaces: Isoperimetry and Processes. Springer, New
+     York, 1991.
+[43] P. L. Lions and B. Mercier, Splitting algorithms for the sum of two nonlinear operators, SIAM J. Numer.
+     Anal., vol. 16, pp. 964–979, 1979.
+[44] M. Loève, Probability Theory II, 4th ed. Springer, New York, 1978.
+[45] Z. Lu and L. Xiao On the complexity analysis of randomized block-coordinate descent methods, Math.
+     Program., to appear.
+[46] B. Mercier, Topics in Finite Element Solution of Elliptic Problems (Lectures on Mathematics, no. 63). Tata
+     Institute of Fundamental Research, Bombay, 1979.
+
+                                                      28
+[47] J. J. Moreau, Fonctions convexes duales et points proximaux dans un espace hilbertien, C. R. Acad. Sci.
+     Paris Sér. A, vol. 255, pp. 2897–2899, 1962.
+[48] I. Necoara and A. Patrascu, A random coordinate descent algorithm for optimization problems with
+     composite objective function and linear coupled constraints, Comput. Optim. Appl., vol. 57, pp. 307–
+     337, 2014.
+[49] Yu. Nesterov, Efficiency of coordinate descent methods on huge-scale optimization problems, SIAM J.
+     Optim., vol. 22, pp. 341–362, 2012.
+[50] J. M. Ortega and W. C. Rheinboldt, Iterative Solution of Nonlinear Equations in Several Variables, Aca-
+     demic Press, New York, 1970.
+[51] N. Papadakis, G. Peyré, and E. Oudet, Optimal transport with proximal splitting, SIAM J. Imaging Sci.,
+     vol. 7, pp. 212–238, 2014.
+[52] T. Pennanen and M. Kallio, A splitting method for stochastic programs, Ann. Oper. Res., vol. 142, pp.
+     259–268, 2006.
+[53] J.-C. Pesquet and N. Pustelnik, A parallel inertial proximal optimization method, Pac. J. Optim., vol. 8,
+     pp. 273–305, 2012.
+[54] W. V. Petryshyn, Construction of fixed points of demicompact mappings in Hilbert space, J. Math. Anal.
+     Appl., vol. 14, pp. 276–284, 1966.
+[55] B. J. Pettis, On integration in vector spaces, Trans. Amer. Math. Soc., vol. 44, pp. 277–304, 1938.
+[56] H. Raguet, J. Fadili, and G. Peyré, A generalized forward-backward splitting, SIAM J. Imaging Sci., vol.
+     6, pp. 1199–1226, 2013.
+[57] E. Raik, Fejér type methods in Hilbert space, Eesti NSV Tead. Akad. Toimetised Füüs.-Mat., vol. 16, pp.
+     286–293, 1967.
+[58] P. Richtárik and M. Takáč, Iteration complexity of randomized block-coordinate descent methods for
+     minimizing a composite function, Math. Program., vol. 144, pp. 1–38, 2014.
+[59] H. Robbins and D. Siegmund, A convergence theorem for non negative almost supermartingales and
+     some applications, in: Optimizing Methods in Statistics, (J. S. Rustagi, Ed.), pp. 233–257. Academic
+     Press, New York, 1971.
+[60] S. Sra, S. Nowozin, and S. J. Wright, (eds.) Optimization for Machine Learning. MIT Press, Cambridge,
+     MA, 2011.
+[61] P. Tseng, Further applications of a splitting algorithm to decomposition in variational inequalities and
+     convex programming, Math. Programming, vol. 48, pp. 249–263, 1990.
+[62] P. Tseng, Applications of a splitting algorithm to decomposition in convex programming and variational
+     inequalities, SIAM J. Control Optim., vol. 29, pp. 119–138, 1991.
+[63] S. Villa, S. Salzo, L. Baldassarre, and A. Verri, Accelerated and inexact forward-backward algorithms,
+     SIAM J. Optim., vol. 23, pp. 1607–1633, 2013.
+[64] B. C. Vũ, A splitting algorithm for dual monotone inclusions involving cocoercive operators, Adv. Com-
+     put. Math., vol. 38, pp. 667–681, 2013.
+[65] D. C. Youla, Mathematical theory of image restoration by the method of convex projections, in: H.
+     Stark (ed.) Image Recovery: Theory and Application, pp. 29–77. Academic Press, San Diego, CA, 1987.
+[66] E. Zeidler, Nonlinear Functional Analysis and Its Applications I: Fixed-Point Theorems. Springer-Verlag,
+     New York, 1986.
+
+
+
+
+                                                     29
+

@@ -1,0 +1,40 @@
+\begin{thebibliography}{4}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Bo{\c t} and Nguyen(2023)]{bot2023fast}
+Radu~Ioan Bo{\c t} and Dang-Khoa Nguyen.
+\newblock Fast {Krasnosel'ski{\u{i}}--Mann} algorithm with a convergence rate
+  of the fixed point iteration of {$o(1/k)$}.
+\newblock \emph{SIAM Journal on Numerical Analysis}, 61\penalty0 (6):\penalty0
+  2813--2843, November 2023.
+\newblock ISSN 1095-7170.
+\newblock \doi{10.1137/22m1504305}.
+\newblock URL \url{http://dx.doi.org/10.1137/22M1504305}.
+
+\bibitem[Bravo and Cominetti(2024)]{bravo2024stochastic}
+Mario Bravo and Roberto Cominetti.
+\newblock Stochastic fixed-point iterations for nonexpansive maps: Convergence
+  and error bounds.
+\newblock \emph{SIAM Journal on Control and Optimization}, 62\penalty0
+  (1):\penalty0 191--219, January 2024.
+\newblock ISSN 1095-7138.
+\newblock \doi{10.1137/22m1515550}.
+\newblock URL \url{http://dx.doi.org/10.1137/22M1515550}.
+
+\bibitem[Nguyen-Trung and Tran-Dinh(2025)]{nguyentrung2025afp}
+Nghia Nguyen-Trung and Quoc Tran-Dinh.
+\newblock A class of accelerated fixed-point-based methods with delayed inexact
+  oracles and its applications, 2025.
+\newblock URL \url{https://arxiv.org/abs/2512.13547}.
+
+\bibitem[Yang et~al.(2026)Yang, Jiang, Chi, Cutkosky, and Xiao]{yang2026ikm}
+Tong Yang, Tao Jiang, Yuejie Chi, Ashok Cutkosky, and Lin Xiao.
+\newblock Stochastic inertial krasnosel'skii-mann iteration achieves
+  near-optimal sample complexity, 2026.
+\newblock URL \url{https://arxiv.org/abs/2609.28543}.
+
+\end{thebibliography}
