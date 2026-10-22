@@ -63,3 +63,12 @@
 | 应用章节放在主体分析之后，逐个给出 $T$、averaged 常数与 $\operatorname{Fix}T$ | Boţ–Nguyen §4；BC §4.3；Cortild 等 §3.2 | §4 按 SGD、FB、BF 三小节 |
 | "The operator $T_{DY}$ is $\frac{2\beta}{4\beta-\gamma}$-averaged" | Boţ–Nguyen §4，Corollary 4.1 前 | $B=0$ 得 $T_{FB}$ 的常数 |
 | Stochastic Backward-Forward splitting (SBF) | Cortild 等 §3.2，式 (SBF) | 沿用名称 |
+
+## 2026-10-22 Reuse noise reduction
+
+| 采用的结构或表达 | 来源 | 本稿处理 |
+|---|---|---|
+| 直接 perturbation 分析的限制 → auxiliary sequence → subtracting the recursion → effective errors | Bravo–Cominetti §2.1 | §4.3 按此顺序组织；递推和 Lemma 按 Fast KM 单独推导 |
+| 隐式 variance reduction 的讨论 | Bravo–Cominetti Remark 2.3 | 区分 stored error 与 new error 的权重 |
+
+Q2 的 mean-square 反例、Q3 的 almost-sure 目标及两种收敛意义的区分为本文说明；不作为参考文献已证明的 Fast KM 结果。

@@ -1,4 +1,4 @@
-\begin{thebibliography}{13}
+\begin{thebibliography}{10}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -34,14 +34,6 @@ Mario Bravo and Roberto Cominetti.
 \newblock \doi{10.1137/22m1515550}.
 \newblock URL \url{http://dx.doi.org/10.1137/22M1515550}.
 
-\bibitem[Combettes and Pesquet(2015)]{combettes2015stochastic}
-Patrick~L. Combettes and Jean-Christophe Pesquet.
-\newblock Stochastic quasi-{F}ej{\'e}r block-coordinate fixed point iterations
-  with random sweeping.
-\newblock \emph{SIAM Journal on Optimization}, 25\penalty0 (2):\penalty0
-  1221--1248, 2015.
-\newblock \doi{10.1137/140971233}.
-
 \bibitem[Cortild et~al.(2026)Cortild, Cartis, and
   Peypouquet]{cortild2026stochastic}
 Daniel Cortild, Coralia Cartis, and Juan Peypouquet.
@@ -56,16 +48,6 @@ Ashok Cutkosky and Harsh Mehta.
   Learning}, volume 119 of \emph{Proceedings of Machine Learning Research},
   2020.
 
-\bibitem[Foster et~al.(2019)Foster, Sekhari, Shamir, Srebro, Sridharan, and
-  Woodworth]{foster2019complexity}
-Dylan~J. Foster, Ayush Sekhari, Ohad Shamir, Nathan Srebro, Karthik Sridharan,
-  and Blake Woodworth.
-\newblock The complexity of making the gradient small in stochastic convex
-  optimization.
-\newblock In \emph{Proceedings of the Thirty-Second Conference on Learning
-  Theory}, volume~99 of \emph{Proceedings of Machine Learning Research}, pages
-  1319--1345, 2019.
-
 \bibitem[Gao et~al.(2024)Gao, Rodomanov, and Stich]{gao2024polyak}
 Yuan Gao, Anton Rodomanov, and Sebastian~U. Stich.
 \newblock Non-convex stochastic composite optimization with {Polyak} momentum.
@@ -79,13 +61,6 @@ Sucheol Lee and Donghwan Kim.
 \newblock Accelerated algorithms for stochastic monotone inclusions with fixed
   queries, 2026.
 \newblock URL \url{https://arxiv.org/abs/2609.35631}.
-
-\bibitem[Park and Ryu(2022)]{park2022exact}
-Jisun Park and Ernest~K. Ryu.
-\newblock Exact optimal accelerated complexity for fixed-point iterations.
-\newblock In \emph{Proceedings of the 39th International Conference on Machine
-  Learning}, volume 162 of \emph{Proceedings of Machine Learning Research},
-  2022.
 
 \bibitem[Tran-Dinh(2024)]{trandinh2024vrfkm}
 Quoc Tran-Dinh.

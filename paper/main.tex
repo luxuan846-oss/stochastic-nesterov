@@ -14,7 +14,7 @@
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{corollary}[theorem]{Corollary}
-\theoremstyle{definition}
+\theoremstyle{definition} 
 \newtheorem{assumption}{Assumption}[section]
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{example}[theorem]{Example}
@@ -40,39 +40,37 @@ Momentum, Implicit Variance Reduction, and Decaying Noise}
 \linenumbers
 
 \begin{abstract}
-[\blue{Blue highlights the research questions and reading guide;} 
-\red{red highlights the main answers and limitations.}]
+\blue{Blue highlights the research questions and reading guide;} 
 
-In this draft, we consider the problem of finding a fixed point of a nonexpansive operator
-in $\RR^d$ from stochastic oracle evaluations. Many single-loop stochastic
-first-order methods, such as stochastic gradient descent and stochastic
-splitting methods, are stochastic Krasnosel'ski\u{i}--Mann (KM) iterations
-\cite{combettes2015stochastic,bravo2024stochastic}. For exact evaluations,
-the Fast KM method of Bo\c{t} and Nguyen \cite{bot2023fast} improves the
-last-iterate residual of KM from $o(1/\sqrt{k})$ to $o(1/k)$ through
-momentum. Under bounded variance, the last iterate of stochastic KM attains
-only $\log k/k^{1/6}$ \cite{bravo2024stochastic}. \blue{We therefore study whether the
-momentum of Fast KM accelerates the last iterate when the operator values
-are noisy.}
+\red{red highlights the main answers and limitations.}
 
+% In this draft, we consider the problem of finding a fixed point of a nonexpansive operator
+% in $\RR^d$ from stochastic oracle evaluations. Many single-loop stochastic
+% first-order methods, such as stochastic gradient descent and stochastic
+% splitting methods, are stochastic Krasnosel'ski\u{i}--Mann (KM) iterations
+% \cite{combettes2015stochastic,bravo2024stochastic}. For exact evaluations,
+% the Fast KM method of Bo\c{t} and Nguyen \cite{bot2023fast} improves the
+% last-iterate residual of KM from $o(1/\sqrt{k})$ to $o(1/k)$ through
+% momentum. Under bounded variance, the last iterate of stochastic KM attains
+% only $\log k/k^{1/6}$ \cite{bravo2024stochastic}. \blue{We therefore study whether the
+% momentum of Fast KM accelerates the last iterate when the operator values
+% are noisy.}
 \end{abstract}
 
 \noindent\textbf{Key words.} nonexpansive operator, fixed-point problem,
 Fast KM, stochastic oracle, almost-sure convergence.
 
 \section{Introduction}\label{sec:introduction}
-In this draft, we consider the problem of finding a fixed point of a nonexpansive operator
-$T:\HH\to\HH$ when only noisy evaluations of $T$
-are available. Many single-loop stochastic first-order methods are
-stochastic Krasnosel'ski\u{i}--Mann (KM) iterations of the form
-\begin{equation}\label{eq:intro-skm}
- x_{k+1}=(1-\lambda_k)x_k+\lambda_k\bigl(Tx_k+e_k\bigr),
+
+We consider the fixed-point problem
+\begin{equation}\label{eq:problem}
+ \text{find }x^\star\in\HH\quad\text{such that}\quad Tx^\star=x^\star,
+ \tag{FP}
 \end{equation}
-where $e_k$ is the error of the $k$th oracle response
-\cite{combettes2015stochastic,bravo2024stochastic,cortild2026stochastic}.
-Stochastic gradient descent, the stochastic proximal gradient method and
-stochastic backward--forward splitting are instances of this form; in the
-proximal gradient method, the error is in general conditionally biased.
+where $T:\HH\to\HH$ is a nonexpansive operator, that is,
+$\norm{Tx-Ty}\leq\norm{x-y}$ for all $x,y\in\HH$, whose set of fixed points
+$\Fix T:=\{x\in\HH:Tx=x\}$ is nonempty. Throughout, only noisy evaluations
+of $T$ are available.
 
 For exact evaluations, the fixed-point residual of KM with a constant
 relaxation parameter satisfies $\norm{x_k-Tx_k}=o(1/\sqrt{k})$
@@ -111,20 +109,14 @@ $x_{k-1}$ there are two implementations.
  available last-iterate bound is $O(\log k/k^{1/6})$, whereas a randomly
  selected iterate attains $O(k^{-1/4})$. Does the last iterate necessarily
  lose this rate? (Section~\ref{sec:km})
- \item \emph{(Q2) Implicit variance reduction in Fast KM.} Can the momentum of Fast KM reduce the variance
- implicitly and improve $O(\log k/k^{1/6})$ under bounded variance?
- (Section~\ref{sec:algorithm})
- \item \emph{(Q3) Fast KM under decaying noise.} Under bounded variance, the residual
- after $k$ samples is $\Omega(\sigma/\sqrt{k})$ on the whole problem class
- \cite[Theorem~2]{foster2019complexity}. How fast must the variance decay
- for the reuse implementation to attain $o(1/k)$?
- (Section~\ref{sec:decaying})
+ \item \emph{(Q2) Implicit variance reduction in Fast KM.} Under bounded variance, does the momentum of Algorithm~\ref{alg:sfkm} with fixed $\alpha>2$ reduce the variance implicitly, so that its last iterate improves on that of stochastic KM? (Section~\ref{sec:algorithm})
+ \item \emph{(Q3) Fast KM under decaying noise.} How fast must the variance $\sigma_k^2$ decay for Algorithm~\ref{alg:sfkm} to attain $k\norm{x_k-Tx_k}\to0$ and $x_k\to x_\infty$ almost surely? (Section~\ref{sec:decaying})
 \end{enumerate}}
 
 
 \begin{table}[t]
 \centering
-\caption{Comparison of last-iterate rates $\EE\norm{x_k-Tx_k}$ for a nonexpansive $T$
+\caption{Comparison of last-iterate residual guarantees for a nonexpansive $T$
 on $\RR^d$.}
 \label{tab:rates}
 \small
@@ -136,23 +128,21 @@ KM \cite{bot2023fast} & --- & $o(1/\sqrt{k})$ \\
 Stochastic KM \cite{bravo2024stochastic} & ---
  & $O(\log k/k^{1/6})$ \\
 Fast KM \cite{bot2023fast} & $\frac{k}{k+\alpha}\to1$ & $o(1/k)$ \\
-Stochastic iKM \cite{yang2026ikm} & $\Theta(1)$
- & $O\bigl(\frac{D}{k}+\frac{\sigma\log k}{\sqrt{k}}\bigr)$ \\
 \midrule
 Stochastic Fast KM, reuse (this paper) & $\frac{k}{k+\alpha}\to1$
- & need not vanish (Prop.~\ref{prop:fixed}) \\
+ & need not vanish in mean square (Prop.~\ref{prop:fixed}) \\
 Same, $\EE\sigma_k^2\asymp k^{-q}$ (this paper) & $\frac{k}{k+\alpha}\to1$
- & $o(1/k)$ for $q>{?}$ (lower bound: $q>1$) \\
+ & $o(1/k)$ a.s.: open; mean-square: $q>2$ necessary \\
 \bottomrule
 \end{tabularx}
 
 \smallskip
 \raggedright\footnotesize
-One oracle query per iteration. Bounded variance in all stochastic rows
-except the last, which assumes decaying variance; the row with
-Prop.~\ref{prop:fixed} also assumes $\EE\sigma_k^2\geq\sigma^2>0$. The
-lower bound refers to $\Omega(\sigma/\sqrt{N})$ after $N$ samples
-\cite[Theorem~2]{foster2019complexity}.
+One oracle query per iteration. Stochastic KM is stated in expectation;
+the fixed-parameter counterexample concerns mean-square convergence.
+The last row states an almost-sure research objective; its mean-square
+necessary condition is a separate conclusion. Proposition~\ref{prop:fixed}
+assumes $\mathbb E\sigma_k^2\geq\sigma^2>0$.
 \end{table}
 % \paragraph{Organization.}
 % Section~\ref{sec:problem} states the problem and the oracle.
@@ -297,16 +287,6 @@ lower bound refers to $\Omega(\sigma/\sqrt{N})$ after $N$ samples
 
 \section{Preliminaries}\label{sec:problem}
 
-The problem is
-\begin{equation}\label{eq:problem}
- \text{find }x^\star\in\HH\quad\text{such that}\quad Tx^\star=x^\star,
- \tag{FP}
-\end{equation}
-where $T$ satisfies the following assumption.
-\begin{assumption}[Operator]\label{ass:operator}
-$T:\HH\to\HH$ is nonexpansive, that is, $\norm{Tx-Ty}\leq\norm{x-y}$ for
-all $x,y\in\HH$, and $\Fix T:=\{x\in\HH:Tx=x\}$ is nonempty.
-\end{assumption}
 % The iterate accuracy is measured by the residual $\norm{x-Tx}$. With $V:=\Id-T$, nonexpansiveness of $T$ is equivalent to
 % \begin{equation}\label{eq:cocoercivity}
 %  \ip{Vx-Vy}{x-y}\geq\frac12\norm{Vx-Vy}^{2},\qquad x,y\in\HH.
@@ -332,48 +312,53 @@ For every $k\geq0$,
 
 \section{The last iterate of stochastic KM}\label{sec:km}
 \blue{In this section, we review existing convergence results for stochastic
-Krasnosel'ski\u{i}--Mann iterations.}
+Krasnosel'ski\u{i}--Mann iterations in \cite{bravo2024stochastic}.}
 
-For Problem~\eqref{eq:problem}, the Krasnosel'ski\u{i}--Mann (KM)
-iteration reads
-\begin{equation}\label{eq:km}
- x_{k+1}=(1-\lambda_{k+1})x_k+\lambda_{k+1}Tx_k,\qquad k\geq0,
-\end{equation}
-with $x_0\in\HH$ and parameters $\lambda_k\in(0,1)$. 
+% For Problem~\eqref{eq:problem}, the Krasnosel'ski\u{i}--Mann (KM)
+% iteration reads
+% \begin{equation}\label{eq:km}
+%  x_{k+1}=(1-\lambda_{k+1})x_k+\lambda_{k+1}Tx_k,\qquad k\geq0,
+% \end{equation}
+% with $x_0\in\HH$ and parameters $\lambda_k\in(0,1)$. 
 
-With a constant $\lambda_k\equiv\lambda$, the iterates converge to a point of $\Fix T$, and the rate is
-\[
-\norm{x_k-Tx_k}=o(1/\sqrt{k}).
-\]
+% With a constant $\lambda_k\equiv\lambda$, the iterates converge to a point of $\Fix T$, and the rate is
+% \[
+% \norm{x_k-Tx_k}=o(1/\sqrt{k}).
+% \]
 
 The stochastic KM iteration is
 \begin{equation}\label{eq:skm}
  x_{k+1}=(1-\lambda_{k+1})x_k+\lambda_{k+1}\widehat T_k(x_k),\qquad
  \widehat T_k(x_k)=Tx_k+e_k .
-\end{equation} under bounded variance, a randomly selected iterate generated by \eqref{eq:skm} attains the order $k^{-1/4}$ \cite[Corollary~5.4]{bravo2024stochastic}, \cite{cortild2026stochastic}.  This naturally introduce the following question:
+\end{equation}
+Under bounded variance, a randomly selected iterate generated by
+\eqref{eq:skm} attains the order $k^{-1/4}$
+\cite[Corollary~5.4]{bravo2024stochastic}, \cite{cortild2026stochastic}.
+This leads to the following question:
 \blue{
 \begin{quote}
 \emph{(Q1) For a general nonexpansive $T$ and bounded variance, can the
 last iterate of stochastic KM attain the order $k^{-1/4}$?}
 \end{quote}}
 
-We recall the last-iterate bound of \cite{bravo2024stochastic}.   Let $D:=\dist(x_0,\Fix T)$ and set
+Let $D:=\dist(x_0,\Fix T)$ and set
 $\tau_k:=\sum_{j=1}^{k}\lambda_j(1-\lambda_j)$,
 $\varphi(y):=\min\{1,1/\sqrt{\pi y}\}$ and
 \[
  \nu_k^2:=\sum_{j=1}^{k}\bigl(w_j^k\bigr)^2\,\EE\sigma_{j-1}^2,
  \qquad w_j^k:=\lambda_j\prod_{i=j+1}^{k}(1-\lambda_i),
 \]
-so that $\tau_k$ is the effective time of the iteration and $\nu_k$ the
-scale of the averaged noise. 
-
+We recall the conditions used for the last-iterate bound
+in \cite{bravo2024stochastic}.
 \begin{assumption}\label{ass:h4}
 Either $T$ has bounded range and $\bar\kappa\geq\sup_{x}\norm{Tx-x_0}$, or
 $S:=\sum_{j\geq2}\lambda_j\nu_{j-1}<\infty$ and $\bar\kappa\geq2D+S$.
 \end{assumption}
-
-\begin{theorem}[{Last-iterate residual of stochastic KM \cite[Theorem~2.10]{bravo2024stochastic}}]\label{thm:skm}
-Let Assumptions~\ref{ass:operator}, \ref{ass:oracle} and~\ref{ass:h4} hold.
+The following theorem gives a bound on the expected fixed-point residual
+of the last iterate of stochastic KM
+\cite[Theorem~2.10]{bravo2024stochastic}.
+\begin{theorem}\label{thm:skm}
+Let $T$ be nonexpansive with $\Fix T\neq\emptyset$, and let Assumptions~\ref{ass:oracle} and~\ref{ass:h4} hold.
 Then, for every $k\geq1$,
 \begin{equation}\label{eq:skm-bound}
  \EE\norm{x_k-Tx_k}\leq\bar\kappa\,\varphi(\tau_k)
@@ -385,10 +370,11 @@ Then, for every $k\geq1$,
 We now consider the special case of Assumption~\ref{ass:oracle} in which
 the second moments are uniformly bounded.
 
+\blue{
 \begin{assumption}[Bounded variance]\label{ass:bvar}
 There exists a finite constant $\sigma\geq0$ such that
 $\sup_{k\geq0}\EE\sigma_k^2\leq\sigma^2$.
-\end{assumption}
+\end{assumption}}
 
 \begin{corollary}{\cite[Theorem~4.4]{bravo2024stochastic}}\label{cor:skm}
 Under the assumptions of Theorem~\ref{thm:skm} and
@@ -405,14 +391,14 @@ $\EE\norm{x_k-Tx_k}=O(\log k/k^{1/6})$ with $a=\frac23$.
 \end{corollary}
 
 \paragraph{\red{Answer to (Q1).}}\label{par:answer-q1}
-\red{In the literature examined here, No: for a general nonexpansive $T$,
+\red{In the literature examined here, no: for a general nonexpansive $T$,
 \[
  \EE\norm{x_k-Tx_k}=O\Bigl(\frac{\log k}{k^{1/6}}\Bigr)
  \quad\text{(last iterate)},\qquad
  \EE\norm{x_R-Tx_R}=O\Bigl(\frac{1}{k^{1/4}}\Bigr)
  \quad\text{(random iterate)}.
 \]}
-\red{The limitations are }
+\red{The limitations are as follows:}
 \begin{enumerate}
  \item  For exact evaluations,
  \[
@@ -421,7 +407,7 @@ $\EE\norm{x_k-Tx_k}=O(\log k/k^{1/6})$ with $a=\frac23$.
   \norm{x_k-Tx_k}^2\leq\frac{D^2}{\tau_{k+1}} ;
  \]
  with noise, $\EE\norm{x_k-Tx_k}^2$ need not be monotone, and the summed
- bound reaches only $x_R$ \cite[Remark~5.3]{bravo2024stochastic}.
+ bound applies only to $x_R$ \cite[Remark~5.3]{bravo2024stochastic}.
  \item \emph{Order of the last iterate:} in~\eqref{eq:skm-bound},
  $1/\sqrt{\tau_k}\asymp\sqrt{k}\,\lambda_k\asymp k^{-1/6}$ at $a=\frac23$
  (Corollary~\ref{cor:skm}).
@@ -489,151 +475,115 @@ Compared with~\eqref{eq:fast-km-unit-step}, the update carries the error
  \EE[\eta_k\mid\FF_k]=-\frac{k}{k+\alpha}\,e_{k-1},
 \end{equation}
 which is nonzero in general, since $e_{k-1}$ is $\FF_k$-measurable. 
-Under bounded variance, no method guarantees a residual smaller than
-$D/K+\sigma/\sqrt{K}$ after $K$ queries on the whole problem class
-\cite[Theorem~4.6]{park2022exact}, \cite[Theorem~2]{foster2019complexity},
-whereas the last iterate of stochastic KM attains only
-$O(\log k/k^{1/6})$ (Section~\ref{sec:km}). In stochastic optimization,
+In stochastic optimization,
 momentum averages the sampled gradients and reduces the variance
 implicitly \cite{cutkosky2020momentum,gao2024polyak}.
 Algorithm~\ref{alg:sfkm} is stochastic KM with momentum and one query per
 iteration, which leads to the second question:
 \blue{\begin{quote}
-\emph{(Q2) Can the momentum reduce the variance implicitly and accelerate
-the last iterate of stochastic KM under bounded variance?}
+\emph{(Q2) Under bounded variance, does the momentum of Algorithm~\ref{alg:sfkm} with fixed $\alpha>2$ reduce the variance implicitly, so that its last iterate improves on that of stochastic KM?}
 \end{quote}}
 
 \subsection{Noise propagation under reuse}\label{sec:implicit-vr}
 
-Set
-\begin{equation}\label{eq:ak-dk}
- a_k:=\frac{k+\alpha/2}{k+\alpha},\qquad d_k:=\frac{k}{k+\alpha}.
-\end{equation}
 
-Since $1+d_k=2a_k$, the update of Algorithm~\ref{alg:sfkm} reads
-$x_{k+1}=a_kx_k+a_k\widehat T_k(x_k)-d_k\widehat T_{k-1}(x_{k-1})$. The
-following lemma isolates the noise that this update propagates.
+Set $\rho_k:=\frac{\alpha}{k+\alpha}$ for $k\geq0$. Then $\frac{\alpha}{2(k+\alpha)}=\frac{\rho_k}{2}$ and $\frac{k}{k+\alpha}=1-\rho_k$, and the update of Algorithm~\ref{alg:sfkm} reads
 
-\begin{lemma}[Noise propagation under reuse]\label{lem:noise}
-Let Assumption~\ref{ass:oracle} hold and set
-$b_k:=a_ka_{k-1}-d_k=\frac{\alpha(\alpha-2)}{4(k+\alpha)(k+\alpha-1)}$.
-Define $u_1:=\frac12e_0$ and
+\[
+x_{k+1}=x_k-\frac{\rho_k}{2}\bigl(x_k-\widehat T_k(x_k)\bigr)+(1-\rho_k)\bigl(\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})\bigr).
+\]
+
+Compared with the exact update, it carries the error
+
+\[
+\eta_k=\Bigl(1-\frac{\rho_k}{2}\Bigr)e_k-(1-\rho_k)\,e_{k-1}.
+\]
+
+Existing analyses of Fast KM concern exact evaluations or summable perturbations \cite{yang2026ikm}. Treating $\eta_k$ as a summable perturbation requires additional decay assumptions, which are not implied by bounded variance.
+
+\paragraph{A reduction.} Following \cite[Section~2.1]{bravo2024stochastic}, we reformulate the iteration with an auxiliary sequence that absorbs the errors. Let $u_0:=0$, $u_1:=\frac12e_0$, and define
+
 \begin{equation}\label{eq:aux-noise}
- u_{k+1}=a_k\,u_k+a_k\,e_k-d_k\,e_{k-1},\qquad k\geq1 .
+u_{k+1}=\Bigl(1-\frac{\rho_k}{2}\Bigr)u_k+\Bigl(1-\frac{\rho_k}{2}\Bigr)e_k-(1-\rho_k)\,e_{k-1},\qquad k\geq1.
 \end{equation}
-Then $z_k:=x_k-u_k$ satisfies the deterministic Fast KM recursion with
-errors $\delta_k:=Tx_k-Tz_k$, $\norm{\delta_k}\leq\norm{u_k}$. Moreover,
-with $v_k:=u_k-a_{k-1}e_{k-1}$,
+
+Subtracting this from the update and denoting $z_k:=x_k-u_k$, we get
+
+\[
+z_{k+1}=z_k-\frac{\rho_k}{2}\bigl(z_k-Tz_k-\delta_k\bigr)+(1-\rho_k)\bigl(Tz_k+\delta_k-Tz_{k-1}-\delta_{k-1}\bigr),
+\]
+
+which is the deterministic Fast KM iteration with errors $\delta_k:=Tx_k-Tz_k$ satisfying $\lVert\delta_k\rVert\leq\lVert x_k-z_k\rVert=\lVert u_k\rVert$.
+
+For stochastic KM, the corresponding process is an average of the errors and converges to zero under the noise and stepsize conditions in that analysis, so the effective errors $\delta_k$ become small \cite[Section~2.1]{bravo2024stochastic}. The next lemma shows that $u_k$ is not an average.
+
+\begin{lemma}[Noise propagation under reuse]\label{lem:noise} Let Assumption~\ref{ass:oracle} hold. Set $v_k:=u_k-\bigl(1-\frac{\rho_{k-1}}{2}\bigr)e_{k-1}$ and $b_k:=\bigl(1-\frac{\rho_k}{2}\bigr)\bigl(1-\frac{\rho_{k-1}}{2}\bigr)-(1-\rho_k)$. Then $v_1=0$, $0\leq b_k\leq\frac{\rho_k\rho_{k-1}}{4}$, and for all $k\geq1$,
+
 \begin{equation}\label{eq:noise-split}
- u_{k+1}=a_k\,e_k+v_{k+1},\qquad v_{k+1}=a_k\,v_k+b_k\,e_{k-1},\qquad v_1=0,
+u_{k+1}=\Bigl(1-\frac{\rho_k}{2}\Bigr)e_k+v_{k+1},\qquad v_{k+1}=\Bigl(1-\frac{\rho_k}{2}\Bigr)v_k+b_k\,e_{k-1},
 \end{equation}
-and
+
 \begin{equation}\label{eq:noise-recursion}
- \EE\norm{u_{k+1}}^2=a_k^2\,\EE\sigma_k^2+\EE\norm{v_{k+1}}^2,\qquad
- \EE\norm{v_{k+1}}^2=a_k^2\,\EE\norm{v_k}^2+b_k^2\,\EE\sigma_{k-1}^2 .
+\begin{split}
+\mathbb{E}\lVert u_{k+1}\rVert^2&=\Bigl(1-\frac{\rho_k}{2}\Bigr)^2\mathbb{E}\sigma_k^2+\mathbb{E}\lVert v_{k+1}\rVert^2,\\
+\mathbb{E}\lVert v_{k+1}\rVert^2&=\Bigl(1-\frac{\rho_k}{2}\Bigr)^2\mathbb{E}\lVert v_k\rVert^2+b_k^2\,\mathbb{E}\sigma_{k-1}^2.
+\end{split}
 \end{equation}
+
 \end{lemma}
 
-\begin{proof}
-Subtracting~\eqref{eq:aux-noise} from the update gives
-$z_{k+1}=a_kz_k+a_k(Tz_k+\delta_k)-d_k(Tz_{k-1}+\delta_{k-1})$, and
-$\norm{\delta_k}\leq\norm{x_k-z_k}$ by nonexpansiveness.
-Substituting $u_k=v_k+a_{k-1}e_{k-1}$ into~\eqref{eq:aux-noise}
-gives~\eqref{eq:noise-split}. The vector $v_k$ depends on
-$e_0,\dots,e_{k-2}$ and is $\FF_{k-1}$-measurable, and $v_{k+1}$ is
-$\FF_k$-measurable; conditional unbiasedness removes the cross terms
-in~\eqref{eq:noise-recursion}.
-\end{proof}
+\begin{proof} Since $\rho_0=1$, $v_1=u_1-\frac12e_0=0$. Substituting $u_k=v_k+\bigl(1-\frac{\rho_{k-1}}{2}\bigr)e_{k-1}$ into the recursion of $u_k$ gives the recursion of $v_k$. A direct computation gives $b_k=\frac{\alpha(\alpha-2)}{4(k+\alpha)(k+\alpha-1)}$, which lies in $\bigl[0,\frac{\rho_k\rho_{k-1}}{4}\bigr]$. The vector $v_k$ depends only on $e_0,\dots,e_{k-2}$, and $v_{k+1}$ is $\mathcal{F}_k$-measurable. Conditional unbiasedness therefore removes the cross terms. \end{proof}
 
-In~\eqref{eq:noise-recursion}, the stored error $e_{k-1}$ enters with the
-net coefficient $b_k=O(1/k^2)$: its two occurrences in consecutive updates
-cancel to leading order. The new error $e_k$ enters with the weight
-$a_k\to1$. Compared with momentum-based variance reduction, where the new
-noise enters with a tunable weight $\rho_k$
-\cite{cutkosky2020momentum,gao2024polyak}, the reuse implementation with
-fixed $\alpha$ reduces only the stored noise.
+In Lemma~\ref{lem:noise}, the stored error $e_{k-1}$ enters with the net coefficient $b_k=O(1/k^2)$: its two occurrences in consecutive updates cancel to leading order. The new error $e_k$ enters with the weight
 
-\begin{proposition}[Parameters of Fast KM]\label{prop:fixed}
-Let $T=0$ and assume $\EE\sigma_k^2\geq\sigma^2>0$ for all $k$. Then the
-iterates of Algorithm~\ref{alg:sfkm} satisfy
-$\EE\norm{x_{k+1}-Tx_{k+1}}^2\geq\sigma^2/4$ for every $k\geq1$.
+\[
+\underbrace{\frac{\rho_k}{2}}_{\text{relaxation}}+\underbrace{(1-\rho_k)}_{\text{momentum}}=1-\frac{\rho_k}{2}\ \to\ 1,
+\]
+
+because it appears both in the relaxation step and in the momentum term. If $\inf_k\mathbb E\sigma_k^2>0$, then $u_k$ does not converge to zero in mean square. The estimate $\lVert\delta_k\rVert\leq\lVert u_k\rVert$ therefore does not establish that the effective errors vanish in mean square.
+
+\begin{proposition}\label{prop:fixed} Let $T=0$ and assume $\mathbb{E}\sigma_k^2\geq\sigma^2>0$ for all $k$. Then the iterates of Algorithm~\ref{alg:sfkm} satisfy, for every $k\geq1$,
+
+\[
+\mathbb{E}\lVert x_{k+1}-Tx_{k+1}\rVert^2\geq\frac{\sigma^2}{4}.
+\]
+
 \end{proposition}
 
-\begin{proof}
-For $T=0$, the update is $x_{k+1}=a_kx_k+a_ke_k-d_ke_{k-1}$. Since $x_k$ and
-$e_{k-1}$ are $\FF_k$-measurable, conditional unbiasedness gives
-$\EE\norm{x_{k+1}}^2=\EE\norm{a_kx_k-d_ke_{k-1}}^2+a_k^2\EE\sigma_k^2
-\geq\sigma^2/4$, because $a_k\geq\frac12$.
-\end{proof}
+\begin{proof} For $T=0$, the update reads $x_{k+1}=\bigl(1-\frac{\rho_k}{2}\bigr)x_k+\bigl(1-\frac{\rho_k}{2}\bigr)e_k-(1-\rho_k)e_{k-1}$. Since $x_k$ and $e_{k-1}$ are $\mathcal{F}_k$-measurable, conditional unbiasedness gives $\mathbb{E}\lVert x_{k+1}\rVert^2\geq\bigl(1-\frac{\rho_k}{2}\bigr)^2\mathbb{E}\sigma_k^2\geq\frac{\sigma^2}{4}$, because $\rho_k\leq1$. \end{proof}
 
-\subsection{Horizon-dependent parameters}\label{sec:horizon}
+\begin{remark}\label{rem:reuse-vr} Bravo and Cominetti observe that stochastic KM carries implicitly a form of variance reduction that operates as the iterates evolve \cite[Remark~2.3]{bravo2024stochastic}. For Algorithm~\ref{alg:sfkm}, Lemma~\ref{lem:noise} shows that this variance reduction acts only on the stored errors. The new error enters through the momentum term, whose coefficient $1-\rho_k$ tends to one for the parameters of Fast KM. For comparison, momentum-based methods control the contribution of new stochastic information through tunable parameters \cite{cutkosky2020momentum,gao2024polyak}.
 
-With parameters that vary with $k$, momentum does accelerate the last
-iterate. Consider the inertial KM iteration
-\begin{equation}\label{eq:ikm}
- y_k=x_k+\alpha_k(x_k-x_{k-1}),\quad z_k=x_k+\beta_k(x_k-x_{k-1}),\quad
- x_{k+1}=(1-\lambda_k)y_k+\lambda_k\widehat T_k(z_k),
-\end{equation}
-which contains Fast KM as a particular choice of parameters
-\cite[Appendix~A]{yang2026ikm}. For $K\geq2$ and
-$0<a\leq\frac{K\log2}{\log K}-1$, set
-$\omega_k:=\log\bigl(1+K^{a-(a+1)k/K}\bigr)$,
-$r_k:=2^{\omega_{k-1}/\omega_k}-1$,
-$u'_k:=\frac{3r_k}{2(1+r_k)(2+r_k)}$, and
-\begin{equation}\label{eq:ikm-schedule}
- \beta_1=0,\quad \beta_k=\frac{4}{3r_{k-1}},\qquad
- \lambda_k=\frac{Kr_k\,\omega_{k-1}}{4(1+1/a)\,\omega_0}\,u'_k,\qquad
- \alpha_k=\frac{u'_k-\lambda_k}{1-\lambda_k}\,\beta_k .
-\end{equation}
-
-\begin{theorem}[{Varying parameters \cite[Theorem~1]{yang2026ikm}}]\label{thm:ikm}
-Let Assumption~\ref{ass:operator} hold, let the errors be conditionally
-unbiased with $\EE[\norm{e_k}^2\mid\FF_k]\leq\sigma^2$, and generate the
-iterates by~\eqref{eq:ikm} with~\eqref{eq:ikm-schedule}. Then, for an
-absolute constant $C>0$,
-\[
- \Bigl(\EE\norm{x_K-Tx_K}^2\Bigr)^{1/2}
- \leq C\Bigl(\frac{1+1/a}{K}\,D+(1+a)\frac{\sigma\log K}{\sqrt{K}}\Bigr).
-\]
-\end{theorem}
-
-\begin{corollary}\label{cor:ikm}
-For $a=\Theta(1)$,
-$\EE\norm{x_K-Tx_K}\lesssim\dfrac{D}{K}+\dfrac{\sigma\log K}{\sqrt{K}}$.
-\end{corollary}
-
-\begin{remark}[\red{Answer to (Q2)}]\label{rem:answer-q2}
-\begin{enumerate}
- \item \emph{Mechanism.} Momentum reduces the variance implicitly: reuse
- cancels the stored noise (Lemma~\ref{lem:noise}), and parameters varying
- with $k$ lower the weight of the new noise (Theorem~\ref{thm:ikm}).
- \item \emph{Parameters must scale with the horizon.} With the parameters of Fast KM, the new noise
- keeps the weight $a_k\to1$, and the residual does not vanish
- (Proposition~\ref{prop:fixed}). \red{The available acceleration uses
- parameters that depend on the horizon $K$ and bounds the iterate at step
- $K$ only.}
- \item \emph{Trade-off.} For exact evaluations, Fast KM improves KM
- uniformly. Under bounded variance, the parameter $a$ trades the
- deterministic factor $1+1/a$ against the noise factor $1+a$, and the
- noise term $\sigma/\sqrt{K}$ dominates $D/K$.
-\end{enumerate}
 \end{remark}
+
+\paragraph{\red{Answer to (Q2).}}\label{rem:answer-q2}
+\red{For fixed $\alpha>2$: no. The residual of Algorithm~\ref{alg:sfkm}
+need not even vanish in mean square under bounded variance
+(Proposition~\ref{prop:fixed}).}
 
 \section{Fast KM under decaying noise}\label{sec:decaying}
 
-Under bounded variance, no method guarantees a residual smaller than
-$\sigma/\sqrt{N}$ after $N$ queries \cite[Theorem~2]{foster2019complexity}.
-Since Corollary~\ref{cor:ikm} is already within a logarithmic factor of
-this order, the rate $o(1/k)$ requires $\sigma/\sqrt{N_k}=o(1/k)$, that is,
-$N_k\gg k^2$ samples in the first $k$ steps. The noise itself has to decay.
+Proposition~\ref{prop:fixed} shows that, even for $T=0$, persistent noise
+can prevent mean-square convergence of the residual. We therefore study
+decaying noise and ask:
 \blue{\begin{quote}
-\emph{(Q3) How fast must the variance $\sigma_k^2$ decay for the reuse
-implementation of stochastic Fast KM to attain
-$\EE\norm{x_k-Tx_k}=o(1/k)$?}
+\emph{(Q3) How fast must the variance $\sigma_k^2$ decay for Algorithm~\ref{alg:sfkm} to attain $k\norm{x_k-Tx_k}\to0$ and $x_k\to x_\infty$ almost surely?}
 \end{quote}}
-With mini-batches $m_k\asymp k^q$, the lower bound requires only $q>1$.
+For deterministic variance profiles $\sigma_k^2\asymp k^{-q}$, the proof of
+Proposition~\ref{prop:fixed} gives
+\[
+ \mathbb E\lVert x_{k+1}-Tx_{k+1}\rVert^2
+ \geq\Bigl(1-\frac{\rho_k}{2}\Bigr)^2\mathbb E\sigma_k^2
+ \geq\frac14\mathbb E\sigma_k^2\qquad(T=0).
+\]
+Thus the root-mean-square rate
+$(\mathbb E\lVert x_k-Tx_k\rVert^2)^{1/2}=o(1/k)$ requires $q>2$,
+while (N6-$\ell^2$) holds if and only if $q>3$.
+The former is a necessary condition for a mean-square rate; the latter
+is a candidate sufficient condition for almost-sure convergence and rates,
+whose applicability to Algorithm~\ref{alg:sfkm} remains to be established.
 
-\blue{For the almost-sure counterpart, the objective is to identify noise
+\blue{The objective is to identify noise
 conditions under which
 \begin{equation}\label{eq:target-rate}
  k\norm{x_k-Tx_k}\longrightarrow0\qquad\text{almost surely},
@@ -647,14 +597,13 @@ The candidate condition is the decaying-noise condition of
 or $\sum_ks_kt_k\sigma_k<\infty$ almost surely, where $s_k$ is the stepsize and
 $t_k:=1+\sum_{i\geq k}\prod_{j=k}^{i}\alpha_j$ for the extrapolation
 coefficients $\alpha_k$. For Algorithm~\ref{alg:sfkm}, $s_k\equiv1$
-and $\alpha_k=d_k$, so $t_k=\frac{k+\alpha-1}{\alpha-1}$ and the condition reads
+and $\alpha_k=1-\rho_k$, so $t_k=\frac{k+\alpha-1}{\alpha-1}$ and the condition reads
 \begin{equation}\label{eq:n6-fast-km}
  \text{(N6-$\ell^2$)}\ \sum_k(k+1)^2\sigma_k^2<\infty
  \qquad\text{or}\qquad
  \text{(N6-$\ell^1$)}\ \sum_k(k+1)\sigma_k<\infty
 \end{equation}
-almost surely. With mini-batches $m_k\asymp k^q$ and
-$\sigma_k^2=\sigma^2/m_k$, (N6-$\ell^2$) holds if and only if $q>3$, and
+almost surely. For deterministic profiles $\sigma_k^2\asymp k^{-q}$, (N6-$\ell^2$) holds if and only if $q>3$, and
 (N6-$\ell^1$) if and only if $q>4$.
 
 % \section{Applications to stochastic optimization}\label{sec:applications}

@@ -2,7 +2,7 @@
 
 本仓库保存随机 Fast Krasnosel'skiĭ–Mann 方法的论文草稿、研究报告、证明与核查笔记、讨论记录，以及用于科研选题讨论的 Booming skill。
 
-**当前状态（2026-10-22）：研究进行中。** `paper/main.tex` 按 Table 1 的三个问题组织：Q1 stochastic KM 的 last iterate（§3），Q2 Fast KM 动量的隐式方差缩减（§4，含本文的噪声传播 Lemma 与 $T=0$ 反例），Q3 衰减噪声下的 $o(1/k)$ 门槛（§5，待讨论）。进展与待办见 [paper/README.md](paper/README.md)。
+**当前状态（2026-10-22）：研究进行中。** 主线为 Q1 stochastic KM 的 expectation 基准 → Q2 固定参数 pure Fast KM 的 $T=0$ mean-square 反例 → Q3 decaying noise 下的 almost-sure 目标。§4.3 已写入，原 §4.4 已删除；$q>2$ 是 mean-square 必要条件，$q>3$ 对应尚待验证的 almost-sure 候选充分条件。进展、待办和待验证项集中在 [paper/README.md](paper/README.md)。
 
 ## 从这里开始阅读
 
