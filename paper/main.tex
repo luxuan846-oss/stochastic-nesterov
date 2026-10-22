@@ -22,6 +22,7 @@
 \newtheorem{remark}[theorem]{Remark}
 
 \input{share}
+\geometry{top=1.9cm}
 
 \newcommand{\HH}{\RR^d}
 \newcommand{\FF}{\mathcal F}
@@ -80,27 +81,34 @@ relaxation parameter satisfies $\norm{x_k-Tx_k}=o(1/\sqrt{k})$
  \norm{x_k-Tx_k}=o(1/k),\qquad x_k\to x^\star\in\Fix T,
 \end{equation}
 for a momentum parameter $\alpha>2$. 
-% Each Fast KM update is a KM step
-% followed by an extrapolation of operator values
-% \cite[Remark~2.1]{bot2023fast}; it uses $Tx_k$ and the value $Tx_{k-1}$
-% computed in the preceding step (Section~\ref{sec:deterministic-fast-km}). Applied to the forward--backward
-% map, Fast KM yields an accelerated $o(1/k)$ rate for the proximal
-% gradient method \cite[Corollary~4.1]{bot2023fast}.
-% Table~\ref{tab:rates} compares the known last-iterate rates.
 
-With noisy evaluations, $Tx_k$ in Fast KM is replaced
-by an oracle response $\widehat T_k(x_k)=Tx_k+e_k$. For the value at
-$x_{k-1}$ there are two implementations.
+With unit stepsize, the Fast KM update reads
+\begin{equation}\label{eq:fast-km-unit-step}
+ x_{k+1}=x_k-\frac{\alpha}{2(k+\alpha)}\bigl(x_k-Tx_k\bigr)
+ +\frac{k}{k+\alpha}\bigl(Tx_k-Tx_{k-1}\bigr),\qquad k\geq1,
+\end{equation}
+and uses the operator values at $x_k$ and $x_{k-1}$. With noisy
+evaluations, $Tx_k$ is replaced by an oracle response
+$\widehat T_k(x_k)=Tx_k+e_k$, where the subscript $k$ indicates the sample
+drawn at iteration $k$. For the difference $Tx_k-Tx_{k-1}$ there are two
+implementations:
 \begin{itemize}
- \item \emph{Re-query with the same sample.} The sampled operator of
- iteration $k$ is evaluated at $x_k$ and at $x_{k-1}$. This uses two
- queries per iteration and an oracle that can evaluate one sample at two
- points \cite[Assumption~2.3]{lee2026fixed}. Variance-reduced methods
- build on this access \cite{trandinh2024vrfkm,trandinh2025vfosa,lee2026fixed}.
- \item \emph{Reuse.} The response
- $\widehat T_{k-1}(x_{k-1})=Tx_{k-1}+e_{k-1}$ of the preceding step is
- stored and used again. This keeps one query per iteration, as in the
- deterministic method, and needs only fresh samples.
+ \item \emph{Re-query with the same sample:}
+ $\widehat T_k(x_k)-\widehat T_k(x_{k-1})$. Both values use the sample of
+ iteration $k$. This requires two queries per iteration and an oracle that
+ can evaluate one sample at two points \cite[Assumption~2.3]{lee2026fixed}.
+ If the noise is Lipschitz in mean square with constant $L_\Delta$
+ \cite[Assumption~2.4]{lee2026fixed}, the error of the difference is at
+ most $L_\Delta\norm{x_k-x_{k-1}}$ in root mean square; see
+ Appendix~\ref{app:requery}.
+ Variance-reduced methods build on this access
+ \cite{trandinh2024vrfkm,trandinh2025vfosa,lee2026fixed}.
+ \item \emph{Reuse:}
+ $\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})$. The second value is the
+ response stored at the preceding step, so each iteration queries the
+ oracle once, as in the deterministic method. The error of the difference
+ is $e_k-e_{k-1}$, which involves two independent samples and does not
+ shrink as $x_k-x_{k-1}\to0$.
 \end{itemize}
 \blue{We thus study the reuse implementation.} Table~\ref{tab:rates} raises three questions:
 \blue{
@@ -110,7 +118,7 @@ $x_{k-1}$ there are two implementations.
  selected iterate attains $O(k^{-1/4})$. Does the last iterate necessarily
  lose this rate? (Section~\ref{sec:km})
  \item \emph{(Q2) Implicit variance reduction in Fast KM.} Under bounded variance, does the momentum of Algorithm~\ref{alg:sfkm} with fixed $\alpha>2$ reduce the variance implicitly, so that its last iterate improves on that of stochastic KM? (Section~\ref{sec:algorithm})
- \item \emph{(Q3) Fast KM under decaying noise.} How fast must the variance $\sigma_k^2$ decay for Algorithm~\ref{alg:sfkm} to attain $k\norm{x_k-Tx_k}\to0$ and $x_k\to x_\infty$ almost surely? (Section~\ref{sec:decaying})
+ \item \emph{(Q3) Fast KM under decaying noise.} For $\sigma_k^2\asymp k^{-q}$, which decay of the variance enables Algorithm~\ref{alg:sfkm} to attain $k\norm{x_k-Tx_k}\to0$ and $x_k\to x_\infty$ almost surely? (Section~\ref{sec:decaying})
 \end{enumerate}}
 
 
@@ -132,7 +140,7 @@ Fast KM \cite{bot2023fast} & $\frac{k}{k+\alpha}\to1$ & $o(1/k)$ \\
 Stochastic Fast KM, reuse (this paper) & $\frac{k}{k+\alpha}\to1$
  & need not vanish in mean square (Prop.~\ref{prop:fixed}) \\
 Same, $\EE\sigma_k^2\asymp k^{-q}$ (this paper) & $\frac{k}{k+\alpha}\to1$
- & $o(1/k)$ a.s.: open; mean-square: $q>2$ necessary \\
+ & mean-square: $q>2$ necessary; a.s.: open ($q>3$ candidate) \\
 \bottomrule
 \end{tabularx}
 
@@ -285,7 +293,7 @@ assumes $\mathbb E\sigma_k^2\geq\sigma^2>0$.
 % refer to $k\to\infty$. Equalities and inequalities between random variables
 % hold $\PP$-almost surely unless stated otherwise.
 
-\section{Preliminaries}\label{sec:problem}
+\section{Stochastic Oracle Setting}\label{sec:problem}
 
 % The iterate accuracy is measured by the residual $\norm{x-Tx}$. With $V:=\Id-T$, nonexpansiveness of $T$ is equivalent to
 % \begin{equation}\label{eq:cocoercivity}
@@ -414,94 +422,74 @@ $\EE\norm{x_k-Tx_k}=O(\log k/k^{1/6})$ with $a=\frac23$.
 \end{enumerate}
 
 \section{Implicit variance reduction in Fast KM}\label{sec:algorithm}
-\subsection{Fast KM iteration}\label{sec:deterministic-fast-km}
-
-Bo\c{t} and Nguyen \cite{bot2023fast} accelerate the KM iteration using
-Nesterov's momentum updates. For fixed parameters $\alpha>2$ and
-$0<s\leq1$, and initial points $x_0,x_1\in\HH$, their Fast KM method is
-\begin{equation}\label{eq:deterministic-fast-km}
-\begin{split}
- x_{k+1}={}&\left(1-\frac{s\alpha}{2(k+\alpha)}\right)x_k
- +\frac{(1-s)k}{k+\alpha}(x_k-x_{k-1})
- +\frac{s\alpha}{2(k+\alpha)}Tx_k\\
- &+{\frac{sk}{k+\alpha}(Tx_k-Tx_{k-1})},\qquad k\geq1.
-\end{split}
-\end{equation}
-
-The stepsize $s$ can be absorbed into the operator: \eqref{eq:deterministic-fast-km}
-applied to $T$ coincides with \eqref{eq:deterministic-fast-km} with $s=1$
-applied to $M:=(1-s)\Id+sT$, which is nonexpansive with $\Fix M=\Fix T$,
-and an oracle for $T$ with error $e_k$ yields an oracle for $M$ with error
-$se_k$. We therefore take $s=1$ without loss of generality: 
-\begin{equation}\label{eq:fast-km-unit-step}
- x_{k+1}=\left(1-\frac{\alpha}{2(k+\alpha)}\right)x_k
- +\frac{\alpha}{2(k+\alpha)}Tx_k
- +\frac{k}{k+\alpha}(Tx_k-Tx_{k-1}).
-\end{equation}
-
 \subsection{The reuse implementation of Stochastic Fast KM}\label{sec:iteration}
 
-With noisy evaluations, $Tx_k$ in~\eqref{eq:fast-km-unit-step} is replaced
-by a fresh response $\widehat T_k(x_k)=Tx_k+e_k$, while $Tx_{k-1}$ is not
-re-queried: we reuse the response stored at the previous step,
-\[
- \widehat T_{k-1}(x_{k-1})=Tx_{k-1}+e_{k-1},
-\]
-where $e_{k-1}$ is the error already realized at step $k-1$. Each iteration
-therefore calls the oracle exactly once, and the update reads
-\[
- x_{k+1}=x_k-\frac{\alpha}{2(k+\alpha)}\bigl(x_k-\widehat T_k(x_k)\bigr)
- +\frac{k}{k+\alpha}\bigl(\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})\bigr).
-\]
+The Fast KM method \cite[Algorithm~2.1]{bot2023fast} also has a stepsize
+$0<s\leq1$. Its iteration with stepsize $s$ applied to $T$ coincides with
+\eqref{eq:fast-km-unit-step} applied to $M:=(1-s)\Id+sT$, which is
+nonexpansive with $\Fix M=\Fix T$, and an oracle for $T$ with error $e_k$
+yields an oracle for $M$ with error $se_k$. We therefore take $s=1$ without
+loss of generality.
+
+Set $\rho_k:=\frac{\alpha}{k+\alpha}$, so that $\frac{\alpha}{2(k+\alpha)}=\frac{\rho_k}{2}$ and $\frac{k}{k+\alpha}=1-\rho_k$ in~\eqref{eq:fast-km-unit-step}. Algorithm~\ref{alg:sfkm} replaces $Tx_k$ by the fresh response $\widehat T_k(x_k)=Tx_k+e_k$ and $Tx_{k-1}$ by the stored response $\widehat T_{k-1}(x_{k-1})=Tx_{k-1}+e_{k-1}$.
+
 \begin{algorithm}[t]
+\color{black}
+\captionsetup{font={color=black}}
 \caption{Stochastic Fast KM with reuse}\label{alg:sfkm}
 \begin{algorithmic}[1]
 \STATE \textbf{Input:} $x_0,x_1\in\HH$, $\alpha>2$.
 \STATE Query $\widehat T_0(x_0)$ and store it.
 \FOR{$k=1,2,\dots$}
  \STATE Query $\widehat T_k(x_k)=Tx_k+e_k$.
- \STATE $x_{k+1}=x_k-\frac{\alpha}{2(k+\alpha)}\bigl(x_k-\widehat T_k(x_k)\bigr)
- +\frac{k}{k+\alpha}\bigl(\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})\bigr)$.
+ \STATE $x_{k+1}=x_k-\frac{\rho_k}{2}\bigl(x_k-\widehat T_k(x_k)\bigr)
+ +(1-\rho_k)\bigl(\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})\bigr)$.
  \STATE Store $\widehat T_k(x_k)$.
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
-Compared with~\eqref{eq:fast-km-unit-step}, the update carries the error
-\begin{equation}\label{eq:perturbed-recurrence}
- \eta_k=\frac{k+\alpha/2}{k+\alpha}\,e_k-\frac{k}{k+\alpha}\,e_{k-1},
-\end{equation}
-\begin{equation}\label{eq:conditional-update-error}
- \EE[\eta_k\mid\FF_k]=-\frac{k}{k+\alpha}\,e_{k-1},
-\end{equation}
-which is nonzero in general, since $e_{k-1}$ is $\FF_k$-measurable. 
-In stochastic optimization,
-momentum averages the sampled gradients and reduces the variance
-implicitly \cite{cutkosky2020momentum,gao2024polyak}.
-Algorithm~\ref{alg:sfkm} is stochastic KM with momentum and one query per
-iteration, which leads to the second question:
+In stochastic optimization, momentum averages the sampled gradients and
+reduces the variance implicitly \cite{cutkosky2020momentum,gao2024polyak}.
+This leads to the second question:
 \blue{\begin{quote}
 \emph{(Q2) Under bounded variance, does the momentum of Algorithm~\ref{alg:sfkm} with fixed $\alpha>2$ reduce the variance implicitly, so that its last iterate improves on that of stochastic KM?}
 \end{quote}}
 
 \subsection{Noise propagation under reuse}\label{sec:implicit-vr}
 
+The update of Algorithm~\ref{alg:sfkm} splits into the exact step and the errors:
+\[
+ x_{k+1}=\underbrace{x_k-\frac{\rho_k}{2}\bigl(x_k-Tx_k\bigr)+(1-\rho_k)\bigl(Tx_k-Tx_{k-1}\bigr)}_{\text{exact Fast KM step}}
+ +\underbrace{\frac{\rho_k}{2}}_{\text{relaxation}\,\to\,0}e_k
+ +\underbrace{(1-\rho_k)}_{\text{momentum}\,\to\,1}\bigl(e_k-e_{k-1}\bigr).
+\]
+Compared with~\eqref{eq:fast-km-unit-step}, the update thus carries the error
+\begin{equation}\label{eq:perturbed-recurrence}
+ \eta_k=\Bigl(1-\frac{\rho_k}{2}\Bigr)e_k-(1-\rho_k)\,e_{k-1}.
+\end{equation}
+The stored error $e_{k-1}$ enters $\eta_{k-1}$ and $\eta_k$ with coefficients of opposite signs, which nearly cancel (Lemma~\ref{lem:noise}). The new error $e_k$ enters with the weight
+\[
+\underbrace{\frac{\rho_k}{2}}_{\text{relaxation}}+\underbrace{(1-\rho_k)}_{\text{momentum}}=1-\frac{\rho_k}{2}\ \to\ 1,
+\]
+so the momentum term offsets the damping of the relaxation step. For $T=0$, this gives a lower bound on the residual.
 
-Set $\rho_k:=\frac{\alpha}{k+\alpha}$ for $k\geq0$. Then $\frac{\alpha}{2(k+\alpha)}=\frac{\rho_k}{2}$ and $\frac{k}{k+\alpha}=1-\rho_k$, and the update of Algorithm~\ref{alg:sfkm} reads
+\begin{proposition}\label{prop:fixed} Let $T=0$ and assume $\mathbb{E}\sigma_k^2\geq\sigma^2>0$ for all $k$. Then the iterates of Algorithm~\ref{alg:sfkm} satisfy, for every $k\geq1$,
 
 \[
-x_{k+1}=x_k-\frac{\rho_k}{2}\bigl(x_k-\widehat T_k(x_k)\bigr)+(1-\rho_k)\bigl(\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})\bigr).
+\mathbb{E}\lVert x_{k+1}-Tx_{k+1}\rVert^2\geq\frac{\sigma^2}{4}.
 \]
 
-Compared with the exact update, it carries the error
+\end{proposition}
 
-\[
-\eta_k=\Bigl(1-\frac{\rho_k}{2}\Bigr)e_k-(1-\rho_k)\,e_{k-1}.
-\]
+\begin{proof} For $T=0$, the update reads $x_{k+1}=\bigl(1-\frac{\rho_k}{2}\bigr)x_k+\bigl(1-\frac{\rho_k}{2}\bigr)e_k-(1-\rho_k)e_{k-1}$. Since $x_k$ and $e_{k-1}$ are $\mathcal{F}_k$-measurable, conditional unbiasedness gives $\mathbb{E}\lVert x_{k+1}\rVert^2\geq\bigl(1-\frac{\rho_k}{2}\bigr)^2\mathbb{E}\sigma_k^2\geq\frac{\sigma^2}{4}$, because $\rho_k\leq1$. \end{proof}
 
-Existing analyses of Fast KM concern exact evaluations or summable perturbations \cite{yang2026ikm}. Treating $\eta_k$ as a summable perturbation requires additional decay assumptions, which are not implied by bounded variance.
+\paragraph{\red{Answer to (Q2).}}\label{rem:answer-q2}
+\red{For fixed $\alpha>2$: no. The residual of Algorithm~\ref{alg:sfkm}
+need not even vanish in mean square under bounded variance
+(Proposition~\ref{prop:fixed}).}
 
-\paragraph{A reduction.} Following \cite[Section~2.1]{bravo2024stochastic}, we reformulate the iteration with an auxiliary sequence that absorbs the errors. Let $u_0:=0$, $u_1:=\frac12e_0$, and define
+\paragraph{The perturbation argument.} Existing analyses of Fast KM concern exact evaluations or summable perturbations \cite{yang2026ikm}, and bounded variance does not make $\eta_k$ in~\eqref{eq:perturbed-recurrence} summable. Following \cite[Section~2.1]{bravo2024stochastic}, we reformulate the iteration with an auxiliary sequence that absorbs the errors. Let $u_0:=0$, $u_1:=\frac12e_0$, and define
 
 \begin{equation}\label{eq:aux-noise}
 u_{k+1}=\Bigl(1-\frac{\rho_k}{2}\Bigr)u_k+\Bigl(1-\frac{\rho_k}{2}\Bigr)e_k-(1-\rho_k)\,e_{k-1},\qquad k\geq1.
@@ -534,77 +522,53 @@ u_{k+1}=\Bigl(1-\frac{\rho_k}{2}\Bigr)e_k+v_{k+1},\qquad v_{k+1}=\Bigl(1-\frac{\
 
 \begin{proof} Since $\rho_0=1$, $v_1=u_1-\frac12e_0=0$. Substituting $u_k=v_k+\bigl(1-\frac{\rho_{k-1}}{2}\bigr)e_{k-1}$ into the recursion of $u_k$ gives the recursion of $v_k$. A direct computation gives $b_k=\frac{\alpha(\alpha-2)}{4(k+\alpha)(k+\alpha-1)}$, which lies in $\bigl[0,\frac{\rho_k\rho_{k-1}}{4}\bigr]$. The vector $v_k$ depends only on $e_0,\dots,e_{k-2}$, and $v_{k+1}$ is $\mathcal{F}_k$-measurable. Conditional unbiasedness therefore removes the cross terms. \end{proof}
 
-In Lemma~\ref{lem:noise}, the stored error $e_{k-1}$ enters with the net coefficient $b_k=O(1/k^2)$: its two occurrences in consecutive updates cancel to leading order. The new error $e_k$ enters with the weight
-
-\[
-\underbrace{\frac{\rho_k}{2}}_{\text{relaxation}}+\underbrace{(1-\rho_k)}_{\text{momentum}}=1-\frac{\rho_k}{2}\ \to\ 1,
-\]
-
-because it appears both in the relaxation step and in the momentum term. If $\inf_k\mathbb E\sigma_k^2>0$, then $u_k$ does not converge to zero in mean square. The estimate $\lVert\delta_k\rVert\leq\lVert u_k\rVert$ therefore does not establish that the effective errors vanish in mean square.
-
-\begin{proposition}\label{prop:fixed} Let $T=0$ and assume $\mathbb{E}\sigma_k^2\geq\sigma^2>0$ for all $k$. Then the iterates of Algorithm~\ref{alg:sfkm} satisfy, for every $k\geq1$,
-
-\[
-\mathbb{E}\lVert x_{k+1}-Tx_{k+1}\rVert^2\geq\frac{\sigma^2}{4}.
-\]
-
-\end{proposition}
-
-\begin{proof} For $T=0$, the update reads $x_{k+1}=\bigl(1-\frac{\rho_k}{2}\bigr)x_k+\bigl(1-\frac{\rho_k}{2}\bigr)e_k-(1-\rho_k)e_{k-1}$. Since $x_k$ and $e_{k-1}$ are $\mathcal{F}_k$-measurable, conditional unbiasedness gives $\mathbb{E}\lVert x_{k+1}\rVert^2\geq\bigl(1-\frac{\rho_k}{2}\bigr)^2\mathbb{E}\sigma_k^2\geq\frac{\sigma^2}{4}$, because $\rho_k\leq1$. \end{proof}
-
-\begin{remark}\label{rem:reuse-vr} Bravo and Cominetti observe that stochastic KM carries implicitly a form of variance reduction that operates as the iterates evolve \cite[Remark~2.3]{bravo2024stochastic}. For Algorithm~\ref{alg:sfkm}, Lemma~\ref{lem:noise} shows that this variance reduction acts only on the stored errors. The new error enters through the momentum term, whose coefficient $1-\rho_k$ tends to one for the parameters of Fast KM. For comparison, momentum-based methods control the contribution of new stochastic information through tunable parameters \cite{cutkosky2020momentum,gao2024polyak}.
-
+\begin{remark}\label{rem:reuse-vr} By Lemma~\ref{lem:noise}, the stored error enters $u_{k+1}$ with the net coefficient $b_k=O(1/k^2)$ and the new error with the weight $1-\frac{\rho_k}{2}\to1$. Hence, if $\inf_k\mathbb E\sigma_k^2>0$, then $u_k$ does not converge to zero in mean square, and the estimate $\lVert\delta_k\rVert\leq\lVert u_k\rVert$ does not make the effective errors small. Bravo and Cominetti observe that stochastic KM carries implicitly a form of variance reduction that operates as the iterates evolve \cite[Remark~2.3]{bravo2024stochastic}. For Algorithm~\ref{alg:sfkm}, this variance reduction acts only on the stored errors. Momentum-based methods control the contribution of new stochastic information through tunable parameters \cite{cutkosky2020momentum,gao2024polyak}.
 \end{remark}
 
-\paragraph{\red{Answer to (Q2).}}\label{rem:answer-q2}
-\red{For fixed $\alpha>2$: no. The residual of Algorithm~\ref{alg:sfkm}
-need not even vanish in mean square under bounded variance
-(Proposition~\ref{prop:fixed}).}
 
 \section{Fast KM under decaying noise}\label{sec:decaying}
 
-Proposition~\ref{prop:fixed} shows that, even for $T=0$, persistent noise
-can prevent mean-square convergence of the residual. We therefore study
-decaying noise and ask:
-\blue{\begin{quote}
-\emph{(Q3) How fast must the variance $\sigma_k^2$ decay for Algorithm~\ref{alg:sfkm} to attain $k\norm{x_k-Tx_k}\to0$ and $x_k\to x_\infty$ almost surely?}
-\end{quote}}
-For deterministic variance profiles $\sigma_k^2\asymp k^{-q}$, the proof of
-Proposition~\ref{prop:fixed} gives
+Proposition~\ref{prop:fixed} shows that the noise has to decay. Its proof
+gives, for $T=0$,
 \[
  \mathbb E\lVert x_{k+1}-Tx_{k+1}\rVert^2
  \geq\Bigl(1-\frac{\rho_k}{2}\Bigr)^2\mathbb E\sigma_k^2
- \geq\frac14\mathbb E\sigma_k^2\qquad(T=0).
+ \geq\frac14\mathbb E\sigma_k^2,
 \]
-Thus the root-mean-square rate
-$(\mathbb E\lVert x_k-Tx_k\rVert^2)^{1/2}=o(1/k)$ requires $q>2$,
-while (N6-$\ell^2$) holds if and only if $q>3$.
-The former is a necessary condition for a mean-square rate; the latter
-is a candidate sufficient condition for almost-sure convergence and rates,
-whose applicability to Algorithm~\ref{alg:sfkm} remains to be established.
-
-\blue{The objective is to identify noise
-conditions under which
-\begin{equation}\label{eq:target-rate}
- k\norm{x_k-Tx_k}\longrightarrow0\qquad\text{almost surely},
+so the root-mean-square rate
+$(\mathbb E\lVert x_k-Tx_k\rVert^2)^{1/2}=o(1/k)$ for $T=0$ requires
+\begin{equation}\label{eq:ms-necessary}
+ k^2\,\mathbb E\sigma_k^2\longrightarrow0.
 \end{equation}
-and, for a $\Fix T$-valued random variable $x_\infty$,
-\begin{equation}\label{eq:target-iterates}
- x_k\to x_\infty\qquad\text{almost surely}.
-\end{equation}}
-The candidate condition is the decaying-noise condition of
-\cite[Theorem~3.1]{attouch2026ravine}: $\sum_ks_k^2t_k^2\sigma_k^2<\infty$
-or $\sum_ks_kt_k\sigma_k<\infty$ almost surely, where $s_k$ is the stepsize and
-$t_k:=1+\sum_{i\geq k}\prod_{j=k}^{i}\alpha_j$ for the extrapolation
-coefficients $\alpha_k$. For Algorithm~\ref{alg:sfkm}, $s_k\equiv1$
-and $\alpha_k=1-\rho_k$, so $t_k=\frac{k+\alpha-1}{\alpha-1}$ and the condition reads
+A candidate sufficient condition for almost-sure convergence and rates is
+the decaying-noise condition $\sum_ks_k^2t_k^2\sigma_k^2<\infty$ almost
+surely of \cite[Theorem~3.1]{attouch2026ravine}, where $s_k$ is the
+stepsize and $t_k:=1+\sum_{i\geq k}\prod_{j=k}^{i}\alpha_j$ for the
+extrapolation coefficients $\alpha_k$. For Algorithm~\ref{alg:sfkm},
+$s_k\equiv1$ and $\alpha_k=1-\rho_k$, so $t_k=\frac{k+\alpha-1}{\alpha-1}$
+and the condition reads
 \begin{equation}\label{eq:n6-fast-km}
- \text{(N6-$\ell^2$)}\ \sum_k(k+1)^2\sigma_k^2<\infty
- \qquad\text{or}\qquad
- \text{(N6-$\ell^1$)}\ \sum_k(k+1)\sigma_k<\infty
+ \sum_k(k+1)^2\sigma_k^2<\infty\qquad\text{almost surely}.
+ \tag{N6-$\ell^2$}
 \end{equation}
-almost surely. For deterministic profiles $\sigma_k^2\asymp k^{-q}$, (N6-$\ell^2$) holds if and only if $q>3$, and
-(N6-$\ell^1$) if and only if $q>4$.
+Theorem~3.1 of \cite{attouch2026ravine} is stated for the Ravine method,
+and its applicability to Algorithm~\ref{alg:sfkm} remains to be
+established.
+
+Both conditions concern the weighted variance $k^2\sigma_k^2$:
+\eqref{eq:ms-necessary} requires it to vanish in expectation, and
+\eqref{eq:n6-fast-km} requires it to be summable. For
+$\sigma_k^2\asymp k^{-q}$, they correspond to $q>2$ and $q>3$,
+respectively. The former is necessary for the mean-square rate; the
+latter is a candidate condition for the almost-sure rate. This leads to the
+third question:
+\blue{\begin{quote}
+\emph{(Q3) For $\sigma_k^2\asymp k^{-q}$, which decay ensures that
+Algorithm~\ref{alg:sfkm} attains $k\norm{x_k-Tx_k}\to0$ and
+$x_k\to x_\infty$ almost surely, for a $\Fix T$-valued random variable
+$x_\infty$? In particular, does the almost-sure threshold lie at $q>2$, as
+for the mean-square rate, or at $q>3$?}
+\end{quote}}
 
 % \section{Applications to stochastic optimization}\label{sec:applications}
 
@@ -801,6 +765,81 @@ almost surely. For deterministic profiles $\sigma_k^2\asymp k^{-q}$, (N6-$\ell^2
 % The order of the proximal and gradient steps decides whether the response
 % is unbiased; the backward--forward order keeps Assumption~\ref{ass:oracle}
 % at the price of measuring optimality at the shadow point $p_k$.
+
+\appendix
+\section{Re-query with the same sample}\label{app:requery}
+
+This appendix compares the two implementations of
+Section~\ref{sec:introduction} in the notation of
+Section~\ref{sec:algorithm}. Let $T(\cdot;\xi)$ be a sampled operator with
+$\EE[T(y;\xi_k)]=Ty$ for every $y\in\HH$, where the sample $\xi_k$ is
+independent of $\FF_k$. Set $\widehat T_k(y):=T(y;\xi_k)$ and
+\[
+ e_k(y):=\widehat T_k(y)-Ty,\qquad y\in\HH.
+\]
+The error of Section~\ref{sec:algorithm} is $e_k=e_k(x_k)$. Since $x_k$ and
+$x_{k-1}$ are $\FF_k$-measurable,
+$\EE[e_k(x_k)\mid\FF_k]=\EE[e_k(x_{k-1})\mid\FF_k]=0$.
+
+\paragraph{Two updates.} With $\rho_k=\frac{\alpha}{k+\alpha}$, the
+re-query implementation evaluates $\widehat T_k$ at $x_k$ and at $x_{k-1}$:
+\begin{equation}\label{eq:requery-update}
+ x_{k+1}=x_k-\frac{\rho_k}{2}\bigl(x_k-\widehat T_k(x_k)\bigr)
+ +(1-\rho_k)\bigl(\widehat T_k(x_k)-\widehat T_k(x_{k-1})\bigr).
+\end{equation}
+This requires two queries per iteration and same-sample access
+\cite[Assumption~2.3]{lee2026fixed}. Algorithm~\ref{alg:sfkm} replaces
+$\widehat T_k(x_{k-1})$ by the stored response $\widehat T_{k-1}(x_{k-1})$
+and uses each sample once.
+
+\paragraph{Errors.} Compared with~\eqref{eq:fast-km-unit-step}, the two
+updates carry the errors
+\begin{equation}\label{eq:requery-error}
+ \eta_k^{\mathrm{rq}}=\frac{\rho_k}{2}\,e_k
+ +(1-\rho_k)\bigl(e_k-e_k(x_{k-1})\bigr),
+ \qquad
+ \eta_k=\frac{\rho_k}{2}\,e_k+(1-\rho_k)\bigl(e_k-e_{k-1}\bigr).
+\end{equation}
+They differ only in the error at $x_{k-1}$: the re-query implementation
+uses the error $e_k(x_{k-1})$ of the current sample, and the reuse
+implementation uses the error $e_{k-1}=e_{k-1}(x_{k-1})$ of the preceding
+sample.
+
+Assume the noise is Lipschitz in mean square, as in
+\cite[Assumption~2.4]{lee2026fixed}:
+$\EE\norm{e_k(x)-e_k(y)}^2\leq L_\Delta^2\norm{x-y}^2$ for all
+$x,y\in\HH$. Since $x_k$ and $x_{k-1}$ are $\FF_k$-measurable and $\xi_k$ is
+independent of $\FF_k$,
+\[
+ \EE\bigl[\norm{e_k(x_k)-e_k(x_{k-1})}^2\bigm|\FF_k\bigr]
+ \leq L_\Delta^2\norm{x_k-x_{k-1}}^2.
+\]
+In the reuse implementation, $e_{k-1}$ is $\FF_k$-measurable and
+$\EE[e_k\mid\FF_k]=0$, so
+\[
+ \EE\norm{e_k-e_{k-1}}^2=\EE\sigma_k^2+\EE\sigma_{k-1}^2,
+\]
+which does not decrease as $x_k-x_{k-1}\to0$. Hence, in
+$\eta_k^{\mathrm{rq}}$ the new error $e_k$ enters outside the difference
+only with the weight $\frac{\rho_k}{2}$, whereas in $\eta_k$ it enters with
+the weight $1-\frac{\rho_k}{2}$ (Lemma~\ref{lem:noise}).
+
+\paragraph{Variance-reduced estimators.} The STORM-type recursion of VRAF
+\cite[(VRAF)]{lee2026fixed}, written for $T$ in the present indexing, is
+\[
+ d_k=\widehat T_k(x_k)+(1-\beta_k)\bigl(d_{k-1}-\widehat T_k(x_{k-1})\bigr),
+ \qquad\beta_k\in(0,1].
+\]
+Its error $\varepsilon_k:=d_k-Tx_k$ satisfies
+\[
+ \varepsilon_k=(1-\beta_k)\,\varepsilon_{k-1}+\beta_k\,e_k
+ +(1-\beta_k)\bigl(e_k-e_k(x_{k-1})\bigr).
+\]
+The new error enters with the weight $\beta_k$, and the remaining term is
+the same-sample difference controlled above. The loopless SVRG estimator of
+\cite[(7)]{trandinh2024vrfkm} for Fast KM likewise evaluates the same
+mini-batch at $x_k$ and at $x_{k-1}$. Both constructions rely on
+same-sample access, which the reuse implementation does not assume.
 
 \bibliographystyle{plainnat}
 \bibliography{references}

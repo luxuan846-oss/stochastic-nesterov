@@ -35,9 +35,9 @@ latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
 | §1 开头与 §2 | 问题 (FP) 与 nonexpansive 条件在引言首段以文字给出，不设 assumption 环境；§2 给出 filtration 与条件无偏 oracle | 已写 |
 | §3 | Q1 与 stochastic KM 已有结果，引用 BC Theorems 2.10、4.4 和 Remark 5.3 | 已写；保留 Q1 |
 | §4.2 | 显式 stored response 与更新式；算法不依赖 $a_k,d_k$ | 已推送 `5d783d1`；后续局部编辑以当前源码为准 |
-| §4.3 | 直接 perturbation 分析的限制 → auxiliary-state reduction → Lemma 4.1 → Proposition 4.2 → 对照 BC Remark 2.3 → Answer to Q2 | 已写入 `main.tex` |
+| §4 | 4.1：$s=1$、$\rho_k$、Algorithm 1、Q2；4.2：机制分解式 → $\eta_k$ → Proposition 4.1（$T=0$ 反例）→ Answer to Q2 → perturbation 路线：reduction → Lemma 4.2 → Remark 4.3（对照 BC Remark 2.3）| 已写入 `main.tex` |
 | §4.4 | 原 horizon-dependent parameters 及其 Q2 回答 | 已从正文删除 |
-| §5 | almost-sure 目标；以 $T=0$ 反例引出 decaying noise；区分 $q>2$ 必要性与 $q>3$ 候选充分性 | 已写入；尚未压缩为一段展望 |
+| §5 | 同一个量 $k^2\sigma_k^2$ 的两种条件：mean-square 必要条件 $k^2\mathbb E\sigma_k^2\to0$（$q>2$，$T=0$）与 almost-sure 候选充分条件 N6-$\ell^2$（$q>3$，Attouch 等 Thm 3.1，针对 Ravine 方法）；Q3 问 almost-sure 门槛在 $q>2$ 还是 $q>3$；删去 N6-$\ell^1$ | 已写入 |
 | 记号 | §4.3 统一为 $\rho_k$；VR 比较使用 “a tunable weight” 的无符号表述；§5 使用 $\alpha_k=1-\rho_k$ | 已处理 |
 | Applications | $\operatorname{Fix}T_{BF}$ 刻画、prox 有偏反例等 | 源码注释保留，当前 PDF 不显示 |
 | 给 Boţ 的邮件 | 中英文定稿 | 据作者提供的进展，待发送；本次未核对邮件稿，未发送 |
@@ -54,7 +54,7 @@ $$
 \eta_k=\frac{\rho_k}{2}e_k+(1-\rho_k)(e_k-e_{k-1}).
 $$
 
-Lemma 4.1 将 auxiliary sequence 写成
+Lemma 4.2 将 auxiliary sequence 写成
 
 $$
 u_{k+1}=\Bigl(1-\frac{\rho_k}{2}\Bigr)e_k+v_{k+1},\qquad
@@ -69,7 +69,7 @@ $$
 
 stored error 的净系数为 $O(k^{-2})$，new error 的系数 $1-\rho_k/2\to1$。关于 $v_k$ 的衰减仍须结合 noise 条件分析。
 
-Proposition 4.2：对 $T=0$ 和 $\mathbb E\sigma_k^2\geq\sigma^2>0$，
+Proposition 4.1：对 $T=0$ 和 $\mathbb E\sigma_k^2\geq\sigma^2>0$，
 
 $$
 \mathbb E\lVert x_{k+1}-Tx_{k+1}\rVert^2\geq\frac{\sigma^2}{4},\qquad k\geq1.
@@ -84,7 +84,7 @@ Q3 涉及两个不同结论：
 
 ## 待办
 
-1. 将 §5 压缩为一段展望，保留 almost-sure 目标及候选条件的待验证地位。
+1. （已完成）§5 按 $k^2\sigma_k^2$ 重写，Q3 按收敛意义区分。
 2. 按最新拟议格式，将 `cor:skm` 的引用放入标题可选参数 `[{\cite[...]{...}}]`；当前仍为正文开头的引用写法。
 3. 核对 Table 1、Q2 回答与 Proposition 的指标是否始终一致，避免由 mean-square 反例推断 expectation 或 almost-sure 不可能性。
 4. 给 Boţ 的邮件待作者发送。
