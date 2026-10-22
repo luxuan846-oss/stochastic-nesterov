@@ -1,6 +1,6 @@
-# 项目对话记录
+# 项目 AI 对话与专题笔记
 
-本目录保存本项目在 **2026 年 10 月 15 日、16 日**的 Claude 与 Codex 用户/助手对话正文。按 **Europe/Vienna** 本地日期筛选，不把 UTC 日期直接当成本地日期。
+本目录保存项目 AI 对话原文导出，以及由对话整理出的专题研究笔记。原文导出目前覆盖 **2026 年 10 月 15 日、16 日**的 Claude 与 Codex 对话；按 **Europe/Vienna** 本地日期筛选，不把 UTC 日期直接当成本地日期。
 
 导出截止：`2026-10-16T01:37:17+02:00`。这是一次快照，之后的新消息未自动同步。
 
@@ -46,3 +46,12 @@
 | Codex | [2026-10-15](2026-10-15-codex.md#会话-01a14191-9be9-73b2-a2dd-a3836713fb37) | `01a14191-9be9-73b2-a2dd-a3836713fb37` | 1 | 4 |
 | Codex | [2026-10-16](2026-10-16-codex.md#会话-01a14191-9be9-73b2-a2dd-a3836713fb37) | `01a14191-9be9-73b2-a2dd-a3836713fb37` | 4 | 8 |
 | Codex | [2026-10-16](2026-10-16-codex.md#会话-01a141b9-e34d-7273-a98d-b3de5a4f0876) | `01a141b9-e34d-7273-a98d-b3de5a4f0876` | 17 | 25 |
+
+## 专题笔记
+
+专题笔记统一使用 `YYYY-MM-DD-topic.md` 命名；同一主题只在主目录保留当前版本。
+
+- [2026-10-21 Fast KM almost-sure convergence](2026-10-21-fast-km-almost-sure-convergence.md)：原始复用 Fast KM 的迭代点几乎必然收敛推导。
+- [2026-10-21 Fast KM auxiliary noise reduction](2026-10-21-fast-km-auxiliary-noise-reduction.md)：辅助噪声归约、随机稳定性与条件比较。
+- [2026-10-21 Boţ accelerated splitting literature map](2026-10-21-bot-accelerated-splitting-literature-map.md)：订正后的文献身份与算法对应关系。
+- [2026-10-22 convergence rate discussion](2026-10-22-fast-km-convergence-discussion.md)：同一会话的最新完整导出，包含后续对 Theorem 2.5 和 Fast KM 的讨论。
