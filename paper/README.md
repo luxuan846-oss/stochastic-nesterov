@@ -7,24 +7,40 @@ cd paper
 latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
 ```
 
-## 当前范围
+## 当前进展（2026-10-22）
 
-问题定位：通过条件无偏的随机算子查询，寻找一个固定非扩张算子的不动点。
+暂定标题：*Last-Iterate Rates of Stochastic Fast Krasnosel'skiĭ–Mann Iterations: Momentum, Implicit Variance Reduction, and Decaying Noise*。正文英文，`article` 10pt，SIOPT 式章节。作者未填写。
 
-- 正文采用英文，已有 Introduction、Problem formulation and stochastic oracle、Stochastic Fast KM iteration。
-- 采用 Yang 等人 arXiv:2609.28543v1 源码中的 `article`、10pt、单栏、1 inch 页边距作为版式基础。
-- 使用按节编号的公式和定理环境、数字引用，按 SIOPT 理论论文方式组织章节；当前没有使用官方 `siamart` 投稿类。
-- 源文件末尾以注释预留 Almost-sure convergence analysis、Noise conditions and sample costs、Numerical experiments、Conclusions、Auxiliary results。后续有结果后再启用，PDF 不显示无内容的章节。
-- 作者和单位尚未填写；标题为暂定标题。摘要明确标明当前只完成问题、模型和算法设定。
+**主线**：Table 1 列出已知 last-iterate 速率，三行之间的差距对应三个问题。
+
+| 节 | 标题 | 问题 | 状态 |
+|---|---|---|---|
+| §1 | Introduction | 背景、两种实现（same-sample re-query / reuse）、Table 1、Q1–Q3 | 已写 |
+| §2 | Preliminaries | (FP)、Assumption 2.1 非扩张、oracle (H1) | 已写 |
+| §3 | The last iterate of stochastic KM | Q1：last iterate $O(\log k/k^{1/6})$ 与 random iterate $O(k^{-1/4})$ | 已写，Answer to (Q1) 引用 BC Thm 2.10、4.4、Rem 5.3 |
+| §4 | Implicit variance reduction in Fast KM | Q2：动量能否隐式降低方差并加速 last iterate | 已写 |
+| §5 | Fast KM under decaying noise | Q3：方差衰减多快才有 $o(1/k)$ | 只有问题与已知条件，待讨论 |
+| §6 | Applications to stochastic optimization | SGD、prox gradient（有偏）、backward–forward（无偏） | 已写 |
+
+**§4 结构**：4.1 Fast KM iteration（$s=1$ 不失一般性）→ 4.2 reuse 实现（Algorithm 1 + 两句动机 + Q2）→ 4.3 Noise propagation under reuse（Lemma：stored noise 系数 $b_k=O(1/k^2)$，new noise 权重 $a_k\to1$；Prop：$T=0$ 且方差有下界时 $\mathbb E\lVert x_{k+1}-Tx_{k+1}\rVert^2\ge\sigma^2/4$）→ 4.4 Horizon-dependent parameters（Yang et al. Thm 1：$O(D/K+\sigma\log K/\sqrt K)$，Answer to (Q2)）。
+
+**本文新增的数学内容**：Lemma 4.x 的噪声分解与二阶矩递推；Prop 4.x 的 $T=0$ 反例；§6 的 $\operatorname{Fix}T_{BF}$ 刻画与 prox 有偏反例。其余定理均为引用。
+
+## 待办
+
+1. **Q3 门槛**：下界只要求 $q>1$，已知 a.s. 充分条件 N6-$\ell^2$ 要求 $q>3$（N6-$\ell^1$：$q>4$）。计划用 $t_k^2$ 加权能量，对照 $T=0$（mean-square 只需 $q>2$）与 $T=-\mathrm{Id}$（$q>3$）。
+2. §5 补一句明确写出 $q>1$ 与 $q>3$ 的差距。
+3. Table 1 之后补定位段，可并入 intro 的 "We thus study the reuse implementation."
+4. 待定：Table 1 动量列是否改成 iKM 参数 $(\alpha_k,\beta_k,\lambda_k)$；iKM 外推参数 $\alpha_k$ 与 Fast KM 的 $\alpha$ 记号冲突，候选改为 $\mu_k$。
+5. 未提交 git。
 
 ## 已固定的数学设定
 
-1. 实可分 Hilbert space，固定非扩张算子，非空不动点集合。
-2. 查询点为当前迭代点，误差关于查询前的信息条件零均值；不引入偏差项 $b_k$。
-3. 与 Yang 等人模型的关系仅为其式 (6) 中 $b_k=0$ 的特例；没有宣称两个随机算法相同。
-4. 固定参数 $\alpha>2$、$0<s\le1$，一次初始化查询，之后每步一次新的随机算子评估。
-5. 上一步返回值直接保存后使用，误差组合明确写出；组合误差的条件均值未必为零。
-6. N2 表示条件方差一致有界；这里的 N6 专指固定步长下的加权二阶矩预算可和。N6 被列为待研究的充分条件，没有写成已证明定理。
+1. $\mathbb R^d$，Euclidean 范数，固定非扩张算子，非空不动点集合。
+2. 查询点为当前迭代点，误差条件无偏，$\sigma_k^2:=\mathbb E[\lVert e_k\rVert^2\mid\mathcal F_k]$；有界方差作为 Assumption 3.2 在 §3 用到时引入。
+3. 固定 $\alpha>2$，$s=1$；一次初始化查询，之后每步一次新查询，上一步返回值保存后复用。
+4. 组合误差 $\eta_k=a_ke_k-d_ke_{k-1}$，条件均值 $-d_ke_{k-1}$。
+5. N6 为 Attouch–Fadili–Kungurtsev Thm 3.1 的 $(K_2)$/$(K_2^+)$ 在 Fast KM 下的特例，只作为候选充分条件，未写成本文定理。
 
 ## 补充材料的采用边界
 

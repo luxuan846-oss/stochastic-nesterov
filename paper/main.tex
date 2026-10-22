@@ -287,13 +287,13 @@ lower bound refers to $\Omega(\sigma/\sqrt{N})$ after $N$ samples
 % noise decay required for an almost-sure rate along one trajectory of a
 % fixed recursion, which is the question above.
 
-\paragraph{Notation.}
-Throughout, $\RR^d$ carries the Euclidean inner product $\ip{\cdot}{\cdot}$,
-the associated norm $\norm{\cdot}$ and the Borel sigma-algebra $\mathcal B$,
-and $\Id$ denotes the identity operator on $\RR^d$. For positive sequences,
-$a_k\asymp b_k$ means that $a_k/b_k$ is bounded from above and bounded away; $O(\cdot)$ and $o(\cdot)$
-refer to $k\to\infty$. Equalities and inequalities between random variables
-hold $\PP$-almost surely unless stated otherwise.
+% \paragraph{Notation.}
+% Throughout, $\RR^d$ carries the Euclidean inner product $\ip{\cdot}{\cdot}$,
+% the associated norm $\norm{\cdot}$ and the Borel sigma-algebra $\mathcal B$,
+% and $\Id$ denotes the identity operator on $\RR^d$. For positive sequences,
+% $a_k\asymp b_k$ means that $a_k/b_k$ is bounded from above and bounded away; $O(\cdot)$ and $o(\cdot)$
+% refer to $k\to\infty$. Equalities and inequalities between random variables
+% hold $\PP$-almost surely unless stated otherwise.
 
 \section{Preliminaries}\label{sec:problem}
 
@@ -307,10 +307,10 @@ where $T$ satisfies the following assumption.
 $T:\HH\to\HH$ is nonexpansive, that is, $\norm{Tx-Ty}\leq\norm{x-y}$ for
 all $x,y\in\HH$, and $\Fix T:=\{x\in\HH:Tx=x\}$ is nonempty.
 \end{assumption}
-The iterate accuracy is measured by the residual $\norm{x-Tx}$. With $V:=\Id-T$, nonexpansiveness of $T$ is equivalent to
-\begin{equation}\label{eq:cocoercivity}
- \ip{Vx-Vy}{x-y}\geq\frac12\norm{Vx-Vy}^{2},\qquad x,y\in\HH.
-\end{equation}
+% The iterate accuracy is measured by the residual $\norm{x-Tx}$. With $V:=\Id-T$, nonexpansiveness of $T$ is equivalent to
+% \begin{equation}\label{eq:cocoercivity}
+%  \ip{Vx-Vy}{x-y}\geq\frac12\norm{Vx-Vy}^{2},\qquad x,y\in\HH.
+% \end{equation}
 
 Let $(\Omega,\FF,\PP)$ be a probability space and $(\FF_k)_{k\geq0}$ a
 filtration, where $\FF_k$ contains the information available before query
@@ -412,7 +412,7 @@ $\EE\norm{x_k-Tx_k}=O(\log k/k^{1/6})$ with $a=\frac23$.
  \EE\norm{x_R-Tx_R}=O\Bigl(\frac{1}{k^{1/4}}\Bigr)
  \quad\text{(random iterate)}.
 \]}
-The limitations are 
+\red{The limitations are }
 \begin{enumerate}
  \item  For exact evaluations,
  \[

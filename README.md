@@ -2,7 +2,7 @@
 
 本仓库保存随机 Fast Krasnosel'skiĭ–Mann 方法的论文草稿、研究报告、证明与核查笔记、讨论记录，以及用于科研选题讨论的 Booming skill。
 
-**当前状态：研究进行中。** `paper/main.tex` 已写出问题、条件无偏 oracle 模型与保留历史返回值的递推。一般算子上的随机定理和精确噪声条件仍是研究目标。讨论记录中的候选结论、标量计算及助手判断，需要按其适用条件分别核对。
+**当前状态（2026-10-22）：研究进行中。** `paper/main.tex` 按 Table 1 的三个问题组织：Q1 stochastic KM 的 last iterate（§3），Q2 Fast KM 动量的隐式方差缩减（§4，含本文的噪声传播 Lemma 与 $T=0$ 反例），Q3 衰减噪声下的 $o(1/k)$ 门槛（§5，待讨论）。进展与待办见 [paper/README.md](paper/README.md)。
 
 ## 从这里开始阅读
 
