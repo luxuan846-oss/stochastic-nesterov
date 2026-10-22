@@ -456,27 +456,39 @@ $se_k$. We therefore take $s=1$ without loss of generality:
 \subsection{The reuse implementation of Stochastic Fast KM}\label{sec:iteration}
 
 With noisy evaluations, $Tx_k$ in~\eqref{eq:fast-km-unit-step} is replaced
-by the response $\widehat T_k(x_k)$, and $Tx_{k-1}$ by the stored response
-$\widehat T_{k-1}(x_{k-1})$, so that each iteration queries the oracle once.
-Set
-\begin{equation}\label{eq:ak-dk}
- a_k:=\frac{k+\alpha/2}{k+\alpha},\qquad d_k:=\frac{k}{k+\alpha}.
-\end{equation}
-
-\begin{algorithm}[ht]
+by a fresh response $\widehat T_k(x_k)=Tx_k+e_k$, while $Tx_{k-1}$ is not
+re-queried: we reuse the response stored at the previous step,
+\[
+ \widehat T_{k-1}(x_{k-1})=Tx_{k-1}+e_{k-1},
+\]
+where $e_{k-1}$ is the error already realized at step $k-1$. Each iteration
+therefore calls the oracle exactly once, and the update reads
+\[
+ x_{k+1}=x_k-\frac{\alpha}{2(k+\alpha)}\bigl(x_k-\widehat T_k(x_k)\bigr)
+ +\frac{k}{k+\alpha}\bigl(\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})\bigr).
+\]
+\begin{algorithm}[t]
 \caption{Stochastic Fast KM with reuse}\label{alg:sfkm}
 \begin{algorithmic}[1]
 \STATE \textbf{Input:} $x_0,x_1\in\HH$, $\alpha>2$.
 \STATE Query $\widehat T_0(x_0)$ and store it.
 \FOR{$k=1,2,\dots$}
  \STATE Query $\widehat T_k(x_k)=Tx_k+e_k$.
- \STATE $x_{k+1}=(1-a_k+d_k)\,x_k+(a_k-d_k)\,\widehat T_k(x_k)
- +d_k\bigl(\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})\bigr)$.
+ \STATE $x_{k+1}=x_k-\frac{\alpha}{2(k+\alpha)}\bigl(x_k-\widehat T_k(x_k)\bigr)
+ +\frac{k}{k+\alpha}\bigl(\widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})\bigr)$.
  \STATE Store $\widehat T_k(x_k)$.
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
+Compared with~\eqref{eq:fast-km-unit-step}, the update carries the error
+\begin{equation}\label{eq:perturbed-recurrence}
+ \eta_k=\frac{k+\alpha/2}{k+\alpha}\,e_k-\frac{k}{k+\alpha}\,e_{k-1},
+\end{equation}
+\begin{equation}\label{eq:conditional-update-error}
+ \EE[\eta_k\mid\FF_k]=-\frac{k}{k+\alpha}\,e_{k-1},
+\end{equation}
+which is nonzero in general, since $e_{k-1}$ is $\FF_k$-measurable. 
 Under bounded variance, no method guarantees a residual smaller than
 $D/K+\sigma/\sqrt{K}$ after $K$ queries on the whole problem class
 \cite[Theorem~4.6]{park2022exact}, \cite[Theorem~2]{foster2019complexity},
@@ -493,19 +505,9 @@ the last iterate of stochastic KM under bounded variance?}
 
 \subsection{Noise propagation under reuse}\label{sec:implicit-vr}
 
-Substituting~\eqref{eq:oracle} into the difference of oracle responses yields
-\begin{equation}\label{eq:oracle-difference}
- \widehat T_k(x_k)-\widehat T_{k-1}(x_{k-1})
- =Tx_k-Tx_{k-1}+e_k-e_{k-1}.
-\end{equation}
-Relative to the exact update~\eqref{eq:fast-km-unit-step} evaluated
-at the current iterates, the total additive error is
-\begin{equation}\label{eq:perturbed-recurrence}
- \eta_k=(a_k-d_k)e_k+d_k(e_k-e_{k-1})=a_ke_k-d_ke_{k-1}.
-\end{equation}
-Since $e_{k-1}$ is $\FF_k$-measurable, Assumption~\ref{ass:oracle} gives
-\begin{equation}\label{eq:conditional-update-error}
- \EE[\eta_k\mid\FF_k]=-d_ke_{k-1}.
+Set
+\begin{equation}\label{eq:ak-dk}
+ a_k:=\frac{k+\alpha/2}{k+\alpha},\qquad d_k:=\frac{k}{k+\alpha}.
 \end{equation}
 
 Since $1+d_k=2a_k$, the update of Algorithm~\ref{alg:sfkm} reads
